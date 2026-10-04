@@ -21,4 +21,22 @@ class ConsoleAccessTest < ActionDispatch::IntegrationTest
   test "the admin sign-in lives under /console" do
     assert_equal "/console/sign_in", new_admin_session_path
   end
+
+  test "a signed-in admin revisiting the console sign-in goes to the console, not the user login" do
+    admin = Admin.create!(name: "Dev", email: "dev2@example.com", password: "password123")
+    sign_in admin
+    get new_admin_session_path
+    assert_redirected_to console_root_path
+  end
+
+  test "the console renders its operator nav" do
+    admin = Admin.create!(name: "Dev", email: "dev3@example.com", password: "password123")
+    ActsAsTenant.without_tenant { Organization.create!(name: "Org A") }
+    sign_in admin
+    get console_root_path
+    assert_response :success
+    assert_match "Organizations", @response.body
+    assert_match "Platform health", @response.body
+    assert_select "aside", true, "console must render a sidebar with nav"
+  end
 end

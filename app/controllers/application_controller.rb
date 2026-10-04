@@ -19,6 +19,23 @@ class ApplicationController < ActionController::Base
   # A cross-tenant / not-permitted access surfaces as 404, never 403 (never confirm existence).
   rescue_from Pundit::NotAuthorizedError, with: :not_found
 
+  # --- Devise redirect targets, scope-aware (fixes Admin bouncing to the User login) ---
+  # Admins live in the Platform Console; everyone else on the org side.
+  def after_sign_in_path_for(resource)
+    resource.is_a?(Admin) ? console_root_path : super
+  end
+
+  # Used for the "already authenticated" redirect when hitting a sign-in page again.
+  def signed_in_root_path(resource_or_scope)
+    scope = Devise::Mapping.find_scope!(resource_or_scope)
+    scope == :admin ? console_root_path : super
+  end
+
+  def after_sign_out_path_for(resource_or_scope)
+    scope = Devise::Mapping.find_scope!(resource_or_scope)
+    scope == :admin ? new_admin_session_path : super
+  end
+
   private
 
   def layout_by_controller

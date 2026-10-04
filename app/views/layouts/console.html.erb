@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "SAC-PAD Console" %></title>
+    <title><%= content_for(:title) || "SAC-PAD · Platform Console" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="application-name" content="SAC-PAD Console">
     <%= csrf_meta_tags %>
@@ -12,27 +12,24 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <%# Platform Console: constant NEUTRAL STEEL skin — never party-themed (DESIGN.md UX-DR15).
-      Distinct from the org-facing layout so an operator can never mistake it for a campaign. %>
-  <body class="min-h-screen bg-gray-100 text-gray-800">
-    <header class="flex h-16 items-center justify-between bg-[#1D2939] px-4 sm:px-6 text-[#ECEFF3]">
-      <div class="flex items-center gap-2">
-        <span class="inline-block h-6 w-6 rounded bg-gray-500"></span>
-        <span class="font-semibold tracking-tight">SAC-PAD · Platform Console</span>
-      </div>
-      <div class="flex items-center gap-3 text-sm">
-        <% if admin_signed_in? %>
-          <span class="text-gray-300"><%= current_admin.email %> · <%= current_admin.tier %></span>
-          <%= button_to "Sign out", destroy_admin_session_path, method: :delete,
-                class: "rounded bg-white/10 px-3 py-1 hover:bg-white/20" %>
-        <% end %>
-      </div>
-    </header>
+  <%# Platform Console: TailAdmin shell, but a constant STEEL operator identity (never party-themed,
+      DESIGN.md UX-DR15). --console-accent drives the operator brand mark. %>
+  <body class="font-outfit" style="--console-accent:#1d2939" x-data="{ sidebarToggle: false, darkMode: false }" :class="{ 'dark bg-gray-900': darkMode }">
+    <div class="flex h-screen overflow-hidden">
+      <%= render "ui/console_sidebar" %>
 
-    <main class="p-4 sm:p-6">
-      <p class="notice text-sm text-emerald-700"><%= notice %></p>
-      <p class="alert text-sm text-rose-700"><%= alert %></p>
-      <%= yield %>
-    </main>
+      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        <div x-show="sidebarToggle" @click="sidebarToggle = false" class="fixed inset-0 z-40 bg-gray-900/50 xl:hidden" x-cloak></div>
+        <%= render "ui/console_top_bar" %>
+
+        <main>
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+            <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
+            <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+            <%= yield %>
+          </div>
+        </main>
+      </div>
+    </div>
   </body>
 </html>

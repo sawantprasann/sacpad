@@ -1,9 +1,37 @@
 <% content_for :title, "Platform Console" %>
 
-<div class="mx-auto max-w-3xl">
-  <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Platform Console</h1>
-  <p class="mt-2 text-sm text-gray-500">
-    Operator view (<%= current_admin.tier %> tier). Organizations, role catalog, reference data,
-    cross-org audit log, and platform health arrive in Stories 0.5 / 0.8 / 0.11 / 0.13.
-  </p>
+<div class="mb-6">
+  <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Platform Console</h1>
+  <p class="text-sm text-gray-500 dark:text-gray-400">Operator view (<%= current_admin.tier %> tier) · <%= current_admin.email %></p>
+</div>
+
+<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
+  <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+    <p class="text-xs uppercase tracking-wider text-gray-400">Organizations</p>
+    <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= current_admin.assignable_organizations.count %></p>
+  </div>
+  <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+    <p class="text-xs uppercase tracking-wider text-gray-400">Roles</p>
+    <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= Role.count %></p>
+  </div>
+  <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+    <p class="text-xs uppercase tracking-wider text-gray-400">Admins</p>
+    <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= Admin.count %></p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
+  <% [
+       [ "Organizations", "Onboard & manage campaigns", console_organizations_path ],
+       [ "Roles", "Define roles & module permissions", console_roles_path ],
+       [ "Parties", "Party reference catalog", console_parties_path ],
+       [ "Geography", "States → Loksabhas → … → Booths", console_states_path ],
+       [ "Audit log", "Cross-org access & activity", console_audit_logs_path ],
+       [ "Platform health", "Jobs, queues, integrations", console_platform_health_path ]
+     ].each do |title, desc, path| %>
+    <%= link_to path, class: "block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]" do %>
+      <p class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= title %></p>
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= desc %></p>
+    <% end %>
+  <% end %>
 </div>

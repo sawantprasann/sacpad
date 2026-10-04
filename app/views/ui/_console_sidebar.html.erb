@@ -1,0 +1,43 @@
+<%# Platform Console sidebar — steel operator identity, TailAdmin .menu-item styling. %>
+<aside
+  :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full'"
+  class="sidebar fixed top-0 left-0 z-50 flex h-screen w-[290px] flex-col overflow-y-auto border-r border-gray-200 bg-white px-5 transition-all duration-300 xl:static xl:translate-x-0 dark:border-gray-800 dark:bg-black"
+  @click.outside="if (window.innerWidth < 1280) sidebarToggle = false"
+>
+  <div class="flex items-center gap-2 pt-8 pb-7">
+    <%= link_to console_root_path, class: "flex items-center gap-2" do %>
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--console-accent)">SP</span>
+      <span class="flex flex-col leading-tight">
+        <span class="text-base font-semibold text-gray-800 dark:text-white/90">SAC-PAD</span>
+        <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">Platform Console</span>
+      </span>
+    <% end %>
+  </div>
+
+  <div class="no-scrollbar flex flex-col overflow-y-auto">
+    <nav>
+      <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">Operations</h3>
+      <ul class="mb-6 flex flex-col gap-1">
+        <li><%= link_to "Dashboard", console_root_path, class: "menu-item group #{current_page?(console_root_path) ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Organizations", console_organizations_path, class: "menu-item group #{controller_name == "organizations" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Roles", console_roles_path, class: "menu-item group #{controller_name == "roles" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+      </ul>
+
+      <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">Reference data</h3>
+      <ul class="mb-6 flex flex-col gap-1">
+        <li><%= link_to "Parties", console_parties_path, class: "menu-item group #{controller_name == "parties" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "States", console_states_path, class: "menu-item group #{controller_name == "states" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Loksabhas", console_loksabhas_path, class: "menu-item group #{controller_name == "loksabhas" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Assemblies", console_assemblies_path, class: "menu-item group #{controller_name == "assemblies" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Villages", console_villages_path, class: "menu-item group #{controller_name == "villages" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Booths", console_booths_path, class: "menu-item group #{controller_name == "booths" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+      </ul>
+
+      <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">System</h3>
+      <ul class="flex flex-col gap-1">
+        <li><%= link_to "Audit log", console_audit_logs_path, class: "menu-item group #{controller_name == "audit_logs" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Platform health", console_platform_health_path, class: "menu-item group #{controller_name == "platform_healths" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+      </ul>
+    </nav>
+  </div>
+</aside>
