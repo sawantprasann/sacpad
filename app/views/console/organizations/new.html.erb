@@ -20,11 +20,13 @@
             <option value="Assembly">Assembly (state)</option>
           </select>
           <div>
-            <select name="organization[constituency_id]" x-show="ctype === 'Loksabha'" :disabled="ctype !== 'Loksabha'" class="<%= ta_field_classes %>">
+            <%# Only the select matching the chosen level carries the submit name (the other gets
+                name removed via :name=null), so the visible dropdown is always enabled/usable. %>
+            <select x-show="ctype === 'Loksabha'" :name="ctype === 'Loksabha' ? 'organization[constituency_id]' : null" class="<%= ta_field_classes %>">
               <option value="">Select Loksabha…</option>
               <% Loksabha.order(:name).each do |l| %><option value="<%= l.id %>" <%= "selected" if @organization.constituency_type == "Loksabha" && @organization.constituency_id == l.id %>><%= l.name %></option><% end %>
             </select>
-            <select name="organization[constituency_id]" x-show="ctype === 'Assembly'" :disabled="ctype !== 'Assembly'" x-cloak class="<%= ta_field_classes %>">
+            <select x-show="ctype === 'Assembly'" :name="ctype === 'Assembly' ? 'organization[constituency_id]' : null" x-cloak class="<%= ta_field_classes %>">
               <option value="">Select Assembly…</option>
               <% Assembly.order(:name).each do |a| %><option value="<%= a.id %>" <%= "selected" if @organization.constituency_type == "Assembly" && @organization.constituency_id == a.id %>><%= a.name %></option><% end %>
             </select>
