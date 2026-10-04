@@ -1,0 +1,4 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# Intentionally empty — Story 0.2 tests build organizations explicitly inside
+# ActsAsTenant.without_tenant blocks. The generated polymorphic-constituency fixtures
+# were removed (they referenced non-existent Constituency rows).
