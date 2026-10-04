@@ -1,0 +1,9 @@
+<%# Voter sentiment / RAG — SOLID fill (reserved palette), always labelled (never color-alone). %>
+<% map = {
+     "green" => [ "Pleased", "#12b76a", "#ffffff" ],
+     "amber" => [ "Transit", "#f79009", "#1a1208" ],
+     "red" => [ "Displeased", "#f04438", "#ffffff" ]
+   } %>
+<% default_label, bg, fg = map[color.to_s] %>
+<span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold"
+      style="background: <%= bg %>; color: <%= fg %>"><%= local_assigns[:label] || default_label %></span>

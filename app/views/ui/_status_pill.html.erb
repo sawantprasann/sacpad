@@ -1,0 +1,13 @@
+<%# Ticket workflow status — subtle tint + dot (never solid; distinct from RAG). Carries a label
+    + dot so meaning never rests on color alone (UX-DR5/UX-DR7). %>
+<% map = {
+     "open" => [ "Open", "#64748b" ],
+     "in_progress" => [ "In progress", "#2970ff" ],
+     "closed" => [ "Closed", "#039855" ],
+     "blocked" => [ "Blocked", "#b42318" ]
+   } %>
+<% lbl, color = map[status.to_s] %>
+<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
+      style="background: color-mix(in srgb, <%= color %> 12%, transparent); color: <%= color %>">
+  <span class="h-1.5 w-1.5 rounded-full" style="background: <%= color %>"></span><%= lbl %>
+</span>

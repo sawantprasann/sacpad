@@ -1,0 +1,8 @@
+<% tones = {
+     "gray" => "bg-gray-100 text-gray-600",
+     "brand" => "bg-brand-50 text-brand-700",
+     "green" => "bg-rag-green/10 text-rag-green",
+     "amber" => "bg-rag-amber/10 text-rag-amber",
+     "red" => "bg-rag-red/10 text-rag-red"
+   } %>
+<span class="inline-flex rounded-full px-2 py-0.5 text-xs font-medium <%= tones[(local_assigns[:tone] || "gray").to_s] %>"><%= label %></span>

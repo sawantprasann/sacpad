@@ -1,17 +1,35 @@
-<%# Shared left sidebar (TailAdmin-style). Module nav is injected per-module in later stories.
-    Hidden on small screens (mobile ticket flow uses the three-level drill, UX-DR9); visible lg+. %>
-<aside class="hidden lg:flex lg:w-64 lg:flex-col bg-gray-900 text-gray-100">
+<%# TailAdmin-style left sidebar. Hidden on small screens (mobile ticket flow uses the drill, UX-DR9). %>
+<aside class="hidden lg:flex lg:w-72 lg:flex-col bg-gray-900 text-gray-300">
   <div class="flex h-16 items-center gap-2 px-6 border-b border-white/10">
-    <span class="inline-block h-6 w-6 rounded" style="background: var(--org-party-color)"></span>
-    <span class="font-semibold tracking-tight">SAC-PAD</span>
+    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white"
+          style="background: var(--org-party-color)">SP</span>
+    <span class="text-base font-semibold tracking-tight text-white">SAC-PAD</span>
   </div>
-  <nav class="flex-1 overflow-y-auto px-3 py-4 text-sm">
-    <%# Placeholder nav — real module links added by their epics over the shared permission check (FR50). %>
-    <p class="px-3 pb-2 text-xs uppercase tracking-wider text-gray-400">Modules</p>
+
+  <nav class="flex-1 overflow-y-auto px-4 py-5 text-sm">
+    <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Menu</p>
     <ul class="space-y-1">
-      <li><span class="block rounded px-3 py-2 text-gray-400">Dashboard</span></li>
-      <li><span class="block rounded px-3 py-2 text-gray-500">Kitchen Cabinet · (Epic 1)</span></li>
-      <li><span class="block rounded px-3 py-2 text-gray-500">…further modules</span></li>
+      <li>
+        <%= link_to root_path,
+              class: "flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-white",
+              style: "background: color-mix(in srgb, var(--org-party-color) 22%, transparent)" do %>
+          <span class="inline-block h-2 w-2 rounded-full" style="background: var(--org-party-color)"></span>
+          Dashboard
+        <% end %>
+      </li>
+      <% if user_signed_in? && current_user.role.can_create_users? %>
+        <li><%= link_to "Team", users_path, class: "flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/5" %></li>
+      <% end %>
+    </ul>
+
+    <p class="mt-6 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Modules</p>
+    <ul class="space-y-1 text-gray-500">
+      <% %w[Kitchen\ Cabinet Cadre\ Program Ground\ Reports PR Social\ Media Voter\ Lists RAG\ Mapping].each do |m| %>
+        <li class="flex items-center justify-between rounded-lg px-3 py-2">
+          <span><%= m %></span>
+          <span class="rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide">soon</span>
+        </li>
+      <% end %>
     </ul>
   </nav>
 </aside>

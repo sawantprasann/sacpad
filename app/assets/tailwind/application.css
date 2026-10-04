@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+/*
+  SAC-PAD theme layer (Story 0.1a) — TailAdmin design language expressed in Tailwind v4
+  (CSS-first @theme). Generates utilities like bg-brand-500, text-rag-green, bg-console.
+  Party accent is applied at runtime via the --org-party-color CSS var (DESIGN.md UX-DR3);
+  the reserved RAG palette is a semantic constant and is never overridden by the party accent.
+*/
+@theme {
+  /* Brand scale (TailAdmin-style); brand-500 is the neutral/Console default accent. */
+  --color-brand-25: #f2f5ff;
+  --color-brand-50: #ecf0ff;
+  --color-brand-100: #dde3ff;
+  --color-brand-200: #c2cbff;
+  --color-brand-300: #9cabff;
+  --color-brand-400: #7584ff;
+  --color-brand-500: #3c50e0;
+  --color-brand-600: #3142c9;
+  --color-brand-700: #2a37a6;
+  --color-brand-800: #212a7d;
+  --color-brand-900: #1b2566;
+
+  /* Reserved RAG / voter-sentiment palette — semantic constants (DESIGN.md). */
+  --color-rag-green: #12b76a;
+  --color-rag-amber: #f79009;
+  --color-rag-red: #f04438;
+
+  /* Ticket workflow-status palette — cool, deliberately distinct from RAG. */
+  --color-status-open: #64748b;
+  --color-status-progress: #2970ff;
+  --color-status-closed: #039855;
+  --color-status-blocked: #b42318;
+
+  /* Platform Console steel chrome + audit-warn banner. */
+  --color-console: #1d2939;
+  --color-console-fg: #eceff3;
+  --color-auditwarn-bg: #fef0c7;
+  --color-auditwarn-fg: #7a2e0e;
+  --color-auditwarn-border: #f79009;
+}

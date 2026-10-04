@@ -42,6 +42,9 @@ Rails.application.routes.draw do
   # Org-facing hierarchical user management (Story 0.9)
   resources :users, only: %i[index new create show]
 
+  # TailAdmin component showcase / style guide (Story 0.1a)
+  get "style_guide" => "home#style_guide"
+
   # Defines the root path route ("/")
   root "home#index"
 end

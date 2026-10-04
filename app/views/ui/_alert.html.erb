@@ -1,0 +1,7 @@
+<% tones = {
+     "success" => "bg-rag-green/10 text-rag-green border-rag-green/30",
+     "warning" => "bg-rag-amber/10 text-rag-amber border-rag-amber/30",
+     "error" => "bg-rag-red/10 text-rag-red border-rag-red/30",
+     "info" => "bg-brand-50 text-brand-700 border-brand-200"
+   } %>
+<div class="rounded-lg border px-4 py-2 text-sm <%= tones[(local_assigns[:tone] || "info").to_s] %>"><%= message %></div>
