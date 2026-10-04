@@ -18,4 +18,12 @@ class AuthLayoutTest < ActionDispatch::IntegrationTest
     assert_select "aside", false
     assert_match "Sign In", @response.body
   end
+
+  test "the forgot-password page is themed and shell-less" do
+    get new_user_password_path
+    assert_response :success
+    assert_select "aside", false
+    assert_match "Forgot your password?", @response.body
+    assert_match "focus:border-brand-300", @response.body
+  end
 end
