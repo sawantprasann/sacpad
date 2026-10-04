@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_140800) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_151012) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -219,12 +219,52 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140800) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  create_table "versions", force: :cascade do |t|
+    t.string "whodunnit"
+    t.datetime "created_at"
+    t.bigint "item_id", null: false
+    t.string "item_type", null: false
+    t.string "event", null: false
+    t.text "object"
+    t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
+  end
+
   create_table "villages", force: :cascade do |t|
     t.bigint "assembly_id", null: false
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["assembly_id"], name: "index_villages_on_assembly_id"
+  end
+
+  create_table "voter_versions", force: :cascade do |t|
+    t.string "item_type", null: false
+    t.bigint "item_id", null: false
+    t.string "event", null: false
+    t.string "whodunnit"
+    t.text "object"
+    t.text "object_changes"
+    t.datetime "created_at"
+    t.index ["item_type", "item_id"], name: "index_voter_versions_on_item_type_and_item_id"
+  end
+
+  create_table "voters", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "booth_id"
+    t.string "state"
+    t.string "loksabha"
+    t.string "assembly"
+    t.string "village"
+    t.text "voter_id"
+    t.text "name"
+    t.text "mobile"
+    t.integer "sentiment_status"
+    t.bigint "sentiment_updated_by_id"
+    t.datetime "sentiment_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booth_id"], name: "index_voters_on_booth_id"
+    t.index ["organization_id"], name: "index_voters_on_organization_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -244,4 +284,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140800) do
   add_foreign_key "users", "roles"
   add_foreign_key "users", "users", column: "parent_id"
   add_foreign_key "villages", "assemblies"
+  add_foreign_key "voters", "booths"
+  add_foreign_key "voters", "organizations"
 end
