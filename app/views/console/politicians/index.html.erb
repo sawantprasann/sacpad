@@ -1,0 +1,24 @@
+<% content_for :title, "#{@organization.name} — Politicians" %>
+<div class="mx-auto max-w-3xl">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900"><%= @organization.name %> — Roster</h1>
+    <%= link_to "Add politician", new_console_organization_politician_path(@organization),
+          class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
+  </div>
+  <table class="mt-4 w-full text-sm">
+    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Party</th><th>Own candidate</th><th></th></tr></thead>
+    <tbody>
+      <% @politicians.each do |p| %>
+        <tr class="border-t">
+          <td class="py-1"><%= p.name %></td>
+          <td class="py-1"><%= p.party&.name || "—" %></td>
+          <td class="py-1"><%= p.is_own_politician? ? "yes" : "no" %></td>
+          <td class="py-1 text-right">
+            <%= link_to "Edit", edit_console_organization_politician_path(@organization, p), class: "text-blue-700" %>
+            <%= button_to "Retire", console_organization_politician_path(@organization, p), method: :delete, class: "ml-2 text-rose-700", form: { style: "display:inline" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

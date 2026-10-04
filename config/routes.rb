@@ -12,6 +12,8 @@ Rails.application.routes.draw do
         patch :deactivate
         patch :reactivate
       end
+      # Per-org Politician roster (Story 0.12)
+      resources :politicians
     end
     # Global reference-data catalogs (Admin-managed, Story 0.4)
     resources :states

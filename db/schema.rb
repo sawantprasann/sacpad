@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_140700) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_140800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -138,6 +138,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140700) do
     t.index ["party_id"], name: "index_party_memberships_on_party_id"
   end
 
+  create_table "politicians", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.bigint "party_id"
+    t.boolean "is_own_politician", default: false, null: false
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_politicians_on_discarded_at"
+    t.index ["organization_id"], name: "index_politicians_on_organization_id"
+    t.index ["organization_id"], name: "one_own_politician_per_org", unique: true, where: "(is_own_politician = true)"
+    t.index ["party_id"], name: "index_politicians_on_party_id"
+  end
+
   create_table "role_permissions", force: :cascade do |t|
     t.bigint "role_id", null: false
     t.integer "module_name", null: false
@@ -221,6 +236,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140700) do
   add_foreign_key "loksabhas", "states"
   add_foreign_key "party_memberships", "organizations"
   add_foreign_key "party_memberships", "parties"
+  add_foreign_key "politicians", "organizations"
+  add_foreign_key "politicians", "parties"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
   add_foreign_key "users", "organizations"
