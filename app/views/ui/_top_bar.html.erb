@@ -1,13 +1,28 @@
 <%# Shared top bar (brief §5): app name/subtitle, session info, user area.
-    Session timestamp + login count wired when auth lands (Story 0.7, NFR26). %>
+    Shows the signed-in user's name, login count, and session time (NFR26). %>
 <header class="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6">
   <div class="flex items-center gap-2">
     <span class="lg:hidden inline-block h-5 w-5 rounded" style="background: var(--org-party-color)"></span>
     <span class="text-sm font-medium text-gray-700">Constituency Management</span>
   </div>
-  <div class="flex items-center gap-3">
-    <%# Placeholder user area — real user photo/name/session/login-count in Story 0.7. %>
-    <span class="text-xs text-gray-400">not signed in</span>
-    <span class="inline-block h-8 w-8 rounded-full bg-gray-200"></span>
+  <div class="flex items-center gap-3 text-sm">
+    <% if user_signed_in? %>
+      <span class="text-gray-600">
+        <%= current_user.name %>
+        · logins: <span class="tabular-nums"><%= current_user.sign_in_count %></span>
+        <% if current_user.current_sign_in_at %>
+          · <%= current_user.current_sign_in_at.strftime("%d %b %H:%M") %>
+        <% end %>
+      </span>
+      <% if current_user.photo.attached? %>
+        <%= image_tag current_user.photo, class: "h-8 w-8 rounded-full object-cover" %>
+      <% else %>
+        <span class="inline-block h-8 w-8 rounded-full bg-gray-200"></span>
+      <% end %>
+      <%= button_to "Sign out", destroy_user_session_path, method: :delete,
+            class: "rounded bg-gray-100 px-3 py-1 hover:bg-gray-200" %>
+    <% else %>
+      <%= link_to "Sign in", new_user_session_path, class: "text-blue-700" %>
+    <% end %>
   </div>
 </header>

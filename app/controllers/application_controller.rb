@@ -16,11 +16,11 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # Wired to the authenticated user's organization in Story 0.7 (set_current_tenant(current_user.organization)).
-  # Until auth lands, org-side controllers touch no tenant-scoped models, so nil is safe;
-  # any accidental scoped query with no tenant will RAISE (require_tenant = true) — by design.
+  # Tenant = the signed-in user's organization (Story 0.7). When not signed in, nil is safe —
+  # org-side controllers touch no tenant-scoped models until authenticated, and any accidental
+  # scoped query with no tenant RAISES (require_tenant = true) by design.
   def set_current_organization
-    set_current_tenant(nil)
+    set_current_tenant(current_user&.organization)
   end
 
   def not_found

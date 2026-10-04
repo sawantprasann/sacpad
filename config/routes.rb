@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Org-facing scope — clean, memorable root-level path (the primary, publicly-known login).
+  devise_for :users, path: ""
+
   # Operator (platform) scope — deliberately non-obvious path, not linked from org-facing UI.
   devise_for :admins, path: "console"
   namespace :console do
