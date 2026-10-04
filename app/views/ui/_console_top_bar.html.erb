@@ -26,8 +26,7 @@
           <div x-show="open" @click.outside="open = false" x-transition x-cloak
                class="absolute right-0 z-50 mt-2 w-60 rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
             <div class="px-3 py-2">
-              <p class="truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= current_admin.email %></p>
-              <p class="text-xs text-gray-400"><%= current_admin.tier %> tier · Platform operator</p>
+              <p class="truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= current_admin.name %></p>
             </div>
             <hr class="my-1 border-gray-100 dark:border-gray-800">
             <%= button_to "Sign out", destroy_admin_session_path, method: :delete,
