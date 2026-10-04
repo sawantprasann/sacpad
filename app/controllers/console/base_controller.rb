@@ -5,6 +5,7 @@ module Console
   # via ActsAsTenant.without_tenant where it needs org data (Story 0.11), not a bypass flag.
   class BaseController < ActionController::Base
     include Pundit::Authorization
+    include Auditable
 
     allow_browser versions: :modern
     before_action :authenticate_admin!
