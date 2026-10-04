@@ -1,0 +1,17 @@
+<%# Shared left sidebar (TailAdmin-style). Module nav is injected per-module in later stories.
+    Hidden on small screens (mobile ticket flow uses the three-level drill, UX-DR9); visible lg+. %>
+<aside class="hidden lg:flex lg:w-64 lg:flex-col bg-gray-900 text-gray-100">
+  <div class="flex h-16 items-center gap-2 px-6 border-b border-white/10">
+    <span class="inline-block h-6 w-6 rounded" style="background: var(--org-party-color)"></span>
+    <span class="font-semibold tracking-tight">SAC-PAD</span>
+  </div>
+  <nav class="flex-1 overflow-y-auto px-3 py-4 text-sm">
+    <%# Placeholder nav — real module links added by their epics over the shared permission check (FR50). %>
+    <p class="px-3 pb-2 text-xs uppercase tracking-wider text-gray-400">Modules</p>
+    <ul class="space-y-1">
+      <li><span class="block rounded px-3 py-2 text-gray-400">Dashboard</span></li>
+      <li><span class="block rounded px-3 py-2 text-gray-500">Kitchen Cabinet · (Epic 1)</span></li>
+      <li><span class="block rounded px-3 py-2 text-gray-500">…further modules</span></li>
+    </ul>
+  </nav>
+</aside>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Sacpad" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Sacpad">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+    <%# Party accent hook — later stories set --org-party-color per organization (DESIGN.md UX-DR3).
+        Defaults to TailAdmin brand blue; Console overrides to neutral steel. %>
+    <div class="flex min-h-screen" style="--org-party-color:#3C50E0">
+      <%= render "ui/sidebar" %>
+
+      <div class="flex flex-1 flex-col">
+        <%= render "ui/top_bar" %>
+
+        <main class="flex-1 p-4 sm:p-6">
+          <%= yield %>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
