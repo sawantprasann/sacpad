@@ -1,0 +1,28 @@
+<% content_for :title, "Organizations" %>
+<div class="mx-auto max-w-4xl">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">Organizations</h1>
+    <%= link_to "Onboard organization", new_console_organization_path,
+          class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
+  </div>
+  <table class="mt-4 w-full text-sm">
+    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Status</th><th>Users</th><th>Last activity</th><th></th></tr></thead>
+    <tbody>
+      <% @organizations.each do |org| %>
+        <tr class="border-t">
+          <td class="py-1"><%= org.name %></td>
+          <td class="py-1"><%= org.active? ? "active" : "inactive" %></td>
+          <td class="py-1 tabular-nums"><%= org.users.count %></td>
+          <td class="py-1"><%= org.users.maximum(:current_sign_in_at)&.strftime("%d %b %H:%M") || "—" %></td>
+          <td class="py-1 text-right">
+            <% if org.active? %>
+              <%= button_to "Deactivate", deactivate_console_organization_path(org), method: :patch, class: "text-rose-700", form: { style: "display:inline" } %>
+            <% else %>
+              <%= button_to "Reactivate", reactivate_console_organization_path(org), method: :patch, class: "text-emerald-700", form: { style: "display:inline" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

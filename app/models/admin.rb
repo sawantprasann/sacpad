@@ -12,7 +12,15 @@ class Admin < ApplicationRecord
   # full = unrestricted, platform-wide. ops = scoped to assigned orgs (join table in Story 0.5/0.11).
   enum :tier, { full: 0, ops: 1 }, default: :full, validate: true
 
+  has_many :admin_organizations, dependent: :destroy
+  has_many :organizations, through: :admin_organizations
+
   validates :name, presence: true
+
+  # Organizations this admin may operate on: full tier = every org; ops tier = assigned only (§3.0).
+  def assignable_organizations
+    full? ? Organization.all : organizations
+  end
 
   # Deactivated admins cannot authenticate.
   def active_for_authentication?

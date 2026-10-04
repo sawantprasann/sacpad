@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_140500) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_140600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140500) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_organizations", force: :cascade do |t|
+    t.bigint "admin_id", null: false
+    t.bigint "organization_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id", "organization_id"], name: "index_admin_organizations_on_admin_id_and_organization_id", unique: true
+    t.index ["admin_id"], name: "index_admin_organizations_on_admin_id"
+    t.index ["organization_id"], name: "index_admin_organizations_on_organization_id"
   end
 
   create_table "admins", force: :cascade do |t|
@@ -101,6 +111,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140500) do
     t.string "color"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "party_memberships", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "party_id", null: false
+    t.datetime "started_at", null: false
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_party_memberships_on_organization_id"
+    t.index ["party_id"], name: "index_party_memberships_on_party_id"
   end
 
   create_table "role_permissions", force: :cascade do |t|
@@ -179,9 +200,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_140500) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "admin_organizations", "admins"
+  add_foreign_key "admin_organizations", "organizations"
   add_foreign_key "assemblies", "loksabhas"
   add_foreign_key "booths", "villages"
   add_foreign_key "loksabhas", "states"
+  add_foreign_key "party_memberships", "organizations"
+  add_foreign_key "party_memberships", "parties"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
   add_foreign_key "users", "organizations"

@@ -24,8 +24,9 @@ class User < ApplicationRecord
     Rails.cache.fetch([ cache_key_with_version, "subtree_ids" ]) { [ id, *descendant_ids ] }
   end
 
+  # Blocked if the user is inactive OR their organization is deactivated (cascade, §3.1a).
   def active_for_authentication?
-    super && active?
+    super && active? && organization&.active?
   end
 
   private

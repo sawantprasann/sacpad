@@ -6,6 +6,13 @@ Rails.application.routes.draw do
   devise_for :admins, path: "console"
   namespace :console do
     root to: "dashboard#index"
+    # Organization lifecycle (Story 0.5/0.6)
+    resources :organizations do
+      member do
+        patch :deactivate
+        patch :reactivate
+      end
+    end
     # Global reference-data catalogs (Admin-managed, Story 0.4)
     resources :states
     resources :loksabhas
