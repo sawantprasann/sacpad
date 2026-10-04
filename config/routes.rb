@@ -3,6 +3,13 @@ Rails.application.routes.draw do
   devise_for :admins, path: "console"
   namespace :console do
     root to: "dashboard#index"
+    # Global reference-data catalogs (Admin-managed, Story 0.4)
+    resources :states
+    resources :loksabhas
+    resources :assemblies
+    resources :villages
+    resources :booths
+    resources :parties
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

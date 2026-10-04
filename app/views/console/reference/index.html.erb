@@ -1,0 +1,29 @@
+<% content_for :title, managed_title.pluralize %>
+<div class="mx-auto max-w-3xl">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900"><%= managed_title.pluralize %></h1>
+    <%= link_to "New #{managed_title}", url_for(action: :new),
+          class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
+  </div>
+
+  <table class="mt-4 w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500">
+        <% managed_fields.each { |f| %><th class="py-1"><%= f.to_s.humanize %></th><% } %>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @records.each do |record| %>
+        <tr class="border-t">
+          <% managed_fields.each { |f| %><td class="py-1"><%= record.public_send(f) %></td><% } %>
+          <td class="py-1 text-right">
+            <%= link_to "Edit", url_for(action: :edit, id: record), class: "text-blue-700" %>
+            <%= button_to "Delete", url_for(action: :destroy, id: record), method: :delete,
+                  class: "ml-2 text-rose-700", form: { style: "display:inline" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_134506) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_04_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -32,6 +32,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_134506) do
     t.index ["email"], name: "index_admins_on_email", unique: true
   end
 
+  create_table "assemblies", force: :cascade do |t|
+    t.bigint "loksabha_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
+  end
+
+  create_table "booths", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.string "number", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["village_id"], name: "index_booths_on_village_id"
+  end
+
+  create_table "loksabhas", force: :cascade do |t|
+    t.bigint "state_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["state_id"], name: "index_loksabhas_on_state_id"
+  end
+
   create_table "organizations", force: :cascade do |t|
     t.string "name", null: false
     t.boolean "active", default: true, null: false
@@ -42,4 +66,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_134506) do
     t.datetime "updated_at", null: false
     t.index ["constituency_type", "constituency_id"], name: "index_organizations_on_constituency"
   end
+
+  create_table "parties", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "abbreviation"
+    t.string "color"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "states", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "villages", force: :cascade do |t|
+    t.bigint "assembly_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assembly_id"], name: "index_villages_on_assembly_id"
+  end
+
+  add_foreign_key "assemblies", "loksabhas"
+  add_foreign_key "booths", "villages"
+  add_foreign_key "loksabhas", "states"
+  add_foreign_key "villages", "assemblies"
 end
