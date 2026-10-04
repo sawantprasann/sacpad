@@ -1,4 +1,4 @@
-<div class="<%= ta_card_classes %> max-w-2xl p-6">
+<div class="<%= ta_card_classes %> p-6">
   <%= form_with model: @role, url: (@role.persisted? ? console_role_path(@role) : console_roles_path) do |f| %>
     <% if @role.errors.any? %>
       <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @role.errors.full_messages.to_sentence %></div>

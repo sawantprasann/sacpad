@@ -3,7 +3,7 @@
 
 <div class="mb-6"><h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @organization.name %></h1></div>
 
-<div class="<%= ta_card_classes %> max-w-2xl p-6">
+<div class="<%= ta_card_classes %> p-6">
   <dl class="grid grid-cols-2 gap-4 text-sm">
     <div><dt class="text-gray-500">Status</dt><dd class="mt-1"><%= render "ui/badge", label: (@organization.active? ? "active" : "inactive"), tone: (@organization.active? ? "green" : "gray") %></dd></div>
     <div><dt class="text-gray-500">Constituency</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.constituency_type || "—" %> #<%= @organization.constituency_id || "—" %></dd></div>

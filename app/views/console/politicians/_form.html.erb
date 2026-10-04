@@ -1,4 +1,4 @@
-<div class="<%= ta_card_classes %> max-w-xl p-6">
+<div class="<%= ta_card_classes %> p-6">
   <%= form_with model: @politician,
         url: (@politician.persisted? ? console_organization_politician_path(@organization, @politician) : console_organization_politicians_path(@organization)) do |f| %>
     <% if @politician.errors.any? %>

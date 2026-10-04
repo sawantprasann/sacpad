@@ -1,6 +1,6 @@
 <% form_url = @record.persisted? ? url_for(action: :update, id: @record) : url_for(action: :create) %>
 <% form_method = @record.persisted? ? :patch : :post %>
-<div class="<%= ta_card_classes %> max-w-xl p-6">
+<div class="<%= ta_card_classes %> p-6">
   <%= form_with model: @record, scope: :record, url: form_url, method: form_method do |f| %>
     <% if @record.errors.any? %>
       <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
