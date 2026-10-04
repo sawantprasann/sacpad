@@ -1,0 +1,13 @@
+<%# Shared module toolbar (brief §5). Actions are wired per-module as modules are built;
+    here as the reusable component. Exports are always subtree/org-scoped (FR49). %>
+<div class="flex flex-wrap items-center gap-2 text-sm">
+  <button type="button" class="rounded border px-3 py-1">Export Excel</button>
+  <button type="button" class="rounded border px-3 py-1">Prepare Chart</button>
+  <span class="inline-flex overflow-hidden rounded border">
+    <button type="button" class="px-2 py-1">Bar</button>
+    <button type="button" class="border-l px-2 py-1">Pie</button>
+    <button type="button" class="border-l px-2 py-1">Line</button>
+  </span>
+  <button type="button" class="rounded border px-3 py-1">Export Chart</button>
+  <button type="button" class="rounded px-3 py-1 text-white" style="background: var(--org-party-color)">Get All Details</button>
+</div>

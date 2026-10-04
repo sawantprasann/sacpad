@@ -24,9 +24,9 @@
   </head>
 
   <body class="bg-gray-50 text-gray-800">
-    <%# Party accent hook — later stories set --org-party-color per organization (DESIGN.md UX-DR3).
-        Defaults to TailAdmin brand blue; Console overrides to neutral steel. %>
-    <div class="flex min-h-screen" style="--org-party-color:#3C50E0">
+    <%# Party accent resolved per organization (DESIGN.md UX-DR3): accent-only, AA-safe foreground.
+        Console never themes (separate steel layout). %>
+    <div class="flex min-h-screen" style="--org-party-color:<%= org_accent_color %>; --org-party-contrast:<%= org_accent_foreground %>">
       <%= render "ui/sidebar" %>
 
       <div class="flex flex-1 flex-col">
