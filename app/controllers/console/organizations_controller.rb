@@ -22,7 +22,11 @@ module Console
       end
     end
 
-    def show; end
+    # Viewing a specific org's data is logged and visibly flagged (§8a, Story 0.11).
+    def show
+      record_activity("organization.viewed", record: @organization, organization: @organization)
+      @viewing_org = @organization
+    end
 
     def deactivate
       @organization.deactivate!

@@ -1,5 +1,6 @@
 <% content_for :title, @organization.name %>
 <div class="mx-auto max-w-3xl">
+  <%= render "ui/console_org_banner", org: @organization %>
   <h1 class="text-xl font-semibold text-gray-900"><%= @organization.name %></h1>
   <p class="mt-2 text-sm text-gray-500">
     Status: <%= @organization.active? ? "active" : "inactive" %> ·

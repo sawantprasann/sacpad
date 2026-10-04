@@ -22,6 +22,8 @@ Rails.application.routes.draw do
     resources :parties
     # Role & permission catalog (Story 0.8) — the only place roles are defined
     resources :roles
+    # Cross-org audit log (Story 0.11)
+    resources :audit_logs, only: :index
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

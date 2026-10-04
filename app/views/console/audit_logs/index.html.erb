@@ -1,0 +1,18 @@
+<% content_for :title, "Audit log" %>
+<div class="mx-auto max-w-4xl">
+  <h1 class="text-xl font-semibold text-gray-900">Cross-org audit log</h1>
+  <table class="mt-4 w-full text-sm">
+    <thead><tr class="text-left text-gray-500"><th>When</th><th>Actor</th><th>Action</th><th>Org</th><th>Record</th></tr></thead>
+    <tbody>
+      <% @logs.each do |log| %>
+        <tr class="border-t">
+          <td class="py-1 whitespace-nowrap"><%= log.created_at.strftime("%d %b %H:%M") %></td>
+          <td class="py-1"><%= log.actor_type %> #<%= log.actor_id %></td>
+          <td class="py-1"><%= log.action %></td>
+          <td class="py-1 tabular-nums"><%= log.organization_id || "—" %></td>
+          <td class="py-1"><%= log.record_type ? "#{log.record_type} ##{log.record_id}" : "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
