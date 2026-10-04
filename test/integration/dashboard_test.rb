@@ -36,7 +36,7 @@ class DashboardTest < ActionDispatch::IntegrationTest
   test "the shell carries the org's party accent (AA-safe), defaulting when Independent" do
     sign_in user_with(@org_admin_role, "a@example.com")
     get "/"
-    assert_match "--org-party-color:#3C50E0", @response.body # Independent -> default
+    assert_match "--org-party-color:#465FFF", @response.body # Independent -> TailAdmin brand default
 
     party = Party.create!(name: "Green Party", color: "#10B981")
     @org.update!(current_party: party)

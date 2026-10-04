@@ -11,7 +11,7 @@
     <%= javascript_importmap_tags %>
   </head>
   <%# Standalone centered auth surface — no app shell (TailAdmin signin layout). %>
-  <body class="font-outfit" x-data="{ darkMode: false }" :class="{ 'dark bg-gray-900': darkMode }">
+  <body class="font-outfit text-sm text-gray-800 dark:text-white/90" x-data="{ darkMode: false }" :class="{ 'dark bg-gray-900': darkMode }">
     <%= yield %>
   </body>
 </html>

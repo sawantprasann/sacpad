@@ -1,7 +1,8 @@
 module ApplicationHelper
   # --- Per-org party theming (UX-DR3) ---
   # Accent resolved from the signed-in user's org's current party; bounded + AA-safe.
-  DEFAULT_ACCENT = "#3C50E0".freeze
+  # Matches TailAdmin's brand-500 so the default (Independent org) accent is consistent with the theme.
+  DEFAULT_ACCENT = "#465FFF".freeze
 
   def org_accent_color
     color = current_user&.organization&.current_party&.color.presence

@@ -16,7 +16,7 @@
   <%# TailAdmin shell. Alpine drives sidebarToggle + darkMode (body x-data). Party accent (UX-DR3)
       resolved per org as a CSS var — accent-only, AA-safe; reserved RAG palette is never overridden. %>
   <body
-    class="font-outfit"
+    class="font-outfit text-sm text-gray-800 dark:text-white/90"
     style="--org-party-color:<%= org_accent_color %>; --org-party-contrast:<%= org_accent_foreground %>"
     x-data="{ sidebarToggle: false, darkMode: false }"
     :class="{ 'dark bg-gray-900': darkMode }"

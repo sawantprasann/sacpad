@@ -11,12 +11,12 @@ sources:
 colors:
   # SAC-PAD brand-layer deltas on top of TailAdmin defaults. Unlisted tokens
   # (surface/background, body text, border, input, muted, etc.) inherit from TailAdmin.
-  primary: '#3C50E0'          # TailAdmin brand blue — SAC-PAD default + Platform Console primary
+  primary: '#465FFF'          # TailAdmin brand-500 — SAC-PAD default + Platform Console primary
   primary-foreground: '#FFFFFF'
   # --- Per-org party accent (DYNAMIC, set at runtime from Party.color) ---
   party-accent: 'var(--org-party-color)'        # bounded accent only; resolved per organization
   party-accent-foreground: 'var(--org-party-contrast)'  # auto-computed black/white for AA on the accent
-  party-accent-fallback: '#3C50E0'              # used when org has no party (Independent) or no color set
+  party-accent-fallback: '#465FFF'              # TailAdmin brand-500; used when org has no party (Independent)
   # --- RESERVED semantic palette: RAG / voter sentiment. NEVER overridden by party accent. ---
   rag-green: '#12B76A'        # pleased
   rag-green-foreground: '#FFFFFF'
