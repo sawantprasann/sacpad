@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "SAC-PAD Console" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="application-name" content="SAC-PAD Console">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <%# Platform Console: constant NEUTRAL STEEL skin — never party-themed (DESIGN.md UX-DR15).
+      Distinct from the org-facing layout so an operator can never mistake it for a campaign. %>
+  <body class="min-h-screen bg-gray-100 text-gray-800">
+    <header class="flex h-16 items-center justify-between bg-[#1D2939] px-4 sm:px-6 text-[#ECEFF3]">
+      <div class="flex items-center gap-2">
+        <span class="inline-block h-6 w-6 rounded bg-gray-500"></span>
+        <span class="font-semibold tracking-tight">SAC-PAD · Platform Console</span>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <% if admin_signed_in? %>
+          <span class="text-gray-300"><%= current_admin.email %> · <%= current_admin.tier %></span>
+          <%= button_to "Sign out", destroy_admin_session_path, method: :delete,
+                class: "rounded bg-white/10 px-3 py-1 hover:bg-white/20" %>
+        <% end %>
+      </div>
+    </header>
+
+    <main class="p-4 sm:p-6">
+      <p class="notice text-sm text-emerald-700"><%= notice %></p>
+      <p class="alert text-sm text-rose-700"><%= alert %></p>
+      <%= yield %>
+    </main>
+  </body>
+</html>
