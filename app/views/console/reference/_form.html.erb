@@ -1,21 +1,22 @@
 <% form_url = @record.persisted? ? url_for(action: :update, id: @record) : url_for(action: :create) %>
 <% form_method = @record.persisted? ? :patch : :post %>
-<%= form_with model: @record, scope: :record, url: form_url, method: form_method do |f| %>
-  <% if @record.errors.any? %>
-    <div class="mb-3 text-sm text-rose-700"><%= @record.errors.full_messages.to_sentence %></div>
+<div class="<%= ta_card_classes %> max-w-xl p-6">
+  <%= form_with model: @record, scope: :record, url: form_url, method: form_method do |f| %>
+    <% if @record.errors.any? %>
+      <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
+    <% end %>
+    <% managed_fields.each do |field| %>
+      <div class="mb-4">
+        <label class="<%= ta_label_classes %>"><%= field.to_s.humanize %></label>
+        <% if field.to_s.end_with?("_id") %>
+          <% klass = field.to_s.sub(/_id\z/, "").classify.constantize %>
+          <% label_method = klass.column_names.include?("name") ? :name : :number %>
+          <%= f.collection_select field, klass.order(label_method), :id, label_method, {}, class: ta_field_classes %>
+        <% else %>
+          <%= f.text_field field, class: ta_field_classes %>
+        <% end %>
+      </div>
+    <% end %>
+    <%= f.submit class: ta_btn_primary %>
   <% end %>
-  <% managed_fields.each do |field| %>
-    <div class="mb-3">
-      <label class="block text-sm text-gray-600"><%= field.to_s.humanize %></label>
-      <% if field.to_s.end_with?("_id") %>
-        <% klass = field.to_s.sub(/_id\z/, "").classify.constantize %>
-        <% label_method = klass.column_names.include?("name") ? :name : :number %>
-        <%= f.collection_select field, klass.order(label_method), :id, label_method, {},
-              class: "rounded border px-2 py-1" %>
-      <% else %>
-        <%= f.text_field field, class: "rounded border px-2 py-1" %>
-      <% end %>
-    </div>
-  <% end %>
-  <%= f.submit class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
-<% end %>
+</div>

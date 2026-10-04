@@ -1,11 +1,16 @@
 <% content_for :title, @organization.name %>
-<div class="mx-auto max-w-3xl">
-  <%= render "ui/console_org_banner", org: @organization %>
-  <h1 class="text-xl font-semibold text-gray-900"><%= @organization.name %></h1>
-  <p class="mt-2 text-sm text-gray-500">
-    Status: <%= @organization.active? ? "active" : "inactive" %> ·
-    Constituency: <%= @organization.constituency_type || "—" %> #<%= @organization.constituency_id || "—" %> ·
-    Users: <span class="tabular-nums"><%= @organization.users.count %></span>
-  </p>
-  <%# The persistent logged-access banner (Story 0.11) will render here when an Admin views org data. %>
+<%= render "ui/console_org_banner", org: @organization %>
+
+<div class="mb-6"><h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @organization.name %></h1></div>
+
+<div class="<%= ta_card_classes %> max-w-2xl p-6">
+  <dl class="grid grid-cols-2 gap-4 text-sm">
+    <div><dt class="text-gray-500">Status</dt><dd class="mt-1"><%= render "ui/badge", label: (@organization.active? ? "active" : "inactive"), tone: (@organization.active? ? "green" : "gray") %></dd></div>
+    <div><dt class="text-gray-500">Constituency</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.constituency_type || "—" %> #<%= @organization.constituency_id || "—" %></dd></div>
+    <div><dt class="text-gray-500">Users</dt><dd class="mt-1 tabular-nums text-gray-800 dark:text-white/90"><%= @organization.users.count %></dd></div>
+    <div><dt class="text-gray-500">Party</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.current_party&.name || "Independent" %></dd></div>
+  </dl>
+  <div class="mt-6">
+    <%= link_to "Manage roster", console_organization_politicians_path(@organization), class: ta_btn_secondary %>
+  </div>
 </div>

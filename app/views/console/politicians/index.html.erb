@@ -1,24 +1,34 @@
 <% content_for :title, "#{@organization.name} — Politicians" %>
-<div class="mx-auto max-w-3xl">
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-gray-900"><%= @organization.name %> — Roster</h1>
-    <%= link_to "Add politician", new_console_organization_politician_path(@organization),
-          class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
-  </div>
-  <table class="mt-4 w-full text-sm">
-    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Party</th><th>Own candidate</th><th></th></tr></thead>
-    <tbody>
-      <% @politicians.each do |p| %>
-        <tr class="border-t">
-          <td class="py-1"><%= p.name %></td>
-          <td class="py-1"><%= p.party&.name || "—" %></td>
-          <td class="py-1"><%= p.is_own_politician? ? "yes" : "no" %></td>
-          <td class="py-1 text-right">
-            <%= link_to "Edit", edit_console_organization_politician_path(@organization, p), class: "text-blue-700" %>
-            <%= button_to "Retire", console_organization_politician_path(@organization, p), method: :delete, class: "ml-2 text-rose-700", form: { style: "display:inline" } %>
-          </td>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @organization.name %> — Roster</h1>
+  <%= link_to "Add politician", new_console_organization_politician_path(@organization), class: ta_btn_primary %>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Party</th>
+          <th class="px-5 py-3 font-medium">Own candidate</th>
+          <th class="px-5 py-3"></th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @politicians.each do |p| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 font-medium text-gray-800 dark:text-white/90"><%= p.name %></td>
+            <td class="px-5 py-3 text-gray-500"><%= p.party&.name || "—" %></td>
+            <td class="px-5 py-3"><% if p.is_own_politician? %><%= render "ui/badge", label: "own", tone: "brand" %><% else %><span class="text-gray-400">—</span><% end %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <%= link_to "Edit", edit_console_organization_politician_path(@organization, p), class: "text-brand-500 hover:text-brand-600" %>
+              <%= button_to "Retire", console_organization_politician_path(@organization, p), method: :delete, class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @politicians.empty? %><p class="px-5 py-10 text-center text-sm text-gray-400">No politicians in this roster yet.</p><% end %>
+  </div>
 </div>

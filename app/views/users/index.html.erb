@@ -1,23 +1,32 @@
 <% content_for :title, "Team" %>
-<div class="mx-auto max-w-3xl">
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-gray-900">Team</h1>
-    <% if policy(User).create? %>
-      <%= link_to "New user", new_user_path, class: "rounded px-3 py-1 text-sm text-white",
-            style: "background: var(--org-party-color)" %>
-    <% end %>
-  </div>
-  <table class="mt-4 w-full text-sm">
-    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Email</th><th>Role</th><th>Parent</th></tr></thead>
-    <tbody>
-      <% @users.each do |u| %>
-        <tr class="border-t">
-          <td class="py-1"><%= u.name %></td>
-          <td class="py-1"><%= u.email %></td>
-          <td class="py-1"><%= u.role.name %></td>
-          <td class="py-1"><%= u.parent&.name || "—" %></td>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Team</h1>
+  <% if policy(User).create? %>
+    <%= link_to "New user", new_user_path, class: "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition", style: "background: var(--org-party-color)" %>
+  <% end %>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Email</th>
+          <th class="px-5 py-3 font-medium">Role</th>
+          <th class="px-5 py-3 font-medium">Parent</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @users.each do |u| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 font-medium text-gray-800 dark:text-white/90"><%= u.name %></td>
+            <td class="px-5 py-3 text-gray-500"><%= u.email %></td>
+            <td class="px-5 py-3"><%= render "ui/badge", label: u.role.name, tone: "brand" %></td>
+            <td class="px-5 py-3 text-gray-500"><%= u.parent&.name || "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

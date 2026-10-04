@@ -1,10 +1,15 @@
-<%= form_with model: @politician,
-      url: (@politician.persisted? ? console_organization_politician_path(@organization, @politician) : console_organization_politicians_path(@organization)) do |f| %>
-  <% if @politician.errors.any? %>
-    <div class="mb-3 text-sm text-rose-700"><%= @politician.errors.full_messages.to_sentence %></div>
+<div class="<%= ta_card_classes %> max-w-xl p-6">
+  <%= form_with model: @politician,
+        url: (@politician.persisted? ? console_organization_politician_path(@organization, @politician) : console_organization_politicians_path(@organization)) do |f| %>
+    <% if @politician.errors.any? %>
+      <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @politician.errors.full_messages.to_sentence %></div>
+    <% end %>
+    <div class="mb-4"><label class="<%= ta_label_classes %>">Name</label><%= f.text_field :name, class: ta_field_classes %></div>
+    <div class="mb-4"><label class="<%= ta_label_classes %>">Party</label><%= f.collection_select :party_id, Party.order(:name), :id, :name, { include_blank: "—" }, class: ta_field_classes %></div>
+    <label class="mb-4 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-400">
+      <%= f.check_box :is_own_politician, class: "h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20" %>
+      Own candidate
+    </label>
+    <%= f.submit class: ta_btn_primary %>
   <% end %>
-  <div class="mb-3"><label class="block text-sm text-gray-600">Name</label><%= f.text_field :name, class: "rounded border px-2 py-1" %></div>
-  <div class="mb-3"><label class="block text-sm text-gray-600">Party</label><%= f.collection_select :party_id, Party.order(:name), :id, :name, { include_blank: "—" }, class: "rounded border px-2 py-1" %></div>
-  <div class="mb-3"><label class="text-sm text-gray-600"><%= f.check_box :is_own_politician %> Own candidate</label></div>
-  <%= f.submit class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
-<% end %>
+</div>

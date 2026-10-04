@@ -1,18 +1,30 @@
 <% content_for :title, "Audit log" %>
-<div class="mx-auto max-w-4xl">
-  <h1 class="text-xl font-semibold text-gray-900">Cross-org audit log</h1>
-  <table class="mt-4 w-full text-sm">
-    <thead><tr class="text-left text-gray-500"><th>When</th><th>Actor</th><th>Action</th><th>Org</th><th>Record</th></tr></thead>
-    <tbody>
-      <% @logs.each do |log| %>
-        <tr class="border-t">
-          <td class="py-1 whitespace-nowrap"><%= log.created_at.strftime("%d %b %H:%M") %></td>
-          <td class="py-1"><%= log.actor_type %> #<%= log.actor_id %></td>
-          <td class="py-1"><%= log.action %></td>
-          <td class="py-1 tabular-nums"><%= log.organization_id || "—" %></td>
-          <td class="py-1"><%= log.record_type ? "#{log.record_type} ##{log.record_id}" : "—" %></td>
+<div class="mb-6"><h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Cross-org audit log</h1></div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">When</th>
+          <th class="px-5 py-3 font-medium">Actor</th>
+          <th class="px-5 py-3 font-medium">Action</th>
+          <th class="px-5 py-3 font-medium">Org</th>
+          <th class="px-5 py-3 font-medium">Record</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @logs.each do |log| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 whitespace-nowrap text-gray-500"><%= log.created_at.strftime("%d %b %H:%M") %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= log.actor_type %> #<%= log.actor_id %></td>
+            <td class="px-5 py-3"><%= render "ui/badge", label: log.action, tone: "brand" %></td>
+            <td class="px-5 py-3 tabular-nums text-gray-500"><%= log.organization_id || "—" %></td>
+            <td class="px-5 py-3 text-gray-500"><%= log.record_type ? "#{log.record_type} ##{log.record_id}" : "—" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @logs.empty? %><p class="px-5 py-10 text-center text-sm text-gray-400">No activity logged yet.</p><% end %>
+  </div>
 </div>

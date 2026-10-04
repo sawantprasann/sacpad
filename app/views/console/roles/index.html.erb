@@ -1,26 +1,37 @@
 <% content_for :title, "Roles" %>
-<div class="mx-auto max-w-4xl">
-  <div class="flex items-center justify-between">
-    <h1 class="text-xl font-semibold text-gray-900">Roles</h1>
-    <%= link_to "New Role", new_console_role_path, class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
-  </div>
-  <table class="mt-4 w-full text-sm">
-    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Slug</th><th>System</th><th>Can create users</th><th></th></tr></thead>
-    <tbody>
-      <% @roles.each do |role| %>
-        <tr class="border-t">
-          <td class="py-1"><%= role.name %></td>
-          <td class="py-1"><%= role.slug %></td>
-          <td class="py-1"><%= role.is_system? ? "yes" : "no" %></td>
-          <td class="py-1"><%= role.can_create_users? ? "yes" : "no" %></td>
-          <td class="py-1 text-right">
-            <%= link_to "Edit", edit_console_role_path(role), class: "text-blue-700" %>
-            <% unless role.is_system? %>
-              <%= button_to "Delete", console_role_path(role), method: :delete, class: "ml-2 text-rose-700", form: { style: "display:inline" } %>
-            <% end %>
-          </td>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Roles</h1>
+  <%= link_to "New Role", new_console_role_path, class: ta_btn_primary %>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Slug</th>
+          <th class="px-5 py-3 font-medium">System</th>
+          <th class="px-5 py-3 font-medium">Can create users</th>
+          <th class="px-5 py-3"></th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @roles.each do |role| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 font-medium text-gray-800 dark:text-white/90"><%= role.name %></td>
+            <td class="px-5 py-3 text-gray-500"><%= role.slug %></td>
+            <td class="px-5 py-3"><%= render "ui/badge", label: (role.is_system? ? "system" : "custom"), tone: (role.is_system? ? "brand" : "gray") %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= role.can_create_users? ? "Yes" : "No" %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <%= link_to "Edit", edit_console_role_path(role), class: "text-brand-500 hover:text-brand-600" %>
+              <% unless role.is_system? %>
+                <%= button_to "Delete", console_role_path(role), method: :delete, class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
