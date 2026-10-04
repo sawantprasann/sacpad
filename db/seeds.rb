@@ -7,3 +7,6 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# System roles (Story 0.8): org_admin + dreamline_user, seeded idempotently.
+Role.seed_system_roles!

@@ -1,0 +1,26 @@
+<% content_for :title, "Roles" %>
+<div class="mx-auto max-w-4xl">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">Roles</h1>
+    <%= link_to "New Role", new_console_role_path, class: "rounded bg-gray-900 px-3 py-1 text-sm text-white" %>
+  </div>
+  <table class="mt-4 w-full text-sm">
+    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Slug</th><th>System</th><th>Can create users</th><th></th></tr></thead>
+    <tbody>
+      <% @roles.each do |role| %>
+        <tr class="border-t">
+          <td class="py-1"><%= role.name %></td>
+          <td class="py-1"><%= role.slug %></td>
+          <td class="py-1"><%= role.is_system? ? "yes" : "no" %></td>
+          <td class="py-1"><%= role.can_create_users? ? "yes" : "no" %></td>
+          <td class="py-1 text-right">
+            <%= link_to "Edit", edit_console_role_path(role), class: "text-blue-700" %>
+            <% unless role.is_system? %>
+              <%= button_to "Delete", console_role_path(role), method: :delete, class: "ml-2 text-rose-700", form: { style: "display:inline" } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

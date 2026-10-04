@@ -10,6 +10,8 @@ Rails.application.routes.draw do
     resources :villages
     resources :booths
     resources :parties
+    # Role & permission catalog (Story 0.8) — the only place roles are defined
+    resources :roles
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
