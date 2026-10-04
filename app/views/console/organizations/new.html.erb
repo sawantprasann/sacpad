@@ -6,9 +6,32 @@
     <p class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Organization</p>
     <div class="grid gap-4 sm:grid-cols-2">
       <div><label class="<%= ta_label_classes %>">Name (Politician / campaign)</label><%= f.text_field :name, class: ta_field_classes %></div>
-      <div><label class="<%= ta_label_classes %>">Constituency level (set once)</label><%= f.select :constituency_type, %w[Loksabha Assembly], { include_blank: true }, class: ta_field_classes %></div>
-      <div><label class="<%= ta_label_classes %>">Constituency id</label><%= f.number_field :constituency_id, class: ta_field_classes %></div>
       <div><label class="<%= ta_label_classes %>">Party (blank = Independent)</label><%= f.collection_select :current_party_id, Party.order(:name), :id, :name, { include_blank: "Independent" }, class: ta_field_classes %></div>
+
+      <%# Constituency = the seat this campaign contests (set once). Pick the level, then the
+          actual Loksabha/Assembly by name — both selects share constituency_id; the hidden one
+          is disabled so it isn't submitted. %>
+      <div class="sm:col-span-2" x-data="{ ctype: '<%= @organization.constituency_type %>' }">
+        <label class="<%= ta_label_classes %>">Constituency — the seat this campaign contests (set once)</label>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <select name="organization[constituency_type]" x-model="ctype" class="<%= ta_field_classes %>">
+            <option value="">Select level…</option>
+            <option value="Loksabha">Loksabha (parliamentary)</option>
+            <option value="Assembly">Assembly (state)</option>
+          </select>
+          <div>
+            <select name="organization[constituency_id]" x-show="ctype === 'Loksabha'" :disabled="ctype !== 'Loksabha'" class="<%= ta_field_classes %>">
+              <option value="">Select Loksabha…</option>
+              <% Loksabha.order(:name).each do |l| %><option value="<%= l.id %>" <%= "selected" if @organization.constituency_type == "Loksabha" && @organization.constituency_id == l.id %>><%= l.name %></option><% end %>
+            </select>
+            <select name="organization[constituency_id]" x-show="ctype === 'Assembly'" :disabled="ctype !== 'Assembly'" x-cloak class="<%= ta_field_classes %>">
+              <option value="">Select Assembly…</option>
+              <% Assembly.order(:name).each do |a| %><option value="<%= a.id %>" <%= "selected" if @organization.constituency_type == "Assembly" && @organization.constituency_id == a.id %>><%= a.name %></option><% end %>
+            </select>
+            <p x-show="!ctype" class="mt-1 text-xs text-gray-400">Pick a level first. (Seed geography under Reference data if the list is empty.)</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <p class="mt-6 mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Initial Org Admin (required)</p>
