@@ -26,6 +26,8 @@ Rails.application.routes.draw do
     resources :roles
     # Cross-org audit log (Story 0.11)
     resources :audit_logs, only: :index
+    # Platform operational health (Story 0.13)
+    resource :platform_health, only: :show, controller: :platform_health
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

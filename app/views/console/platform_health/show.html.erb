@@ -1,0 +1,22 @@
+<% content_for :title, "Platform health" %>
+<div class="mx-auto max-w-3xl">
+  <h1 class="text-xl font-semibold text-gray-900">Platform health</h1>
+
+  <div class="mt-4 grid grid-cols-2 gap-4">
+    <div class="rounded-2xl border p-4">
+      <p class="text-xs uppercase tracking-wider text-gray-500">Organizations</p>
+      <p class="mt-1 text-2xl font-semibold tabular-nums"><%= @active_orgs %>/<%= @org_count %></p>
+      <p class="text-xs text-gray-500">active / total</p>
+    </div>
+    <div class="rounded-2xl border p-4">
+      <p class="text-xs uppercase tracking-wider text-gray-500">Background jobs</p>
+      <p class="mt-1 text-2xl font-semibold tabular-nums"><%= @queue_depth.nil? ? "—" : @queue_depth %></p>
+      <p class="text-xs text-gray-500">queued · failed: <%= @failed_jobs.nil? ? "—" : @failed_jobs %></p>
+    </div>
+  </div>
+
+  <div class="mt-4 rounded-2xl border p-4 text-sm text-gray-600">
+    <p><strong>Daily sync:</strong> <%= @sync_status %></p>
+    <p class="mt-1"><strong>External providers:</strong> <%= @token_status %></p>
+  </div>
+</div>
