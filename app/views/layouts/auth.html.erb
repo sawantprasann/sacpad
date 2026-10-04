@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "Sign In · SAC-PAD" %></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <%# Standalone centered auth surface — no app shell (TailAdmin signin layout). %>
+  <body class="font-outfit" x-data="{ darkMode: false }" :class="{ 'dark bg-gray-900': darkMode }">
+    <%= yield %>
+  </body>
+</html>

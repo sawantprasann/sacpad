@@ -2,6 +2,10 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
   include Auditable
 
+  # Devise pages (sign-in, password reset) use a standalone centered auth layout — NO app shell
+  # (no sidebar on the login page). Everything else uses the themed application shell.
+  layout :layout_by_controller
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
@@ -16,6 +20,10 @@ class ApplicationController < ActionController::Base
   rescue_from Pundit::NotAuthorizedError, with: :not_found
 
   private
+
+  def layout_by_controller
+    devise_controller? ? "auth" : "application"
+  end
 
   # Tenant = the signed-in user's organization (Story 0.7). When not signed in, nil is safe —
   # org-side controllers touch no tenant-scoped models until authenticated, and any accidental

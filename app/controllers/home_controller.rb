@@ -1,8 +1,8 @@
 class HomeController < ApplicationController
-  before_action :authenticate_user!, only: :style_guide
+  before_action :authenticate_user!
 
-  # The Organization Dashboard (FR50/FR51). Public landing when signed out; widget-composed
-  # dashboard when signed in, each widget gated by the viewer's role permissions.
+  # The Organization Dashboard (FR50/FR51) — widget-composed, each widget gated by the viewer's
+  # role permissions. Unauthenticated visitors are redirected to the (shell-less) sign-in page.
   def index
     @widgets = helpers.dashboard_widgets_for(current_user)
   end

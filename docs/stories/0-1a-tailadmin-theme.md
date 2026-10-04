@@ -56,7 +56,13 @@ So that every screen inherits the real TailAdmin look instead of the hand-rolled
 
 ### Completion Notes
 
-- TailAdmin's **free MIT HTML/Tailwind** variant used as the design reference; the design language is reproduced natively in ERB + a Tailwind v4 `@theme` layer (brand scale + reserved RAG/status/console tokens). No Node/SPA build, no vendored proprietary assets — correct for a server-rendered Rails + Hotwire app.
+> **Correction (second pass):** the first pass only *approximated* TailAdmin with hand-rolled classes and (wrongly) left Devise on the app layout, so the login page showed the sidebar and nothing looked like the demo. This pass does a **real integration**.
+
+- Adopted TailAdmin's **actual `style.css`** (MIT, from `TailAdmin/tailadmin-free-tailwind-dashboard-template`) as the Tailwind entry — Outfit font, the full brand/gray scales, `--text-title-*`, `shadow-theme-*`, and the `@utility menu-item*` component classes. Compiled CSS verified to contain them.
+- Vendored their images (logos/shapes/avatars) into `app/assets/images`. Appended SAC-PAD-only tokens (RAG/status/console) on top.
+- **Login fixed:** Devise pages now use a standalone `layouts/auth` (centered, two-column, brand panel) — **no app sidebar** (test-verified `assert_select "aside", false`). Sign-in markup ported from the real `signin.html`, wired to Devise (works for both user + admin scopes).
+- **Shell:** `layouts/application` + `ui/_sidebar` + `ui/_top_bar` rebuilt from TailAdmin's real structure/classes (dark sidebar, `.menu-item`, hamburger, dark-mode toggle) with our nav + SAC-PAD branding (not their logo). Dashboard requires auth (logged-out → shell-less sign-in).
+- **Alpine** pinned via importmap (vendored) and started after `turbo:load` — powers sidebarToggle, dark mode, password show/hide.
 - Shell restyled (dark sidebar with menu/module nav, sticky translucent top bar). Component library under `app/views/ui/`: `_card` (layout), `_badge`, `_alert`, `_breadcrumb`, `_status_pill` (cool, labelled, never solid), `_rag_chip` (solid reserved palette, always labelled), restyled `_dashboard_widget` + `_module_toolbar`.
 - Party accent wired via `--org-party-color` (accent-only, AA-safe); RAG palette is a reserved semantic constant; Console keeps its steel skin (unthemed).
 - `/style_guide` sample page showcases the library. `form_field`/`dropdown`/`modal` deferred until a module needs them.

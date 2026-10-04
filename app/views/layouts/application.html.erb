@@ -1,39 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Sacpad" %></title>
+    <title><%= content_for(:title) || "SAC-PAD" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Sacpad">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="SAC-PAD">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-gray-50 text-gray-800">
-    <%# Party accent resolved per organization (DESIGN.md UX-DR3): accent-only, AA-safe foreground.
-        Console never themes (separate steel layout). %>
-    <div class="flex min-h-screen" style="--org-party-color:<%= org_accent_color %>; --org-party-contrast:<%= org_accent_foreground %>">
+  <%# TailAdmin shell. Alpine drives sidebarToggle + darkMode (body x-data). Party accent (UX-DR3)
+      resolved per org as a CSS var — accent-only, AA-safe; reserved RAG palette is never overridden. %>
+  <body
+    class="font-outfit"
+    style="--org-party-color:<%= org_accent_color %>; --org-party-contrast:<%= org_accent_foreground %>"
+    x-data="{ sidebarToggle: false, darkMode: false }"
+    :class="{ 'dark bg-gray-900': darkMode }"
+  >
+    <div class="flex h-screen overflow-hidden">
       <%= render "ui/sidebar" %>
 
-      <div class="flex flex-1 flex-col">
+      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+        <%# Mobile overlay when sidebar is open %>
+        <div x-show="sidebarToggle" @click="sidebarToggle = false"
+             class="fixed inset-0 z-40 bg-gray-900/50 xl:hidden" x-cloak></div>
+
         <%= render "ui/top_bar" %>
 
-        <main class="flex-1 p-4 sm:p-6">
-          <%= yield %>
+        <main>
+          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+            <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
+            <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+            <%= yield %>
+          </div>
         </main>
       </div>
     </div>

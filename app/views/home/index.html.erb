@@ -1,25 +1,19 @@
 <% content_for :title, "Dashboard" %>
 
-<% if user_signed_in? %>
-  <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Dashboard</h1>
-    <%= render "ui/module_toolbar" %>
+<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  <div>
+    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Dashboard</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400"><%= current_user.organization.name %></p>
   </div>
+  <%= render "ui/module_toolbar" %>
+</div>
 
-  <% if @widgets.any? %>
-    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <% @widgets.each do |widget| %>
-        <%= render "ui/dashboard_widget", widget: widget %>
-      <% end %>
-    </div>
-  <% else %>
-    <p class="mt-6 text-sm text-gray-500">No modules are available to your role yet.</p>
-  <% end %>
-<% else %>
-  <div class="mx-auto max-w-3xl">
-    <h1 class="text-2xl font-semibold tracking-tight text-gray-900">SAC-PAD</h1>
-    <p class="mt-2 text-sm text-gray-500">Constituency management platform. Please sign in to continue.</p>
-    <%= link_to "Sign in", new_user_session_path, class: "mt-4 inline-block rounded px-3 py-1 text-sm text-white",
-          style: "background: var(--org-party-color)" %>
+<% if @widgets.any? %>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
+    <% @widgets.each do |widget| %>
+      <%= render "ui/dashboard_widget", widget: widget %>
+    <% end %>
   </div>
+<% else %>
+  <p class="text-sm text-gray-500">No modules are available to your role yet.</p>
 <% end %>

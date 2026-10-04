@@ -1,35 +1,53 @@
-<%# TailAdmin-style left sidebar. Hidden on small screens (mobile ticket flow uses the drill, UX-DR9). %>
-<aside class="hidden lg:flex lg:w-72 lg:flex-col bg-gray-900 text-gray-300">
-  <div class="flex h-16 items-center gap-2 px-6 border-b border-white/10">
-    <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white"
-          style="background: var(--org-party-color)">SP</span>
-    <span class="text-base font-semibold tracking-tight text-white">SAC-PAD</span>
+<%# TailAdmin sidebar: real structure + .menu-item component classes. Collapses on mobile via
+    Alpine sidebarToggle (body x-data). Our nav + SAC-PAD branding (not TailAdmin's logo). %>
+<aside
+  :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full'"
+  class="sidebar fixed top-0 left-0 z-50 flex h-screen w-[290px] flex-col overflow-y-auto border-r border-gray-200 bg-white px-5 transition-all duration-300 xl:static xl:translate-x-0 dark:border-gray-800 dark:bg-black"
+  @click.outside="if (window.innerWidth < 1280) sidebarToggle = false"
+>
+  <div class="flex items-center gap-2 pt-8 pb-7">
+    <%= link_to root_path, class: "flex items-center gap-2" do %>
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white" style="background: var(--org-party-color)">SP</span>
+      <span class="text-lg font-semibold text-gray-800 dark:text-white/90">SAC-PAD</span>
+    <% end %>
   </div>
 
-  <nav class="flex-1 overflow-y-auto px-4 py-5 text-sm">
-    <p class="px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Menu</p>
-    <ul class="space-y-1">
-      <li>
-        <%= link_to root_path,
-              class: "flex items-center gap-3 rounded-lg px-3 py-2 font-medium text-white",
-              style: "background: color-mix(in srgb, var(--org-party-color) 22%, transparent)" do %>
-          <span class="inline-block h-2 w-2 rounded-full" style="background: var(--org-party-color)"></span>
-          Dashboard
-        <% end %>
-      </li>
-      <% if user_signed_in? && current_user.role.can_create_users? %>
-        <li><%= link_to "Team", users_path, class: "flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/5" %></li>
-      <% end %>
-    </ul>
+  <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+    <nav>
+      <div>
+        <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">Menu</h3>
+        <ul class="mb-6 flex flex-col gap-1">
+          <li>
+            <%= link_to root_path, class: "menu-item group #{current_page?(root_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+              <span class="menu-item-text">Dashboard</span>
+            <% end %>
+          </li>
+          <% if user_signed_in? && current_user.role.can_create_users? %>
+            <li>
+              <%= link_to users_path, class: "menu-item group #{current_page?(users_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <span class="menu-item-text">Team</span>
+              <% end %>
+            </li>
+          <% end %>
+          <li>
+            <%= link_to style_guide_path, class: "menu-item group #{current_page?(style_guide_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+              <span class="menu-item-text">Style guide</span>
+            <% end %>
+          </li>
+        </ul>
 
-    <p class="mt-6 px-3 pb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Modules</p>
-    <ul class="space-y-1 text-gray-500">
-      <% %w[Kitchen\ Cabinet Cadre\ Program Ground\ Reports PR Social\ Media Voter\ Lists RAG\ Mapping].each do |m| %>
-        <li class="flex items-center justify-between rounded-lg px-3 py-2">
-          <span><%= m %></span>
-          <span class="rounded-full bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide">soon</span>
-        </li>
-      <% end %>
-    </ul>
-  </nav>
+        <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">Modules</h3>
+        <ul class="flex flex-col gap-1">
+          <% ["Kitchen Cabinet", "Cadre Program", "Ground Reports", "PR", "Social Media", "Voter Lists", "RAG Mapping"].each do |m| %>
+            <li>
+              <span class="menu-item group menu-item-inactive cursor-default">
+                <span class="menu-item-text"><%= m %></span>
+                <span class="menu-dropdown-badge menu-dropdown-badge-inactive ml-auto">soon</span>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </nav>
+  </div>
 </aside>
