@@ -3,6 +3,7 @@ class Organization < ApplicationRecord
   # Geography/party associations (constituency, parties, politicians) are wired in later
   # stories (0.4/0.5/0.12); constituency is polymorphic + optional for now (§3.1c).
   belongs_to :constituency, polymorphic: true, optional: true
+  has_many :users, dependent: :restrict_with_error
 
   validates :name, presence: true
 

@@ -1,0 +1,23 @@
+<% content_for :title, "Team" %>
+<div class="mx-auto max-w-3xl">
+  <div class="flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-900">Team</h1>
+    <% if policy(User).create? %>
+      <%= link_to "New user", new_user_path, class: "rounded px-3 py-1 text-sm text-white",
+            style: "background: var(--org-party-color)" %>
+    <% end %>
+  </div>
+  <table class="mt-4 w-full text-sm">
+    <thead><tr class="text-left text-gray-500"><th>Name</th><th>Email</th><th>Role</th><th>Parent</th></tr></thead>
+    <tbody>
+      <% @users.each do |u| %>
+        <tr class="border-t">
+          <td class="py-1"><%= u.name %></td>
+          <td class="py-1"><%= u.email %></td>
+          <td class="py-1"><%= u.role.name %></td>
+          <td class="py-1"><%= u.parent&.name || "—" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
