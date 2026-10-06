@@ -49,7 +49,7 @@ gem "closure_tree"              # user hierarchy / subtree queries — Story 0.9
 gem "acts_as_tenant"            # model-layer tenant isolation net — Story 0.2
 gem "discard"                   # soft delete — Story 0.10
 gem "paper_trail"               # versioning (custom per-model version classes) — Story 0.10
-gem "pagy"                      # pagination on every listing (NFR12)
+gem "pagy", "~> 43.7"           # pagination on every listing (NFR12) — pinned; 43.x API (Pagy::Method)
 gem "chartkick"                 # Bar/Pie/Line charts
 gem "caxlsx"                    # Excel export (axlsx)
 gem "caxlsx_rails"              # Rails view integration for caxlsx

@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   include Pundit::Authorization
   include Auditable
+  include Pagy::Method   # pagination helper (`pagy :offset, relation`) — pagy 43.x API
 
   # Devise pages (sign-in, password reset) use a standalone centered auth layout — NO app shell
   # (no sidebar on the login page). Everything else uses the themed application shell.

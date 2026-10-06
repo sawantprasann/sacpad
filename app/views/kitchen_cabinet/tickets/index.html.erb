@@ -71,16 +71,16 @@
   <% end %>
 </div>
 
-<% if @pages > 1 %>
+<% if @pagy.last > 1 %>
   <nav class="mt-4 flex items-center justify-between text-sm">
-    <% if @page > 1 %>
-      <%= link_to "← Prev", kitchen_cabinet_tickets_path(category: params[:category], status: params[:status], q: params[:q], page: @page - 1), class: "font-medium text-brand-500 hover:text-brand-600" %>
+    <% if @pagy.previous %>
+      <%= link_to "← Prev", kitchen_cabinet_tickets_path(category: params[:category], status: params[:status], q: params[:q], page: @pagy.previous), class: "font-medium text-brand-500 hover:text-brand-600" %>
     <% else %>
       <span class="text-gray-300">← Prev</span>
     <% end %>
-    <span class="text-gray-500">Page <%= @page %> of <%= @pages %></span>
-    <% if @page < @pages %>
-      <%= link_to "Next →", kitchen_cabinet_tickets_path(category: params[:category], status: params[:status], q: params[:q], page: @page + 1), class: "font-medium text-brand-500 hover:text-brand-600" %>
+    <span class="text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
+    <% if @pagy.next %>
+      <%= link_to "Next →", kitchen_cabinet_tickets_path(category: params[:category], status: params[:status], q: params[:q], page: @pagy.next), class: "font-medium text-brand-500 hover:text-brand-600" %>
     <% else %>
       <span class="text-gray-300">Next →</span>
     <% end %>

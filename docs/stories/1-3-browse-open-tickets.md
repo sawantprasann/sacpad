@@ -24,7 +24,7 @@ So that I can work my branch's grievances.
 ## Tasks / Subtasks
 
 - [x] Task 1: Pagination (first listing in the app) (AC: 2)
-  - [x] **Deviation:** the installed `pagy` is **43.7.0**, a rewrite with **no `Pagy::Backend`/`Pagy::Frontend` modules** and an unfamiliar toolbox API — following the story's pagy-include instructions verbatim would be guessing. Implemented a small, DB-agnostic **manual offset paginator** in the controller (`PER_PAGE = 20`, `@page/@total/@pages`, `offset/limit`) + an inline prev/next pager in the view. Satisfies NFR12 (paginated; no raw-table dump). Flagged for review below.
+  - [x] The installed `pagy` is **43.7.0** — a rewrite that replaces `Pagy::Backend`/`Pagy::Frontend` with `Pagy::Method` (`pagy(:offset, relation) → [@pagy, records]`). **Resolved (follow-up):** pinned `gem "pagy", "~> 43.7"`, `include Pagy::Method` in `ApplicationController`, and used `@pagy, @tickets = pagy(:offset, relation)` (default limit 20). The view pager uses the `@pagy` object (`page/last/previous/next`). The interim manual paginator was removed.
 - [x] Task 2: Narrow the ticket Pundit scope + add `show?` (AC: 2, 3)
   - [x] `TicketPolicy::Scope#resolve` → `scope.kept.where(owner_id: user.subtree_user_ids)`; `show?` = `index? && record.owner_id.in?(user.subtree_user_ids)` (out-of-subtree → 404).
 - [x] Task 3: Real index + show actions (AC: 1, 2, 3)
@@ -83,7 +83,7 @@ claude-opus-4-8[1m] (BMad dev-story)
 
 ### Completion Notes List
 
-- **⚠️ Pagy deviation (needs a review decision).** The Gemfile's `pagy` resolves to **43.7.0**, a rewrite that does **not** expose `Pagy::Backend`/`Pagy::Frontend` (verified via `rails runner`: those constants are undefined) and uses an unfamiliar toolbox/paginator API. Rather than guess at an unverified API, I implemented a minimal manual offset paginator (`PER_PAGE = 20`; `@page/@total/@pages`; `offset/limit`; inline prev/next pager). It fully satisfies AC2/NFR12 and is DB-agnostic and tested. **Review options:** (a) keep the manual paginator and drop the pagy gem, (b) pin `pagy` to a `~> 9` and adopt the standard `pagy`/`pagy_nav` API, or (c) learn the 43.x API and migrate. Low urgency — behavior is correct either way.
+- **Pagy (resolved).** The Gemfile's `pagy` was unpinned and floated to **43.7.0** — a genuine (verified authentic: ddnexus/Domizio Demichelis, MIT) rewrite that renames the mixins to `Pagy::Method` (no more `Backend`/`Frontend`). Initially shipped a manual paginator to avoid guessing; then adopted the real 43.x API: `include Pagy::Method`, `@pagy, @tickets = pagy(:offset, relation)` (default limit 20), view pager off the `@pagy` object (`page/last/previous/next`), and **pinned `gem "pagy", "~> 43.7"`** so it can't drift again. The root cause was the unpinned gem.
 - **Scope enforced in the policy, not the controller:** `TicketPolicy::Scope` narrows to `kept ∩ owner∈subtree` (org via acts_as_tenant); the controller reads everything through `policy_scope`. Mirrors `UserPolicy::Scope`. Out-of-subtree / other-org `show` → 404 (RecordNotFound), consistent with the no-403 rule.
 - Filters: category (sidebar `?category=`), status (enum-validated), and `?q=` ILIKE on person/village (Postgres). Ordered newest-first.
 - Detail page shows display-only placeholders for status control (1.4), voter-gate (1.6), and follow-up log (1.5) so it reads as complete without implementing those behaviors.
@@ -92,7 +92,9 @@ claude-opus-4-8[1m] (BMad dev-story)
 
 ### File List
 
-- `app/controllers/kitchen_cabinet/tickets_controller.rb` (modified — real index + show + manual pagination)
+- `Gemfile` / `Gemfile.lock` (modified — pin `pagy ~> 43.7`)
+- `app/controllers/application_controller.rb` (modified — `include Pagy::Method`)
+- `app/controllers/kitchen_cabinet/tickets_controller.rb` (modified — real index + show + pagy pagination)
 - `app/policies/kitchen_cabinet/ticket_policy.rb` (modified — subtree/kept Scope + show?)
 - `app/views/kitchen_cabinet/tickets/index.html.erb` (modified — table + cards + filters + pager + FAB)
 - `app/views/kitchen_cabinet/tickets/show.html.erb` (new — ticket detail)
@@ -105,7 +107,8 @@ claude-opus-4-8[1m] (BMad dev-story)
 | Date | Change |
 |------|--------|
 | 2026-10-06 | Story 1.3 drafted (BMad create-story) — scoped, paginated browse list (mobile cards + desktop filterable table) + ticket detail; subtree∩org∩permission scoping via the Pundit Scope. Status → ready-for-dev. |
-| 2026-10-06 | Story 1.3 implemented (BMad dev-story) — real scoped/filtered/paginated index, ticket detail, `_ticket_card`, subtree Pundit Scope + `show?`. **Pagy 43.7.0 lacked Backend/Frontend → used a manual offset paginator (flagged for review).** 8 new tests; full suite 101/0, rubocop clean. Status → review. |
+| 2026-10-06 | Story 1.3 implemented (BMad dev-story) — real scoped/filtered/paginated index, ticket detail, `_ticket_card`, subtree Pundit Scope + `show?`. Interim manual paginator pending a pagy decision. 8 new tests; full suite 101/0, rubocop clean. Status → review. |
+| 2026-10-06 | Follow-up: investigated pagy — authentic gem, unpinned → floated to the 43.x rewrite (`Pagy::Method`). Adopted the real API (`include Pagy::Method`, `pagy(:offset, relation)`) and **pinned `gem "pagy", "~> 43.7"`**; removed the interim manual paginator. Full suite 101/0, rubocop clean. |
 
 ## Status
 

@@ -7,11 +7,9 @@ module KitchenCabinet
     before_action :authenticate_user!
     before_action :require_kitchen_cabinet_access
 
-    PER_PAGE = 20
-
     # Scoped, filtered, paginated browse list (Story 1.3). policy_scope narrows to
     # organization (acts_as_tenant) ∩ viewer subtree ∩ kept; "Get All Details" returns this
-    # paginated relation, never an unpaged dump (NFR12).
+    # paginated relation, never an unpaged dump (NFR12). Pagination via pagy 43.x (Pagy::Method).
     def index
       @category = TicketCategory.active.find_by(slug: params[:category])
 
@@ -26,10 +24,7 @@ module KitchenCabinet
       end
       relation = relation.order(reported_at: :desc, id: :desc)
 
-      @page  = [ params[:page].to_i, 1 ].max
-      @total = relation.count
-      @pages = [ (@total / PER_PAGE.to_f).ceil, 1 ].max
-      @tickets = relation.offset((@page - 1) * PER_PAGE).limit(PER_PAGE)
+      @pagy, @tickets = pagy(:offset, relation)
     end
 
     # Ticket detail (Story 1.3). policy_scope guarantees org ∩ subtree ∩ kept; a ticket outside
