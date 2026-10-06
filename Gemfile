@@ -43,19 +43,21 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # --- SAC-PAD foundation (installed in Story 0.1; wired in Stories 0.2+) ---
-gem "devise"                    # authentication (two scopes: users + admins) — Story 0.3/0.7
-gem "pundit"                    # authorization policies — Story 0.8/0.9
-gem "closure_tree"              # user hierarchy / subtree queries — Story 0.9
-gem "acts_as_tenant"            # model-layer tenant isolation net — Story 0.2
-gem "discard"                   # soft delete — Story 0.10
-gem "paper_trail"               # versioning (custom per-model version classes) — Story 0.10
-gem "pagy", "~> 43.7"           # pagination on every listing (NFR12) — pinned; 43.x API (Pagy::Method)
-gem "chartkick"                 # Bar/Pie/Line charts
-gem "caxlsx"                    # Excel export (axlsx)
-gem "caxlsx_rails"              # Rails view integration for caxlsx
-gem "roo"                       # Excel import (Ground Reports, Voter roll)
-gem "faraday"                   # HTTP client for Meta/WhatsApp/IVRS adapters
-gem "aws-sdk-s3", require: false # Active Storage S3 backend (all file types)
+# Versions pinned (~> minor) so a bundle update can't silently jump a major API
+# (learned in Epic 1: unpinned pagy floated to a rewritten major).
+gem "devise", "~> 5.0"          # authentication (two scopes: users + admins) — Story 0.3/0.7
+gem "pundit", "~> 2.5"          # authorization policies — Story 0.8/0.9
+gem "closure_tree", "~> 9.8"    # user hierarchy / subtree queries — Story 0.9
+gem "acts_as_tenant", "~> 2.0"  # model-layer tenant isolation net — Story 0.2
+gem "discard", "~> 2.0"         # soft delete — Story 0.10
+gem "paper_trail", "~> 17.0"    # versioning (custom per-model version classes) — Story 0.10
+gem "pagy", "~> 43.7"           # pagination on every listing (NFR12) — 43.x API (Pagy::Method)
+gem "chartkick", "~> 5.2"       # Bar/Pie/Line charts
+gem "caxlsx", "~> 4.5"          # Excel export (axlsx)
+gem "caxlsx_rails", "~> 0.7"    # Rails view integration for caxlsx
+gem "roo", "~> 3.0"             # Excel import (Ground Reports, Voter roll)
+gem "faraday", "~> 2.14"        # HTTP client for Meta/WhatsApp/IVRS adapters
+gem "aws-sdk-s3", "~> 1.233", require: false # Active Storage S3 backend (all file types)
 
 group :development, :test do
   # N+1 query detection (NFR) — Story 0.1

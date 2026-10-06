@@ -1,0 +1,97 @@
+# Sprint status — SAC-PAD
+# Hand-authored 2026-10-06 (no _bmad install). Regenerate/refresh via `run sprint planning`.
+#
+# STATUS DEFINITIONS:
+#   backlog       — not yet started
+#   ready-for-dev — story file created with full implementation context
+#   in-progress   — implementation underway
+#   review        — implemented, tests green + rubocop clean, awaiting sign-off
+#   done          — reviewed and signed off
+#
+# NOTE: Epic 0 + Epic 1 stories are at `review` (implemented; suite 143/0) pending sign-off.
+# Epic 2–8 story keys below are PROVISIONAL (derived from epics.md titles) — `create-story`
+# is authoritative for the final slug when each is drafted.
+
+last_updated: 2026-10-06
+
+development_status:
+  # ── Epic 0: Secure Multi-Tenant Foundation & Platform Operations ──
+  epic-0: in-progress
+  0-1-scaffold: review
+  0-1a-tailadmin-theme: review
+  0-2-tenant-isolation-spine: review
+  0-3-admin-console: review
+  0-4-reference-data-catalog-editor: review
+  0-5-org-onboarding-wizard: review
+  0-6-org-deactivation-cascade: review
+  0-7-org-user-accounts-login: review
+  0-8-roles-permissions-catalog: review
+  0-9-hierarchical-user-management: review
+  0-10-soft-delete-audit-framework: review
+  0-11-cross-org-access-banner: review
+  0-12-politician-roster: review
+  0-13-operational-health-view: review
+  0-14-shared-chrome-export-dashboard: review
+  0-15-voter-primitive: review
+  epic-0-retrospective: optional
+
+  # ── Epic 1: Kitchen Cabinet — Grievance Capture to Proof of Help ──
+  epic-1: in-progress
+  1-1-ticket-categories-sidebar-nav: review
+  1-2-log-a-ticket: review
+  1-3-browse-open-tickets: review
+  1-4-ticket-status-workflow: review
+  1-5-ticket-follow-up-log: review
+  1-6-voter-id-gate: review
+  1-7-closure-sentiment: review
+  1-8-dashboard-widget-export: review
+  epic-1-retrospective: done
+
+  # ── Epic 2: Cadre Program — Party-Organizing Activity ──
+  epic-2: backlog
+  2-1-cadre-activity-base-capture: backlog
+  2-2-per-category-detail-forms: backlog
+  2-3-cadre-activity-feed-export: backlog
+
+  # ── Epic 3: Ground Reports — Village-Centric Field Intelligence ──
+  epic-3: backlog
+  3-1-village-report-testimonials: backlog
+  3-2-worship-yatra-political-position: backlog
+  3-3-local-contacts: backlog
+  3-4-mock-poll-capture-tally: backlog
+  3-5-bulk-excel-import-report-mock-poll: backlog
+
+  # ── Epic 4: PR — Traditional Media Monitoring ──
+  epic-4: backlog
+  4-1-pr-catalogs: backlog
+  4-2-pr-record-capture: backlog
+  4-3-outdoor-ad-podcast-date: backlog
+
+  # ── Epic 5: Social Media v1 — Karyakarta Pages, Bulk Outreach & Meta ──
+  epic-5: backlog
+  5-1-karyakarta-pages-meta-connect: backlog
+  5-2-compose-bulk-post: backlog
+  5-3-async-fan-out-retry: backlog
+  5-4-per-post-reporting: backlog
+  5-5-influencers-outreach-log: backlog
+  5-6-bulk-whatsapp-sms-broadcast: backlog
+  5-7-ivrs-voice-broadcast: backlog
+
+  # ── Epic 6: Voter Lists — Electoral Roll & PII-Guarded Sentiment ──
+  epic-6: backlog
+  6-1-bulk-voter-roll-import: backlog
+  6-2-filtered-voter-lookup: backlog
+  6-3-pii-access-logged-exports: backlog
+  6-4-voter-sentiment-view-history: backlog
+
+  # ── Epic 7: RAG Mapping — Constituency Risk/Opportunity Rollup ──
+  epic-7: backlog
+  7-1-precomputed-rag-rollup-job: backlog
+  7-2-rag-views: backlog
+
+  # ── Epic 8: Scale, Security & Launch Readiness ──
+  epic-8: backlog
+  8-1-scale-performance-hardening: backlog
+  8-2-load-test: backlog
+  8-3-security-penetration-test: backlog
+  8-4-compliance-consent-signoff: backlog
