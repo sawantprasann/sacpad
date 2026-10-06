@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -192,6 +192,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
     t.index ["slug"], name: "index_ticket_categories_on_slug", unique: true
   end
 
+  create_table "tickets", force: :cascade do |t|
+    t.bigint "owner_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "ticket_category_id", null: false
+    t.string "ticket_number"
+    t.string "person_name", null: false
+    t.string "village"
+    t.string "mobile"
+    t.text "description"
+    t.date "reported_at", null: false
+    t.datetime "closed_at"
+    t.string "voter_id"
+    t.string "nature_of_issue"
+    t.decimal "reported_value", precision: 12, scale: 2
+    t.integer "status", default: 0, null: false
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_tickets_on_discarded_at"
+    t.index ["organization_id", "ticket_number"], name: "index_tickets_on_organization_id_and_ticket_number", unique: true
+    t.index ["organization_id"], name: "index_tickets_on_organization_id"
+    t.index ["owner_id"], name: "index_tickets_on_owner_id"
+    t.index ["ticket_category_id"], name: "index_tickets_on_ticket_category_id"
+  end
+
   create_table "user_hierarchies", id: false, force: :cascade do |t|
     t.bigint "ancestor_id", null: false
     t.bigint "descendant_id", null: false
@@ -291,6 +317,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
   add_foreign_key "politicians", "parties"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
+  add_foreign_key "tickets", "organizations"
+  add_foreign_key "tickets", "ticket_categories"
+  add_foreign_key "tickets", "users", column: "owner_id"
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "roles"
   add_foreign_key "users", "users", column: "parent_id"
