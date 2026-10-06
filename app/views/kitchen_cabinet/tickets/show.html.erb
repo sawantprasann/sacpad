@@ -1,0 +1,72 @@
+<% content_for :title, "Ticket #{@ticket.ticket_number}" %>
+
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @ticket.person_name %></h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <%= @ticket.ticket_number %> · <%= @ticket.ticket_category.name %>
+    </p>
+  </div>
+  <%= render "ui/status_pill", status: @ticket.status %>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <%# Main: ticket fields + attachments %>
+  <div class="lg:col-span-2 space-y-6">
+    <div class="<%= ta_card_classes %> p-6">
+      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div><dt class="<%= ta_label_classes %>">Person / represents</dt><dd class="text-gray-800 dark:text-white/90"><%= @ticket.person_name %></dd></div>
+        <div><dt class="<%= ta_label_classes %>">Village / ward</dt><dd class="text-gray-800 dark:text-white/90"><%= @ticket.village.presence || "—" %></dd></div>
+        <div><dt class="<%= ta_label_classes %>">Mobile</dt><dd class="text-gray-800 dark:text-white/90"><%= @ticket.mobile.presence || "—" %></dd></div>
+        <div><dt class="<%= ta_label_classes %>">Reported date</dt><dd class="text-gray-800 dark:text-white/90"><%= @ticket.reported_at&.strftime("%d %b %Y") %></dd></div>
+        <div><dt class="<%= ta_label_classes %>">Nature of issue</dt><dd class="text-gray-800 dark:text-white/90"><%= @ticket.nature_of_issue.presence || "—" %></dd></div>
+        <div><dt class="<%= ta_label_classes %>">Reported value</dt><dd class="text-gray-800 dark:text-white/90"><%= @ticket.reported_value.present? ? number_to_currency(@ticket.reported_value, unit: "₹") : "—" %></dd></div>
+      </dl>
+      <div class="mt-4">
+        <dt class="<%= ta_label_classes %>">Description</dt>
+        <dd class="whitespace-pre-line text-gray-800 dark:text-white/90"><%= @ticket.description.presence || "—" %></dd>
+      </div>
+    </div>
+
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Attachments</h2>
+      <% if @ticket.attachments.attached? %>
+        <div class="flex flex-wrap gap-3">
+          <% @ticket.attachments.each do |att| %>
+            <% if att.image? %>
+              <%= image_tag att, class: "h-24 w-24 rounded-lg object-cover" %>
+            <% else %>
+              <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-brand-500" %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-sm text-gray-400">No attachments.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Side: placeholders for interactive pieces delivered by later stories. %>
+  <div class="space-y-6">
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</h2>
+      <%= render "ui/status_pill", status: @ticket.status %>
+      <p class="mt-3 text-xs text-gray-400">Status changes arrive in a later story.</p>
+    </div>
+
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Voter ID</h2>
+      <p class="text-sm text-gray-500"><%= @ticket.voter_id.presence || "—" %></p>
+      <p class="mt-3 text-xs text-gray-400">Voter ID unlocks once this issue is closed (later story).</p>
+    </div>
+
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Follow-up log</h2>
+      <p class="text-sm text-gray-400">The follow-up action log arrives in a later story.</p>
+    </div>
+  </div>
+</div>
+
+<div class="mt-6">
+  <%= link_to "← Back to list", kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+</div>

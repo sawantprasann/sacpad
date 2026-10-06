@@ -4,12 +4,16 @@ module KitchenCabinet
   # for the browse list is Story 1.3's job, so Scope stays permissive here.
   class TicketPolicy < ApplicationPolicy
     def index? = user.role.can_access?("kitchen_cabinet")
-    def show?  = index?
+    def show?  = index? && record.owner_id.in?(user.subtree_user_ids)
     def create? = user.role.can_write?("kitchen_cabinet")
     def new?    = create?
 
+    # Browse list (Story 1.3): organization is already enforced by acts_as_tenant; here we add the
+    # viewer-subtree narrowing (owner ∈ viewer subtree, Story 0.9) and exclude soft-deleted rows.
     class Scope < ApplicationPolicy::Scope
-      def resolve = scope.all
+      def resolve
+        scope.kept.where(owner_id: user.subtree_user_ids)
+      end
     end
   end
 end

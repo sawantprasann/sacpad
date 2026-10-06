@@ -7,8 +7,36 @@ module KitchenCabinet
     before_action :authenticate_user!
     before_action :require_kitchen_cabinet_access
 
+    PER_PAGE = 20
+
+    # Scoped, filtered, paginated browse list (Story 1.3). policy_scope narrows to
+    # organization (acts_as_tenant) ∩ viewer subtree ∩ kept; "Get All Details" returns this
+    # paginated relation, never an unpaged dump (NFR12).
     def index
       @category = TicketCategory.active.find_by(slug: params[:category])
+
+      relation = policy_scope(KitchenCabinet::Ticket).includes(:ticket_category, :owner)
+      relation = relation.where(ticket_category_id: @category.id) if @category
+      if params[:status].present? && KitchenCabinet::Ticket.statuses.key?(params[:status])
+        relation = relation.where(status: params[:status])
+      end
+      if params[:q].present?
+        term = "%#{params[:q].strip}%"
+        relation = relation.where("person_name ILIKE :t OR village ILIKE :t", t: term)
+      end
+      relation = relation.order(reported_at: :desc, id: :desc)
+
+      @page  = [ params[:page].to_i, 1 ].max
+      @total = relation.count
+      @pages = [ (@total / PER_PAGE.to_f).ceil, 1 ].max
+      @tickets = relation.offset((@page - 1) * PER_PAGE).limit(PER_PAGE)
+    end
+
+    # Ticket detail (Story 1.3). policy_scope guarantees org ∩ subtree ∩ kept; a ticket outside
+    # the viewer's scope raises RecordNotFound → 404 (never 403). authorize is belt-and-suspenders.
+    def show
+      @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
+      authorize @ticket
     end
 
     # Mobile-first capture (Story 1.2): pre-fill to the category tapped in the sidebar.

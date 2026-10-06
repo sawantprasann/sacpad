@@ -1,0 +1,20 @@
+<%# Mobile ticket-card (UX-DR10): whole-card tap-through; person+village, category badge,
+    status pill, reported date. No swipe actions in v1. ≥44px target. %>
+<%= link_to kitchen_cabinet_ticket_path(ticket),
+      class: "block rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]" do %>
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <p class="truncate font-medium text-gray-800 dark:text-white/90"><%= ticket.person_name %></p>
+      <p class="truncate text-xs text-gray-500 dark:text-gray-400"><%= ticket.village.presence || "—" %></p>
+    </div>
+    <%= render "ui/status_pill", status: ticket.status %>
+  </div>
+  <div class="mt-3 flex items-center gap-2 text-xs text-gray-400">
+    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold text-gray-500 dark:bg-gray-800">
+      <%= ticket.ticket_category.name.first.upcase %>
+    </span>
+    <span><%= ticket.ticket_category.name %></span>
+    <span aria-hidden="true">·</span>
+    <span><%= ticket.reported_at&.strftime("%d %b %Y") %></span>
+  </div>
+<% end %>

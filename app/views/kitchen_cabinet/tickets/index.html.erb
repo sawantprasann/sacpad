@@ -7,22 +7,87 @@
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @category.name %></span></p>
     <% end %>
   </div>
+  <%= render "ui/module_toolbar" %>
 </div>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
-  <p class="px-5 py-16 text-center text-sm text-gray-400">
-    <% if @category %>
-      No tickets in <span class="font-medium text-gray-500"><%= @category.name %></span> yet.
-    <% else %>
-      Select a category from the sidebar to view its tickets.
+<%# Per-column filters (UX-DR10): category comes from the sidebar; status + text search are a GET form. %>
+<%= form_with url: kitchen_cabinet_tickets_path, method: :get, class: "mb-4 flex flex-wrap items-end gap-3" do %>
+  <%= hidden_field_tag :category, params[:category] if @category %>
+  <div>
+    <label class="<%= ta_label_classes %>">Status</label>
+    <%= select_tag :status,
+          options_for_select([ [ "All", "" ] ] + KitchenCabinet::Ticket.statuses.keys.map { |s| [ s.humanize, s ] }, params[:status]),
+          class: "#{ta_field_classes} min-h-11" %>
+  </div>
+  <div class="flex-1 min-w-48">
+    <label class="<%= ta_label_classes %>">Search</label>
+    <%= text_field_tag :q, params[:q], placeholder: "Person or village", class: "#{ta_field_classes} min-h-11" %>
+  </div>
+  <%= submit_tag "Filter", class: "#{ta_btn_secondary} min-h-11" %>
+<% end %>
+
+<%# Desktop: filterable center table. %>
+<div class="<%= ta_card_classes %> hidden overflow-hidden xl:block">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Ticket</th>
+          <th class="px-5 py-3 font-medium">Person / village</th>
+          <th class="px-5 py-3 font-medium">Category</th>
+          <th class="px-5 py-3 font-medium">Status</th>
+          <th class="px-5 py-3 font-medium">Reported</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @tickets.each do |ticket| %>
+          <tr class="cursor-pointer border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]"
+              onclick="window.location='<%= kitchen_cabinet_ticket_path(ticket) %>'">
+            <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-300"><%= ticket.ticket_number %></td>
+            <td class="px-5 py-3">
+              <div class="text-gray-800 dark:text-white/90"><%= ticket.person_name %></div>
+              <div class="text-xs text-gray-500"><%= ticket.village.presence || "—" %></div>
+            </td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= ticket.ticket_category.name %></td>
+            <td class="px-5 py-3"><%= render "ui/status_pill", status: ticket.status %></td>
+            <td class="px-5 py-3 text-gray-500"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @tickets.empty? %>
+      <p class="px-5 py-16 text-center text-sm text-gray-400">No tickets match.</p>
     <% end %>
-    <br>
-    <span class="text-xs text-gray-300">The full ticket list arrives in the next story.</span>
-  </p>
+  </div>
 </div>
 
-<%# Party-accented new-ticket FAB (UX-DR9). Shown when a category is selected; opens the capture
-    form pre-filled to that category. ≥44px target. %>
+<%# Mobile: ticket-card list. %>
+<div class="flex flex-col gap-3 xl:hidden">
+  <% @tickets.each do |ticket| %>
+    <%= render "ticket_card", ticket: ticket %>
+  <% end %>
+  <% if @tickets.empty? %>
+    <div class="<%= ta_card_classes %> p-10 text-center text-sm text-gray-400">No tickets match.</div>
+  <% end %>
+</div>
+
+<% if @pages > 1 %>
+  <nav class="mt-4 flex items-center justify-between text-sm">
+    <% if @page > 1 %>
+      <%= link_to "← Prev", kitchen_cabinet_tickets_path(category: params[:category], status: params[:status], q: params[:q], page: @page - 1), class: "font-medium text-brand-500 hover:text-brand-600" %>
+    <% else %>
+      <span class="text-gray-300">← Prev</span>
+    <% end %>
+    <span class="text-gray-500">Page <%= @page %> of <%= @pages %></span>
+    <% if @page < @pages %>
+      <%= link_to "Next →", kitchen_cabinet_tickets_path(category: params[:category], status: params[:status], q: params[:q], page: @page + 1), class: "font-medium text-brand-500 hover:text-brand-600" %>
+    <% else %>
+      <span class="text-gray-300">Next →</span>
+    <% end %>
+  </nav>
+<% end %>
+
+<%# Party-accented new-ticket FAB (UX-DR9). Shown when a category is selected. ≥44px target. %>
 <% if @category %>
   <%= link_to new_kitchen_cabinet_ticket_path(category: @category.slug),
         class: "fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
