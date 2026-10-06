@@ -53,6 +53,7 @@ Rails.application.routes.draw do
         patch :voter
       end
       resources :follow_ups, only: :create
+      resource :closure, only: %i[new create]  # two-step closure + voter-sentiment (Story 1.7)
     end
   end
 

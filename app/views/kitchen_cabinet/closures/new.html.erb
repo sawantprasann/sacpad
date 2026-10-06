@@ -1,0 +1,32 @@
+<% content_for :title, "Close ticket #{@ticket.ticket_number}" %>
+
+<div class="mx-auto max-w-xl">
+  <div class="mb-6">
+    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Close ticket</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= @ticket.ticket_number %> · <%= @ticket.person_name %></p>
+  </div>
+
+  <%= form_with url: kitchen_cabinet_ticket_closure_path(@ticket), method: :post, class: "space-y-6" do %>
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Step 1 — Confirm resolution</h2>
+      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Confirm this grievance was resolved. Closing records it as help delivered.</p>
+      <label class="<%= ta_label_classes %>">Closure date</label>
+      <%= date_field_tag :closure_date, Date.current, class: "#{ta_field_classes} min-h-11" %>
+    </div>
+
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Step 2 — Voter &amp; sentiment <span class="font-normal text-gray-400">(optional)</span></h2>
+      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Attach a voter and record how they feel. Both are optional — a blank or unmatched voter ID still closes the ticket.</p>
+      <div class="mb-4">
+        <label class="<%= ta_label_classes %>">Voter ID</label>
+        <%= text_field_tag :voter_id, nil, placeholder: "Voter ID", class: "#{ta_field_classes} min-h-11" %>
+      </div>
+      <%= render "ui/sentiment_picker" %>
+    </div>
+
+    <div class="flex gap-3">
+      <%= submit_tag "Close ticket", class: "#{ta_btn_primary} min-h-11" %>
+      <%= link_to "Cancel", kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
+    </div>
+  <% end %>
+</div>

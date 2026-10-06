@@ -18,4 +18,10 @@ class Voter < ApplicationRecord
   def rag_color
     { "pleased" => :green, "transit" => :amber, "displeased" => :red }[sentiment_status]
   end
+
+  # Record a sentiment reading (Story 1.7 closure). Attributed + timestamped; the change is captured
+  # in VoterVersion automatically (Tier-1 history, FR43).
+  def record_sentiment!(status, by:)
+    update!(sentiment_status: status, sentiment_updated_by_id: by.id, sentiment_updated_at: Time.current)
+  end
 end

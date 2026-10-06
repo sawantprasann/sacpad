@@ -100,8 +100,14 @@
       <% if allowed.any? %>
         <div class="mt-4 flex flex-wrap gap-2">
           <% allowed.each do |to| %>
-            <%= button_to to.humanize, status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
-                  params: { to_status: to }, class: "#{ta_btn_secondary} min-h-11" %>
+            <% if to == "closed" %>
+              <%# Closing goes through the two-step closure flow (Story 1.7), not a bare status PATCH. %>
+              <%= link_to "Close…", new_kitchen_cabinet_ticket_closure_path(@ticket),
+                    class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
+            <% else %>
+              <%= button_to to.humanize, status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
+                    params: { to_status: to }, class: "#{ta_btn_secondary} min-h-11" %>
+            <% end %>
           <% end %>
         </div>
       <% else %>

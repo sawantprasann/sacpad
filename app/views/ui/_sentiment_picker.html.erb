@@ -1,0 +1,16 @@
+<%# 3-segment voter-sentiment picker (Story 1.7, UX-DR12). Optional (no selection = no write).
+    RAG is a presentation mapping only — the text label carries the meaning, never colour alone
+    (UX-DR4/DR5/DR7). Submits a top-level `sentiment` param. ≥44px targets. %>
+<fieldset>
+  <legend class="<%= ta_label_classes %>">Voter sentiment (optional)</legend>
+  <div class="inline-flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+    <% [ [ "pleased", "Pleased", "#039855" ], [ "transit", "Transit", "#DC6803" ], [ "displeased", "Displeased", "#D92D20" ] ].each_with_index do |(value, label, color), i| %>
+      <label class="flex min-h-11 cursor-pointer items-center gap-2 px-4 py-2 text-sm <%= "border-l border-gray-200 dark:border-gray-700" unless i.zero? %>">
+        <%= radio_button_tag :sentiment, value, false, class: "h-4 w-4" %>
+        <span class="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+          <span class="h-2 w-2 rounded-full" style="background: <%= color %>"></span><%= label %>
+        </span>
+      </label>
+    <% end %>
+  </div>
+</fieldset>
