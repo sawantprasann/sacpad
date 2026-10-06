@@ -1,6 +1,10 @@
 <%# Shared module toolbar (brief §5). Actions wired per-module; exports are subtree/org-scoped (FR49). %>
 <div class="flex flex-wrap items-center gap-2 text-sm">
-  <button type="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50">Export Excel</button>
+  <% if local_assigns[:export_url] %>
+    <%= link_to "Export Excel", export_url, class: "rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50" %>
+  <% else %>
+    <button type="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50">Export Excel</button>
+  <% end %>
   <button type="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50">Prepare Chart</button>
   <span class="inline-flex overflow-hidden rounded-lg border border-gray-200">
     <button type="button" class="bg-white px-3 py-1.5 hover:bg-gray-50">Bar</button>

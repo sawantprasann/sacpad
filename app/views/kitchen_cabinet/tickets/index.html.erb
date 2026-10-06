@@ -7,7 +7,7 @@
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @category.name %></span></p>
     <% end %>
   </div>
-  <%= render "ui/module_toolbar" %>
+  <%= render "ui/module_toolbar", export_url: kitchen_cabinet_tickets_path(format: :xlsx, category: params[:category], status: params[:status], q: params[:q]) %>
 </div>
 
 <%# Per-column filters (UX-DR10): category comes from the sidebar; status + text search are a GET form. %>

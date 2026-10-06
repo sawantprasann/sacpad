@@ -24,7 +24,14 @@ module KitchenCabinet
       end
       relation = relation.order(reported_at: :desc, id: :desc)
 
-      @pagy, @tickets = pagy(:offset, relation)
+      respond_to do |format|
+        format.html { @pagy, @tickets = pagy(:offset, relation) }
+        format.xlsx do
+          # Export the full scoped+filtered set (unpaginated), scoped to the viewer (Story 1.8, FR49).
+          @tickets = relation
+          response.headers["Content-Disposition"] = "attachment; filename=kitchen_cabinet_tickets.xlsx"
+        end
+      end
     end
 
     # Ticket detail (Story 1.3). policy_scope guarantees org ∩ subtree ∩ kept; a ticket outside

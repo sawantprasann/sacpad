@@ -4,5 +4,12 @@
     <p class="text-sm font-semibold text-gray-700"><%= widget[:title] %></p>
     <% if widget[:admin_only] %><%= render "ui/badge", label: "Org admin", tone: "brand" %><% end %>
   </div>
-  <p class="mt-3 text-xs text-gray-400">Populated by its module epic.</p>
+  <%# Each module supplies its own body at app/views/<mod>/_dashboard_widget.html.erb. The framework
+      stays generic (FR50) — no module-specific code here. %>
+  <% body = widget[:mod] && "#{widget[:mod]}/dashboard_widget" %>
+  <% if body && lookup_context.exists?(body, [], true) %>
+    <div class="mt-3"><%= render body, widget: widget %></div>
+  <% else %>
+    <p class="mt-3 text-xs text-gray-400">Populated by its module epic.</p>
+  <% end %>
 </div>
