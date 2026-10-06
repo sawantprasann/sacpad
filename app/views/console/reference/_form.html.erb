@@ -6,13 +6,23 @@
       <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
     <% end %>
     <% managed_fields.each do |field| %>
+      <% column = @record.class.columns_hash[field.to_s] %>
       <div class="mb-4">
-        <label class="<%= ta_label_classes %>"><%= field.to_s.humanize %></label>
         <% if field.to_s.end_with?("_id") %>
+          <label class="<%= ta_label_classes %>"><%= field.to_s.humanize %></label>
           <% klass = field.to_s.sub(/_id\z/, "").classify.constantize %>
           <% label_method = klass.column_names.include?("name") ? :name : :number %>
           <%= f.collection_select field, klass.order(label_method), :id, label_method, {}, class: ta_field_classes %>
+        <% elsif column&.type == :boolean %>
+          <label class="flex items-center gap-2 <%= ta_label_classes %>">
+            <%= f.check_box field, class: "h-4 w-4 rounded border-gray-300 text-brand-500" %>
+            <%= field.to_s.humanize %>
+          </label>
+        <% elsif column&.type == :integer %>
+          <label class="<%= ta_label_classes %>"><%= field.to_s.humanize %></label>
+          <%= f.number_field field, class: ta_field_classes %>
         <% else %>
+          <label class="<%= ta_label_classes %>"><%= field.to_s.humanize %></label>
           <%= f.text_field field, class: ta_field_classes %>
         <% end %>
       </div>

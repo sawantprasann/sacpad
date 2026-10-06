@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_04_151012) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_06_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -179,6 +179,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_04_151012) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "ticket_categories", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.boolean "active", default: true, null: false
+    t.integer "display_order", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["display_order"], name: "index_ticket_categories_on_display_order"
+    t.index ["slug"], name: "index_ticket_categories_on_slug", unique: true
   end
 
   create_table "user_hierarchies", id: false, force: :cascade do |t|

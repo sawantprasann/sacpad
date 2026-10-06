@@ -11,6 +11,10 @@
 # System roles (Story 0.8): org_admin + dreamline_user, seeded idempotently.
 Role.seed_system_roles!
 
+# Kitchen Cabinet ticket categories (Story 1.1): the 12 global, Admin-managed categories
+# (incl. "Other"), seeded idempotently.
+TicketCategory.seed_defaults!
+
 # Bootstrap platform Admin (Story 0.3) — the only way into the Console (no self-service sign-up).
 # Configurable via env; in production a password MUST be provided (no insecure default).
 admin_email = ENV.fetch("SACPAD_ADMIN_EMAIL", "admin@sacpad.com")

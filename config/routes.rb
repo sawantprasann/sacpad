@@ -22,6 +22,8 @@ Rails.application.routes.draw do
     resources :villages
     resources :booths
     resources :parties
+    # Kitchen Cabinet ticket-category catalog (Story 1.1) — global, Admin-managed
+    resources :ticket_categories
     # Role & permission catalog (Story 0.8) — the only place roles are defined
     resources :roles
     # Cross-org audit log (Story 0.11)
@@ -41,6 +43,12 @@ Rails.application.routes.draw do
 
   # Org-facing hierarchical user management (Story 0.9)
   resources :users, only: %i[index new create show]
+
+  # Kitchen Cabinet (Epic 1). Story 1.1 stands up only the category-filtered list target;
+  # ticket capture (1.2) and the real scoped browse list (1.3) fill it in later.
+  namespace :kitchen_cabinet do
+    resources :tickets, only: :index
+  end
 
   # TailAdmin component showcase / style guide (Story 0.1a)
   get "style_guide" => "home#style_guide"

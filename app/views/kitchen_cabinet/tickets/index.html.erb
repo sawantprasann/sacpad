@@ -1,0 +1,22 @@
+<% content_for :title, @category ? "Kitchen Cabinet — #{@category.name}" : "Kitchen Cabinet" %>
+
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Kitchen Cabinet</h1>
+    <% if @category %>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @category.name %></span></p>
+    <% end %>
+  </div>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <p class="px-5 py-16 text-center text-sm text-gray-400">
+    <% if @category %>
+      No tickets in <span class="font-medium text-gray-500"><%= @category.name %></span> yet.
+    <% else %>
+      Select a category from the sidebar to view its tickets.
+    <% end %>
+    <br>
+    <span class="text-xs text-gray-300">Ticket capture and the full list arrive in the next stories.</span>
+  </p>
+</div>
