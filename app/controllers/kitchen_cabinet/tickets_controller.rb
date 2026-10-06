@@ -34,6 +34,21 @@ module KitchenCabinet
       authorize @ticket
     end
 
+    # Status transition (Story 1.4). The model guard + policy are the authority; the view only
+    # offers legal buttons. An illegal `to_status` is refused with a flash, no row written.
+    def status
+      @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
+      authorize @ticket, :update?
+      to = params[:to_status]
+      if @ticket.may_change_to?(to)
+        @ticket.change_status!(to: to, actor: current_user)
+        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Status updated to #{to.to_s.humanize}."
+      else
+        redirect_to kitchen_cabinet_ticket_path(@ticket),
+                    alert: "Can't move from #{@ticket.status.humanize} to #{to.to_s.humanize}."
+      end
+    end
+
     # Mobile-first capture (Story 1.2): pre-fill to the category tapped in the sidebar.
     def new
       @ticket = Ticket.new(ticket_category: TicketCategory.active.find_by(slug: params[:category]))

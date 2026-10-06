@@ -7,6 +7,8 @@ module KitchenCabinet
     def show?  = index? && record.owner_id.in?(user.subtree_user_ids)
     def create? = user.role.can_write?("kitchen_cabinet")
     def new?    = create?
+    # Status change (Story 1.4): write permission + the ticket is in the viewer's subtree.
+    def update? = user.role.can_write?("kitchen_cabinet") && record.owner_id.in?(user.subtree_user_ids)
 
     # Browse list (Story 1.3): organization is already enforced by acts_as_tenant; here we add the
     # viewer-subtree narrowing (owner ∈ viewer subtree, Story 0.9) and exclude soft-deleted rows.

@@ -51,7 +51,33 @@
     <div class="<%= ta_card_classes %> p-6">
       <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Status</h2>
       <%= render "ui/status_pill", status: @ticket.status %>
-      <p class="mt-3 text-xs text-gray-400">Status changes arrive in a later story.</p>
+
+      <% allowed = KitchenCabinet::Ticket::TRANSITIONS.fetch(@ticket.status, []) %>
+      <% if allowed.any? %>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <% allowed.each do |to| %>
+            <%= button_to to.humanize, status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
+                  params: { to_status: to }, class: "#{ta_btn_secondary} min-h-11" %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-3 text-xs text-gray-400">This ticket is closed.</p>
+      <% end %>
+
+      <h3 class="mt-5 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">History</h3>
+      <% changes = @ticket.status_changes.order(:created_at) %>
+      <% if changes.any? %>
+        <ul class="space-y-2 text-xs text-gray-500">
+          <% changes.each do |c| %>
+            <li>
+              <%= c.from_status&.humanize || "—" %> → <strong class="text-gray-700 dark:text-gray-300"><%= c.to_status.humanize %></strong>
+              · <%= c.actor.name %> · <%= c.created_at.strftime("%d %b %Y %H:%M") %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-xs text-gray-400">No changes yet.</p>
+      <% end %>
     </div>
 
     <div class="<%= ta_card_classes %> p-6">
