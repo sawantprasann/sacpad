@@ -48,7 +48,10 @@ Rails.application.routes.draw do
   # ticket capture (1.2) and the real scoped browse list (1.3) fill it in later.
   namespace :kitchen_cabinet do
     resources :tickets, only: %i[index new create show] do
-      member { patch :status }
+      member do
+        patch :status
+        patch :voter
+      end
       resources :follow_ups, only: :create
     end
   end

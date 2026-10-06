@@ -67,6 +67,18 @@ module KitchenCabinet
       end
     end
 
+    # Attach/update the voter id on a resolved ticket (Story 1.6). The model validation is the
+    # authority — setting voter_id on an unresolved ticket simply fails to persist.
+    def voter
+      @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
+      authorize @ticket, :update?
+      if @ticket.update(voter_id: params[:voter_id])
+        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Voter ID saved."
+      else
+        redirect_to kitchen_cabinet_ticket_path(@ticket), alert: @ticket.errors.full_messages.to_sentence
+      end
+    end
+
     private
 
     def ticket_params

@@ -26,6 +26,9 @@ module KitchenCabinet
     }.freeze
 
     validates :person_name, presence: true
+    # Voter-ID gate (Story 1.6, FR21): a voter_id can only be attached once the ticket is closed,
+    # so a voter_id on file always means help was actually delivered. Model-level invariant, not UI.
+    validate :voter_id_locked_until_closed
 
     after_initialize :set_defaults, if: :new_record?
     before_create :assign_ticket_number
@@ -56,7 +59,19 @@ module KitchenCabinet
       closed_at - reported_at.to_time
     end
 
+    # Loose lookup to the org's Voter roll (Story 1.6, AC 3) — NOT an enforced FK. Voter#voter_id is
+    # deterministically encrypted (Story 0.15), so find_by works; a non-matching id is allowed.
+    def matched_voter
+      return nil if voter_id.blank?
+
+      Voter.find_by(voter_id: voter_id)
+    end
+
     private
+
+    def voter_id_locked_until_closed
+      errors.add(:voter_id, "unlocks once this issue is closed") if voter_id.present? && !closed?
+    end
 
     def set_defaults
       self.reported_at ||= Date.current
