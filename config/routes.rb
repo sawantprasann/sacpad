@@ -49,6 +49,7 @@ Rails.application.routes.draw do
   namespace :kitchen_cabinet do
     resources :tickets, only: %i[index new create show] do
       member { patch :status }
+      resources :follow_ups, only: :create
     end
   end
 

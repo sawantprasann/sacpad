@@ -12,6 +12,7 @@ module KitchenCabinet
     belongs_to :ticket_category, class_name: "TicketCategory"
     has_many_attached :attachments
     has_many :status_changes, class_name: "KitchenCabinet::TicketStatusChange", dependent: :destroy
+    has_many :follow_ups, class_name: "KitchenCabinet::TicketFollowUp", dependent: :destroy
 
     enum :status, { open: 0, in_progress: 1, closed: 2, blocked: 3 }, default: :open
 

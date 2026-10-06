@@ -44,6 +44,50 @@
         <p class="text-sm text-gray-400">No attachments.</p>
       <% end %>
     </div>
+
+    <%# Follow-up action log (Story 1.5) — append-only, newest-first; visually distinct from the
+        compact status-change History in the Status card (UX-DR13). %>
+    <div class="<%= ta_card_classes %> p-6">
+      <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Follow-up log</h2>
+
+      <% if policy(@ticket).update? %>
+        <%= form_with url: kitchen_cabinet_ticket_follow_ups_path(@ticket), scope: :ticket_follow_up,
+              method: :post, multipart: true, class: "mb-6" do |f| %>
+          <%= f.text_area :note, rows: 3, placeholder: "What was done about this issue?", class: ta_field_classes %>
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <%= f.file_field :attachment, accept: "image/*,.pdf",
+                  class: "block text-sm text-gray-600 file:mr-3 file:min-h-11 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+            <%= f.submit "Add follow-up", class: "#{ta_btn_primary} min-h-11" %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% entries = @ticket.follow_ups.order(created_at: :desc) %>
+      <% if entries.any? %>
+        <ol class="space-y-4">
+          <% entries.each do |fu| %>
+            <li class="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+              <div class="mb-1 flex items-center justify-between text-xs text-gray-400">
+                <span class="font-medium text-gray-600 dark:text-gray-300"><%= fu.created_by.name %></span>
+                <span><%= fu.created_at.strftime("%d %b %Y %H:%M") %></span>
+              </div>
+              <p class="whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= fu.note %></p>
+              <% if fu.attachment.attached? %>
+                <div class="mt-2">
+                  <% if fu.attachment.image? %>
+                    <%= image_tag fu.attachment, class: "h-20 w-20 rounded-lg object-cover" %>
+                  <% else %>
+                    <%= link_to fu.attachment.filename, rails_blob_path(fu.attachment, disposition: "attachment"), class: "text-xs text-brand-500" %>
+                  <% end %>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="text-sm text-gray-400">No follow-ups yet.</p>
+      <% end %>
+    </div>
   </div>
 
   <%# Side: placeholders for interactive pieces delivered by later stories. %>
@@ -86,10 +130,6 @@
       <p class="mt-3 text-xs text-gray-400">Voter ID unlocks once this issue is closed (later story).</p>
     </div>
 
-    <div class="<%= ta_card_classes %> p-6">
-      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Follow-up log</h2>
-      <p class="text-sm text-gray-400">The follow-up action log arrives in a later story.</p>
-    </div>
   </div>
 </div>
 
