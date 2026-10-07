@@ -5,14 +5,9 @@
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0 flex items-center gap-3">
-    <div class="<%= module_color("kitchen_cabinet") %>">
-      <%= raw module_icon("kitchen_cabinet", "h-7 w-7") %>
-    </div>
-    <div>
-      <h1 class="<%= ta_page_title %>">Kitchen Cabinet</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@pagy.count, "ticket") %></p>
-    </div>
+  <div class="min-w-0">
+    <h1 class="<%= ta_page_title %>">Kitchen Cabinet</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@pagy.count, "ticket") %></p>
   </div>
   <%= render "ui/module_toolbar",
         export_url: kitchen_cabinet_tickets_path(format: :xlsx, category: params[:category], status: params[:status], q: params[:q]),

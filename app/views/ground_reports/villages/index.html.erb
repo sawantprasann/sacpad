@@ -2,14 +2,9 @@
 <% page_link = "inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200" %>
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0 flex items-center gap-3">
-    <div class="<%= module_color("ground_reports") %>">
-      <%= raw module_icon("ground_reports", "h-7 w-7") %>
-    </div>
-    <div>
-      <h1 class="<%= ta_page_title %>">Ground Reports</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@pagy.count, "village") %></p>
-    </div>
+  <div class="min-w-0">
+    <h1 class="<%= ta_page_title %>">Ground Reports</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@pagy.count, "village") %></p>
   </div>
   <% if current_user.role.can_import? %>
     <%= link_to "Import", new_ground_reports_import_path, class: "#{page_link} min-h-11 cursor-pointer" %>
