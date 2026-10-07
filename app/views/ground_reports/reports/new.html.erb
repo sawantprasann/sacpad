@@ -1,8 +1,10 @@
 <% content_for :title, "Create report — #{@village.name}" %>
+<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb @village.name, ground_reports_village_path(@village) %>
+<% breadcrumb "Create report" %>
 
 <div class="mb-6">
-  <%= link_to "← #{@village.name}", ground_reports_village_path(@village), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-  <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90">Create report</h1>
+  <h1 class="<%= ta_page_title %>">Create report</h1>
   <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record the issue, any resolution, and what villagers said.</p>
 </div>
 

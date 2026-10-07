@@ -1,11 +1,10 @@
 <% content_for :title, "Edit PR Record #{@record.record_number}" %>
-
-<div class="mb-8">
-  <%= link_to "← Back to PR Records", pr_record_path(@record), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
-</div>
+<% breadcrumb "PR Records", pr_records_path %>
+<% breadcrumb @record.title, pr_record_path(@record) %>
+<% breadcrumb "Edit" %>
 
 <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-8 max-w-2xl">
-  <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Edit PR Record <%= @record.record_number %></h1>
+  <h1 class="<%= ta_page_title %> mb-6">Edit PR record <%= @record.record_number %></h1>
 
   <%= form_with model: @record, scope: :pr_record, local: true, class: "space-y-6" do |f| %>
     <% if @record.errors.any? %>

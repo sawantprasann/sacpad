@@ -1,6 +1,6 @@
 <% content_for :title, "#{@organization.name} — Politicians" %>
 <div class="mb-6 flex items-center justify-between">
-  <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @organization.name %> — Roster</h1>
+  <h1 class="<%= ta_page_title %>"><%= @organization.name %> — Roster</h1>
   <%= link_to "Add politician", new_console_organization_politician_path(@organization), class: ta_btn_primary %>
 </div>
 

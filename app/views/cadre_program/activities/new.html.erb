@@ -1,11 +1,13 @@
 <% action_label = @activity.category_label ? "Create #{@activity.category_label}" : "Create activity" %>
 <% content_for :title, action_label %>
 <% back_path = @activity.category ? cadre_program_activities_path(category: @activity.category) : cadre_program_activities_path %>
+<% breadcrumb "Cadre Program", cadre_program_activities_path %>
+<% breadcrumb @activity.category_label, back_path if @activity.category_label %>
+<% breadcrumb action_label %>
 
 <div x-data='<%= { category: @activity.category.to_s, labels: CadreProgram::CadreActivity::CATEGORY_LABELS }.to_json %>'>
   <div class="mb-6">
-    <%= link_to "← Cadre Program", back_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-    <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90"
+    <h1 class="<%= ta_page_title %>"
         x-text="labels[category] ? ('Create ' + labels[category]) : 'Create activity'"><%= action_label %></h1>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record what happened, the political impact, and any photos.</p>
   </div>

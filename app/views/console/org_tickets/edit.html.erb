@@ -1,11 +1,10 @@
 <% content_for :title, "Edit Ticket #{@ticket.ticket_number}" %>
 
-<div class="mb-8">
-  <%= link_to "← Back to Kitchen Cabinet", console_organization_path(@organization, tab: "kitchen_cabinet"), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
-</div>
+<% breadcrumb @organization.name, console_organization_path(@organization) %>
+<% breadcrumb "Edit ticket" %>
 
 <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-8 max-w-2xl">
-  <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Edit Ticket <%= @ticket.ticket_number %></h1>
+  <h1 class="<%= ta_page_title %> mb-6">Edit ticket <%= @ticket.ticket_number %></h1>
 
   <% ActsAsTenant.with_tenant(@organization) do %>
     <%= form_with model: @ticket, scope: :ticket, local: true, class: "space-y-6" do |f| %>

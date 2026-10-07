@@ -1,18 +1,20 @@
 <%# App header. Neutral chrome so it matches the sidebar; party color stays on page actions. %>
 <header class="sticky top-0 z-30 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-  <div class="flex h-16 items-center justify-between gap-3 px-4 xl:px-6">
+  <div class="flex h-16 items-center gap-3 px-4 xl:px-6">
     <button
       type="button"
       @click.stop="sidebarToggle = !sidebarToggle"
       aria-label="Toggle sidebar"
-      class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-white/5"
+      class="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-white/5"
     >
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
       </svg>
     </button>
 
-    <div class="ml-auto flex items-center gap-1 sm:gap-2">
+    <%= render "ui/breadcrumbs" %>
+
+    <div class="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
       <button
         type="button"
         @click="darkMode = !darkMode"

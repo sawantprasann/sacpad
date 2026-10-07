@@ -70,6 +70,32 @@ class GroundReportsImportTest < ActionDispatch::IntegrationTest
     assert_match "Likely to win: Meera Patil", @response.body
   end
 
+  test "a writer can upload a mock poll sheet without the import capability" do
+    sign_in @bob
+    get ground_reports_village_path(@village)
+    assert_select "a", text: "Upload"
+
+    get new_ground_reports_import_path(kind: "mock_poll", village_id: @village.id)
+    assert_response :success
+    assert_match "Upload mock poll", @response.body
+
+    upload = workbook([
+      %w[village politician respondent_name preference_basis vote_intent],
+      [ "Nimgaon", "Meera Patil", "Sheet Voter", "party", "yes" ]
+    ])
+    perform_enqueued_jobs do
+      post ground_reports_imports_path, params: {
+        village_id: @village.id,
+        import: { kind: "mock_poll", file: upload }
+      }
+    end
+    follow_redirect!
+    assert_match "Imported 1 response", @response.body
+
+    get new_ground_reports_import_path
+    assert_response :not_found
+  end
+
   test "a user without ground reports access cannot open the import" do
     outsider = User.create!(organization: @org, role: @none, name: "Out", email: "import-out@example.com", password: "password123")
     sign_in outsider

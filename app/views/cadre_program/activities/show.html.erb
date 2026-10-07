@@ -1,25 +1,16 @@
 <% headline = @activity.detail_headline.presence || @activity.category_label %>
 <% content_for :title, "#{headline} · #{@activity.category_label}" %>
 <% list_path = cadre_program_activities_path(category: @activity.category) %>
-
-<nav aria-label="Breadcrumb" class="mb-5">
-  <ol class="flex flex-wrap items-center gap-1.5 text-sm">
-    <li><%= link_to "Dashboard", root_path, class: "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90" %></li>
-    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
-    <li><%= link_to "Cadre Program", cadre_program_activities_path, class: "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90" %></li>
-    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
-    <li><%= link_to @activity.category_label, list_path, class: "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90" %></li>
-    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
-    <li class="font-medium text-gray-800 dark:text-white/90" aria-current="page"><%= headline %></li>
-  </ol>
-</nav>
+<% breadcrumb "Cadre Program", cadre_program_activities_path %>
+<% breadcrumb @activity.category_label, list_path %>
+<% breadcrumb headline %>
 
 <header class="<%= ta_card_classes %> mb-4 overflow-hidden">
   <div class="h-1" style="background: var(--org-party-color)"></div>
   <div class="flex flex-wrap items-start justify-between gap-4 p-6">
     <div class="min-w-0">
       <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= headline %></h1>
+        <h1 class="<%= ta_page_title %>"><%= headline %></h1>
         <%= render "ui/badge", label: @activity.category_label, tone: "brand" %>
       </div>
       <dl class="mt-4 flex flex-wrap gap-x-8 gap-y-3 text-sm">

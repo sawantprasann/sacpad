@@ -1,8 +1,10 @@
-<% content_for :title, "Import — Ground Reports" %>
+<% content_for :title, @import.mock_poll? ? "Upload mock poll" : "Import" %>
+<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb @village.name, ground_reports_village_path(@village) if @village %>
+<% breadcrumb @import.mock_poll? ? "Upload mock poll" : "Import" %>
 
 <div class="mb-4">
-  <%= link_to "← Ground Reports", ground_reports_villages_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-  <h1 class="mt-2 text-xl font-semibold tracking-tight text-gray-900">Import</h1>
+  <h1 class="<%= ta_page_title %>"><%= @import.mock_poll? ? "Upload mock poll" : "Import" %></h1>
   <p class="mt-1 text-sm text-gray-600">Excel workbook. One sheet. The first row is the column names.</p>
 </div>
 
@@ -12,19 +14,28 @@
   <% end %>
 
   <%= form_with model: @import, scope: :import, url: ground_reports_imports_path, class: "space-y-4" do |f| %>
-    <div>
-      <%= f.label :kind, "What is in the file", class: ta_label_classes %>
-      <%= f.select :kind, [ [ "Report", "report" ], [ "Mock poll", "mock_poll" ] ], {}, { class: ta_field_classes } %>
-    </div>
+    <% if @village %>
+      <%= hidden_field_tag :village_id, @village.id %>
+    <% end %>
+    <% if current_user.role.can_import? %>
+      <div>
+        <%= f.label :kind, "What is in the file", class: ta_label_classes %>
+        <%= f.select :kind, [ [ "Report", "report" ], [ "Mock poll", "mock_poll" ] ], {}, { class: ta_field_classes } %>
+      </div>
+    <% else %>
+      <%= f.hidden_field :kind, value: "mock_poll" %>
+    <% end %>
     <div>
       <%= f.label :file, "Workbook", class: ta_label_classes %>
       <%= f.file_field :file, accept: ".xlsx", required: true, class: "#{ta_field_classes} py-2" %>
     </div>
     <div class="grid gap-4 text-sm text-gray-600 md:grid-cols-2">
-      <p><span class="font-medium text-gray-800">Report columns.</span> village, issue, resolution, reported_at</p>
+      <% if current_user.role.can_import? %>
+        <p><span class="font-medium text-gray-800">Report columns.</span> village, issue, resolution, reported_at</p>
+      <% end %>
       <p><span class="font-medium text-gray-800">Mock poll columns.</span> village, politician, respondent_name, respondent_mobile, preference_basis, vote_intent, note</p>
     </div>
     <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-            style="background: var(--org-party-color); color: var(--org-party-contrast)">Import</button>
+            style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= @import.mock_poll? ? "Upload" : "Import" %></button>
   <% end %>
 </div>

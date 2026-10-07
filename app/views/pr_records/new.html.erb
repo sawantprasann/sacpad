@@ -1,11 +1,13 @@
 <% action_label = @record.pr_category ? "Log #{@record.pr_category.name}" : "Log PR record" %>
 <% content_for :title, action_label %>
 <% back_path = @record.pr_category ? pr_records_path(category: @record.pr_category.slug) : pr_records_path %>
+<% breadcrumb "PR Records", pr_records_path %>
+<% breadcrumb @record.pr_category.name, back_path if @record.pr_category %>
+<% breadcrumb action_label %>
 
 <div>
   <div class="mb-6">
-    <%= link_to "← PR Records", back_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-    <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= action_label %></h1>
+    <h1 class="<%= ta_page_title %>"><%= action_label %></h1>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record media coverage details and attachments.</p>
   </div>
 

@@ -44,6 +44,17 @@ module ApplicationHelper
     "rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]"
   end
 
+  def ta_page_title
+    "text-xl font-semibold tracking-tight text-gray-900 dark:text-white/90"
+  end
+
+  def document_title
+    raw = content_for(:title).to_s.sub(/\s*·\s*SAC-PAD\z/, "").strip
+    return "SAC-PAD" if raw.blank?
+
+    "#{raw} · SAC-PAD"
+  end
+
   # --- Organization Dashboard widget composition (FR50/FR51) ---
   # Module widgets render only if the viewer's role can access that module; org-admin-only
   # widgets render for roles with the can_create_users (org_admin) capability.

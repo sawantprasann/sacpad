@@ -2,9 +2,10 @@ module GroundReports
   class ImportsController < ApplicationController
     before_action :authenticate_user!
     before_action :require_ground_reports_access
+    before_action :set_village
 
     def new
-      @import = Import.new(kind: :report)
+      @import = Import.new(kind: params[:kind] == "mock_poll" ? :mock_poll : :report)
       authorize @import
     end
 
@@ -15,7 +16,7 @@ module GroundReports
       authorize @import
       if @import.save
         ImportGroundReportsJob.perform_later(@import.id)
-        redirect_to ground_reports_import_path(@import), notice: "Import started."
+        redirect_to ground_reports_import_path(@import, village_id: @village&.id), notice: "Import started."
       else
         render :new, status: :unprocessable_entity
       end
@@ -30,6 +31,12 @@ module GroundReports
 
     def import_params
       params.require(:import).permit(:kind, :file)
+    end
+
+    def set_village
+      return if params[:village_id].blank?
+
+      @village = current_user.organization.villages.find_by(id: params[:village_id])
     end
 
     def require_ground_reports_access

@@ -1,17 +1,17 @@
 <%# Platform Console top bar — steel operator identity. %>
-<header class="sticky top-0 z-30 flex w-full border-gray-200 bg-white xl:border-b dark:border-gray-800 dark:bg-gray-900">
-  <div class="flex grow items-center justify-between px-3 py-3 sm:gap-4 lg:py-4 xl:px-6">
-    <div class="flex items-center gap-3">
+<header class="sticky top-0 z-30 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+  <div class="flex h-16 items-center gap-3 px-4 xl:px-6">
+    <div class="flex min-w-0 flex-1 items-center gap-3">
       <button
         @click.stop="sidebarToggle = !sidebarToggle"
         aria-label="Toggle sidebar"
-        class="z-50 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400"
+        class="z-50 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 xl:hidden dark:text-gray-400"
       >
         <svg class="fill-current" width="20" height="14" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path fill-rule="evenodd" clip-rule="evenodd" d="M0.583 1A.75.75 0 011.333.25h13.334a.75.75 0 110 1.5H1.333A.75.75 0 01.583 1zm0 10a.75.75 0 01.75-.75h13.334a.75.75 0 110 1.5H1.333a.75.75 0 01-.75-.75zM1.333 5.25a.75.75 0 100 1.5h6.667a.75.75 0 100-1.5H1.333z" fill=""/>
         </svg>
       </button>
-      <span class="inline-flex items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-white" style="background: var(--console-accent)">Platform Console</span>
+      <%= render "ui/breadcrumbs" %>
     </div>
 
     <div class="flex items-center gap-3 text-sm">

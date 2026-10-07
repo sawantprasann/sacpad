@@ -1,11 +1,13 @@
 <% action_label = @ticket.ticket_category ? "Create #{@ticket.ticket_category.name}" : "Create ticket" %>
 <% content_for :title, action_label %>
 <% back_path = @ticket.ticket_category ? kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) : kitchen_cabinet_tickets_path %>
+<% breadcrumb "Kitchen Cabinet", kitchen_cabinet_tickets_path %>
+<% breadcrumb @ticket.ticket_category.name, back_path if @ticket.ticket_category %>
+<% breadcrumb action_label %>
 
 <div>
   <div class="mb-6">
-    <%= link_to "← Kitchen Cabinet", back_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-    <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= action_label %></h1>
+    <h1 class="<%= ta_page_title %>"><%= action_label %></h1>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record the person, the issue, and any photos.</p>
   </div>
 

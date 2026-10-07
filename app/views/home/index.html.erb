@@ -1,9 +1,9 @@
 <% content_for :title, "Dashboard" %>
 
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
   <div>
-    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Dashboard</h1>
-    <p class="text-sm text-gray-500 dark:text-gray-400"><%= current_user.organization.name %></p>
+    <h1 class="<%= ta_page_title %>">Dashboard</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= current_user.organization.name %></p>
   </div>
   <%= render "ui/module_toolbar" %>
 </div>

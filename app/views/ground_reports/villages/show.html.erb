@@ -1,4 +1,6 @@
-<% content_for :title, "Ground Reports — #{@village.name}" %>
+<% content_for :title, @village.name %>
+<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb @village.name %>
 <% page_link = "inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200" %>
 <% current_position = @positions.find { |position| position.ended_at.nil? } %>
 <% can_write = current_user.role.can_write?("ground_reports") %>
@@ -14,8 +16,7 @@
 <div class="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5"
      style="background: color-mix(in srgb, var(--org-party-color) 12%, white); border-color: color-mix(in srgb, var(--org-party-color) 28%, white)">
   <div class="min-w-0">
-    <%= link_to "← Ground Reports", ground_reports_villages_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-    <h1 class="mt-2 text-xl font-semibold tracking-tight text-gray-900"><%= @village.name %></h1>
+    <h1 class="text-xl font-semibold tracking-tight text-gray-900"><%= @village.name %></h1>
     <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
       <span><%= @village.assembly.name %></span>
       <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
@@ -326,9 +327,15 @@
       <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Mock poll</h2>
       <p class="mt-0.5 text-xs text-gray-500">Yes votes, counted when this page loads.</p>
     </div>
-    <% if @likely_winners.any? %>
-      <p class="text-sm font-medium text-gray-800 dark:text-white/90">Likely to win: <%= @likely_winners.map(&:name).to_sentence %></p>
-    <% end %>
+    <div class="flex flex-wrap items-center gap-3">
+      <% if @likely_winners.any? %>
+        <p class="text-sm font-medium text-gray-800 dark:text-white/90">Likely to win: <%= @likely_winners.map(&:name).to_sentence %></p>
+      <% end %>
+      <% if can_write %>
+        <%= link_to "Upload", new_ground_reports_import_path(kind: "mock_poll", village_id: @village.id),
+              class: "inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600" %>
+      <% end %>
+    </div>
   </div>
 
   <% if @poll_tally.any? %>

@@ -224,6 +224,7 @@ class GroundReportsTest < ActionDispatch::IntegrationTest
     sign_in @alice
     get ground_reports_village_path(@village)
     assert_select "button", text: "Record response"
+    assert_select "a[href=?]", new_ground_reports_import_path(kind: "mock_poll", village_id: @village.id), text: "Upload"
 
     assert_difference -> { GroundReports::MockPollResponse.unscoped.count }, 2 do
       post ground_reports_village_mock_poll_responses_path(@village), params: { mock_poll_response: {
@@ -275,6 +276,7 @@ class GroundReportsTest < ActionDispatch::IntegrationTest
     get ground_reports_village_path(@village)
     assert_match "Likely to win: Meera Patil", @response.body
     assert_select "button", text: "Record response", count: 0
+    assert_select "a", text: "Upload", count: 0
 
     post ground_reports_village_mock_poll_responses_path(@village), params: { mock_poll_response: {
       respondent_name: "Nope", preference_basis: "party", vote_choice: "no"

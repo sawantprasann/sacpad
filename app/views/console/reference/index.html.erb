@@ -1,6 +1,6 @@
 <% content_for :title, managed_title.pluralize %>
 <div class="mb-6 flex items-center justify-between">
-  <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= managed_title.pluralize %></h1>
+  <h1 class="<%= ta_page_title %>"><%= managed_title.pluralize %></h1>
   <%= link_to "New #{managed_title}", url_for(action: :new), class: ta_btn_primary %>
 </div>
 

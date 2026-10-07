@@ -1,5 +1,5 @@
 <% content_for :title, "New user" %>
-<div class="mb-6"><h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">New user</h1></div>
+<div class="mb-6"><h1 class="<%= ta_page_title %>">New user</h1></div>
 
 <div class="<%= ta_card_classes %> p-6">
   <%= form_with model: @user, url: users_path do |f| %>

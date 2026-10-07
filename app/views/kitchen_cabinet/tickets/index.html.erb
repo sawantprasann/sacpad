@@ -4,19 +4,10 @@
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
-<div class="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5"
-     style="background: color-mix(in srgb, var(--org-party-color) 12%, white); border-color: color-mix(in srgb, var(--org-party-color) 28%, white)">
-  <div class="flex min-w-0 items-center gap-3">
-    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
-          style="background: var(--org-party-color); color: var(--org-party-contrast)">KC</span>
-    <div class="min-w-0">
-      <h1 class="text-xl font-semibold tracking-tight text-gray-900">Kitchen Cabinet</h1>
-      <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-        <% if @category %><span class="font-medium text-gray-800"><%= @category.name %></span><% end %>
-        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= pluralize(@pagy.count, "ticket") %></span>
-      </p>
-    </div>
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+  <div class="min-w-0">
+    <h1 class="<%= ta_page_title %>">Kitchen Cabinet</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@pagy.count, "ticket") %></p>
   </div>
   <%= render "ui/module_toolbar",
         export_url: kitchen_cabinet_tickets_path(format: :xlsx, category: params[:category], status: params[:status], q: params[:q]),

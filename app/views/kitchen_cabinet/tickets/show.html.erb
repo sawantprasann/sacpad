@@ -1,28 +1,18 @@
 <% content_for :title, "#{@ticket.person_name} · #{@ticket.ticket_number}" %>
 <% list_path = kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) %>
-<% crumb = "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90" %>
+<% breadcrumb "Kitchen Cabinet", kitchen_cabinet_tickets_path %>
+<% breadcrumb @ticket.ticket_category.name, list_path %>
+<% breadcrumb @ticket.person_name %>
 <% field = "rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]" %>
 <% label = "text-xs font-medium tracking-wide text-gray-400 uppercase" %>
 <% section = "border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90" %>
-
-<nav aria-label="Breadcrumb" class="mb-5">
-  <ol class="flex flex-wrap items-center gap-1.5 text-sm">
-    <li><%= link_to "Dashboard", root_path, class: crumb %></li>
-    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
-    <li><%= link_to "Kitchen Cabinet", kitchen_cabinet_tickets_path, class: crumb %></li>
-    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
-    <li><%= link_to @ticket.ticket_category.name, list_path, class: crumb %></li>
-    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
-    <li class="font-medium text-gray-800 dark:text-white/90" aria-current="page"><%= @ticket.person_name %></li>
-  </ol>
-</nav>
 
 <header class="<%= ta_card_classes %> mb-4 overflow-hidden">
   <div class="h-1" style="background: var(--org-party-color)"></div>
   <div class="flex flex-wrap items-start justify-between gap-4 p-6">
     <div class="min-w-0">
       <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @ticket.person_name %></h1>
+        <h1 class="<%= ta_page_title %>"><%= @ticket.person_name %></h1>
         <%= render "ui/status_pill", status: @ticket.status %>
       </div>
       <dl class="mt-4 flex flex-wrap gap-x-8 gap-y-3 text-sm">
