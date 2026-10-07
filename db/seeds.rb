@@ -18,6 +18,9 @@ TicketCategory.seed_defaults!
 # PR categories (Story 4.1): the 6 fixed PR categories, seeded idempotently.
 PrCategory.seed_defaults!
 
+# Media platforms (Story 4.1): extensible catalog of media outlets for PR records, seeded idempotently.
+MediaPlatform.seed_defaults!
+
 # Bootstrap platform Admin (Story 0.3) — the only way into the Console (no self-service sign-up).
 # Configurable via env; in production a password MUST be provided (no insecure default).
 admin_email = ENV.fetch("SACPAD_ADMIN_EMAIL", "admin@sacpad.com")
