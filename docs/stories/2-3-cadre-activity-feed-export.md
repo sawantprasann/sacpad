@@ -7,7 +7,7 @@ baseline_commit: 597d5ae7d31f9b1d6ae955812cf3381da3a873e2
 
 # Story 2.3: Cadre activity feed and export
 
-Status: review
+Status: done
 
 ## Story
 
@@ -95,7 +95,8 @@ Grok 4.7 (BMad create-story, then dev-story)
 |------|--------|
 | 2026-10-07 | Story 2.3 drafted (BMad create-story) — dashboard feed over `cadre_activities`, module-gated widget, viewer-scoped Excel export and category chart. Chart-image download stays deferred with Story 1.8. Status → ready-for-dev. |
 | 2026-10-07 | Story 2.3 implemented (BMad dev-story) — widget, Excel export, category chart. Full suite 174/0, rubocop clean. Status → review. |
+| 2026-10-08 | Signed off with Epic 2. Status → done. |
 
 ## Status
 
-review
+done

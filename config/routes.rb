@@ -65,9 +65,6 @@ Rails.application.routes.draw do
     end
   end
 
-  # TailAdmin component showcase / style guide (Story 0.1a)
-  get "style_guide" => "home#style_guide"
-
   # Defines the root path route ("/")
   root "home#index"
 end

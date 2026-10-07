@@ -6,8 +6,4 @@ class HomeController < ApplicationController
   def index
     @widgets = helpers.dashboard_widgets_for(current_user)
   end
-
-  # TailAdmin component showcase (Story 0.1a) — the sample page demonstrating the ui/ library.
-  def style_guide
-  end
 end

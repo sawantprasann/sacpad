@@ -7,7 +7,7 @@ baseline_commit: 597d5ae7d31f9b1d6ae955812cf3381da3a873e2
 
 # Story 2.2: Per-category detail forms
 
-Status: review
+Status: done
 
 ## Story
 
@@ -106,7 +106,8 @@ Grok 4.7 (BMad dev-story)
 |------|--------|
 | 2026-10-07 | Story 2.2 drafted (BMad create-story) — five detail tables on the 2.1 base, shared program shape, one-to-one karyakarta FK or fallback name. Status → ready-for-dev. |
 | 2026-10-07 | Story 2.2 implemented (BMad dev-story) — detail models, category fieldsets, show page, isolation tests. Full suite 167/0, rubocop clean. Status → review. |
+| 2026-10-08 | Signed off with Epic 2. Status → done. |
 
 ## Status
 
-review
+done

@@ -7,7 +7,7 @@ baseline_commit: 597d5ae7d31f9b1d6ae955812cf3381da3a873e2
 
 # Story 2.1: Cadre activity base capture
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -207,7 +207,8 @@ Grok 4.7 (BMad dev-story)
 |------|--------|
 | 2026-10-07 | Story 2.1 drafted (BMad create-story) — Cadre Program base capture: `CadreProgram::CadreActivity` (fixed six-value enum, Media Value text, Active Storage photos, soft-delete), subtree/org policy, mobile-first form, sidebar entry. Detail tables (2.2) and widget/export (2.3) left out. Status → ready-for-dev. |
 | 2026-10-07 | Story 2.1 implemented (BMad dev-story) — base model, subtree policy, capture form, scoped list/show, sidebar entry, activity log on create. 15 new tests; full suite 158/0, rubocop clean. Status → review. |
+| 2026-10-08 | Signed off with Epic 2. Status → done. |
 
 ## Status
 
-review
+done

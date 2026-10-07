@@ -12,7 +12,7 @@
 # Epic 2–8 story keys below are PROVISIONAL (derived from epics.md titles) — `create-story`
 # is authoritative for the final slug when each is drafted.
 
-last_updated: 2026-10-07
+last_updated: 2026-10-08
 
 development_status:
   # ── Epic 0: Secure Multi-Tenant Foundation & Platform Operations ──
@@ -49,10 +49,10 @@ development_status:
   epic-1-retrospective: done
 
   # ── Epic 2: Cadre Program — Party-Organizing Activity ──
-  epic-2: in-progress
-  2-1-cadre-activity-base-capture: review
-  2-2-per-category-detail-forms: review
-  2-3-cadre-activity-feed-export: review
+  epic-2: done
+  2-1-cadre-activity-base-capture: done
+  2-2-per-category-detail-forms: done
+  2-3-cadre-activity-feed-export: done
 
   # ── Epic 3: Ground Reports — Village-Centric Field Intelligence ──
   epic-3: backlog
