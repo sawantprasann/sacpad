@@ -46,6 +46,7 @@ class KitchenCabinetNavTest < ActionDispatch::IntegrationTest
     get kitchen_cabinet_tickets_path(category: "water")
     assert_response :success
     assert_match "Water", @response.body
+    assert_select "a[href=?]", new_kitchen_cabinet_ticket_path(category: "water")
   end
 
   test "a user without KC access cannot reach the module by URL" do

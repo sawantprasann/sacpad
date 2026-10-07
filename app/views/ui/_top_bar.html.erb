@@ -1,42 +1,55 @@
-<%# TailAdmin header: hamburger (toggles sidebar), dark-mode toggle, user area (NFR26). %>
-<header class="sticky top-0 z-30 flex w-full border-gray-200 bg-white xl:border-b dark:border-gray-800 dark:bg-gray-900">
-  <div class="flex grow items-center justify-between px-3 py-3 sm:gap-4 lg:py-4 xl:px-6">
-    <div class="flex items-center gap-3">
-      <button
-        @click.stop="sidebarToggle = !sidebarToggle"
-        aria-label="Toggle sidebar"
-        class="z-50 flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 xl:h-11 xl:w-11 xl:border dark:border-gray-800 dark:text-gray-400"
-      >
-        <svg class="fill-current" width="20" height="14" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M0.583 1A.75.75 0 011.333.25h13.334a.75.75 0 110 1.5H1.333A.75.75 0 01.583 1zm0 10a.75.75 0 01.75-.75h13.334a.75.75 0 110 1.5H1.333a.75.75 0 01-.75-.75zM1.333 5.25a.75.75 0 100 1.5h6.667a.75.75 0 100-1.5H1.333z" fill=""/>
-        </svg>
-      </button>
-      <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Constituency Management</span>
-    </div>
+<%# App header. The sidebar is always visible from xl up, so the menu control is mobile-only. %>
+<header class="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur-md dark:border-gray-800 dark:bg-gray-900/95">
+  <div class="flex h-16 items-center justify-between gap-3 px-4 xl:px-6">
+    <button
+      type="button"
+      @click.stop="sidebarToggle = !sidebarToggle"
+      aria-label="Toggle sidebar"
+      class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 xl:hidden dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
+      </svg>
+    </button>
 
-    <div class="flex items-center gap-3 text-sm">
+    <div class="ml-auto flex items-center gap-2 sm:gap-3">
       <button
+        type="button"
         @click="darkMode = !darkMode"
         aria-label="Toggle dark mode"
-        class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400"
+        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5"
       >
-        <span x-show="!darkMode">☾</span><span x-show="darkMode" x-cloak>☀</span>
+        <svg x-show="!darkMode" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+        <svg x-show="darkMode" x-cloak class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.22a1 1 0 011.42 0l.7.7a1 1 0 01-1.41 1.42l-.71-.71a1 1 0 010-1.41zM18 9a1 1 0 100 2h-1a1 1 0 100-2h1zM5.64 4.64a1 1 0 010 1.41l-.7.71a1 1 0 11-1.42-1.41l.71-.71a1 1 0 011.41 0zM4 9a1 1 0 100 2H3a1 1 0 100-2h1zm1.34 6.66a1 1 0 011.41 0l.71.7a1 1 0 11-1.42 1.42l-.7-.71a1 1 0 010-1.41zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm6.36-1.64a1 1 0 010 1.41l-.7.71a1 1 0 01-1.42-1.41l.71-.71a1 1 0 011.41 0zM10 6a4 4 0 100 8 4 4 0 000-8z" clip-rule="evenodd"/>
+        </svg>
       </button>
 
       <% if user_signed_in? %>
-        <span class="hidden text-gray-500 sm:inline dark:text-gray-400">
-          <%= current_user.name %>
-          · logins: <span class="tabular-nums"><%= current_user.sign_in_count %></span>
-          <% if current_user.current_sign_in_at %>· <%= current_user.current_sign_in_at.strftime("%d %b %H:%M") %><% end %>
-        </span>
-        <% if current_user.photo.attached? %>
-          <%= image_tag current_user.photo, class: "h-9 w-9 rounded-full object-cover" %>
-        <% else %>
-          <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-500 dark:bg-white/10"><%= current_user.name.to_s.first %></span>
-        <% end %>
+        <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 py-1.5 pr-3 pl-1.5 dark:border-gray-700 dark:bg-white/5">
+          <% if current_user.photo.attached? %>
+            <%= image_tag current_user.photo, class: "h-9 w-9 rounded-lg object-cover", alt: "" %>
+          <% else %>
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-xs font-semibold"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= current_user.name.to_s.first&.upcase %></span>
+          <% end %>
+          <div class="hidden min-w-0 leading-tight sm:block">
+            <p class="truncate text-sm font-semibold text-gray-800 dark:text-white/90"><%= current_user.name %></p>
+            <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+              <%= current_user.role.name %>
+              · logins: <span class="tabular-nums"><%= current_user.sign_in_count %></span>
+              <% if current_user.current_sign_in_at %>
+                · <%= current_user.current_sign_in_at.strftime("%d %b %H:%M") %>
+              <% end %>
+            </p>
+          </div>
+        </div>
         <%= button_to "Sign out", destroy_user_session_path, method: :delete,
-              class: "rounded-lg bg-gray-100 px-3 py-1.5 font-medium text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80" %>
+              class: "inline-flex h-10 cursor-pointer items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-white/5" %>
       <% end %>
     </div>
   </div>
+  <span class="block h-0.5 w-full" style="background: var(--org-party-color)" aria-hidden="true"></span>
 </header>

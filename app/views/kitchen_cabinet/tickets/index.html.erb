@@ -1,32 +1,53 @@
 <% content_for :title, @category ? "Kitchen Cabinet — #{@category.name}" : "Kitchen Cabinet" %>
+<% new_path = @category ? new_kitchen_cabinet_ticket_path(category: @category.slug) : new_kitchen_cabinet_ticket_path %>
 
-<div class="mb-6 flex items-center justify-between">
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
   <div>
     <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Kitchen Cabinet</h1>
     <% if @category %>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @category.name %></span></p>
+    <% else %>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tickets in your branch</p>
     <% end %>
   </div>
-  <%= render "ui/module_toolbar", export_url: kitchen_cabinet_tickets_path(format: :xlsx, category: params[:category], status: params[:status], q: params[:q]) %>
+  <%= render "ui/module_toolbar",
+        export_url: kitchen_cabinet_tickets_path(format: :xlsx, category: params[:category], status: params[:status], q: params[:q]),
+        new_url: (new_path if current_user.role.can_write?("kitchen_cabinet")),
+        new_label: (@category ? "Create #{@category.name}" : "Create ticket") %>
 </div>
 
-<%# Per-column filters (UX-DR10): category comes from the sidebar; status + text search are a GET form. %>
 <%= form_with url: kitchen_cabinet_tickets_path, method: :get, class: "mb-4 flex flex-wrap items-end gap-3" do %>
   <%= hidden_field_tag :category, params[:category] if @category %>
   <div>
     <label class="<%= ta_label_classes %>">Status</label>
     <%= select_tag :status,
           options_for_select([ [ "All", "" ] ] + KitchenCabinet::Ticket.statuses.keys.map { |s| [ s.humanize, s ] }, params[:status]),
-          class: "#{ta_field_classes} min-h-11" %>
+          class: "#{ta_field_classes} min-h-11 cursor-pointer" %>
   </div>
-  <div class="flex-1 min-w-48">
+  <div class="min-w-48 flex-1">
     <label class="<%= ta_label_classes %>">Search</label>
     <%= text_field_tag :q, params[:q], placeholder: "Person or village", class: "#{ta_field_classes} min-h-11" %>
   </div>
-  <%= submit_tag "Filter", class: "#{ta_btn_secondary} min-h-11" %>
+  <%= submit_tag "Filter", class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
 <% end %>
 
-<%# Desktop: filterable center table. %>
+<% if @status_counts.present? %>
+  <div class="<%= ta_card_classes %> mb-4 grid gap-4 p-5 lg:grid-cols-[16rem_1fr] lg:items-center">
+    <div>
+      <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">By status</h2>
+      <ul class="space-y-1">
+        <% @status_counts.each do |label, count| %>
+          <li class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+            <span><%= label %></span>
+            <span class="tabular-nums font-semibold"><%= count %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+    <%= pie_chart @status_counts, height: "180px" %>
+  </div>
+<% end %>
+
 <div class="<%= ta_card_classes %> hidden overflow-hidden xl:block">
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
@@ -41,16 +62,18 @@
       </thead>
       <tbody>
         <% @tickets.each do |ticket| %>
-          <tr class="cursor-pointer border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]"
-              onclick="window.location='<%= kitchen_cabinet_ticket_path(ticket) %>'">
-            <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-300"><%= ticket.ticket_number %></td>
+          <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]">
+            <td class="px-5 py-3 font-medium">
+              <%= link_to ticket.ticket_number, kitchen_cabinet_ticket_path(ticket),
+                    class: "text-gray-800 hover:text-brand-500 dark:text-white/90" %>
+            </td>
             <td class="px-5 py-3">
               <div class="text-gray-800 dark:text-white/90"><%= ticket.person_name %></div>
               <div class="text-xs text-gray-500"><%= ticket.village.presence || "—" %></div>
             </td>
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= ticket.ticket_category.name %></td>
+            <td class="px-5 py-3"><%= render "ui/badge", label: ticket.ticket_category.name, tone: "brand" %></td>
             <td class="px-5 py-3"><%= render "ui/status_pill", status: ticket.status %></td>
-            <td class="px-5 py-3 text-gray-500"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
+            <td class="px-5 py-3 tabular-nums text-gray-500"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
           </tr>
         <% end %>
       </tbody>
@@ -61,7 +84,6 @@
   </div>
 </div>
 
-<%# Mobile: ticket-card list. %>
 <div class="flex flex-col gap-3 xl:hidden">
   <% @tickets.each do |ticket| %>
     <%= render "ticket_card", ticket: ticket %>
@@ -85,16 +107,4 @@
       <span class="text-gray-300">Next →</span>
     <% end %>
   </nav>
-<% end %>
-
-<%# Party-accented new-ticket FAB (UX-DR9). Shown when a category is selected. ≥44px target. %>
-<% if @category %>
-  <%= link_to new_kitchen_cabinet_ticket_path(category: @category.slug),
-        class: "fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg",
-        style: "background: var(--org-party-color); color: var(--org-party-contrast)",
-        aria: { label: "New ticket in #{@category.name}" } do %>
-    <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-      <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
-    </svg>
-  <% end %>
 <% end %>

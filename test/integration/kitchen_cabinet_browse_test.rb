@@ -109,6 +109,7 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     sign_in reader
     get kitchen_cabinet_tickets_path
     assert_response :success
+    assert_select "a[href=?]", new_kitchen_cabinet_ticket_path, count: 0
 
     outsider = User.create!(organization: @org, role: @none, name: "Out", email: "out@example.com", password: "password123")
     sign_in outsider

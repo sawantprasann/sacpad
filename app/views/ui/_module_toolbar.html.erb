@@ -1,17 +1,21 @@
-<%# Shared module toolbar (brief §5). Actions wired per-module; exports are subtree/org-scoped (FR49). %>
-<% tool = "inline-flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm font-medium" %>
+<%# Shared module toolbar. Excel export is wired per-module (subtree/org-scoped).
+    Optional new_url renders a circular plus beside the export control. %>
+<% tool = "inline-flex h-11 cursor-pointer items-center rounded-lg px-3.5 text-sm font-medium" %>
+<% quiet = "#{tool} border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-white/5" %>
 <div class="flex flex-wrap items-center gap-2">
   <% if local_assigns[:export_url] %>
-    <%= link_to "Export Excel", export_url, class: "#{tool} border border-gray-200 bg-white text-gray-600 hover:bg-gray-50" %>
+    <%= link_to "Export Excel", export_url, class: quiet %>
   <% else %>
-    <button type="button" class="<%= tool %> border border-gray-200 bg-white text-gray-600 hover:bg-gray-50">Export Excel</button>
+    <button type="button" class="<%= quiet %>">Export Excel</button>
   <% end %>
-  <button type="button" class="<%= tool %> border border-gray-200 bg-white text-gray-600 hover:bg-gray-50">Prepare Chart</button>
-  <span class="inline-flex h-8 overflow-hidden rounded-lg border border-gray-200">
-    <button type="button" class="cursor-pointer bg-white px-3 text-sm hover:bg-gray-50">Bar</button>
-    <button type="button" class="cursor-pointer border-l border-gray-200 bg-white px-3 text-sm hover:bg-gray-50">Pie</button>
-    <button type="button" class="cursor-pointer border-l border-gray-200 bg-white px-3 text-sm hover:bg-gray-50">Line</button>
-  </span>
-  <button type="button" class="<%= tool %> border border-gray-200 bg-white text-gray-600 hover:bg-gray-50">Export Chart</button>
-  <button type="button" class="<%= tool %> text-white" style="background: var(--org-party-color)">Get All Details</button>
+  <% if local_assigns[:new_url] %>
+    <%= link_to new_url,
+          class: "inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full shadow-sm transition hover:opacity-90",
+          style: "background: var(--org-party-color); color: var(--org-party-contrast)",
+          aria: { label: local_assigns[:new_label].presence || "Create" } do %>
+      <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
+      </svg>
+    <% end %>
+  <% end %>
 </div>

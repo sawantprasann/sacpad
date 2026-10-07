@@ -113,6 +113,7 @@
             <th class="px-6 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300">CATEGORY</th>
             <th class="px-6 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300">STATUS</th>
             <th class="px-6 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300">REPORTED DATE</th>
+            <th class="px-6 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300">ACTIONS</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -128,6 +129,12 @@
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= ticket.ticket_category.name %></td>
                 <td class="px-6 py-4"><%= render "ui/status_pill", status: ticket.status %></td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 tabular-nums"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
+                <td class="px-6 py-4 text-sm">
+                  <div class="flex gap-3">
+                    <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+                    <%= link_to "Delete", console_organization_org_ticket_path(@organization, ticket), method: :delete, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-700 font-semibold" %>
+                  </div>
+                </td>
               </tr>
             <% end %>
           <% else %>
@@ -154,10 +161,14 @@
               </div>
               <%= render "ui/status_pill", status: ticket.status %>
             </div>
-            <div class="flex gap-2 text-xs text-gray-600 dark:text-gray-400">
+            <div class="flex gap-2 text-xs text-gray-600 dark:text-gray-400 mb-3">
               <span class="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded"><%= ticket.ticket_category.name %></span>
               <span>Owner: <%= ticket.owner.name %></span>
               <span><%= ticket.reported_at&.strftime("%d %b") %></span>
+            </div>
+            <div class="flex gap-3 text-sm border-t border-gray-200 dark:border-gray-700 pt-3">
+              <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+              <%= link_to "Delete", console_organization_org_ticket_path(@organization, ticket), method: :delete, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-700 font-semibold" %>
             </div>
           </div>
         <% end %>

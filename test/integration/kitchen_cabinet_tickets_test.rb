@@ -23,7 +23,10 @@ class KitchenCabinetTicketsTest < ActionDispatch::IntegrationTest
     sign_in @writer
     get new_kitchen_cabinet_ticket_path(category: "water")
     assert_response :success
-    assert_match "Water", @response.body
+    assert_match "Create Water", @response.body
+    assert_select "div.max-w-xl", count: 0
+    assert_select "h1", text: "Create Water"
+    assert_select "button[type=submit].cursor-pointer", text: "Create Water"
     assert_select "input[name=?][value=?]", "ticket[ticket_category_id]", @water.id.to_s
   end
 

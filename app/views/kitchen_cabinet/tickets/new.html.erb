@@ -1,60 +1,67 @@
-<% content_for :title, "New ticket#{" — #{@ticket.ticket_category.name}" if @ticket.ticket_category}" %>
+<% action_label = @ticket.ticket_category ? "Create #{@ticket.ticket_category.name}" : "Create ticket" %>
+<% content_for :title, action_label %>
+<% back_path = @ticket.ticket_category ? kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) : kitchen_cabinet_tickets_path %>
 
-<div class="mx-auto max-w-xl">
+<div>
   <div class="mb-6">
-    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Log a ticket</h1>
-    <% if @ticket.ticket_category %>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @ticket.ticket_category.name %></span></p>
-    <% end %>
+    <%= link_to "← Kitchen Cabinet", back_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+    <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= action_label %></h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record the person, the issue, and any photos.</p>
   </div>
 
-  <div class="<%= ta_card_classes %> p-6">
+  <div class="<%= ta_card_classes %> p-6 md:p-8">
     <%# scope: :ticket — the model is KitchenCabinet::Ticket, so without this the params would be
         nested under `kitchen_cabinet_ticket` and the controller's require(:ticket) would miss them. %>
     <%= form_with model: @ticket, scope: :ticket, url: kitchen_cabinet_tickets_path, method: :post, multipart: true do |f| %>
       <% if @ticket.errors.any? %>
-        <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @ticket.errors.full_messages.to_sentence %></div>
+        <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @ticket.errors.full_messages.to_sentence %></div>
       <% end %>
 
-      <%# Pre-filled category travels as a hidden field; the label above shows it to the user. %>
       <%= f.hidden_field :ticket_category_id %>
 
-      <div class="mb-4">
-        <%= f.label :person_name, "Person / represents", class: ta_label_classes %>
-        <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :village, "Village / ward", class: ta_label_classes %>
-        <%= f.text_field :village, class: "#{ta_field_classes} min-h-11" %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :mobile, "Mobile number", class: ta_label_classes %>
-        <%= f.telephone_field :mobile, class: "#{ta_field_classes} min-h-11" %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :description, class: ta_label_classes %>
-        <%= f.text_area :description, rows: 4, class: ta_field_classes %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :nature_of_issue, class: ta_label_classes %>
-        <%= f.text_field :nature_of_issue, class: "#{ta_field_classes} min-h-11" %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :reported_value, "Reported value", class: ta_label_classes %>
-        <%= f.number_field :reported_value, step: "0.01", class: "#{ta_field_classes} min-h-11" %>
-      </div>
-      <div class="mb-4">
-        <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
-        <%= f.date_field :reported_at, class: "#{ta_field_classes} min-h-11" %>
-      </div>
-      <div class="mb-6">
-        <%= f.label :attachments, "Photos", class: ta_label_classes %>
-        <%= f.file_field :attachments, multiple: true, accept: "image/*", class: "block w-full text-sm text-gray-600 file:mr-3 file:min-h-11 file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+      <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <%= f.label :person_name, "Person / represents", class: ta_label_classes %>
+          <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
+        </div>
+        <div>
+          <%= f.label :village, "Village / ward", class: ta_label_classes %>
+          <%= f.text_field :village, class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :mobile, "Mobile number", class: ta_label_classes %>
+          <%= f.telephone_field :mobile, class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :nature_of_issue, class: ta_label_classes %>
+          <%= f.text_field :nature_of_issue, class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :reported_value, "Reported value", class: ta_label_classes %>
+          <%= f.number_field :reported_value, step: "0.01", class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
+          <%= f.date_field :reported_at, class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div class="md:col-span-2">
+          <%= f.label :description, class: ta_label_classes %>
+          <%= f.text_area :description, rows: 5, class: ta_field_classes %>
+        </div>
+        <div class="md:col-span-2">
+          <%= f.label :attachments, "Photos", class: ta_label_classes %>
+          <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
+            <%= f.file_field :attachments, multiple: true, accept: "image/*",
+                  class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+            <p class="mt-2 text-xs text-gray-500">Add one or more photos of the issue.</p>
+          </div>
+        </div>
       </div>
 
-      <div class="flex gap-3">
-        <%= f.submit "Log ticket", class: "#{ta_btn_primary} min-h-11" %>
-        <%= link_to "Cancel", kitchen_cabinet_tickets_path(category: @ticket.ticket_category&.slug), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
+      <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= action_label %></button>
+        <%= link_to "Cancel", back_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
       </div>
     <% end %>
   </div>

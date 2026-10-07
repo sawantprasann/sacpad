@@ -33,6 +33,15 @@ module KitchenCabinet
     after_initialize :set_defaults, if: :new_record?
     before_create :assign_ticket_number
 
+    # Labeled status counts for the filtered list chart. reorder drops the list's ORDER BY,
+    # which PostgreSQL rejects alongside GROUP BY.
+    def self.counts_by_status
+      reorder(nil).group(:status).count.each_with_object({}) do |(key, count), labeled|
+        slug = key.is_a?(Integer) ? statuses.key(key) : key.to_s
+        labeled[slug.humanize] = count
+      end
+    end
+
     def may_change_to?(to)
       TRANSITIONS.fetch(status, []).include?(to.to_s)
     end
