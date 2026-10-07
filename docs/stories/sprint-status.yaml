@@ -65,7 +65,7 @@ development_status:
   # ── Epic 4: PR — Traditional Media Monitoring ──
   epic-4: in-progress
   4-1-pr-catalogs: review
-  4-2-pr-record-capture: ready-for-dev
+  4-2-pr-record-capture: review
   4-3-outdoor-ad-podcast-date: backlog
 
   # ── Epic 5: Social Media v1 — Karyakarta Pages, Bulk Outreach & Meta ──
