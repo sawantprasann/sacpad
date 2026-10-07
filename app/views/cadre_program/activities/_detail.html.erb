@@ -1,0 +1,81 @@
+<% detail = activity.matching_detail %>
+<% if detail %>
+  <div class="<%= ta_card_classes %> p-6">
+    <h2 class="border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90">Details</h2>
+    <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <% case detail
+         when CadreProgram::CadreActivityProgram %>
+        <% [
+             [ "Program name", detail.program_name ],
+             [ "Occasion", detail.occasion ],
+             [ "Location", detail.location ],
+             [ "Date", detail.occurred_on&.strftime("%d %b %Y") ],
+             [ "Host", detail.host ],
+             [ "Notes", detail.notes ]
+           ].each do |label, value| %>
+          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
+            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
+          </div>
+        <% end %>
+      <% when CadreProgram::CadreActivityLeadershipMeet %>
+        <% [
+             [ "Whom to meet", detail.whom_to_meet ],
+             [ "Point of discussion", detail.point_of_discussion ],
+             [ "Work submitted", detail.work_submitted ],
+             [ "Submitted on", detail.submitted_on&.strftime("%d %b %Y") ],
+             [ "Follow up on", detail.followup_on&.strftime("%d %b %Y") ],
+             [ "Resolution", detail.resolution_notes ]
+           ].each do |label, value| %>
+          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
+            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
+          </div>
+        <% end %>
+      <% when CadreProgram::CadreActivityPartyProgramHosted %>
+        <% [
+             [ "Program name", detail.program_name ],
+             [ "Hosted on", detail.hosted_on&.strftime("%d %b %Y") ],
+             [ "Location", detail.location ],
+             [ "Total attendees", detail.total_attendees ],
+             [ "Print media", detail.print_media ],
+             [ "Electronic media", detail.electronic_media ]
+           ].each do |label, value| %>
+          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
+            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
+          </div>
+        <% end %>
+      <% when CadreProgram::CadreActivityPersonalActivity %>
+        <% [
+             [ "Activity name", detail.activity_name ],
+             [ "Occasion", detail.occasion ],
+             [ "Total submission", detail.total_submission ],
+             [ "From", detail.from_date&.strftime("%d %b %Y") ],
+             [ "To", detail.to_date&.strftime("%d %b %Y") ],
+             [ "Notes", detail.notes ]
+           ].each do |label, value| %>
+          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
+            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
+          </div>
+        <% end %>
+      <% when CadreProgram::CadreActivityOneToOne %>
+        <% karyakarta = detail.karyakarta_user&.name || detail.karyakarta_name_text %>
+        <% [
+             [ "Karyakarta", karyakarta ],
+             [ "Assignment", detail.assignment ],
+             [ "Resolved", detail.resolved? ? "Yes" : "No" ],
+             [ "From", detail.from_date&.strftime("%d %b %Y") ],
+             [ "To", detail.to_date&.strftime("%d %b %Y") ],
+             [ "Notes", detail.notes ]
+           ].each do |label, value| %>
+          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
+            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
+          </div>
+        <% end %>
+      <% end %>
+    </dl>
+  </div>
+<% end %>

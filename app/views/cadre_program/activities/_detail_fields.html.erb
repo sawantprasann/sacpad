@@ -1,0 +1,171 @@
+<%# One fieldset per detail shape. Disabled fieldsets are not submitted. Program By Party and
+    Personal Program share the program fieldset. %>
+<% field = "#{ta_field_classes} min-h-11" %>
+<% grid = "grid grid-cols-1 gap-4 md:grid-cols-2" %>
+<% wide = "md:col-span-2" %>
+
+<fieldset class="mb-6" x-show="category == 'program_by_party' || category == 'personal_program'" x-cloak
+          :disabled="category !== 'program_by_party' && category !== 'personal_program'">
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Program</h2>
+  <%= f.fields_for :program do |p| %>
+    <div class="<%= grid %>">
+      <div>
+        <%= p.label :program_name, "Program name", class: ta_label_classes %>
+        <%= p.text_field :program_name, class: field %>
+      </div>
+      <div>
+        <%= p.label :occasion, class: ta_label_classes %>
+        <%= p.text_field :occasion, class: field %>
+      </div>
+      <div>
+        <%= p.label :location, class: ta_label_classes %>
+        <%= p.text_field :location, class: field %>
+      </div>
+      <div>
+        <%= p.label :occurred_on, "Date", class: ta_label_classes %>
+        <%= p.date_field :occurred_on, class: field %>
+      </div>
+      <div>
+        <%= p.label :host, class: ta_label_classes %>
+        <%= p.text_field :host, class: field %>
+      </div>
+      <div class="<%= wide %>">
+        <%= p.label :notes, class: ta_label_classes %>
+        <%= p.text_area :notes, rows: 3, class: ta_field_classes %>
+      </div>
+    </div>
+  <% end %>
+</fieldset>
+
+<fieldset class="mb-6" x-show="category == 'leadership_meets'" x-cloak :disabled="category !== 'leadership_meets'">
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Leadership meet</h2>
+  <%= f.fields_for :leadership_meet do |p| %>
+    <div class="<%= grid %>">
+      <div>
+        <%= p.label :whom_to_meet, "Whom to meet", class: ta_label_classes %>
+        <%= p.text_field :whom_to_meet, class: field %>
+      </div>
+      <div>
+        <%= p.label :submitted_on, "Submitted on", class: ta_label_classes %>
+        <%= p.date_field :submitted_on, class: field %>
+      </div>
+      <div>
+        <%= p.label :followup_on, "Follow up on", class: ta_label_classes %>
+        <%= p.date_field :followup_on, class: field %>
+      </div>
+      <div class="<%= wide %>">
+        <%= p.label :point_of_discussion, "Point of discussion", class: ta_label_classes %>
+        <%= p.text_area :point_of_discussion, rows: 3, class: ta_field_classes %>
+      </div>
+      <div class="<%= wide %>">
+        <%= p.label :work_submitted, "Work submitted", class: ta_label_classes %>
+        <%= p.text_area :work_submitted, rows: 3, class: ta_field_classes %>
+      </div>
+      <div class="<%= wide %>">
+        <%= p.label :resolution_notes, "Resolution", class: ta_label_classes %>
+        <%= p.text_area :resolution_notes, rows: 3, class: ta_field_classes %>
+      </div>
+    </div>
+  <% end %>
+</fieldset>
+
+<fieldset class="mb-6" x-show="category == 'party_programs_hosted'" x-cloak :disabled="category !== 'party_programs_hosted'">
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Party program hosted</h2>
+  <%= f.fields_for :party_program_hosted do |p| %>
+    <div class="<%= grid %>">
+      <div>
+        <%= p.label :program_name, "Program name", class: ta_label_classes %>
+        <%= p.text_field :program_name, class: field %>
+      </div>
+      <div>
+        <%= p.label :hosted_on, "Hosted on", class: ta_label_classes %>
+        <%= p.date_field :hosted_on, class: field %>
+      </div>
+      <div>
+        <%= p.label :location, class: ta_label_classes %>
+        <%= p.text_field :location, class: field %>
+      </div>
+      <div>
+        <%= p.label :total_attendees, "Total attendees", class: ta_label_classes %>
+        <%= p.number_field :total_attendees, min: 0, class: field %>
+      </div>
+      <div>
+        <%= p.label :print_media, "Print media", class: ta_label_classes %>
+        <%= p.text_field :print_media, class: field %>
+      </div>
+      <div>
+        <%= p.label :electronic_media, "Electronic media", class: ta_label_classes %>
+        <%= p.text_field :electronic_media, class: field %>
+      </div>
+    </div>
+  <% end %>
+</fieldset>
+
+<fieldset class="mb-6" x-show="category == 'personal_activities'" x-cloak :disabled="category !== 'personal_activities'">
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Personal activity</h2>
+  <%= f.fields_for :personal_activity do |p| %>
+    <div class="<%= grid %>">
+      <div>
+        <%= p.label :activity_name, "Activity name", class: ta_label_classes %>
+        <%= p.text_field :activity_name, class: field %>
+      </div>
+      <div>
+        <%= p.label :occasion, class: ta_label_classes %>
+        <%= p.text_field :occasion, class: field %>
+      </div>
+      <div>
+        <%= p.label :total_submission, "Total submission", class: ta_label_classes %>
+        <%= p.text_field :total_submission, class: field %>
+      </div>
+      <div>
+        <%= p.label :from_date, "From", class: ta_label_classes %>
+        <%= p.date_field :from_date, class: field %>
+      </div>
+      <div>
+        <%= p.label :to_date, "To", class: ta_label_classes %>
+        <%= p.date_field :to_date, class: field %>
+      </div>
+      <div class="<%= wide %>">
+        <%= p.label :notes, class: ta_label_classes %>
+        <%= p.text_area :notes, rows: 3, class: ta_field_classes %>
+      </div>
+    </div>
+  <% end %>
+</fieldset>
+
+<fieldset class="mb-6" x-show="category == 'one_to_one'" x-cloak :disabled="category !== 'one_to_one'">
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">One to one</h2>
+  <%= f.fields_for :one_to_one do |p| %>
+    <div class="<%= grid %>">
+      <div>
+        <%= p.label :karyakarta_user_id, "Karyakarta", class: ta_label_classes %>
+        <%= p.collection_select :karyakarta_user_id, @org_users, :id, :name,
+              { include_blank: "Not in the team list" }, class: field %>
+      </div>
+      <div>
+        <%= p.label :karyakarta_name_text, "Name, if they have no login", class: ta_label_classes %>
+        <%= p.text_field :karyakarta_name_text, class: field %>
+      </div>
+      <div>
+        <%= p.label :assignment, class: ta_label_classes %>
+        <%= p.text_field :assignment, class: field %>
+      </div>
+      <div class="flex min-h-11 items-end gap-2 pb-2">
+        <%= p.check_box :resolved, class: "h-5 w-5 rounded border-gray-300" %>
+        <%= p.label :resolved, "Resolved", class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+      </div>
+      <div>
+        <%= p.label :from_date, "From", class: ta_label_classes %>
+        <%= p.date_field :from_date, class: field %>
+      </div>
+      <div>
+        <%= p.label :to_date, "To", class: ta_label_classes %>
+        <%= p.date_field :to_date, class: field %>
+      </div>
+      <div class="<%= wide %>">
+        <%= p.label :notes, class: ta_label_classes %>
+        <%= p.text_area :notes, rows: 3, class: ta_field_classes %>
+      </div>
+    </div>
+  <% end %>
+</fieldset>

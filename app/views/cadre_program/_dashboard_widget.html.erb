@@ -1,0 +1,38 @@
+<%# Recent cadre activity (Story 2.3, FR26/FR50). One policy_scope over cadre_activities —
+    not a union of the detail tables. Counts carry a text label (UX-DR6). %>
+<% scope = policy_scope(CadreProgram::CadreActivity) %>
+<% recent = scope.includes(:owner).order(created_at: :desc, id: :desc).limit(5) %>
+<% counts = scope.counts_by_category %>
+
+<% if recent.empty? %>
+  <p class="text-xs text-gray-400">No cadre activity yet.</p>
+<% else %>
+  <ul class="space-y-3">
+    <% recent.each do |activity| %>
+      <li>
+        <%= link_to cadre_program_activity_path(activity), class: "block" do %>
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= activity.category_label %></p>
+            <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b") %></p>
+          </div>
+          <p class="mt-0.5 line-clamp-2 text-xs text-gray-500"><%= activity.impact_notes.presence || "—" %></p>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<% if counts.any? %>
+  <ul class="mt-4 space-y-1">
+    <% counts.each do |label, count| %>
+      <li class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
+        <span><%= label %></span>
+        <span class="tabular-nums font-semibold"><%= count %></span>
+      </li>
+    <% end %>
+  </ul>
+  <div class="mt-3"><%= pie_chart counts, height: "160px" %></div>
+<% end %>
+
+<%= link_to "View activity", cadre_program_activities_path,
+      class: "mt-3 inline-block text-xs font-medium text-brand-500 hover:text-brand-600" %>

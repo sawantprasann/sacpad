@@ -326,22 +326,24 @@ layer(base);
     border-color: var(--color-gray-200, currentColor);
   }
   button:not(:disabled),
-  [role="button"]:not(:disabled) {
+  [role="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="button"]:not(:disabled) {
     cursor: pointer;
   }
   body {
     @apply font-outfit relative z-1 bg-gray-50 font-normal;
   }
 }
-@layer utilities {
-  /* For Remove Date Icon */
-  input[type="date"]::-webkit-inner-spin-button,
-  input[type="time"]::-webkit-inner-spin-button,
-  input[type="date"]::-webkit-calendar-picker-indicator,
-  input[type="time"]::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
-  }
+/* Tailwind preflight sets appearance:none on date/time inputs, which removes the
+   native calendar popup in Chromium. Restore it so the picker can open. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+  appearance: auto;
+  -webkit-appearance: auto;
 }
 
 .sidebar:hover {

@@ -1,0 +1,121 @@
+<% content_for :title, @category_label ? "Cadre Program — #{@category_label}" : "Cadre Program" %>
+<% new_path = @category_key ? new_cadre_program_activity_path(category: @category_key) : new_cadre_program_activity_path %>
+
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Cadre Program</h1>
+    <% if @category_label %>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @category_label %></span></p>
+    <% else %>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Activity in your branch</p>
+    <% end %>
+  </div>
+  <div class="flex flex-wrap items-center gap-3">
+    <%= render "ui/module_toolbar", export_url: cadre_program_activities_path(format: :xlsx, category: @category_key) %>
+    <% if current_user.role.can_write?("cadre_program") %>
+      <%= link_to "Log activity", new_path,
+            class: "#{ta_btn_primary} min-h-11",
+            style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
+    <% end %>
+  </div>
+</div>
+
+<% if @category_counts.present? %>
+  <div class="<%= ta_card_classes %> mb-4 grid gap-4 p-5 lg:grid-cols-[16rem_1fr] lg:items-center">
+    <div>
+      <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">By category</h2>
+      <ul class="space-y-1">
+        <% @category_counts.each do |label, count| %>
+          <li class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+            <span><%= label %></span>
+            <span class="tabular-nums font-semibold"><%= count %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+    <%= pie_chart @category_counts, height: "180px" %>
+  </div>
+<% end %>
+
+<div class="<%= ta_card_classes %> hidden overflow-hidden xl:block">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Activity</th>
+          <th class="px-5 py-3 font-medium">Category</th>
+          <th class="px-5 py-3 font-medium">Media value</th>
+          <th class="px-5 py-3 font-medium">Logged by</th>
+          <th class="px-5 py-3 font-medium">Photos</th>
+          <th class="px-5 py-3 font-medium">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @activities.each do |activity| %>
+          <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]">
+            <td class="px-5 py-3 font-medium">
+              <%= link_to activity.detail_headline.presence || activity.category_label, cadre_program_activity_path(activity),
+                    class: "text-gray-800 hover:text-brand-500 dark:text-white/90" %>
+            </td>
+            <td class="px-5 py-3"><%= render "ui/badge", label: activity.category_label, tone: "brand" %></td>
+            <td class="max-w-sm px-5 py-3 text-gray-600 dark:text-gray-300">
+              <%= activity.impact_notes.present? ? truncate(activity.impact_notes, length: 90) : "—" %>
+            </td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
+            <td class="px-5 py-3 tabular-nums text-gray-500"><%= activity.photos.size %></td>
+            <td class="px-5 py-3 tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @activities.empty? %>
+      <p class="px-5 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="flex flex-col gap-3 xl:hidden">
+  <% @activities.each do |activity| %>
+    <%= link_to cadre_program_activity_path(activity), class: "#{ta_card_classes} block p-4" do %>
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="truncate font-medium text-gray-800 dark:text-white/90"><%= activity.detail_headline.presence || activity.category_label %></p>
+          <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "brand" %></p>
+        </div>
+        <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></p>
+      </div>
+      <p class="mt-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
+      <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
+    <% end %>
+  <% end %>
+  <% if @activities.empty? %>
+    <div class="<%= ta_card_classes %> p-10 text-center text-sm text-gray-400">No cadre activity yet.</div>
+  <% end %>
+</div>
+
+<% if @pagy.last > 1 %>
+  <nav class="mt-4 flex items-center justify-between text-sm">
+    <% if @pagy.previous %>
+      <%= link_to "← Prev", cadre_program_activities_path(category: @category_key, page: @pagy.previous), class: "font-medium text-brand-500 hover:text-brand-600" %>
+    <% else %>
+      <span class="text-gray-300">← Prev</span>
+    <% end %>
+    <span class="text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
+    <% if @pagy.next %>
+      <%= link_to "Next →", cadre_program_activities_path(category: @category_key, page: @pagy.next), class: "font-medium text-brand-500 hover:text-brand-600" %>
+    <% else %>
+      <span class="text-gray-300">Next →</span>
+    <% end %>
+  </nav>
+<% end %>
+
+<% if current_user.role.can_write?("cadre_program") %>
+  <%= link_to new_path,
+        class: "fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg xl:hidden",
+        style: "background: var(--org-party-color); color: var(--org-party-contrast)",
+        aria: { label: @category_label ? "Log activity in #{@category_label}" : "Log activity" } do %>
+    <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
+    </svg>
+  <% end %>
+<% end %>

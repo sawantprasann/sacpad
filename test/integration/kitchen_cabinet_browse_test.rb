@@ -80,6 +80,9 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Asha", @response.body
     assert_match t.ticket_number, @response.body
+    assert_select "nav[aria-label=Breadcrumb] a", text: "Kitchen Cabinet"
+    assert_select "nav[aria-label=Breadcrumb] a", text: "Water"
+    assert_select "nav[aria-label=Breadcrumb] [aria-current=page]", text: "Asha"
   end
 
   test "opening a ticket outside the viewer's subtree returns 404" do

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_06_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -98,6 +98,99 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["village_id"], name: "index_booths_on_village_id"
+  end
+
+  create_table "cadre_activities", force: :cascade do |t|
+    t.bigint "owner_id", null: false
+    t.bigint "organization_id", null: false
+    t.integer "category", null: false
+    t.text "impact_notes"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_cadre_activities_on_category"
+    t.index ["discarded_at"], name: "index_cadre_activities_on_discarded_at"
+    t.index ["organization_id", "owner_id"], name: "index_cadre_activities_on_organization_id_and_owner_id"
+    t.index ["organization_id"], name: "index_cadre_activities_on_organization_id"
+    t.index ["owner_id"], name: "index_cadre_activities_on_owner_id"
+  end
+
+  create_table "cadre_activity_leadership_meets", force: :cascade do |t|
+    t.bigint "cadre_activity_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "whom_to_meet", null: false
+    t.text "point_of_discussion"
+    t.text "work_submitted"
+    t.date "submitted_on"
+    t.date "followup_on"
+    t.text "resolution_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cadre_activity_id"], name: "index_cadre_activity_leadership_meets_on_cadre_activity_id", unique: true
+    t.index ["organization_id"], name: "index_cadre_activity_leadership_meets_on_organization_id"
+  end
+
+  create_table "cadre_activity_one_to_ones", force: :cascade do |t|
+    t.bigint "cadre_activity_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "karyakarta_user_id"
+    t.string "karyakarta_name_text"
+    t.string "assignment"
+    t.boolean "resolved", default: false, null: false
+    t.date "from_date"
+    t.date "to_date"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cadre_activity_id"], name: "index_cadre_activity_one_to_ones_on_cadre_activity_id", unique: true
+    t.index ["karyakarta_user_id"], name: "index_cadre_activity_one_to_ones_on_karyakarta_user_id"
+    t.index ["organization_id"], name: "index_cadre_activity_one_to_ones_on_organization_id"
+  end
+
+  create_table "cadre_activity_party_program_hosteds", force: :cascade do |t|
+    t.bigint "cadre_activity_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "program_name", null: false
+    t.date "hosted_on"
+    t.string "location"
+    t.integer "total_attendees"
+    t.string "print_media"
+    t.string "electronic_media"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cadre_activity_id"], name: "idx_on_cadre_activity_id_3c508384a4", unique: true
+    t.index ["organization_id"], name: "index_cadre_activity_party_program_hosteds_on_organization_id"
+  end
+
+  create_table "cadre_activity_personal_activities", force: :cascade do |t|
+    t.bigint "cadre_activity_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "activity_name", null: false
+    t.string "occasion"
+    t.string "total_submission"
+    t.date "from_date"
+    t.date "to_date"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cadre_activity_id"], name: "index_cadre_activity_personal_activities_on_cadre_activity_id", unique: true
+    t.index ["organization_id"], name: "index_cadre_activity_personal_activities_on_organization_id"
+  end
+
+  create_table "cadre_activity_programs", force: :cascade do |t|
+    t.bigint "cadre_activity_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "program_name", null: false
+    t.string "occasion"
+    t.string "location"
+    t.date "occurred_on"
+    t.string "host"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cadre_activity_id"], name: "index_cadre_activity_programs_on_cadre_activity_id", unique: true
+    t.index ["organization_id"], name: "index_cadre_activity_programs_on_organization_id"
   end
 
   create_table "loksabhas", force: :cascade do |t|
@@ -335,6 +428,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_06_150000) do
   add_foreign_key "admin_organizations", "organizations"
   add_foreign_key "assemblies", "loksabhas"
   add_foreign_key "booths", "villages"
+  add_foreign_key "cadre_activities", "organizations"
+  add_foreign_key "cadre_activities", "users", column: "owner_id"
+  add_foreign_key "cadre_activity_leadership_meets", "cadre_activities"
+  add_foreign_key "cadre_activity_leadership_meets", "organizations"
+  add_foreign_key "cadre_activity_one_to_ones", "cadre_activities"
+  add_foreign_key "cadre_activity_one_to_ones", "organizations"
+  add_foreign_key "cadre_activity_one_to_ones", "users", column: "karyakarta_user_id"
+  add_foreign_key "cadre_activity_party_program_hosteds", "cadre_activities"
+  add_foreign_key "cadre_activity_party_program_hosteds", "organizations"
+  add_foreign_key "cadre_activity_personal_activities", "cadre_activities"
+  add_foreign_key "cadre_activity_personal_activities", "organizations"
+  add_foreign_key "cadre_activity_programs", "cadre_activities"
+  add_foreign_key "cadre_activity_programs", "organizations"
   add_foreign_key "loksabhas", "states"
   add_foreign_key "party_memberships", "organizations"
   add_foreign_key "party_memberships", "parties"

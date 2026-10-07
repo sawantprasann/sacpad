@@ -44,6 +44,12 @@ Rails.application.routes.draw do
   # Org-facing hierarchical user management (Story 0.9)
   resources :users, only: %i[index new create show]
 
+  # Cadre Program (Epic 2). Story 2.1 is the shared base capture; detail forms (2.2) and
+  # the dashboard widget / Excel export (2.3) extend this resource.
+  namespace :cadre_program do
+    resources :activities, only: %i[index new create show]
+  end
+
   # Kitchen Cabinet (Epic 1). Story 1.1 stands up only the category-filtered list target;
   # ticket capture (1.2) and the real scoped browse list (1.3) fill it in later.
   namespace :kitchen_cabinet do

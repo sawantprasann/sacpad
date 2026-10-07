@@ -67,7 +67,32 @@
             </li>
           <% end %>
 
-          <% ["Cadre Program", "Ground Reports", "PR", "Social Media", "Voter Lists", "RAG Mapping"].each do |m| %>
+          <%# Cadre Program: expandable submenu of the six fixed categories, each driving the
+              ?category= filter. Same pattern as Kitchen Cabinet. Shown only with module access. %>
+          <% if user_signed_in? && current_user.role.can_access?("cadre_program") %>
+            <li x-data="{ open: <%= params[:controller] == 'cadre_program/activities' %> }">
+              <button type="button" @click="open = !open"
+                class="menu-item group menu-item-inactive w-full"
+                :class="{ 'menu-item-active': open }">
+                <span class="menu-item-text">Cadre Program</span>
+                <svg class="ml-auto h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
+                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <ul x-show="open" x-cloak class="mt-1 ml-5 flex flex-col gap-1 border-l border-gray-100 pl-3 dark:border-gray-800">
+                <% CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label| %>
+                  <% cat_path = cadre_program_activities_path(category: key) %>
+                  <li>
+                    <%= link_to label, cat_path,
+                          class: "menu-dropdown-item #{current_page?(cat_path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}" %>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
+
+          <% ["Ground Reports", "PR", "Social Media", "Voter Lists", "RAG Mapping"].each do |m| %>
             <li>
               <span class="menu-item group menu-item-inactive cursor-default">
                 <span class="menu-item-text"><%= m %></span>

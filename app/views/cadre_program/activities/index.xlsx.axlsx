@@ -1,0 +1,15 @@
+# Cadre activity export (Story 2.3, FR49). Rows are the viewer-scoped, filtered list.
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Cadre activity") do |sheet|
+  sheet.add_row [ "Date", "Category", "Activity", "Media value", "Logged by", "Photos" ]
+  @activities.each do |activity|
+    sheet.add_row [
+      activity.created_at,
+      activity.category_label,
+      activity.detail_headline,
+      activity.impact_notes,
+      activity.owner.name,
+      activity.photos.size
+    ]
+  end
+end

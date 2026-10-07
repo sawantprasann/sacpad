@@ -1,0 +1,57 @@
+<% action_label = @activity.category_label ? "Create #{@activity.category_label}" : "Create activity" %>
+<% content_for :title, action_label %>
+<% back_path = @activity.category ? cadre_program_activities_path(category: @activity.category) : cadre_program_activities_path %>
+
+<div x-data='<%= { category: @activity.category.to_s, labels: CadreProgram::CadreActivity::CATEGORY_LABELS }.to_json %>'>
+  <div class="mb-6">
+    <%= link_to "← Cadre Program", back_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+    <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90"
+        x-text="labels[category] ? ('Create ' + labels[category]) : 'Create activity'"><%= action_label %></h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record what happened, the political impact, and any photos.</p>
+  </div>
+
+  <div class="<%= ta_card_classes %> p-6 md:p-8">
+    <%# scope: :cadre_activity — CadreProgram::CadreActivity would otherwise nest params under
+        cadre_program_cadre_activity, and require(:cadre_activity) would miss them. %>
+    <%= form_with model: @activity, scope: :cadre_activity, url: cadre_program_activities_path, method: :post, multipart: true do |f| %>
+      <% if @activity.errors.any? %>
+        <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @activity.errors.full_messages.to_sentence %></div>
+      <% end %>
+
+      <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <%= f.label :category, class: ta_label_classes %>
+          <%= f.select :category,
+                CadreProgram::CadreActivity::CATEGORY_LABELS.map { |key, label| [ label, key ] },
+                { include_blank: "Select a category" },
+                class: "#{ta_field_classes} min-h-11 cursor-pointer", "x-model": "category" %>
+        </div>
+      </div>
+
+      <%= render "detail_fields", f: f %>
+
+      <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div>
+          <%= f.label :impact_notes, "Media Value", class: ta_label_classes %>
+          <%= f.text_area :impact_notes, rows: 6, class: "#{ta_field_classes} min-h-11",
+                placeholder: "Sentiment, local reaction, whether this is likely to move votes" %>
+        </div>
+        <div>
+          <%= f.label :photos, "Photos", class: ta_label_classes %>
+          <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
+            <%= f.file_field :photos, multiple: true, accept: "image/*",
+                  class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+            <p class="mt-2 text-xs text-gray-500">Add one or more photos from the activity.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"
+                x-text="labels[category] ? ('Create ' + labels[category]) : 'Create activity'"><%= action_label %></button>
+        <%= link_to "Cancel", back_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>
