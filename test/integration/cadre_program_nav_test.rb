@@ -30,8 +30,8 @@ class CadreProgramNavTest < ActionDispatch::IntegrationTest
     CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label|
       assert_select "a[href=?]", cadre_program_activities_path(category: key), text: label
     end
-    assert_select ".menu-dropdown-badge", text: "soon", count: 5
-    assert_match "Ground Reports", @response.body
+    assert_select ".menu-dropdown-badge", text: "soon", count: 4
+    assert_no_match(/Ground Reports/, @response.body)
     assert_match "RAG Mapping", @response.body
   end
 
@@ -58,7 +58,7 @@ class CadreProgramNavTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href=?]", cadre_program_activities_path, count: 0
     assert_no_match(/Cadre Program/, @response.body)
-    assert_match "Ground Reports", @response.body
+    assert_no_match(/Ground Reports/, @response.body)
 
     get cadre_program_activities_path
     assert_redirected_to root_path

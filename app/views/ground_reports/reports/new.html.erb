@@ -1,0 +1,43 @@
+<% content_for :title, "Create report — #{@village.name}" %>
+
+<div class="mb-6">
+  <%= link_to "← #{@village.name}", ground_reports_village_path(@village), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+  <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90">Create report</h1>
+  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record the issue, any resolution, and what villagers said.</p>
+</div>
+
+<div class="<%= ta_card_classes %> p-6 md:p-8">
+  <%# scope: :ground_report — GroundReports::GroundReport would otherwise nest params under
+      ground_reports_ground_report. %>
+  <%= form_with model: @report, scope: :ground_report, url: ground_reports_village_reports_path(@village), method: :post, multipart: true do |f| %>
+    <% if @report.errors.any? %>
+      <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @report.errors.full_messages.to_sentence %></div>
+    <% end %>
+
+    <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="md:col-span-2">
+        <%= f.label :issue_text, "Issue", class: ta_label_classes %>
+        <%= f.text_area :issue_text, rows: 4, class: ta_field_classes, autofocus: true %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :resolution_text, "Resolution", class: ta_label_classes %>
+        <%= f.text_area :resolution_text, rows: 3, class: ta_field_classes %>
+      </div>
+      <div>
+        <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
+        <%= f.date_field :reported_at, class: "#{ta_field_classes} min-h-11" %>
+      </div>
+    </div>
+
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Testimonial</h2>
+    <%= f.fields_for :testimonials do |tf| %>
+      <%= render "ground_reports/testimonials/fields", f: tf %>
+    <% end %>
+
+    <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)">Create report</button>
+      <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

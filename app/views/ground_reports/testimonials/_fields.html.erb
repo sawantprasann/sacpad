@@ -1,0 +1,24 @@
+<div class="grid grid-cols-1 gap-4 md:grid-cols-2" x-data="{ kind: '<%= f.object.content_type.presence || "text" %>' }">
+  <div>
+    <%= f.label :person_name, "Person", class: ta_label_classes %>
+    <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11" %>
+  </div>
+  <div>
+    <%= f.label :content_type, "Type", class: ta_label_classes %>
+    <%= f.select :content_type,
+          GroundReports::GroundReportTestimonial.content_types.keys.map { |key| [ key.humanize, key ] },
+          {},
+          class: "#{ta_field_classes} min-h-11 cursor-pointer", "x-model": "kind" %>
+  </div>
+  <div class="md:col-span-2" x-show="kind === 'text'">
+    <%= f.label :text_content, "What they said", class: ta_label_classes %>
+    <%= f.text_area :text_content, rows: 3, class: ta_field_classes %>
+  </div>
+  <div class="md:col-span-2" x-show="kind === 'audio' || kind === 'video'" x-cloak>
+    <%= f.label :media, "Recording", class: ta_label_classes %>
+    <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
+      <%= f.file_field :media, class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2",
+            ":accept" => "kind === 'audio' ? 'audio/*' : 'video/*'" %>
+    </div>
+  </div>
+</div>

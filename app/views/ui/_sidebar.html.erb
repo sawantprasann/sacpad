@@ -87,7 +87,16 @@
             </li>
           <% end %>
 
-          <% ["Ground Reports", "PR", "Social Media", "Voter Lists", "RAG Mapping"].each do |m| %>
+          <% if user_signed_in? && current_user.role.can_access?("ground_reports") %>
+            <li>
+              <%= link_to ground_reports_villages_path,
+                    class: "menu-item group #{params[:controller].to_s.start_with?("ground_reports/") ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <span class="menu-item-text">Ground Reports</span>
+              <% end %>
+            </li>
+          <% end %>
+
+          <% ["PR", "Social Media", "Voter Lists", "RAG Mapping"].each do |m| %>
             <li>
               <span class="menu-item group menu-item-inactive cursor-default">
                 <span class="menu-item-text"><%= m %></span>

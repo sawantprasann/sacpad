@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -193,12 +193,70 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
     t.index ["organization_id"], name: "index_cadre_activity_programs_on_organization_id"
   end
 
+  create_table "ground_report_testimonials", force: :cascade do |t|
+    t.bigint "ground_report_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "person_name", null: false
+    t.integer "content_type", null: false
+    t.text "text_content"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_ground_report_testimonials_on_created_by_id"
+    t.index ["discarded_at"], name: "index_ground_report_testimonials_on_discarded_at"
+    t.index ["ground_report_id"], name: "index_ground_report_testimonials_on_ground_report_id"
+    t.index ["organization_id"], name: "index_ground_report_testimonials_on_organization_id"
+  end
+
+  create_table "ground_reports", force: :cascade do |t|
+    t.bigint "owner_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "village_id", null: false
+    t.text "issue_text", null: false
+    t.text "resolution_text"
+    t.date "reported_at", null: false
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_ground_reports_on_discarded_at"
+    t.index ["organization_id", "owner_id"], name: "index_ground_reports_on_organization_id_and_owner_id"
+    t.index ["organization_id", "village_id"], name: "index_ground_reports_on_organization_id_and_village_id"
+    t.index ["organization_id"], name: "index_ground_reports_on_organization_id"
+    t.index ["owner_id"], name: "index_ground_reports_on_owner_id"
+    t.index ["village_id"], name: "index_ground_reports_on_village_id"
+  end
+
   create_table "loksabhas", force: :cascade do |t|
     t.bigint "state_id", null: false
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["state_id"], name: "index_loksabhas_on_state_id"
+  end
+
+  create_table "mock_poll_responses", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "politician_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "respondent_name", null: false
+    t.string "respondent_mobile"
+    t.integer "preference_basis", null: false
+    t.boolean "vote_intent"
+    t.text "note"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_mock_poll_responses_on_created_by_id"
+    t.index ["discarded_at"], name: "index_mock_poll_responses_on_discarded_at"
+    t.index ["organization_id", "village_id", "politician_id"], name: "index_mock_poll_responses_on_org_village_politician"
+    t.index ["organization_id"], name: "index_mock_poll_responses_on_organization_id"
+    t.index ["politician_id"], name: "index_mock_poll_responses_on_politician_id"
+    t.index ["village_id"], name: "index_mock_poll_responses_on_village_id"
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -384,6 +442,71 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  create_table "village_local_admin_contacts", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "role_title", null: false
+    t.string "phone"
+    t.text "notes"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_village_local_admin_contacts_on_discarded_at"
+    t.index ["organization_id", "village_id"], name: "idx_on_organization_id_village_id_9698e53fd0"
+    t.index ["organization_id"], name: "index_village_local_admin_contacts_on_organization_id"
+    t.index ["village_id"], name: "index_village_local_admin_contacts_on_village_id"
+  end
+
+  create_table "village_local_karyakartas", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "phone"
+    t.text "notes"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_village_local_karyakartas_on_discarded_at"
+    t.index ["organization_id", "village_id"], name: "idx_on_organization_id_village_id_4a876deaf0"
+    t.index ["organization_id"], name: "index_village_local_karyakartas_on_organization_id"
+    t.index ["village_id"], name: "index_village_local_karyakartas_on_village_id"
+  end
+
+  create_table "village_political_positions", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "party_id", null: false
+    t.string "representative_name", null: false
+    t.string "position_title", null: false
+    t.date "started_at", null: false
+    t.date "ended_at"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_village_political_positions_on_discarded_at"
+    t.index ["organization_id"], name: "index_village_political_positions_on_organization_id"
+    t.index ["party_id"], name: "index_village_political_positions_on_party_id"
+    t.index ["village_id", "organization_id"], name: "one_current_position_per_village_org", unique: true, where: "((ended_at IS NULL) AND (discarded_at IS NULL))"
+    t.index ["village_id"], name: "index_village_political_positions_on_village_id"
+  end
+
+  create_table "village_yatras", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.bigint "updated_by_id"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_village_yatras_on_organization_id"
+    t.index ["updated_by_id"], name: "index_village_yatras_on_updated_by_id"
+    t.index ["village_id", "organization_id"], name: "index_village_yatras_on_village_id_and_organization_id", unique: true
+    t.index ["village_id"], name: "index_village_yatras_on_village_id"
+  end
+
   create_table "villages", force: :cascade do |t|
     t.bigint "assembly_id", null: false
     t.string "name", null: false
@@ -422,6 +545,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
     t.index ["organization_id"], name: "index_voters_on_organization_id"
   end
 
+  create_table "worship_places", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "place_type", null: false
+    t.text "notes"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_worship_places_on_discarded_at"
+    t.index ["organization_id", "village_id"], name: "index_worship_places_on_organization_id_and_village_id"
+    t.index ["organization_id"], name: "index_worship_places_on_organization_id"
+    t.index ["village_id"], name: "index_worship_places_on_village_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_organizations", "admins"
@@ -441,7 +580,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
   add_foreign_key "cadre_activity_personal_activities", "organizations"
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
+  add_foreign_key "ground_report_testimonials", "ground_reports"
+  add_foreign_key "ground_report_testimonials", "organizations"
+  add_foreign_key "ground_report_testimonials", "users", column: "created_by_id"
+  add_foreign_key "ground_reports", "organizations"
+  add_foreign_key "ground_reports", "users", column: "owner_id"
+  add_foreign_key "ground_reports", "villages"
   add_foreign_key "loksabhas", "states"
+  add_foreign_key "mock_poll_responses", "organizations"
+  add_foreign_key "mock_poll_responses", "politicians"
+  add_foreign_key "mock_poll_responses", "users", column: "created_by_id"
+  add_foreign_key "mock_poll_responses", "villages"
   add_foreign_key "party_memberships", "organizations"
   add_foreign_key "party_memberships", "parties"
   add_foreign_key "politicians", "organizations"
@@ -460,7 +609,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_110000) do
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "roles"
   add_foreign_key "users", "users", column: "parent_id"
+  add_foreign_key "village_local_admin_contacts", "organizations"
+  add_foreign_key "village_local_admin_contacts", "villages"
+  add_foreign_key "village_local_karyakartas", "organizations"
+  add_foreign_key "village_local_karyakartas", "villages"
+  add_foreign_key "village_political_positions", "organizations"
+  add_foreign_key "village_political_positions", "parties"
+  add_foreign_key "village_political_positions", "villages"
+  add_foreign_key "village_yatras", "organizations"
+  add_foreign_key "village_yatras", "users", column: "updated_by_id"
+  add_foreign_key "village_yatras", "villages"
   add_foreign_key "villages", "assemblies"
   add_foreign_key "voters", "booths"
   add_foreign_key "voters", "organizations"
+  add_foreign_key "worship_places", "organizations"
+  add_foreign_key "worship_places", "villages"
 end

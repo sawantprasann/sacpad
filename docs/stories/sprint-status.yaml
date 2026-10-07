@@ -55,16 +55,16 @@ development_status:
   2-3-cadre-activity-feed-export: done
 
   # ── Epic 3: Ground Reports — Village-Centric Field Intelligence ──
-  epic-3: backlog
-  3-1-village-report-testimonials: backlog
-  3-2-worship-yatra-political-position: backlog
-  3-3-local-contacts: backlog
-  3-4-mock-poll-capture-tally: backlog
+  epic-3: in-progress
+  3-1-village-report-testimonials: review
+  3-2-worship-yatra-political-position: review
+  3-3-local-contacts: review
+  3-4-mock-poll-capture-tally: review
   3-5-bulk-excel-import-report-mock-poll: backlog
 
   # ── Epic 4: PR — Traditional Media Monitoring ──
-  epic-4: backlog
-  4-1-pr-catalogs: backlog
+  epic-4: in-progress
+  4-1-pr-catalogs: ready-for-dev
   4-2-pr-record-capture: backlog
   4-3-outdoor-ad-podcast-date: backlog
 

@@ -1,0 +1,70 @@
+<% content_for :title, "#{@village.name} — report" %>
+<% crumb = "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+
+<nav aria-label="Breadcrumb" class="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+  <ol class="flex flex-wrap items-center gap-2">
+    <li><%= link_to "Dashboard", root_path, class: crumb %></li>
+    <li aria-hidden="true">/</li>
+    <li><%= link_to "Ground Reports", ground_reports_villages_path, class: crumb %></li>
+    <li aria-hidden="true">/</li>
+    <li><%= link_to @village.name, ground_reports_village_path(@village), class: crumb %></li>
+    <li aria-hidden="true">/</li>
+    <li class="font-medium text-gray-800 dark:text-white/90" aria-current="page"><%= truncate(@report.issue_text, length: 48) %></li>
+  </ol>
+</nav>
+
+<div class="<%= ta_card_classes %> mb-4 overflow-hidden">
+  <div class="h-1" style="background: var(--org-party-color)"></div>
+  <div class="flex flex-wrap items-start justify-between gap-4 px-6 py-5">
+    <div class="min-w-0">
+      <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">Issue</p>
+      <h1 class="mt-1 text-xl font-semibold text-gray-900 dark:text-white/90"><%= @report.issue_text %></h1>
+      <p class="mt-2 text-sm text-gray-500">
+        Logged by <%= @report.owner.name %> · <%= @report.reported_at.strftime("%d %b %Y") %>
+      </p>
+    </div>
+    <%= link_to "Back to village", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
+  </div>
+</div>
+
+<div class="grid gap-4 xl:grid-cols-3">
+  <div class="<%= ta_card_classes %> p-6 xl:col-span-2">
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Resolution</h2>
+    <p class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300"><%= @report.resolution_text.presence || "—" %></p>
+  </div>
+
+  <div class="<%= ta_card_classes %> p-6">
+    <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Testimonials</h2>
+    <% if @report.testimonials.kept.any? %>
+      <ul class="space-y-4">
+        <% @report.testimonials.kept.each do |item| %>
+          <li class="rounded-xl bg-gray-50 p-4 dark:bg-white/5">
+            <p class="text-sm font-medium text-gray-900 dark:text-white/90"><%= item.person_name %></p>
+            <p class="mt-1 text-xs text-gray-400"><%= item.content_type.humanize %></p>
+            <% if item.text? %>
+              <p class="mt-2 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300"><%= item.text_content %></p>
+            <% elsif item.media.attached? && item.audio? %>
+              <audio class="mt-2 w-full" controls src="<%= rails_blob_path(item.media) %>"></audio>
+            <% elsif item.media.attached? && item.video? %>
+              <video class="mt-2 w-full rounded-lg" controls src="<%= rails_blob_path(item.media) %>"></video>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-gray-400">No testimonials yet.</p>
+    <% end %>
+
+    <% if current_user.role.can_write?("ground_reports") %>
+      <div class="mt-6 border-t border-gray-100 pt-4 dark:border-gray-800">
+        <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Add testimonial</h3>
+        <%= form_with model: @testimonial, scope: :ground_report_testimonial,
+              url: ground_reports_village_report_testimonials_path(@village, @report), method: :post, multipart: true do |f| %>
+          <%= render "ground_reports/testimonials/fields", f: f %>
+          <button type="submit" class="<%= ta_btn_primary %> mt-4 min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add testimonial</button>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
