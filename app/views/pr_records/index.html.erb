@@ -4,9 +4,14 @@
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
 <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0">
-    <h1 class="<%= ta_page_title %>">PR Records</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= @category ? "#{@category.name} — " : "" %><%= pluralize(@pagy.count, "record") %></p>
+  <div class="min-w-0 flex items-center gap-3">
+    <div class="<%= module_color("pr_records") %>">
+      <%= raw module_icon("pr_records", "h-7 w-7") %>
+    </div>
+    <div>
+      <h1 class="<%= ta_page_title %>">PR Records</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= @category ? "#{@category.name} — " : "" %><%= pluralize(@pagy.count, "record") %></p>
+    </div>
   </div>
   <%= render "ui/module_toolbar",
         export_url: pr_records_path(format: :xlsx, category: @category&.slug),
