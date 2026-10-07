@@ -1,16 +1,17 @@
 <%# Shared module toolbar (brief §5). Actions wired per-module; exports are subtree/org-scoped (FR49). %>
-<div class="flex flex-wrap items-center gap-2 text-sm">
+<% tool = "inline-flex h-8 cursor-pointer items-center rounded-lg px-3 text-sm font-medium" %>
+<div class="flex flex-wrap items-center gap-2">
   <% if local_assigns[:export_url] %>
-    <%= link_to "Export Excel", export_url, class: "rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50" %>
+    <%= link_to "Export Excel", export_url, class: "#{tool} border border-gray-200 bg-white text-gray-600 hover:bg-gray-50" %>
   <% else %>
-    <button type="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50">Export Excel</button>
+    <button type="button" class="<%= tool %> border border-gray-200 bg-white text-gray-600 hover:bg-gray-50">Export Excel</button>
   <% end %>
-  <button type="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50">Prepare Chart</button>
-  <span class="inline-flex overflow-hidden rounded-lg border border-gray-200">
-    <button type="button" class="bg-white px-3 py-1.5 hover:bg-gray-50">Bar</button>
-    <button type="button" class="border-l border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50">Pie</button>
-    <button type="button" class="border-l border-gray-200 bg-white px-3 py-1.5 hover:bg-gray-50">Line</button>
+  <button type="button" class="<%= tool %> border border-gray-200 bg-white text-gray-600 hover:bg-gray-50">Prepare Chart</button>
+  <span class="inline-flex h-8 overflow-hidden rounded-lg border border-gray-200">
+    <button type="button" class="cursor-pointer bg-white px-3 text-sm hover:bg-gray-50">Bar</button>
+    <button type="button" class="cursor-pointer border-l border-gray-200 bg-white px-3 text-sm hover:bg-gray-50">Pie</button>
+    <button type="button" class="cursor-pointer border-l border-gray-200 bg-white px-3 text-sm hover:bg-gray-50">Line</button>
   </span>
-  <button type="button" class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-50">Export Chart</button>
-  <button type="button" class="rounded-lg px-3 py-1.5 font-medium text-white" style="background: var(--org-party-color)">Get All Details</button>
+  <button type="button" class="<%= tool %> border border-gray-200 bg-white text-gray-600 hover:bg-gray-50">Export Chart</button>
+  <button type="button" class="<%= tool %> text-white" style="background: var(--org-party-color)">Get All Details</button>
 </div>
