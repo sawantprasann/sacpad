@@ -63,10 +63,10 @@ development_status:
   3-5-bulk-excel-import-report-mock-poll: review
 
   # ── Epic 4: PR — Traditional Media Monitoring ──
-  epic-4: in-progress
+  epic-4: done
   4-1-pr-catalogs: review
   4-2-pr-record-capture: review
-  4-3-outdoor-ad-podcast-date: backlog
+  4-3-outdoor-ad-podcast-date: review
 
   # ── Epic 5: Social Media v1 — Karyakarta Pages, Bulk Outreach & Meta ──
   epic-5: backlog
