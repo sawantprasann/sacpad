@@ -23,9 +23,30 @@ module Console
     end
 
     # Viewing a specific org's data is logged and visibly flagged (§8a, Story 0.11).
+    # Story 0.16: Kitchen Cabinet / Cadre tabs load org-wide ticket/activity data (org admin view).
     def show
       record_activity("organization.viewed", record: @organization, organization: @organization)
       @viewing_org = @organization
+
+      # Load Kitchen Cabinet tickets if tab is selected (Story 0.16, AC 1).
+      if params[:tab] == "kitchen_cabinet"
+        ActsAsTenant.with_tenant(@organization) do
+          relation = KitchenCabinet::Ticket.kept.includes(:ticket_category, :owner)
+          if params[:category]
+            cat = TicketCategory.active.find_by(slug: params[:category])
+            relation = relation.where(ticket_category_id: cat.id) if cat
+          end
+          if params[:status].present? && KitchenCabinet::Ticket.statuses.key?(params[:status])
+            relation = relation.where(status: params[:status])
+          end
+          if params[:q].present?
+            term = "%#{params[:q].strip}%"
+            relation = relation.where("person_name ILIKE :t OR village ILIKE :t", t: term)
+          end
+          relation = relation.order(reported_at: :desc, id: :desc)
+          @pagy, @tickets = pagy(:offset, relation)
+        end
+      end
     end
 
     def deactivate

@@ -12,7 +12,7 @@
 # Epic 2–8 story keys below are PROVISIONAL (derived from epics.md titles) — `create-story`
 # is authoritative for the final slug when each is drafted.
 
-last_updated: 2026-10-06
+last_updated: 2026-10-07
 
 development_status:
   # ── Epic 0: Secure Multi-Tenant Foundation & Platform Operations ──
@@ -33,6 +33,7 @@ development_status:
   0-13-operational-health-view: review
   0-14-shared-chrome-export-dashboard: review
   0-15-voter-primitive: review
+  0-16-org-admin-dashboard: review
   epic-0-retrospective: optional
 
   # ── Epic 1: Kitchen Cabinet — Grievance Capture to Proof of Help ──
@@ -48,10 +49,10 @@ development_status:
   epic-1-retrospective: done
 
   # ── Epic 2: Cadre Program — Party-Organizing Activity ──
-  epic-2: backlog
-  2-1-cadre-activity-base-capture: backlog
-  2-2-per-category-detail-forms: backlog
-  2-3-cadre-activity-feed-export: backlog
+  epic-2: in-progress
+  2-1-cadre-activity-base-capture: review
+  2-2-per-category-detail-forms: review
+  2-3-cadre-activity-feed-export: review
 
   # ── Epic 3: Ground Reports — Village-Centric Field Intelligence ──
   epic-3: backlog

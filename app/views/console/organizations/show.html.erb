@@ -3,14 +3,153 @@
 
 <div class="mb-6"><h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @organization.name %></h1></div>
 
-<div class="<%= ta_card_classes %> p-6">
-  <dl class="grid grid-cols-2 gap-4 text-sm">
-    <div><dt class="text-gray-500">Status</dt><dd class="mt-1"><%= render "ui/badge", label: (@organization.active? ? "active" : "inactive"), tone: (@organization.active? ? "green" : "gray") %></dd></div>
-    <div><dt class="text-gray-500">Constituency</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.constituency_type || "—" %> #<%= @organization.constituency_id || "—" %></dd></div>
-    <div><dt class="text-gray-500">Users</dt><dd class="mt-1 tabular-nums text-gray-800 dark:text-white/90"><%= @organization.users.count %></dd></div>
-    <div><dt class="text-gray-500">Party</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.current_party&.name || "Independent" %></dd></div>
-  </dl>
-  <div class="mt-6">
-    <%= link_to "Manage roster", console_organization_politicians_path(@organization), class: ta_btn_secondary %>
+<%# Tabs: Overview | Kitchen Cabinet | Cadre Program -%>
+<div class="border-b border-gray-200 dark:border-gray-800 mb-6">
+  <div class="flex gap-8">
+    <button class="tab-btn <%= params[:tab] != 'kitchen_cabinet' && params[:tab] != 'cadre' ? 'tab-active' : 'tab-inactive' %>"
+            onclick="document.location.search = ''">Overview</button>
+    <a href="<%= console_organization_path(@organization, tab: 'kitchen_cabinet') %>"
+       class="tab-btn <%= params[:tab] == 'kitchen_cabinet' ? 'tab-active' : 'tab-inactive' %>">Kitchen Cabinet</a>
+    <a href="<%= console_organization_path(@organization, tab: 'cadre') %>"
+       class="tab-btn <%= params[:tab] == 'cadre' ? 'tab-active' : 'tab-inactive' %>">Cadre Program</a>
   </div>
 </div>
+
+<%# Overview Tab -%>
+<% if params[:tab].blank? || params[:tab] == 'overview' %>
+  <div class="<%= ta_card_classes %> p-6">
+    <dl class="grid grid-cols-2 gap-4 text-sm">
+      <div><dt class="text-gray-500">Status</dt><dd class="mt-1"><%= render "ui/badge", label: (@organization.active? ? "active" : "inactive"), tone: (@organization.active? ? "green" : "gray") %></dd></div>
+      <div><dt class="text-gray-500">Constituency</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.constituency_type || "—" %> #<%= @organization.constituency_id || "—" %></dd></div>
+      <div><dt class="text-gray-500">Users</dt><dd class="mt-1 tabular-nums text-gray-800 dark:text-white/90"><%= @organization.users.count %></dd></div>
+      <div><dt class="text-gray-500">Party</dt><dd class="mt-1 text-gray-800 dark:text-white/90"><%= @organization.current_party&.name || "Independent" %></dd></div>
+    </dl>
+    <div class="mt-6">
+      <%= link_to "Manage roster", console_organization_politicians_path(@organization), class: ta_btn_secondary %>
+    </div>
+  </div>
+<% end %>
+
+<%# Kitchen Cabinet Tab (Story 0.16, AC 1) -%>
+<% if params[:tab] == 'kitchen_cabinet' %>
+  <% ActsAsTenant.with_tenant(@organization) do %>
+    <%# Filter form -%>
+    <%= form_with url: console_organization_path(@organization, tab: 'kitchen_cabinet'), method: :get,
+          class: "mb-4 flex flex-wrap items-end gap-3", local: true do %>
+      <div>
+        <label class="<%= ta_label_classes %>">Category</label>
+        <%= select_tag :category,
+              options_for_select([ [ "All", "" ] ] + TicketCategory.active.order(:name).map { |c| [ c.name, c.slug ] }, params[:category]),
+              class: "#{ta_field_classes} min-h-11" %>
+      </div>
+      <div>
+        <label class="<%= ta_label_classes %>">Status</label>
+        <%= select_tag :status,
+              options_for_select([ [ "All", "" ] ] + KitchenCabinet::Ticket.statuses.keys.map { |s| [ s.humanize, s ] }, params[:status]),
+              class: "#{ta_field_classes} min-h-11" %>
+      </div>
+      <div class="flex-1 min-w-48">
+        <label class="<%= ta_label_classes %>">Search</label>
+        <%= text_field_tag :q, params[:q], placeholder: "Person or village", class: "#{ta_field_classes} min-h-11" %>
+      </div>
+      <%= submit_tag "Filter", class: "#{ta_btn_secondary} min-h-11" %>
+    <% end %>
+
+    <%# Desktop: filterable table. -%>
+    <div class="<%= ta_card_classes %> hidden overflow-hidden xl:block">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            <tr>
+              <th class="px-5 py-3 font-medium">Ticket</th>
+              <th class="px-5 py-3 font-medium">Person / village</th>
+              <th class="px-5 py-3 font-medium">Owner</th>
+              <th class="px-5 py-3 font-medium">Category</th>
+              <th class="px-5 py-3 font-medium">Status</th>
+              <th class="px-5 py-3 font-medium">Reported</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @tickets.each do |ticket| %>
+              <tr class="cursor-pointer border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]">
+                <td class="px-5 py-3 font-medium text-gray-700 dark:text-gray-300"><%= ticket.ticket_number %></td>
+                <td class="px-5 py-3">
+                  <div class="text-gray-800 dark:text-white/90"><%= ticket.person_name %></div>
+                  <div class="text-xs text-gray-500"><%= ticket.village.presence || "—" %></div>
+                </td>
+                <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= ticket.owner.name %></td>
+                <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= ticket.ticket_category.name %></td>
+                <td class="px-5 py-3"><%= render "ui/status_pill", status: ticket.status %></td>
+                <td class="px-5 py-3 text-gray-500 tabular-nums"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        <% if @tickets.empty? %>
+          <p class="px-5 py-16 text-center text-sm text-gray-400">No tickets match.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Mobile: card list. -%>
+    <div class="flex flex-col gap-3 xl:hidden">
+      <% @tickets.each do |ticket| %>
+        <div class="<%= ta_card_classes %> p-4">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= ticket.person_name %></p>
+              <p class="text-xs text-gray-500 dark:text-gray-400"><%= ticket.village.presence || "—" %></p>
+            </div>
+            <%= render "ui/status_pill", status: ticket.status %>
+          </div>
+          <div class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+            <span><%= ticket.owner.name %></span>
+            <span aria-hidden="true">·</span>
+            <span><%= ticket.ticket_category.name %></span>
+            <span aria-hidden="true">·</span>
+            <span><%= ticket.reported_at&.strftime("%d %b %Y") %></span>
+          </div>
+        </div>
+      <% end %>
+      <% if @tickets.empty? %>
+        <div class="<%= ta_card_classes %> p-10 text-center text-sm text-gray-400">No tickets match.</div>
+      <% end %>
+    </div>
+
+    <%# Pagination -%>
+    <% if @pagy.last > 1 %>
+      <nav class="mt-4 flex items-center justify-between text-sm">
+        <% if @pagy.previous %>
+          <%= link_to "← Prev", console_organization_path(@organization, tab: 'kitchen_cabinet', category: params[:category], status: params[:status], q: params[:q], page: @pagy.previous), class: "font-medium text-brand-500 hover:text-brand-600" %>
+        <% else %>
+          <span class="text-gray-300">← Prev</span>
+        <% end %>
+        <span class="text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
+        <% if @pagy.next %>
+          <%= link_to "Next →", console_organization_path(@organization, tab: 'kitchen_cabinet', category: params[:category], status: params[:status], q: params[:q], page: @pagy.next), class: "font-medium text-brand-500 hover:text-brand-600" %>
+        <% else %>
+          <span class="text-gray-300">Next →</span>
+        <% end %>
+      </nav>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%# Cadre Program Tab (Story 0.16, AC 3 - placeholder for now) -%>
+<% if params[:tab] == 'cadre' %>
+  <div class="<%= ta_card_classes %> p-6 text-center">
+    <p class="text-gray-500">Cadre Program activities (coming soon).</p>
+  </div>
+<% end %>
+
+<style>
+  .tab-btn {
+    @apply pb-3 px-1 text-sm font-medium border-b-2 transition-colors cursor-pointer;
+  }
+  .tab-active {
+    @apply text-gray-800 border-brand-500 dark:text-white/90;
+  }
+  .tab-inactive {
+    @apply text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300;
+  }
+</style>

@@ -6,6 +6,7 @@ module Console
   class BaseController < ActionController::Base
     include Pundit::Authorization
     include Auditable
+    include Pagy::Method   # pagination helper (Story 0.16)
 
     allow_browser versions: :modern
     before_action :authenticate_admin!
