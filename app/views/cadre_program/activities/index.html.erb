@@ -1,14 +1,22 @@
 <% content_for :title, @category_label ? "Cadre Program — #{@category_label}" : "Cadre Program" %>
 <% new_path = @category_key ? new_cadre_program_activity_path(category: @category_key) : new_cadre_program_activity_path %>
+<% page_link = "inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200" %>
+<% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
+<% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
-<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
-  <div>
-    <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90">Cadre Program</h1>
-    <% if @category_label %>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Category: <span class="font-medium text-gray-700 dark:text-gray-300"><%= @category_label %></span></p>
-    <% else %>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Activity in your branch</p>
-    <% end %>
+<div class="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5"
+     style="background: color-mix(in srgb, var(--org-party-color) 12%, white); border-color: color-mix(in srgb, var(--org-party-color) 28%, white)">
+  <div class="flex min-w-0 items-center gap-3">
+    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
+          style="background: var(--org-party-color); color: var(--org-party-contrast)">CP</span>
+    <div class="min-w-0">
+      <h1 class="text-xl font-semibold tracking-tight text-gray-900">Cadre Program</h1>
+      <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+        <% if @category_label %><span class="font-medium text-gray-800"><%= @category_label %></span><% end %>
+        <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= pluralize(@pagy.count, "activity") %></span>
+      </p>
+    </div>
   </div>
   <%= render "ui/module_toolbar",
         export_url: cadre_program_activities_path(format: :xlsx, category: @category_key),
@@ -16,92 +24,81 @@
         new_label: (@category_label ? "Create #{@category_label}" : "Create activity") %>
 </div>
 
-<% if @category_counts.present? %>
-  <div class="<%= ta_card_classes %> mb-4 grid gap-4 p-5 lg:grid-cols-[16rem_1fr] lg:items-center">
-    <div>
-      <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">By category</h2>
-      <ul class="space-y-1">
-        <% @category_counts.each do |label, count| %>
-          <li class="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-            <span><%= label %></span>
-            <span class="tabular-nums font-semibold"><%= count %></span>
-          </li>
-        <% end %>
-      </ul>
-    </div>
-    <%= pie_chart @category_counts, height: "180px" %>
-  </div>
-<% end %>
-
-<div class="<%= ta_card_classes %> hidden overflow-hidden xl:block">
-  <div class="overflow-x-auto">
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="hidden xl:block">
     <table class="w-full text-sm">
-      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+      <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <th class="px-5 py-3 font-medium">Activity</th>
-          <th class="px-5 py-3 font-medium">Category</th>
-          <th class="px-5 py-3 font-medium">Media value</th>
-          <th class="px-5 py-3 font-medium">Logged by</th>
-          <th class="px-5 py-3 font-medium">Photos</th>
-          <th class="px-5 py-3 font-medium">Date</th>
+          <th class="<%= th %>">Activity</th>
+          <th class="<%= th %>">Category</th>
+          <th class="<%= th %>">Media value</th>
+          <th class="<%= th %>">Logged by</th>
+          <th class="<%= th %> text-right">Photos</th>
+          <th class="<%= th %> text-right">Date</th>
+          <th class="<%= th %> w-12"><span class="sr-only">Open</span></th>
         </tr>
       </thead>
       <tbody>
         <% @activities.each do |activity| %>
-          <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-white/[0.03]">
-            <td class="px-5 py-3 font-medium">
-              <%= link_to activity.detail_headline.presence || activity.category_label, cadre_program_activity_path(activity),
-                    class: "text-gray-800 hover:text-brand-500 dark:text-white/90" %>
+          <% headline = activity.detail_headline.presence || activity.category_label %>
+          <tr class="group hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
+            <td class="<%= td %> max-w-xs">
+              <%= link_to headline, cadre_program_activity_path(activity),
+                    class: "font-medium text-gray-900 dark:text-white/90" %>
             </td>
-            <td class="px-5 py-3"><%= render "ui/badge", label: activity.category_label, tone: "brand" %></td>
-            <td class="max-w-sm px-5 py-3 text-gray-600 dark:text-gray-300">
-              <%= activity.impact_notes.present? ? truncate(activity.impact_notes, length: 90) : "—" %>
+            <td class="<%= td %>"><%= render "ui/badge", label: activity.category_label, tone: "gray" %></td>
+            <td class="<%= td %> max-w-sm text-gray-600 dark:text-gray-300">
+              <span class="line-clamp-2"><%= activity.impact_notes.presence || "—" %></span>
             </td>
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
-            <td class="px-5 py-3 tabular-nums text-gray-500"><%= activity.photos.size %></td>
-            <td class="px-5 py-3 tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.photos.size %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></td>
+            <td class="<%= td %> text-right">
+              <%= link_to cadre_program_activity_path(activity), class: "inline-flex text-gray-300 group-hover:text-gray-500", aria: { label: "Open #{headline}" } do %>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>
     </table>
     <% if @activities.empty? %>
-      <p class="px-5 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>
+      <p class="px-6 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>
     <% end %>
   </div>
-</div>
 
-<div class="flex flex-col gap-3 xl:hidden">
-  <% @activities.each do |activity| %>
-    <%= link_to cadre_program_activity_path(activity), class: "#{ta_card_classes} block p-4" do %>
-      <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-          <p class="truncate font-medium text-gray-800 dark:text-white/90"><%= activity.detail_headline.presence || activity.category_label %></p>
-          <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "brand" %></p>
+  <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
+    <% @activities.each do |activity| %>
+      <%= link_to cadre_program_activity_path(activity), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= activity.detail_headline.presence || activity.category_label %></p>
+            <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "gray" %></p>
+          </div>
+          <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></p>
         </div>
-        <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></p>
-      </div>
-      <p class="mt-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
-      <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
+        <p class="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
+        <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
+      <% end %>
     <% end %>
-  <% end %>
-  <% if @activities.empty? %>
-    <div class="<%= ta_card_classes %> p-10 text-center text-sm text-gray-400">No cadre activity yet.</div>
+    <% if @activities.empty? %>
+      <p class="px-6 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>
+    <% end %>
+  </div>
+
+  <% if @pagy.last > 1 %>
+    <nav class="flex items-center justify-between gap-3 border-t border-gray-200 px-6 py-3 dark:border-gray-800">
+      <% if @pagy.previous %>
+        <%= link_to "← Prev", cadre_program_activities_path(category: @category_key, page: @pagy.previous), class: page_link %>
+      <% else %>
+        <span class="text-sm text-gray-300">← Prev</span>
+      <% end %>
+      <span class="text-sm tabular-nums text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
+      <% if @pagy.next %>
+        <%= link_to "Next →", cadre_program_activities_path(category: @category_key, page: @pagy.next), class: page_link %>
+      <% else %>
+        <span class="text-sm text-gray-300">Next →</span>
+      <% end %>
+    </nav>
   <% end %>
 </div>
-
-<% if @pagy.last > 1 %>
-  <nav class="mt-4 flex items-center justify-between text-sm">
-    <% if @pagy.previous %>
-      <%= link_to "← Prev", cadre_program_activities_path(category: @category_key, page: @pagy.previous), class: "font-medium text-brand-500 hover:text-brand-600" %>
-    <% else %>
-      <span class="text-gray-300">← Prev</span>
-    <% end %>
-    <span class="text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
-    <% if @pagy.next %>
-      <%= link_to "Next →", cadre_program_activities_path(category: @category_key, page: @pagy.next), class: "font-medium text-brand-500 hover:text-brand-600" %>
-    <% else %>
-      <span class="text-gray-300">Next →</span>
-    <% end %>
-  </nav>
-<% end %>
-

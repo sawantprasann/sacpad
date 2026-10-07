@@ -1,19 +1,17 @@
-<%# Mobile ticket-card (UX-DR10): whole-card tap-through; person+village, category badge,
-    status pill, reported date. No swipe actions in v1. ≥44px target. %>
-<%= link_to kitchen_cabinet_ticket_path(ticket), class: "#{ta_card_classes} block p-4" do %>
+<%# Mobile row inside the ticket table card. Whole row opens the ticket. %>
+<%= link_to kitchen_cabinet_ticket_path(ticket), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0">
-      <p class="truncate font-medium text-gray-800 dark:text-white/90"><%= ticket.person_name %></p>
-      <p class="truncate text-xs text-gray-500 dark:text-gray-400"><%= ticket.village.presence || "—" %></p>
+      <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= ticket.person_name %></p>
+      <p class="truncate text-xs text-gray-500"><%= ticket.village.presence || "—" %></p>
     </div>
     <%= render "ui/status_pill", status: ticket.status %>
   </div>
-  <div class="mt-3 flex items-center gap-2 text-xs text-gray-400">
-    <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-[10px] font-semibold text-gray-500 dark:bg-gray-800">
-      <%= ticket.ticket_category.name.first.upcase %>
-    </span>
+  <div class="mt-2 flex items-center gap-2 text-xs text-gray-500">
     <span><%= ticket.ticket_category.name %></span>
     <span aria-hidden="true">·</span>
-    <span><%= ticket.reported_at&.strftime("%d %b %Y") %></span>
+    <span class="tabular-nums"><%= ticket.ticket_number %></span>
+    <span aria-hidden="true">·</span>
+    <span class="tabular-nums"><%= ticket.reported_at&.strftime("%d %b %Y") %></span>
   </div>
 <% end %>

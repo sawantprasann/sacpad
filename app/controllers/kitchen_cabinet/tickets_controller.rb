@@ -25,10 +25,7 @@ module KitchenCabinet
       relation = relation.order(reported_at: :desc, id: :desc)
 
       respond_to do |format|
-        format.html do
-          @status_counts = relation.counts_by_status
-          @pagy, @tickets = pagy(:offset, relation)
-        end
+        format.html { @pagy, @tickets = pagy(:offset, relation) }
         format.xlsx do
           # Export the full scoped+filtered set (unpaginated), scoped to the viewer (Story 1.8, FR49).
           @tickets = relation

@@ -85,12 +85,11 @@ class CadreProgramFeedTest < ActionDispatch::IntegrationTest
     assert_not_includes cells, "Party rally"
   end
 
-  test "the list shows the category chart and an excel link for the same filter" do
+  test "the list shows the selected category and an excel link for the same filter" do
     make_activity(owner: @alice, notes: "Alice rally")
     sign_in @alice
     get cadre_program_activities_path(category: "program_by_party")
     assert_response :success
-    assert_match "By category", @response.body
     assert_match "Program By Party", @response.body
     assert_select "a[href=?]", cadre_program_activities_path(format: :xlsx, category: "program_by_party")
   end

@@ -26,7 +26,10 @@
         </div>
         <div>
           <%= f.label :village, "Village / ward", class: ta_label_classes %>
-          <%= f.text_field :village, class: "#{ta_field_classes} min-h-11" %>
+          <%= f.select :village,
+                options_for_select(Village.order(:name).pluck(:name), @ticket.village),
+                { include_blank: "Select a village..." },
+                class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
           <%= f.label :mobile, "Mobile number", class: ta_label_classes %>

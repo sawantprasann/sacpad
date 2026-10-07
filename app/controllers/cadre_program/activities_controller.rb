@@ -9,10 +9,7 @@ module CadreProgram
       authorize CadreActivity
       relation = filtered_activities
       respond_to do |format|
-        format.html do
-          @category_counts = relation.counts_by_category
-          @pagy, @activities = pagy(:offset, with_list_includes(relation))
-        end
+        format.html { @pagy, @activities = pagy(:offset, with_list_includes(relation)) }
         format.xlsx do
           @activities = with_list_includes(relation)
           response.headers["Content-Disposition"] = "attachment; filename=cadre_program_activities.xlsx"
