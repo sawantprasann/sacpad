@@ -27,6 +27,9 @@
       <ul class="mb-6 flex flex-col gap-1">
         <li><%= link_to "Parties", console_parties_path, class: "menu-item group #{controller_name == "parties" ? "menu-item-active" : "menu-item-inactive"}" %></li>
         <li><%= link_to "Ticket categories", console_ticket_categories_path, class: "menu-item group #{controller_name == "ticket_categories" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "PR categories", console_pr_categories_path, class: "menu-item group #{controller_name == "pr_categories" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Media platforms", console_media_platforms_path, class: "menu-item group #{controller_name == "media_platforms" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Outdoor ad types", console_outdoor_ad_types_path, class: "menu-item group #{controller_name == "outdoor_ad_types" ? "menu-item-active" : "menu-item-inactive"}" %></li>
         <li><%= link_to "States", console_states_path, class: "menu-item group #{controller_name == "states" ? "menu-item-active" : "menu-item-inactive"}" %></li>
         <li><%= link_to "Loksabhas", console_loksabhas_path, class: "menu-item group #{controller_name == "loksabhas" ? "menu-item-active" : "menu-item-inactive"}" %></li>
         <li><%= link_to "Assemblies", console_assemblies_path, class: "menu-item group #{controller_name == "assemblies" ? "menu-item-active" : "menu-item-inactive"}" %></li>
