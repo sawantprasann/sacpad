@@ -17,6 +17,10 @@
       <%= f.check_box :can_create_users, class: "h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20" %>
       Can create users
     </label>
+    <label class="mt-3 flex items-center gap-2 text-sm text-gray-700 dark:text-gray-400">
+      <%= f.check_box :can_import, class: "h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20" %>
+      Can import ground reports
+    </label>
 
     <p class="mt-6 mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Module permissions</p>
     <div class="<%= ta_card_classes %> overflow-hidden">

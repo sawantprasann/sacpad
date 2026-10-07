@@ -1,0 +1,79 @@
+<% action_label = @record.pr_category ? "Log #{@record.pr_category.name}" : "Log PR record" %>
+<% content_for :title, action_label %>
+<% back_path = @record.pr_category ? pr_records_path(category: @record.pr_category.slug) : pr_records_path %>
+
+<div>
+  <div class="mb-6">
+    <%= link_to "← PR Records", back_path, class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+    <h1 class="mt-2 text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= action_label %></h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record media coverage details and attachments.</p>
+  </div>
+
+  <div class="<%= ta_card_classes %> p-6 md:p-8">
+    <%= form_with model: @record, scope: :pr_record, url: pr_records_path, method: :post, multipart: true do |f| %>
+      <% if @record.errors.any? %>
+        <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
+      <% end %>
+
+      <%= f.hidden_field :pr_category_id %>
+
+      <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <%= f.label :title, "Title / Headline", class: ta_label_classes %>
+          <%= f.text_field :title, class: "#{ta_field_classes} min-h-11", autofocus: true %>
+        </div>
+        <div>
+          <%= f.label :published_on, "Published date", class: ta_label_classes %>
+          <%= f.date_field :published_on, class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :sentiment, class: ta_label_classes %>
+          <%= f.select :sentiment,
+                options_for_select(PrRecord.sentiments.keys.map { |s| [s.humanize, s] }, @record.sentiment),
+                {},
+                class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :pr_category_id, "Category", class: ta_label_classes %>
+          <%= f.select :pr_category_id,
+                options_from_collection_for_select(PrCategory.active, :id, :name, @record.pr_category_id),
+                { include_blank: "Select a category..." },
+                class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :media_platform_id, "Platform (if available)", class: ta_label_classes %>
+          <%= f.select :media_platform_id,
+                options_from_collection_for_select(MediaPlatform.active, :id, :name, @record.media_platform_id),
+                { include_blank: "Select or enter below..." },
+                class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div>
+          <%= f.label :media_platform_name, "Platform name (free-text)", class: ta_label_classes %>
+          <%= f.text_field :media_platform_name, placeholder: "e.g., Local Radio 104.5", class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div class="md:col-span-2">
+          <%= f.label :url, "URL / Link", class: ta_label_classes %>
+          <%= f.url_field :url, class: "#{ta_field_classes} min-h-11" %>
+        </div>
+        <div class="md:col-span-2">
+          <%= f.label :description, "Details", class: ta_label_classes %>
+          <%= f.text_area :description, rows: 4, class: ta_field_classes %>
+        </div>
+        <div class="md:col-span-2">
+          <%= f.label :attachments, "Attachments (photos, PDFs, etc.)", class: ta_label_classes %>
+          <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
+            <%= f.file_field :attachments, multiple: true,
+                  class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+            <p class="mt-2 text-xs text-gray-500">Add one or more media files.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= action_label %></button>
+        <%= link_to "Cancel", back_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

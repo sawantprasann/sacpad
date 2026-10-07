@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       resources :local_admin_contacts, only: :create
       resources :mock_poll_responses, only: :create
     end
+    resources :imports, only: %i[new create show]
   end
 
   # Kitchen Cabinet (Epic 1). Story 1.1 stands up only the category-filtered list target;
@@ -83,6 +84,9 @@ Rails.application.routes.draw do
       resource :closure, only: %i[new create]  # two-step closure + voter-sentiment (Story 1.7)
     end
   end
+
+  # PR Records (Epic 4). Story 4.2 captures media coverage; Story 4.3 adds category-specific details.
+  resources :pr_records, only: %i[index new create show edit update]
 
   # Defines the root path route ("/")
   root "home#index"

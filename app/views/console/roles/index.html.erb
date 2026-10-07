@@ -13,6 +13,7 @@
           <th class="px-5 py-3 font-medium">Slug</th>
           <th class="px-5 py-3 font-medium">System</th>
           <th class="px-5 py-3 font-medium">Can create users</th>
+          <th class="px-5 py-3 font-medium">Can import</th>
           <th class="px-5 py-3"></th>
         </tr>
       </thead>
@@ -23,6 +24,7 @@
             <td class="px-5 py-3 text-gray-500"><%= role.slug %></td>
             <td class="px-5 py-3"><%= render "ui/badge", label: (role.is_system? ? "system" : "custom"), tone: (role.is_system? ? "brand" : "gray") %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= role.can_create_users? ? "Yes" : "No" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= role.can_import? ? "Yes" : "No" %></td>
             <td class="px-5 py-3 text-right whitespace-nowrap">
               <%= link_to "Edit", edit_console_role_path(role), class: "text-brand-500 hover:text-brand-600" %>
               <% unless role.is_system? %>

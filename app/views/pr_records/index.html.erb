@@ -1,0 +1,91 @@
+<% content_for :title, @category ? "PR Records — #{@category.name}" : "PR Records" %>
+
+<div class="mb-8">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white">PR Records</h1>
+</div>
+
+<div class="mb-8">
+  <div class="flex gap-1 border-b-2 border-gray-200 dark:border-gray-700">
+    <% current_category = params[:category].presence || 'overview' %>
+    <% PrCategory.active.each do |cat| %>
+      <a href="<%= pr_records_path(category: cat.slug) %>"
+         class="px-6 py-4 font-semibold border-b-4 transition-all <%= current_category == cat.slug ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/10' : 'text-gray-700 border-transparent dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100' %>">
+        <%= cat.name %>
+      </a>
+    <% end %>
+  </div>
+</div>
+
+<% if @category %>
+  <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Filters</h3>
+    <%= form_with url: pr_records_path(category: @category.slug), method: :get, class: "space-y-4", local: true do %>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Search</label>
+          <%= text_field_tag :q, params[:q], placeholder: "Title or details...", class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+        </div>
+        <div class="flex items-end gap-2">
+          <%= submit_tag "Search", class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors" %>
+          <% if params[:q].present? %>
+            <%= link_to "Clear", pr_records_path(category: @category.slug), class: "w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-center" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @records.any? %>
+    <div class="space-y-3">
+      <% @records.each do |record| %>
+        <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="font-bold text-gray-900 dark:text-white"><%= link_to record.title, pr_record_path(record), class: "text-blue-600 hover:text-blue-700" %></p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Record: <%= record.record_number %></p>
+            </div>
+            <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
+              <%= record.sentiment == 'positive' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : record.sentiment == 'negative' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' %>">
+              <%= record.sentiment.humanize %>
+            </span>
+          </div>
+          <div class="flex gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <span><strong><%= record.media_platform&.name || record.media_platform_name %></strong></span>
+            <span>•</span>
+            <span class="tabular-nums"><%= record.published_on.strftime("%d %b") %></span>
+            <span>•</span>
+            <span>By <%= record.owner.name %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @pagy.last > 1 %>
+      <div class="mt-6 flex items-center justify-between">
+        <div>
+          <% if @pagy.previous %>
+            <%= link_to "← Previous", pr_records_path(category: @category.slug, page: @pagy.previous), class: "px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white font-semibold rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition-colors" %>
+          <% else %>
+            <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold rounded-lg cursor-not-allowed">← Previous</button>
+          <% end %>
+        </div>
+        <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Page <span class="tabular-nums"><%= @pagy.page %></span> of <span class="tabular-nums"><%= @pagy.last %></span></p>
+        <div>
+          <% if @pagy.next %>
+            <%= link_to "Next →", pr_records_path(category: @category.slug, page: @pagy.next), class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors" %>
+          <% else %>
+            <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold rounded-lg cursor-not-allowed">Next →</button>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
+      <p class="text-gray-500 dark:text-gray-400">No records found. <%= link_to "Log one now.", new_pr_record_path(category: @category.slug), class: "text-blue-600 hover:text-blue-700" %></p>
+    </div>
+  <% end %>
+<% else %>
+  <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
+    <p class="text-gray-500 dark:text-gray-400">Select a category to view records.</p>
+  </div>
+<% end %>

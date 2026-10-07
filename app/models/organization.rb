@@ -7,6 +7,7 @@ class Organization < ApplicationRecord
   has_many :party_memberships, dependent: :destroy
   has_many :admin_organizations, dependent: :destroy
   has_many :politicians, dependent: :destroy
+  has_many :pr_records, dependent: :destroy
 
   validates :name, presence: true
   validates :constituency_type, inclusion: { in: %w[Loksabha Assembly] }, allow_nil: true

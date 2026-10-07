@@ -61,7 +61,7 @@ module Console
 
     def role_params
       params.require(:role).permit(
-        :name, :slug, :can_create_users,
+        :name, :slug, :can_create_users, :can_import,
         role_permissions_attributes: %i[id module_name access_level]
       )
     end

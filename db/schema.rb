@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_050000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -193,6 +193,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
     t.index ["organization_id"], name: "index_cadre_activity_programs_on_organization_id"
   end
 
+  create_table "ground_report_imports", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.integer "kind", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "imported_count", default: 0, null: false
+    t.jsonb "row_errors", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_ground_report_imports_on_organization_id"
+    t.index ["user_id"], name: "index_ground_report_imports_on_user_id"
+  end
+
   create_table "ground_report_testimonials", force: :cascade do |t|
     t.bigint "ground_report_id", null: false
     t.bigint "organization_id", null: false
@@ -332,6 +345,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
     t.index ["slug"], name: "index_pr_categories_on_slug", unique: true
   end
 
+  create_table "pr_records", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "owner_id", null: false
+    t.bigint "pr_category_id", null: false
+    t.bigint "media_platform_id"
+    t.string "record_number", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "url"
+    t.string "thumbnail_url"
+    t.integer "sentiment", default: 0, null: false
+    t.date "published_on", null: false
+    t.string "media_platform_name"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_pr_records_on_discarded_at"
+    t.index ["discarded_by_id"], name: "index_pr_records_on_discarded_by_id"
+    t.index ["media_platform_id"], name: "index_pr_records_on_media_platform_id"
+    t.index ["organization_id", "record_number"], name: "index_pr_records_on_organization_id_and_record_number", unique: true
+    t.index ["organization_id"], name: "index_pr_records_on_organization_id"
+    t.index ["owner_id"], name: "index_pr_records_on_owner_id"
+    t.index ["pr_category_id"], name: "index_pr_records_on_pr_category_id"
+  end
+
   create_table "role_permissions", force: :cascade do |t|
     t.bigint "role_id", null: false
     t.integer "module_name", null: false
@@ -350,6 +389,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
     t.bigint "organization_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "can_import", default: false, null: false
     t.index ["organization_id"], name: "index_roles_on_organization_id"
     t.index ["slug"], name: "index_roles_on_slug", unique: true
   end
@@ -608,6 +648,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
   add_foreign_key "cadre_activity_personal_activities", "organizations"
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
+  add_foreign_key "ground_report_imports", "organizations"
+  add_foreign_key "ground_report_imports", "users"
   add_foreign_key "ground_report_testimonials", "ground_reports"
   add_foreign_key "ground_report_testimonials", "organizations"
   add_foreign_key "ground_report_testimonials", "users", column: "created_by_id"
@@ -623,6 +665,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
   add_foreign_key "party_memberships", "parties"
   add_foreign_key "politicians", "organizations"
   add_foreign_key "politicians", "parties"
+  add_foreign_key "pr_records", "media_platforms"
+  add_foreign_key "pr_records", "organizations"
+  add_foreign_key "pr_records", "pr_categories"
+  add_foreign_key "pr_records", "users", column: "discarded_by_id"
+  add_foreign_key "pr_records", "users", column: "owner_id"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
   add_foreign_key "ticket_follow_ups", "organizations"

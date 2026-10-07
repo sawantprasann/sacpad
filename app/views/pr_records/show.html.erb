@@ -1,0 +1,106 @@
+<% content_for :title, "#{@record.title} · #{@record.record_number}" %>
+<% list_path = pr_records_path(category: @record.pr_category.slug) %>
+<% crumb = "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90" %>
+<% field = "rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]" %>
+<% label = "text-xs font-medium tracking-wide text-gray-400 uppercase" %>
+<% section = "border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90" %>
+
+<nav aria-label="Breadcrumb" class="mb-5">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm">
+    <li><%= link_to "Dashboard", root_path, class: crumb %></li>
+    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
+    <li><%= link_to "PR Records", pr_records_path, class: crumb %></li>
+    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
+    <li><%= link_to @record.pr_category.name, list_path, class: crumb %></li>
+    <li aria-hidden="true" class="text-gray-300 dark:text-gray-600">/</li>
+    <li class="font-medium text-gray-800 dark:text-white/90" aria-current="page"><%= @record.title %></li>
+  </ol>
+</nav>
+
+<header class="<%= ta_card_classes %> mb-4 overflow-hidden">
+  <div class="h-1" style="background: var(--org-party-color)"></div>
+  <div class="flex flex-wrap items-start justify-between gap-4 p-6">
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-title-sm font-semibold text-gray-800 dark:text-white/90"><%= @record.title %></h1>
+        <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full
+          <%= @record.sentiment == 'positive' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : @record.sentiment == 'negative' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300' %>">
+          <%= @record.sentiment.humanize %>
+        </span>
+      </div>
+      <dl class="mt-4 flex flex-wrap gap-x-8 gap-y-3 text-sm">
+        <div>
+          <dt class="<%= label %>">Record</dt>
+          <dd class="mt-0.5 font-medium tabular-nums text-gray-800 dark:text-white/90"><%= @record.record_number %></dd>
+        </div>
+        <div>
+          <dt class="<%= label %>">Category</dt>
+          <dd class="mt-0.5 font-medium text-gray-800 dark:text-white/90"><%= @record.pr_category.name %></dd>
+        </div>
+        <div>
+          <dt class="<%= label %>">Published</dt>
+          <dd class="mt-0.5 font-medium tabular-nums text-gray-800 dark:text-white/90"><%= @record.published_on.strftime("%d %b %Y") %></dd>
+        </div>
+        <div>
+          <dt class="<%= label %>">Logged by</dt>
+          <dd class="mt-0.5 font-medium text-gray-800 dark:text-white/90"><%= @record.owner.name %></dd>
+        </div>
+      </dl>
+    </div>
+    <div class="flex gap-2">
+      <% if policy(@record).edit? %>
+        <%= link_to "Edit", edit_pr_record_path(@record), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+      <% end %>
+      <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    </div>
+  </div>
+</header>
+
+<div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
+  <div class="space-y-4 xl:col-span-2">
+    <section class="<%= ta_card_classes %> p-6">
+      <h2 class="<%= section %>">Media Coverage</h2>
+      <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div class="<%= field %>">
+          <dt class="<%= label %>">Platform</dt>
+          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.media_platform&.name || @record.media_platform_name || "—" %></dd>
+        </div>
+        <div class="<%= field %>">
+          <dt class="<%= label %>">Sentiment</dt>
+          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.sentiment.humanize %></dd>
+        </div>
+        <div class="<%= field %> sm:col-span-2">
+          <dt class="<%= label %>">URL</dt>
+          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90">
+            <% if @record.url.present? %>
+              <%= link_to truncate(@record.url, length: 60), @record.url, target: "_blank", rel: "noopener", class: "text-brand-500 hover:text-brand-600" %>
+            <% else %>
+              —
+            <% end %>
+          </dd>
+        </div>
+        <div class="<%= field %> sm:col-span-2">
+          <dt class="<%= label %>">Details</dt>
+          <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= @record.description.presence || "—" %></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="<%= ta_card_classes %> p-6">
+      <h2 class="<%= section %>">Attachments</h2>
+      <% if @record.attachments.attached? %>
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <% @record.attachments.each do |att| %>
+            <% if att.image? %>
+              <%= image_tag att, class: "aspect-square w-full rounded-xl object-cover" %>
+            <% else %>
+              <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm text-brand-500 hover:text-brand-600" %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="mt-4 rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-400 dark:border-gray-700">No attachments.</p>
+      <% end %>
+    </section>
+  </div>
+</div>

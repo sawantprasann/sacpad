@@ -60,7 +60,7 @@ development_status:
   3-2-worship-yatra-political-position: review
   3-3-local-contacts: review
   3-4-mock-poll-capture-tally: review
-  3-5-bulk-excel-import-report-mock-poll: backlog
+  3-5-bulk-excel-import-report-mock-poll: review
 
   # ── Epic 4: PR — Traditional Media Monitoring ──
   epic-4: in-progress

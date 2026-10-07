@@ -1,0 +1,56 @@
+<% content_for :title, "Edit PR Record #{@record.record_number}" %>
+
+<div class="mb-8">
+  <%= link_to "← Back to PR Records", pr_record_path(@record), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+</div>
+
+<div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-8 max-w-2xl">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Edit PR Record <%= @record.record_number %></h1>
+
+  <%= form_with model: @record, scope: :pr_record, local: true, class: "space-y-6" do |f| %>
+    <% if @record.errors.any? %>
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+        <p class="text-red-800 dark:text-red-300 font-semibold"><%= pluralize(@record.errors.count, "error") %> prevented saving:</p>
+        <ul class="list-disc list-inside text-red-700 dark:text-red-400 mt-2">
+          <% @record.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Title</label>
+      <%= f.text_field :title, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Published Date</label>
+        <%= f.date_field :published_on, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+      <div>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Sentiment</label>
+        <%= f.select :sentiment,
+              options_for_select(PrRecord.sentiments.keys.map { |s| [s.humanize, s] }, @record.sentiment),
+              {},
+              class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Description</label>
+      <%= f.text_area :description, rows: 4, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">URL</label>
+      <%= f.url_field :url, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <div class="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+      <%= f.submit "Save Changes", class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
+      <%= link_to "Cancel", pr_record_path(@record), class: "bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
+    </div>
+  <% end %>
+</div>

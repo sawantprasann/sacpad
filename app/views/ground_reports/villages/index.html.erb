@@ -14,6 +14,9 @@
       </p>
     </div>
   </div>
+  <% if current_user.role.can_import? %>
+    <%= link_to "Import", new_ground_reports_import_path, class: "#{page_link} min-h-11 cursor-pointer" %>
+  <% end %>
 </div>
 
 <div class="<%= ta_card_classes %> overflow-hidden">
