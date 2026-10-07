@@ -237,6 +237,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
     t.index ["state_id"], name: "index_loksabhas_on_state_id"
   end
 
+  create_table "media_platforms", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_media_platforms_on_slug", unique: true
+  end
+
   create_table "mock_poll_responses", force: :cascade do |t|
     t.bigint "village_id", null: false
     t.bigint "organization_id", null: false
@@ -268,6 +277,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["constituency_type", "constituency_id"], name: "index_organizations_on_constituency"
+  end
+
+  create_table "outdoor_ad_types", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_outdoor_ad_types_on_slug", unique: true
   end
 
   create_table "parties", force: :cascade do |t|
@@ -302,6 +320,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_040000) do
     t.index ["organization_id"], name: "index_politicians_on_organization_id"
     t.index ["organization_id"], name: "one_own_politician_per_org", unique: true, where: "(is_own_politician = true)"
     t.index ["party_id"], name: "index_politicians_on_party_id"
+  end
+
+  create_table "pr_categories", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.integer "display_order", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_pr_categories_on_slug", unique: true
   end
 
   create_table "role_permissions", force: :cascade do |t|

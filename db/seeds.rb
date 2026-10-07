@@ -15,6 +15,9 @@ Role.seed_system_roles!
 # (incl. "Other"), seeded idempotently.
 TicketCategory.seed_defaults!
 
+# PR categories (Story 4.1): the 6 fixed PR categories, seeded idempotently.
+PrCategory.seed_defaults!
+
 # Bootstrap platform Admin (Story 0.3) — the only way into the Console (no self-service sign-up).
 # Configurable via env; in production a password MUST be provided (no insecure default).
 admin_email = ENV.fetch("SACPAD_ADMIN_EMAIL", "admin@sacpad.com")

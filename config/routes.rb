@@ -26,6 +26,10 @@ Rails.application.routes.draw do
     resources :parties
     # Kitchen Cabinet ticket-category catalog (Story 1.1) — global, Admin-managed
     resources :ticket_categories
+    # PR catalogs (Story 4.1) — global, Admin-managed
+    resources :pr_categories
+    resources :media_platforms
+    resources :outdoor_ad_types
     # Role & permission catalog (Story 0.8) — the only place roles are defined
     resources :roles
     # Cross-org audit log (Story 0.11)
