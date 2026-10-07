@@ -55,7 +55,7 @@ Rails.application.routes.draw do
   # Kitchen Cabinet (Epic 1). Story 1.1 stands up only the category-filtered list target;
   # ticket capture (1.2) and the real scoped browse list (1.3) fill it in later.
   namespace :kitchen_cabinet do
-    resources :tickets, only: %i[index new create show] do
+    resources :tickets, only: %i[index new create show edit update] do
       member do
         patch :status
         patch :voter

@@ -77,6 +77,23 @@ module KitchenCabinet
       end
     end
 
+    # Edit ticket (org admins can edit any ticket; team leads see read-only).
+    def edit
+      @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
+      authorize @ticket, :edit?
+    end
+
+    # Update ticket (org admins can update any ticket in their org).
+    def update
+      @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
+      authorize @ticket, :update?
+      if @ticket.update(ticket_params)
+        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Ticket updated."
+      else
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
     # Attach/update the voter id on a resolved ticket (Story 1.6). The model validation is the
     # authority — setting voter_id on an unresolved ticket simply fails to persist.
     def voter

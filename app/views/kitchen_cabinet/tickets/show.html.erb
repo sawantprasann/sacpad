@@ -44,7 +44,12 @@
         </div>
       </dl>
     </div>
-    <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    <div class="flex gap-2">
+      <% if policy(@ticket).edit? %>
+        <%= link_to "Edit", edit_kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+      <% end %>
+      <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    </div>
   </div>
 </header>
 
