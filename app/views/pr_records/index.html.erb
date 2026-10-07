@@ -1,17 +1,13 @@
 <% content_for :title, @category ? "PR Records — #{@category.name}" : "PR Records" %>
 
 <div class="mb-8">
-  <h1 class="text-3xl font-bold text-gray-900 dark:text-white">PR Records</h1>
-</div>
-
-<div class="mb-8">
-  <div class="flex gap-1 border-b-2 border-gray-200 dark:border-gray-700">
-    <% current_category = params[:category].presence || 'overview' %>
-    <% PrCategory.active.each do |cat| %>
-      <a href="<%= pr_records_path(category: cat.slug) %>"
-         class="px-6 py-4 font-semibold border-b-4 transition-all <%= current_category == cat.slug ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/10' : 'text-gray-700 border-transparent dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100' %>">
-        <%= cat.name %>
-      </a>
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white"><%= @category&.name || "PR Records" %></h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Media coverage logged for <%= @category ? @category.name.downcase : "all categories" %></p>
+    </div>
+    <% if @category %>
+      <%= link_to "Log #{@category.name}", new_pr_record_path(category: @category.slug), class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
     <% end %>
   </div>
 </div>
@@ -86,6 +82,6 @@
   <% end %>
 <% else %>
   <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
-    <p class="text-gray-500 dark:text-gray-400">Select a category to view records.</p>
+    <p class="text-gray-500 dark:text-gray-400">Select a category from the sidebar to view records.</p>
   </div>
 <% end %>
