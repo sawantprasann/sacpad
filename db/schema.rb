@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_050000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -345,6 +345,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_050000) do
     t.index ["slug"], name: "index_pr_categories_on_slug", unique: true
   end
 
+  create_table "pr_record_outdoor_ad_counts", force: :cascade do |t|
+    t.bigint "pr_record_id", null: false
+    t.bigint "outdoor_ad_type_id", null: false
+    t.integer "count", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pr_record_id", "outdoor_ad_type_id"], name: "idx_on_pr_record_id_outdoor_ad_type_id_5cdb583466", unique: true
+  end
+
+  create_table "pr_record_podcasts", force: :cascade do |t|
+    t.bigint "pr_record_id", null: false
+    t.date "recording_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pr_record_id"], name: "index_pr_record_podcasts_on_pr_record_id", unique: true
+  end
+
   create_table "pr_records", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "owner_id", null: false
@@ -665,6 +682,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_050000) do
   add_foreign_key "party_memberships", "parties"
   add_foreign_key "politicians", "organizations"
   add_foreign_key "politicians", "parties"
+  add_foreign_key "pr_record_outdoor_ad_counts", "outdoor_ad_types"
+  add_foreign_key "pr_record_outdoor_ad_counts", "pr_records"
+  add_foreign_key "pr_record_podcasts", "pr_records"
   add_foreign_key "pr_records", "media_platforms"
   add_foreign_key "pr_records", "organizations"
   add_foreign_key "pr_records", "pr_categories"

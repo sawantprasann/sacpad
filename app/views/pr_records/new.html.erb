@@ -59,6 +59,39 @@
           <%= f.label :description, "Details", class: ta_label_classes %>
           <%= f.text_area :description, rows: 4, class: ta_field_classes %>
         </div>
+
+        <% if @record.pr_category&.slug == "outdoor-media" %>
+          <div class="md:col-span-2">
+            <h3 class="mb-3 font-semibold text-gray-800 dark:text-white/90">Outdoor Ad Placements</h3>
+            <div class="space-y-2 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
+              <%= f.fields_for :outdoor_ad_counts do |oac| %>
+                <div class="flex gap-2 items-center">
+                  <%= oac.select :outdoor_ad_type_id,
+                        options_from_collection_for_select(OutdoorAdType.active, :id, :name),
+                        { include_blank: "Select ad type..." },
+                        class: "flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-sm" %>
+                  <%= oac.number_field :count, placeholder: "Count",
+                        class: "w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-sm" %>
+                  <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                    <%= oac.check_box :_destroy %>
+                    Remove
+                  </label>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @record.pr_category&.slug == "podcasts-interviews" %>
+          <div>
+            <%= f.label "Recording date", class: ta_label_classes %>
+            <%= f.fields_for :podcast do |p| %>
+              <%= p.date_field :recording_date, class: "#{ta_field_classes} min-h-11" %>
+            <% end %>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">When the episode was recorded (separate from publish date)</p>
+          </div>
+        <% end %>
+
         <div class="md:col-span-2">
           <%= f.label :attachments, "Attachments (photos, PDFs, etc.)", class: ta_label_classes %>
           <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">

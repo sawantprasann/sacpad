@@ -8,7 +8,12 @@ class PrRecord < ApplicationRecord
   belongs_to :owner, class_name: "User"
   belongs_to :pr_category
   belongs_to :media_platform, optional: true  # FK if using catalog; nil if free-text fallback
+  has_many :outdoor_ad_counts, class_name: "PrRecordOutdoorAdCount", dependent: :destroy
+  has_one :podcast, class_name: "PrRecordPodcast", dependent: :destroy
   has_many_attached :attachments
+
+  accepts_nested_attributes_for :outdoor_ad_counts, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :podcast, allow_destroy: true, reject_if: :all_blank
 
   enum :sentiment, { neutral: 0, positive: 1, negative: 2 }, default: :neutral
 

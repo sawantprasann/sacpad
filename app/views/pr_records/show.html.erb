@@ -86,6 +86,30 @@
       </dl>
     </section>
 
+    <% if @record.pr_category.slug == "outdoor-media" && @record.outdoor_ad_counts.any? %>
+      <section class="<%= ta_card_classes %> p-6">
+        <h2 class="<%= section %>">Outdoor Ad Placements</h2>
+        <div class="mt-4 space-y-2">
+          <% @record.outdoor_ad_counts.each do |count| %>
+            <div class="flex justify-between rounded-lg bg-gray-50 px-4 py-2 dark:bg-white/[0.03]">
+              <span class="text-sm font-medium text-gray-800 dark:text-white/90"><%= count.outdoor_ad_type.name %></span>
+              <span class="text-sm tabular-nums font-semibold text-gray-600 dark:text-gray-400"><%= count.count %> placement<%= count.count == 1 ? "" : "s" %></span>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+
+    <% if @record.pr_category.slug == "podcasts-interviews" && @record.podcast %>
+      <section class="<%= ta_card_classes %> p-6">
+        <h2 class="<%= section %>">Podcast Recording</h2>
+        <div class="<%= field %>">
+          <dt class="<%= label %>">Recording Date</dt>
+          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.podcast.recording_date.strftime("%d %b %Y") %></dd>
+        </div>
+      </section>
+    <% end %>
+
     <section class="<%= ta_card_classes %> p-6">
       <h2 class="<%= section %>">Attachments</h2>
       <% if @record.attachments.attached? %>

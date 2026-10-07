@@ -1,5 +1,15 @@
 <% content_for :title, "Ground Reports — #{@village.name}" %>
 <% page_link = "inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200" %>
+<% current_position = @positions.find { |position| position.ended_at.nil? } %>
+<% can_write = current_user.role.can_write?("ground_reports") %>
+<% snapshot = [
+  [ "Worship places", @worship_places.size ],
+  [ "Yatra", @yatra.notes.present? ? "On file" : "None" ],
+  [ "Current post", current_position&.representative_name || "None" ],
+  [ "Karyakartas", @karyakartas.size ],
+  [ "Admin contacts", @admin_contacts.size ],
+  [ "Likely winner", @likely_winners.map(&:name).to_sentence.presence || "None" ]
+] %>
 
 <div class="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5"
      style="background: color-mix(in srgb, var(--org-party-color) 12%, white); border-color: color-mix(in srgb, var(--org-party-color) 28%, white)">
@@ -12,7 +22,7 @@
             style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= pluralize(@pagy.count, "report") %></span>
     </p>
   </div>
-  <% if current_user.role.can_write?("ground_reports") %>
+  <% if can_write %>
     <%= link_to new_ground_reports_village_report_path(@village),
           class: "inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full shadow-sm transition hover:opacity-90",
           style: "background: var(--org-party-color); color: var(--org-party-contrast)",
@@ -24,7 +34,21 @@
   <% end %>
 </div>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+  <% snapshot.each do |label, value| %>
+    <div class="<%= ta_card_classes %> px-4 py-3">
+      <p class="text-xs font-medium text-gray-500"><%= label %></p>
+      <p class="mt-1 truncate text-sm font-semibold text-gray-900 dark:text-white/90"><%= value %></p>
+    </div>
+  <% end %>
+</div>
+
+<section class="<%= ta_card_classes %> overflow-hidden">
+  <div class="border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Reports</h2>
+    <p class="mt-0.5 text-xs text-gray-500"><%= pluralize(@pagy.count, "issue") %> logged in this village</p>
+  </div>
+
   <table class="hidden w-full text-sm xl:table">
     <thead class="bg-gray-50 dark:bg-white/[0.03]">
       <tr>
@@ -59,7 +83,7 @@
   </div>
 
   <% if @reports.empty? %>
-    <p class="px-6 py-16 text-center text-sm text-gray-400">No reports yet.</p>
+    <p class="px-6 py-10 text-center text-sm text-gray-400">No reports yet.</p>
   <% end %>
 
   <% if @pagy.last > 1 %>
@@ -77,15 +101,19 @@
       <% end %>
     </nav>
   <% end %>
-</div>
+</section>
 
-<div class="mt-4 grid gap-4 xl:grid-cols-3">
-  <section class="<%= ta_card_classes %> p-6">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Worship places</h2>
+<h2 class="mb-3 mt-8 text-xs font-semibold tracking-wide text-gray-500 uppercase">Village record</h2>
+<div class="grid gap-4 xl:grid-cols-3">
+  <section class="<%= ta_card_classes %> overflow-hidden">
+    <div class="px-5 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Worship places</h3>
+      <p class="mt-0.5 text-xs text-gray-500"><%= pluralize(@worship_places.size, "place") %></p>
+    </div>
     <% if @worship_places.any? %>
-      <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+      <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @worship_places.each do |place| %>
-          <li class="py-3">
+          <li class="px-5 py-3">
             <p class="font-medium text-gray-900 dark:text-white/90"><%= place.name %></p>
             <p class="mt-0.5 text-xs text-gray-500"><%= place.place_type %></p>
             <% if place.notes.present? %>
@@ -95,54 +123,40 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="mt-4 text-sm text-gray-400">No worship places yet.</p>
+      <p class="border-t border-gray-100 px-5 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No worship places yet.</p>
     <% end %>
-
-    <% if current_user.role.can_write?("ground_reports") %>
-      <%= form_with model: GroundReports::WorshipPlace.new, scope: :worship_place,
-            url: ground_reports_village_worship_places_path(@village), class: "mt-5 space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800" do |f| %>
-        <div>
-          <%= f.label :name, class: ta_label_classes %>
-          <%= f.text_field :name, required: true, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :place_type, "Type", class: ta_label_classes %>
-          <%= f.text_field :place_type, required: true, placeholder: "Temple, mosque, church…", class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :notes, class: ta_label_classes %>
-          <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
-        </div>
-        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Add place</button>
+    <% if can_write %>
+      <%= render "ground_reports/villages/add_panel", label: "Add place" do %>
+        <%= form_with model: GroundReports::WorshipPlace.new, scope: :worship_place,
+              url: ground_reports_village_worship_places_path(@village), class: "space-y-3" do |f| %>
+          <div>
+            <%= f.label :name, class: ta_label_classes %>
+            <%= f.text_field :name, required: true, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :place_type, "Type", class: ta_label_classes %>
+            <%= f.text_field :place_type, required: true, placeholder: "Temple, mosque, church…", class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :notes, class: ta_label_classes %>
+            <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
+          </div>
+          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add place</button>
+        <% end %>
       <% end %>
     <% end %>
   </section>
 
-  <section class="<%= ta_card_classes %> p-6">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Yatra</h2>
-    <p class="mt-1 text-xs text-gray-500">One note for this village.</p>
-    <% if current_user.role.can_write?("ground_reports") %>
-      <%= form_with model: @yatra, scope: :village_yatra,
-            url: ground_reports_village_yatra_path(@village), method: :patch, class: "mt-4 space-y-3" do |f| %>
-        <%= f.label :notes, "Note", class: ta_label_classes %>
-        <%= f.text_area :notes, rows: 6, class: "#{ta_field_classes} h-auto" %>
-        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Save yatra</button>
-      <% end %>
-    <% elsif @yatra.notes.present? %>
-      <p class="mt-4 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300"><%= @yatra.notes %></p>
-    <% else %>
-      <p class="mt-4 text-sm text-gray-400">No yatra note yet.</p>
-    <% end %>
-  </section>
-
-  <section class="<%= ta_card_classes %> p-6">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Political position</h2>
+  <section class="<%= ta_card_classes %> overflow-hidden">
+    <div class="px-5 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Political position</h3>
+      <p class="mt-0.5 text-xs text-gray-500"><%= pluralize(@positions.size, "record") %></p>
+    </div>
     <% if @positions.any? %>
-      <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+      <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @positions.each do |position| %>
-          <li class="py-3">
+          <li class="px-5 py-3">
             <div class="flex items-center justify-between gap-2">
               <p class="font-medium text-gray-900 dark:text-white/90"><%= position.representative_name %></p>
               <% if position.ended_at.nil? %>
@@ -158,41 +172,70 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="mt-4 text-sm text-gray-400">No political history yet.</p>
+      <p class="border-t border-gray-100 px-5 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No political history yet.</p>
     <% end %>
-
-    <% if current_user.role.can_write?("ground_reports") %>
-      <%= form_with model: GroundReports::VillagePoliticalPosition.new, scope: :village_political_position,
-            url: ground_reports_village_political_positions_path(@village), class: "mt-5 space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800" do |f| %>
-        <div>
-          <%= f.label :party_id, "Party", class: ta_label_classes %>
-          <%= f.collection_select :party_id, @parties, :id, :name, { prompt: "Select a party" }, { required: true, class: ta_field_classes } %>
-        </div>
-        <div>
-          <%= f.label :representative_name, "Representative", class: ta_label_classes %>
-          <%= f.text_field :representative_name, required: true, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :position_title, "Title", class: ta_label_classes %>
-          <%= f.text_field :position_title, required: true, placeholder: "Sarpanch", class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :started_at, "Started", class: ta_label_classes %>
-          <%= f.date_field :started_at, required: true, value: Date.current, class: ta_field_classes %>
-        </div>
-        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Record position</button>
+    <% if can_write %>
+      <%= render "ground_reports/villages/add_panel", label: "Record position" do %>
+        <%= form_with model: GroundReports::VillagePoliticalPosition.new, scope: :village_political_position,
+              url: ground_reports_village_political_positions_path(@village), class: "space-y-3" do |f| %>
+          <div>
+            <%= f.label :party_id, "Party", class: ta_label_classes %>
+            <%= f.collection_select :party_id, @parties, :id, :name, { prompt: "Select a party" }, { required: true, class: ta_field_classes } %>
+          </div>
+          <div>
+            <%= f.label :representative_name, "Representative", class: ta_label_classes %>
+            <%= f.text_field :representative_name, required: true, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :position_title, "Title", class: ta_label_classes %>
+            <%= f.text_field :position_title, required: true, placeholder: "Sarpanch", class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :started_at, "Started", class: ta_label_classes %>
+            <%= f.date_field :started_at, required: true, value: Date.current, class: ta_field_classes %>
+          </div>
+          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Record position</button>
+        <% end %>
       <% end %>
     <% end %>
   </section>
 
-  <section class="<%= ta_card_classes %> p-6">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Karyakartas</h2>
-    <p class="mt-1 text-xs text-gray-500">Village workers. These are not logins.</p>
+  <section class="<%= ta_card_classes %> overflow-hidden">
+    <div class="px-5 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Yatra</h3>
+      <p class="mt-0.5 text-xs text-gray-500">One note for this village</p>
+    </div>
+    <% if @yatra.notes.present? %>
+      <p class="whitespace-pre-wrap border-t border-gray-100 px-5 py-4 text-sm text-gray-700 dark:border-gray-800 dark:text-gray-300"><%= @yatra.notes %></p>
+    <% else %>
+      <p class="border-t border-gray-100 px-5 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No yatra note yet.</p>
+    <% end %>
+    <% if can_write %>
+      <%= render "ground_reports/villages/add_panel", label: @yatra.notes.present? ? "Edit note" : "Add note" do %>
+        <%= form_with model: @yatra, scope: :village_yatra,
+              url: ground_reports_village_yatra_path(@village), method: :patch, class: "space-y-3" do |f| %>
+          <%= f.label :notes, "Note", class: ta_label_classes %>
+          <%= f.text_area :notes, rows: 4, class: "#{ta_field_classes} h-auto" %>
+          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Save yatra</button>
+        <% end %>
+      <% end %>
+    <% end %>
+  </section>
+</div>
+
+<h2 class="mb-3 mt-8 text-xs font-semibold tracking-wide text-gray-500 uppercase">People</h2>
+<div class="grid gap-4 xl:grid-cols-2">
+  <section class="<%= ta_card_classes %> overflow-hidden">
+    <div class="px-5 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Karyakartas</h3>
+      <p class="mt-0.5 text-xs text-gray-500">Village workers. These are not logins.</p>
+    </div>
     <% if @karyakartas.any? %>
-      <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+      <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @karyakartas.each do |contact| %>
-          <li class="py-3">
+          <li class="px-5 py-3">
             <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
             <% if contact.phone.present? %>
               <p class="mt-0.5 text-xs tabular-nums text-gray-500"><%= contact.phone %></p>
@@ -204,36 +247,40 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="mt-4 text-sm text-gray-400">No karyakartas yet.</p>
+      <p class="border-t border-gray-100 px-5 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No karyakartas yet.</p>
     <% end %>
-
-    <% if current_user.role.can_write?("ground_reports") %>
-      <%= form_with model: GroundReports::VillageLocalKaryakarta.new, scope: :village_local_karyakarta,
-            url: ground_reports_village_local_karyakartas_path(@village), class: "mt-5 space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800" do |f| %>
-        <div>
-          <%= f.label :name, class: ta_label_classes %>
-          <%= f.text_field :name, required: true, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :phone, class: ta_label_classes %>
-          <%= f.telephone_field :phone, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :notes, class: ta_label_classes %>
-          <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
-        </div>
-        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Add karyakarta</button>
+    <% if can_write %>
+      <%= render "ground_reports/villages/add_panel", label: "Add karyakarta" do %>
+        <%= form_with model: GroundReports::VillageLocalKaryakarta.new, scope: :village_local_karyakarta,
+              url: ground_reports_village_local_karyakartas_path(@village), class: "space-y-3" do |f| %>
+          <div>
+            <%= f.label :name, class: ta_label_classes %>
+            <%= f.text_field :name, required: true, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :phone, class: ta_label_classes %>
+            <%= f.telephone_field :phone, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :notes, class: ta_label_classes %>
+            <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
+          </div>
+          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add karyakarta</button>
+        <% end %>
       <% end %>
     <% end %>
   </section>
 
-  <section class="<%= ta_card_classes %> p-6">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Administrative contacts</h2>
+  <section class="<%= ta_card_classes %> overflow-hidden">
+    <div class="px-5 py-4">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Administrative contacts</h3>
+      <p class="mt-0.5 text-xs text-gray-500"><%= pluralize(@admin_contacts.size, "contact") %></p>
+    </div>
     <% if @admin_contacts.any? %>
-      <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+      <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @admin_contacts.each do |contact| %>
-          <li class="py-3">
+          <li class="px-5 py-3">
             <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
             <p class="mt-0.5 text-xs text-gray-500"><%= contact.role_title %><% if contact.phone.present? %> · <span class="tabular-nums"><%= contact.phone %></span><% end %></p>
             <% if contact.notes.present? %>
@@ -243,76 +290,81 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="mt-4 text-sm text-gray-400">No administrative contacts yet.</p>
+      <p class="border-t border-gray-100 px-5 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No administrative contacts yet.</p>
     <% end %>
-
-    <% if current_user.role.can_write?("ground_reports") %>
-      <%= form_with model: GroundReports::VillageLocalAdminContact.new, scope: :village_local_admin_contact,
-            url: ground_reports_village_local_admin_contacts_path(@village), class: "mt-5 space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800" do |f| %>
-        <div>
-          <%= f.label :name, class: ta_label_classes %>
-          <%= f.text_field :name, required: true, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :role_title, "Role", class: ta_label_classes %>
-          <%= f.text_field :role_title, required: true, placeholder: "Sarpanch, Gram Sevak, Police…", class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :phone, class: ta_label_classes %>
-          <%= f.telephone_field :phone, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :notes, class: ta_label_classes %>
-          <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
-        </div>
-        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Add contact</button>
+    <% if can_write %>
+      <%= render "ground_reports/villages/add_panel", label: "Add contact" do %>
+        <%= form_with model: GroundReports::VillageLocalAdminContact.new, scope: :village_local_admin_contact,
+              url: ground_reports_village_local_admin_contacts_path(@village), class: "space-y-3" do |f| %>
+          <div>
+            <%= f.label :name, class: ta_label_classes %>
+            <%= f.text_field :name, required: true, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :role_title, "Role", class: ta_label_classes %>
+            <%= f.text_field :role_title, required: true, placeholder: "Sarpanch, Gram Sevak, Police…", class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :phone, class: ta_label_classes %>
+            <%= f.telephone_field :phone, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :notes, class: ta_label_classes %>
+            <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
+          </div>
+          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add contact</button>
+        <% end %>
       <% end %>
     <% end %>
   </section>
 </div>
 
-<section class="<%= ta_card_classes %> mt-4 p-6">
-  <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Mock poll</h2>
-  <p class="mt-1 text-xs text-gray-500">Yes votes, counted when this page loads.</p>
+<section class="<%= ta_card_classes %> mt-8 overflow-hidden">
+  <div class="flex flex-wrap items-end justify-between gap-3 px-6 py-4">
+    <div>
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Mock poll</h2>
+      <p class="mt-0.5 text-xs text-gray-500">Yes votes, counted when this page loads.</p>
+    </div>
+    <% if @likely_winners.any? %>
+      <p class="text-sm font-medium text-gray-800 dark:text-white/90">Likely to win: <%= @likely_winners.map(&:name).to_sentence %></p>
+    <% end %>
+  </div>
 
   <% if @poll_tally.any? %>
-    <% if @likely_winners.any? %>
-      <p class="mt-4 text-sm text-gray-800 dark:text-white/90">Likely to win: <%= @likely_winners.map(&:name).to_sentence %></p>
-    <% end %>
-    <table class="mt-4 w-full text-sm">
+    <table class="w-full text-sm">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <th class="border-b border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-500">Politician</th>
-          <th class="border-b border-gray-200 px-4 py-3 text-right text-xs font-medium text-gray-500">Yes</th>
-          <th class="border-b border-gray-200 px-4 py-3 text-right text-xs font-medium text-gray-500">No</th>
-          <th class="border-b border-gray-200 px-4 py-3 text-right text-xs font-medium text-gray-500">Undecided</th>
+          <th class="border-y border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500">Politician</th>
+          <th class="border-y border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500">Yes</th>
+          <th class="border-y border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500">No</th>
+          <th class="border-y border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500">Undecided</th>
         </tr>
       </thead>
       <tbody>
         <% @poll_tally.each do |row| %>
           <tr data-politician="<%= row[:politician].id %>">
-            <td class="border-b border-gray-100 px-4 py-3 font-medium text-gray-900 dark:border-gray-800 dark:text-white/90">
+            <td class="border-b border-gray-100 px-6 py-3 font-medium text-gray-900 dark:border-gray-800 dark:text-white/90">
               <%= row[:politician].name %>
               <% if @likely_winners.include?(row[:politician]) %>
                 <span class="ml-2 rounded-full bg-success-50 px-2 py-0.5 text-xs font-medium text-success-700">Likely</span>
               <% end %>
             </td>
-            <td class="border-b border-gray-100 px-4 py-3 text-right tabular-nums text-gray-700 dark:border-gray-800" data-count="yes"><%= row[:yes] %></td>
-            <td class="border-b border-gray-100 px-4 py-3 text-right tabular-nums text-gray-700 dark:border-gray-800" data-count="no"><%= row[:no] %></td>
-            <td class="border-b border-gray-100 px-4 py-3 text-right tabular-nums text-gray-700 dark:border-gray-800" data-count="undecided"><%= row[:undecided] %></td>
+            <td class="border-b border-gray-100 px-6 py-3 text-right tabular-nums text-gray-700 dark:border-gray-800" data-count="yes"><%= row[:yes] %></td>
+            <td class="border-b border-gray-100 px-6 py-3 text-right tabular-nums text-gray-700 dark:border-gray-800" data-count="no"><%= row[:no] %></td>
+            <td class="border-b border-gray-100 px-6 py-3 text-right tabular-nums text-gray-700 dark:border-gray-800" data-count="undecided"><%= row[:undecided] %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
   <% else %>
-    <p class="mt-4 text-sm text-gray-400">No survey responses yet.</p>
+    <p class="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No survey responses yet.</p>
   <% end %>
 
   <% if @poll_responses.any? %>
-    <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+    <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
       <% @poll_responses.each do |survey| %>
-        <li class="py-3">
+        <li class="px-6 py-3">
           <p class="font-medium text-gray-900 dark:text-white/90"><%= survey.respondent_name %></p>
           <p class="mt-0.5 text-xs text-gray-500">
             <%= survey.politician.name %> · <%= survey.preference_basis.humanize %> · <%= survey.vote_label %>
@@ -326,41 +378,43 @@
     </ul>
   <% end %>
 
-  <% if current_user.role.can_write?("ground_reports") %>
+  <% if can_write %>
     <% if @politicians.any? %>
-      <%= form_with model: GroundReports::MockPollResponse.new, scope: :mock_poll_response,
-            url: ground_reports_village_mock_poll_responses_path(@village), class: "mt-5 space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800" do |f| %>
-        <div class="grid gap-3 md:grid-cols-2">
-          <div>
-            <%= f.label :politician_id, "Politician", class: ta_label_classes %>
-            <%= f.collection_select :politician_id, @politicians, :id, :name, { prompt: "Select a politician" }, { required: true, class: ta_field_classes } %>
+      <%= render "ground_reports/villages/add_panel", label: "Record response" do %>
+        <%= form_with model: GroundReports::MockPollResponse.new, scope: :mock_poll_response,
+              url: ground_reports_village_mock_poll_responses_path(@village), class: "space-y-3" do |f| %>
+          <div class="grid gap-3 md:grid-cols-2">
+            <div>
+              <%= f.label :politician_id, "Politician", class: ta_label_classes %>
+              <%= f.collection_select :politician_id, @politicians, :id, :name, { prompt: "Select a politician" }, { required: true, class: ta_field_classes } %>
+            </div>
+            <div>
+              <%= f.label :respondent_name, "Respondent", class: ta_label_classes %>
+              <%= f.text_field :respondent_name, required: true, class: ta_field_classes %>
+            </div>
+            <div>
+              <%= f.label :respondent_mobile, "Mobile", class: ta_label_classes %>
+              <%= f.telephone_field :respondent_mobile, class: ta_field_classes %>
+            </div>
+            <div>
+              <%= f.label :preference_basis, "Leaning because of", class: ta_label_classes %>
+              <%= f.select :preference_basis, GroundReports::MockPollResponse.preference_bases.keys.map { |key| [ key.humanize, key ] }, { prompt: "Select" }, { required: true, class: ta_field_classes } %>
+            </div>
+            <div>
+              <%= f.label :vote_choice, "Vote", class: ta_label_classes %>
+              <%= f.select :vote_choice, [ [ "Yes", "yes" ], [ "No", "no" ], [ "Undecided", "undecided" ] ], { prompt: "Select" }, { required: true, class: ta_field_classes } %>
+            </div>
+            <div>
+              <%= f.label :note, class: ta_label_classes %>
+              <%= f.text_area :note, rows: 2, class: "#{ta_field_classes} h-auto" %>
+            </div>
           </div>
-          <div>
-            <%= f.label :respondent_name, "Respondent", class: ta_label_classes %>
-            <%= f.text_field :respondent_name, required: true, class: ta_field_classes %>
-          </div>
-          <div>
-            <%= f.label :respondent_mobile, "Mobile", class: ta_label_classes %>
-            <%= f.telephone_field :respondent_mobile, class: ta_field_classes %>
-          </div>
-          <div>
-            <%= f.label :preference_basis, "Leaning because of", class: ta_label_classes %>
-            <%= f.select :preference_basis, GroundReports::MockPollResponse.preference_bases.keys.map { |key| [ key.humanize, key ] }, { prompt: "Select" }, { required: true, class: ta_field_classes } %>
-          </div>
-          <div>
-            <%= f.label :vote_choice, "Vote", class: ta_label_classes %>
-            <%= f.select :vote_choice, [ [ "Yes", "yes" ], [ "No", "no" ], [ "Undecided", "undecided" ] ], { prompt: "Select" }, { required: true, class: ta_field_classes } %>
-          </div>
-          <div>
-            <%= f.label :note, class: ta_label_classes %>
-            <%= f.text_area :note, rows: 2, class: "#{ta_field_classes} h-auto" %>
-          </div>
-        </div>
-        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Record response</button>
+          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Record response</button>
+        <% end %>
       <% end %>
     <% else %>
-      <p class="mt-5 border-t border-gray-100 pt-5 text-sm text-gray-500 dark:border-gray-800">No politicians yet. An administrator adds them from the console.</p>
+      <p class="border-t border-gray-100 px-6 py-4 text-sm text-gray-500 dark:border-gray-800">No politicians yet. An administrator adds them from the console.</p>
     <% end %>
   <% end %>
 </section>

@@ -63,7 +63,9 @@ class PrRecordsController < ApplicationController
   def record_params
     params.require(:pr_record).permit(:title, :description, :url, :thumbnail_url,
       :published_on, :sentiment, :pr_category_id, :media_platform_id,
-      :media_platform_name, attachments: [])
+      :media_platform_name, attachments: [],
+      outdoor_ad_counts_attributes: [:id, :outdoor_ad_type_id, :count, :_destroy],
+      podcast_attributes: [:id, :recording_date, :_destroy])
   end
 
   def require_pr_access

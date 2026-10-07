@@ -1,0 +1,13 @@
+<details class="group border-t border-gray-100 dark:border-gray-800">
+  <summary class="flex min-h-11 cursor-pointer list-none items-center gap-2 px-5 py-3 text-sm font-medium text-gray-700 marker:content-none hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+    <span class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition group-open:rotate-45 dark:border-gray-700">
+      <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
+      </svg>
+    </span>
+    <%= label %>
+  </summary>
+  <div class="space-y-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800">
+    <%= yield %>
+  </div>
+</details>

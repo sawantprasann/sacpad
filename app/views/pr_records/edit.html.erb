@@ -48,6 +48,41 @@
       <%= f.url_field :url, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     </div>
 
+    <% if @record.pr_category&.slug == "outdoor-media" %>
+      <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Outdoor Ad Placements</h3>
+        <div class="space-y-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+          <%= f.fields_for :outdoor_ad_counts do |oac| %>
+            <div class="flex gap-2 items-center">
+              <%= oac.select :outdoor_ad_type_id,
+                    options_from_collection_for_select(OutdoorAdType.active, :id, :name),
+                    { include_blank: "Select ad type..." },
+                    class: "flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-sm" %>
+              <%= oac.number_field :count, placeholder: "Count",
+                    class: "w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white text-sm" %>
+              <label class="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
+                <%= oac.check_box :_destroy %>
+                Remove
+              </label>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @record.pr_category&.slug == "podcasts-interviews" %>
+      <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Podcast Recording</h3>
+        <%= f.fields_for :podcast do |p| %>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Recording Date</label>
+            <%= p.date_field :recording_date, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">When the episode was recorded (separate from publish date)</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
     <div class="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
       <%= f.submit "Save Changes", class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
       <%= link_to "Cancel", pr_record_path(@record), class: "bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
