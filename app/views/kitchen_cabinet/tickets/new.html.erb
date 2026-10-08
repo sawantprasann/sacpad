@@ -26,23 +26,30 @@
           <%= f.label :person_name, "Person / represents", class: ta_label_classes %>
           <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
         </div>
-        <div data-controller="searchable-select" class="space-y-1">
-          <div class="flex items-center justify-between">
-            <%= f.label :village, "Village / ward", class: ta_label_classes %>
-            <button type="button"
-                    data-action="searchable-select#clearSearch"
-                    class="text-xs text-blue-600 hover:underline dark:text-blue-400">Clear</button>
+        <div data-controller="searchable-select">
+          <%= f.label :village, "Village / ward", class: ta_label_classes %>
+          <div class="mt-1 rounded-lg border border-gray-300 bg-white overflow-hidden dark:border-gray-600 dark:bg-gray-800">
+            <!-- Search Input -->
+            <div class="border-b border-gray-200 dark:border-gray-700 px-3 py-2 flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input type="text"
+                     placeholder="Type to search..."
+                     data-target="searchable-select.input"
+                     data-action="searchable-select#search"
+                     class="flex-1 bg-transparent border-0 outline-none text-sm text-gray-900 placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500">
+              <button type="button"
+                      data-action="searchable-select#clearSearch"
+                      class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 px-1">✕</button>
+            </div>
+            <!-- Dropdown -->
+            <%= f.select :village,
+                  options_for_select(Village.order(:name).pluck(:name), @ticket.village),
+                  { include_blank: "Select a village..." },
+                  class: "w-full bg-white dark:bg-gray-800 border-0 outline-none text-gray-900 dark:text-white p-3 text-sm",
+                  data: { target: "searchable-select.select" } %>
           </div>
-          <input type="text"
-                 placeholder="Search village..."
-                 data-target="searchable-select.input"
-                 data-action="searchable-select#search"
-                 class="#{ta_field_classes} min-h-10 text-sm">
-          <%= f.select :village,
-                options_for_select(Village.order(:name).pluck(:name), @ticket.village),
-                { include_blank: "Select a village..." },
-                class: "#{ta_field_classes} min-h-11",
-                data: { target: "searchable-select.select" } %>
         </div>
         <div>
           <%= f.label :mobile, "Mobile number", class: ta_label_classes %>
