@@ -56,6 +56,13 @@ Rails.application.routes.draw do
   # Org-facing hierarchical user management (Story 0.9)
   resources :users, only: %i[index new create show]
 
+  # Voter management — Org-scoped sentiment tracking (Epic 6, org-side)
+  resources :voters, only: %i[index show] do
+    member do
+      patch :update_sentiment
+    end
+  end
+
   # Cadre Program (Epic 2). Story 2.1 is the shared base capture; detail forms (2.2) and
   # the dashboard widget / Excel export (2.3) extend this resource.
   namespace :cadre_program do

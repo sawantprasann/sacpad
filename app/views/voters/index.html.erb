@@ -1,0 +1,107 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Voters</h1>
+    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Electoral roll with sentiment tracking</p>
+  </div>
+
+  <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+    <!-- Filters -->
+    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+      <%= form_with url: voters_path, method: :get, local: true, class: "space-y-3" do |f| %>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div>
+            <%= f.text_field :q, placeholder: "Search by voter ID or name...", value: params[:q],
+                  class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" %>
+          </div>
+          <div>
+            <%= f.text_field :village, placeholder: "Filter by village...", value: params[:village],
+                  class: "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" %>
+          </div>
+          <div class="flex gap-2">
+            <%= f.select :sentiment,
+                  [["All Sentiments", ""], ["Pleased", "pleased"], ["Transit", "transit"], ["Displeased", "displeased"]],
+                  { include_blank: false },
+                  value: params[:sentiment],
+                  class: "flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white" %>
+            <%= f.submit "Search", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+          </div>
+        </div>
+      <% end %>
+      <% if @search_hint %>
+        <p class="text-xs text-gray-500 dark:text-gray-400"><%= @search_hint %></p>
+      <% end %>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50">
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Voter ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Village</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Sentiment</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Updated</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+          <% @voters.each do |voter| %>
+            <% sentiment = ActsAsTenant.with_tenant(current_user.organization) { voter.voter_sentiments.first } %>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                <%= link_to voter.voter_id, voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= "#{voter.first_name} #{voter.last_name}" %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= voter.village&.name || "—" %>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <% if sentiment&.sentiment_status %>
+                  <% color_map = { "pleased" => "green", "transit" => "amber", "displeased" => "red" } %>
+                  <% color = color_map[sentiment.sentiment_status] || "gray" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800 dark:bg-<%= color %>-900/30 dark:text-<%= color %>-400">
+                    <%= sentiment.sentiment_status %>
+                  </span>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                <%= sentiment&.sentiment_updated_at&.strftime("%b %d") || "—" %>
+              </td>
+              <td class="px-6 py-4 text-right text-sm">
+                <%= link_to "View", voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if @pagy.last > 1 %>
+      <div class="border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            Page <%= @pagy.page %> of <%= @pagy.last %> (<%= @pagy.count %> voters)
+          </div>
+          <div class="flex gap-2">
+            <% if @pagy.previous %>
+              <%= link_to "← Prev", voters_path(voter_filters.merge(page: @pagy.previous)), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
+            <% end %>
+            <% if @pagy.next %>
+              <%= link_to "Next →", voters_path(voter_filters.merge(page: @pagy.next)), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="text-sm text-gray-600 dark:text-gray-400">
+    Total: <strong><%= Voter.count %></strong> voters available
+  </div>
+</div>

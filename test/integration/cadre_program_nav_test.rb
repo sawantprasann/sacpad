@@ -30,9 +30,10 @@ class CadreProgramNavTest < ActionDispatch::IntegrationTest
     CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label|
       assert_select "a[href=?]", cadre_program_activities_path(category: key), text: label
     end
-    assert_select ".menu-dropdown-badge", text: "soon", count: 3
+    assert_select ".menu-dropdown-badge", text: "soon", count: 2
     assert_no_match(/Ground Reports/, @response.body)
     assert_match "RAG Mapping", @response.body
+    assert_match "Voter Lists", @response.body
   end
 
   test "a category submenu link filters the list and pre-fills a new activity" do

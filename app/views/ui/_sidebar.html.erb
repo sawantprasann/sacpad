@@ -125,7 +125,15 @@
             </li>
           <% end %>
 
-          <% ["Social Media", "Voter Lists", "RAG Mapping"].each do |m| %>
+          <%# Voter Lists (Epic 6): Org-scoped voter management with sentiment tracking %>
+          <li>
+            <%= link_to voters_path,
+                  class: "menu-item group #{current_page?(voters_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+              <span class="menu-item-text">Voter Lists</span>
+            <% end %>
+          </li>
+
+          <% ["Social Media", "RAG Mapping"].each do |m| %>
             <li>
               <span class="menu-item group menu-item-inactive cursor-default">
                 <span class="menu-item-text"><%= m %></span>
