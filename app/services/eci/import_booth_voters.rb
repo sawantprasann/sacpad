@@ -2,15 +2,11 @@ require "open3"
 require "json"
 
 module Eci
-  # Download one booth's published roll PDF and read voters with the existing
-  # OCR script (gemini-code-1791443548136.rb --pdf).
+  # Download one booth's published roll PDF and read voters with script/eroll/extract_pdf.rb.
   class ImportBoothVoters
     class Error < StandardError; end
 
-    SCRIPT = ENV.fetch(
-      "EROLL_EXTRACT_SCRIPT",
-      File.expand_path("~/prasann-workspace/scripts/sac-pad/gemini-code-1791443548136.rb")
-    ).freeze
+    SCRIPT = Rails.root.join("script/eroll/extract_pdf.rb").to_s.freeze
 
     def initialize(booth, downloader: nil, extractor: nil)
       @booth = booth
@@ -66,39 +62,17 @@ module Eci
     def extract(path)
       return @extractor.call(path) if @extractor
 
-      raise Error, "Voter extract script was not found at #{SCRIPT}." unless File.file?(SCRIPT)
+      raise Error, "Voter extract script is missing from this app." unless File.file?(SCRIPT)
 
-      stdout, stderr, status = Open3.capture3(extract_env, extract_ruby, SCRIPT, "--pdf", path, unsetenv_others: true)
+      stdout, stderr, status = Open3.capture3(
+        { "BUNDLE_GEMFILE" => Rails.root.join("Gemfile").to_s },
+        RbConfig.ruby, "-rbundler/setup", SCRIPT, "--pdf", path
+      )
       raise Error, script_failure(stderr) unless status.success?
 
       JSON.parse(stdout)
     rescue JSON::ParserError
       raise Error, "The voter extract script did not return voter data."
-    end
-
-    def extract_ruby
-      configured = ENV["EROLL_EXTRACT_RUBY"].presence
-      return configured if configured
-
-      bundled = File.expand_path("~/.rvm/rubies/ruby-3.3.9/bin/ruby")
-      File.executable?(bundled) ? bundled : RbConfig.ruby
-    end
-
-    # The Rails process points GEM_HOME and BUNDLE_* at this app. The extract
-    # script runs on the Ruby that has pdf-reader, with that Ruby's own gems.
-    def extract_env
-      gem_home = File.expand_path("~/.rvm/gems/ruby-3.3.9")
-      env = {
-        "HOME" => ENV["HOME"],
-        "PATH" => ENV["PATH"],
-        "LANG" => ENV["LANG"].presence || "en_US.UTF-8",
-        "TMPDIR" => ENV["TMPDIR"]
-      }
-      if File.directory?(gem_home)
-        env["GEM_HOME"] = gem_home
-        env["GEM_PATH"] = [ gem_home, "#{gem_home}@global" ].select { |path| File.directory?(path) }.join(File::PATH_SEPARATOR)
-      end
-      env.compact
     end
 
     def script_failure(stderr)

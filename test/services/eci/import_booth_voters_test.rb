@@ -68,12 +68,10 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     assert_equal "cannot load such file -- pdf-reader (LoadError)", message
   end
 
-  test "the extract process uses the pdf-reader ruby instead of the Rails bundle" do
-    env = Eci::ImportBoothVoters.new(@booth).send(:extract_env)
-
-    assert_nil env["BUNDLE_GEMFILE"]
-    assert_nil env["RUBYOPT"]
-    assert_equal File.expand_path("~/.rvm/gems/ruby-3.3.9"), env["GEM_HOME"]
+  test "the extract script ships inside the application" do
+    assert Eci::ImportBoothVoters::SCRIPT.start_with?(Rails.root.to_s)
+    assert File.file?(Eci::ImportBoothVoters::SCRIPT)
+    assert File.file?(Rails.root.join("script/eroll/ocr_page.swift"))
   end
 
   test "asks the script for the english draft-roll pdf of this assembly and part" do

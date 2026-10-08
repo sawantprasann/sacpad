@@ -45,7 +45,7 @@
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= voter.mobile %></td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <% if voter.booth %>
-                  <%= link_to voter.booth.name, console_booth_path(voter.booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                  <%= link_to "Booth #{voter.booth.number}", console_booth_path(voter.booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
                 <% else %>
                   <span class="text-gray-400">—</span>
                 <% end %>
