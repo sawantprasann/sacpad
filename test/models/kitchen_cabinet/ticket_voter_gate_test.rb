@@ -48,7 +48,7 @@ module KitchenCabinet
         t.update!(voter_id: "VTR999")
         assert_nil t.matched_voter
 
-        voter = Voter.create!(organization: @org, voter_id: "VTR999", name: "Asha")
+        voter = Voter.create!(voter_id: "VTR999", first_name: "Asha", last_name: "Kumar")
         assert_equal voter, t.matched_voter
       end
     end

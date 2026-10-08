@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -624,6 +624,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_090000) do
     t.index ["taluka_id"], name: "index_villages_on_taluka_id"
   end
 
+  create_table "voter_sentiment_versions", force: :cascade do |t|
+    t.string "item_type", null: false
+    t.bigint "item_id", null: false
+    t.string "event", null: false
+    t.string "whodunnit"
+    t.text "object"
+    t.text "object_changes"
+    t.datetime "created_at"
+    t.index ["item_type", "item_id"], name: "index_voter_sentiment_versions_on_item_type_and_item_id"
+  end
+
+  create_table "voter_sentiments", force: :cascade do |t|
+    t.bigint "voter_id", null: false
+    t.bigint "organization_id", null: false
+    t.integer "sentiment_status"
+    t.bigint "sentiment_updated_by_id"
+    t.datetime "sentiment_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_voter_sentiments_on_organization_id"
+    t.index ["voter_id", "organization_id"], name: "index_voter_sentiments_on_voter_id_and_organization_id", unique: true
+    t.index ["voter_id"], name: "index_voter_sentiments_on_voter_id"
+  end
+
   create_table "voter_versions", force: :cascade do |t|
     t.string "item_type", null: false
     t.bigint "item_id", null: false
@@ -636,22 +660,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_090000) do
   end
 
   create_table "voters", force: :cascade do |t|
-    t.bigint "organization_id", null: false
     t.bigint "booth_id"
     t.string "state"
     t.string "loksabha"
     t.string "assembly"
     t.string "village"
     t.text "voter_id"
-    t.text "name"
     t.text "mobile"
-    t.integer "sentiment_status"
-    t.bigint "sentiment_updated_by_id"
-    t.datetime "sentiment_updated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "first_name"
+    t.text "last_name"
+    t.text "middle_name"
     t.index ["booth_id"], name: "index_voters_on_booth_id"
-    t.index ["organization_id"], name: "index_voters_on_organization_id"
   end
 
   create_table "worship_places", force: :cascade do |t|
@@ -743,8 +764,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_090000) do
   add_foreign_key "village_yatras", "villages"
   add_foreign_key "villages", "assemblies"
   add_foreign_key "villages", "talukas"
+  add_foreign_key "voter_sentiments", "organizations"
+  add_foreign_key "voter_sentiments", "voters"
   add_foreign_key "voters", "booths"
-  add_foreign_key "voters", "organizations"
   add_foreign_key "worship_places", "organizations"
   add_foreign_key "worship_places", "villages"
 end

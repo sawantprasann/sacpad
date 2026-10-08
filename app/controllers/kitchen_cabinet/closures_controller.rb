@@ -17,8 +17,9 @@ module KitchenCabinet
         if params[:voter_id].present?
           @ticket.update!(voter_id: params[:voter_id])              # gate passes now that it's closed
           sentiment = params[:sentiment].to_s
-          if Voter.sentiment_statuses.key?(sentiment) && (voter = @ticket.matched_voter)
-            voter.record_sentiment!(sentiment, by: current_user)
+          if VoterSentiment.sentiment_statuses.key?(sentiment) && (voter = @ticket.matched_voter)
+            voter_sentiment = VoterSentiment.find_or_create_by!(voter: voter, organization: ActsAsTenant.current_tenant)
+            voter_sentiment.record_sentiment!(sentiment, by: current_user)
           end
         end
       end

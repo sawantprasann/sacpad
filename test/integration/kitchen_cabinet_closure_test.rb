@@ -27,8 +27,12 @@ class KitchenCabinetClosureTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "closing with a matched voter writes sentiment to the Voter" do
-    voter = ActsAsTenant.with_tenant(@org) { Voter.create!(voter_id: "VTR1", name: "Asha") }
+  test "closing with a matched voter writes sentiment to the VoterSentiment" do
+    voter = Voter.create!(voter_id: "VTR1", first_name: "Asha", last_name: "Kumar")
+    ActsAsTenant.with_tenant(@org) do
+      VoterSentiment.create!(voter: voter, organization: @org)
+    end
+
     t = in_progress_ticket
     sign_in @alice
     post kitchen_cabinet_ticket_closure_path(t),
@@ -36,9 +40,12 @@ class KitchenCabinetClosureTest < ActionDispatch::IntegrationTest
     assert_redirected_to kitchen_cabinet_ticket_path(t)
     assert t.reload.closed?
     assert_equal "VTR1", t.voter_id
-    voter.reload
-    assert voter.sentiment_pleased?
-    assert_equal @alice.id, voter.sentiment_updated_by_id
+
+    ActsAsTenant.with_tenant(@org) do
+      voter_sentiment = VoterSentiment.find_by(voter: voter, organization: @org)
+      assert voter_sentiment.sentiment_pleased?
+      assert_equal @alice.id, voter_sentiment.sentiment_updated_by_id
+    end
   end
 
   test "closing without a voter still closes and writes no sentiment" do
