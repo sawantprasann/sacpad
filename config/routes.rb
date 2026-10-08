@@ -19,7 +19,9 @@ Rails.application.routes.draw do
     end
     # Global reference-data catalogs (Admin-managed, Story 0.4)
     resources :states
+    resources :districts
     resources :loksabhas
+    resources :talukas
     resources :assemblies
     resources :villages
     resources :booths

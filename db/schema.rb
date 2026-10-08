@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_070000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -89,7 +89,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "taluka_id"
+    t.string "constituency_no"
     t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
+    t.index ["taluka_id"], name: "index_assemblies_on_taluka_id"
   end
 
   create_table "booths", force: :cascade do |t|
@@ -193,6 +196,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
     t.index ["organization_id"], name: "index_cadre_activity_programs_on_organization_id"
   end
 
+  create_table "districts", force: :cascade do |t|
+    t.bigint "state_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["state_id"], name: "index_districts_on_state_id"
+  end
+
   create_table "ground_report_imports", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "user_id", null: false
@@ -247,6 +258,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "district_id"
+    t.string "constituency_no"
+    t.index ["district_id"], name: "index_loksabhas_on_district_id"
     t.index ["state_id"], name: "index_loksabhas_on_state_id"
   end
 
@@ -415,6 +429,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "talukas", force: :cascade do |t|
+    t.bigint "district_id", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["district_id"], name: "index_talukas_on_district_id"
   end
 
   create_table "ticket_categories", force: :cascade do |t|
@@ -651,6 +673,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
   add_foreign_key "admin_organizations", "admins"
   add_foreign_key "admin_organizations", "organizations"
   add_foreign_key "assemblies", "loksabhas"
+  add_foreign_key "assemblies", "talukas"
   add_foreign_key "booths", "villages"
   add_foreign_key "cadre_activities", "organizations"
   add_foreign_key "cadre_activities", "users", column: "owner_id"
@@ -665,6 +688,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
   add_foreign_key "cadre_activity_personal_activities", "organizations"
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
+  add_foreign_key "districts", "states"
   add_foreign_key "ground_report_imports", "organizations"
   add_foreign_key "ground_report_imports", "users"
   add_foreign_key "ground_report_testimonials", "ground_reports"
@@ -673,6 +697,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
   add_foreign_key "ground_reports", "organizations"
   add_foreign_key "ground_reports", "users", column: "owner_id"
   add_foreign_key "ground_reports", "villages"
+  add_foreign_key "loksabhas", "districts"
   add_foreign_key "loksabhas", "states"
   add_foreign_key "mock_poll_responses", "organizations"
   add_foreign_key "mock_poll_responses", "politicians"
@@ -692,6 +717,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_060000) do
   add_foreign_key "pr_records", "users", column: "owner_id"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
+  add_foreign_key "talukas", "districts"
   add_foreign_key "ticket_follow_ups", "organizations"
   add_foreign_key "ticket_follow_ups", "tickets"
   add_foreign_key "ticket_follow_ups", "users", column: "created_by_id"
