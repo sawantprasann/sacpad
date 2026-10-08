@@ -26,16 +26,18 @@
           <%= f.label :person_name, "Person / represents", class: ta_label_classes %>
           <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
         </div>
-        <div data-controller="searchable-select">
-          <%= f.label :village, "Village / ward", class: ta_label_classes %>
+        <div data-controller="searchable-select" class="space-y-1">
+          <div class="flex items-center justify-between">
+            <%= f.label :village, "Village / ward", class: ta_label_classes %>
+            <button type="button"
+                    data-action="searchable-select#clearSearch"
+                    class="text-xs text-blue-600 hover:underline dark:text-blue-400">Clear</button>
+          </div>
           <input type="text"
                  placeholder="Search village..."
                  data-target="searchable-select.input"
                  data-action="searchable-select#search"
-                 class="#{ta_field_classes} min-h-11 mt-1 mb-1">
-          <button type="button"
-                  data-action="searchable-select#clearSearch"
-                  class="text-xs text-blue-600 hover:underline dark:text-blue-400">Clear</button>
+                 class="#{ta_field_classes} min-h-10 text-sm">
           <%= f.select :village,
                 options_for_select(Village.order(:name).pluck(:name), @ticket.village),
                 { include_blank: "Select a village..." },
