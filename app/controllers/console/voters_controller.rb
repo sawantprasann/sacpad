@@ -11,6 +11,8 @@ module Console
     end
 
     def show
+      # Load org-scoped sentiments without tenant context (console operates cross-org)
+      @voter_sentiments = ActsAsTenant.without_tenant { @voter.voter_sentiments.includes(:organization) }
     end
 
     private

@@ -90,7 +90,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-          <% @voter.voter_sentiments.includes(:organization).each do |sentiment| %>
+          <% @voter_sentiments.each do |sentiment| %>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
               <td class="px-6 py-4 text-sm text-gray-900 dark:text-white"><%= sentiment.organization.name %></td>
               <td class="px-6 py-4 text-sm">
@@ -119,7 +119,7 @@
         </tbody>
       </table>
     </div>
-    <% if @voter.voter_sentiments.empty? %>
+    <% if @voter_sentiments.empty? %>
       <div class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">No sentiment tracking yet</div>
     <% end %>
   </div>
