@@ -12,11 +12,12 @@ class Voter < ApplicationRecord
   belongs_to :village, optional: true
   has_many :voter_sentiments, dependent: :destroy
 
-  # PII encrypted at rest (NFR18). voter_id is deterministic so the loose Ticket lookup can query it.
+  # PII encrypted at rest (NFR18). Name fields deterministic for searchability.
+  # voter_id is deterministic for Ticket lookup; name fields deterministic for voter search/filter.
   encrypts :voter_id, deterministic: true
-  encrypts :first_name
-  encrypts :last_name
-  encrypts :middle_name
+  encrypts :first_name, deterministic: true
+  encrypts :last_name, deterministic: true
+  encrypts :middle_name, deterministic: true
   encrypts :mobile
 
   validates :first_name, :last_name, presence: true
