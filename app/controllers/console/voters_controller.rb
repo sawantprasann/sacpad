@@ -5,9 +5,16 @@ module Console
     before_action :set_voter, only: [:show]
 
     def index
-      relation = Voter.all
-      relation = relation.where("voter_id ILIKE ?", "%#{params[:q]}%") if params[:q].present?
-      @pagy, @voters = pagy(:offset, relation.order(:voter_id))
+      if params[:q].present? && params[:q].length >= 3
+        # Search by voter_id (deterministic encrypted, indexed for fast lookup)
+        relation = Voter.where("voter_id ILIKE ?", "%#{params[:q]}%")
+        @pagy, @voters = pagy(:offset, relation.order(:voter_id))
+      else
+        # Default: show recent voters (much faster than Voter.all for large datasets)
+        relation = Voter.order(created_at: :desc)
+        @pagy, @voters = pagy(:offset, relation)
+        @search_hint = "Search requires at least 3 characters" if params[:q].present?
+      end
     end
 
     def show

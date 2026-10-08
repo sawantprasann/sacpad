@@ -6,12 +6,16 @@
 
   <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
     <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-      <div class="flex items-center gap-3">
-        <%= form_with url: console_voters_path, method: :get, class: "flex-1", local: true do |f| %>
-          <div class="flex gap-2">
-            <%= f.text_field :q, placeholder: "Search by voter ID...", value: params[:q], class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" %>
-            <%= f.submit "Search", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
-          </div>
+      <div class="space-y-3">
+        <%= form_with url: console_voters_path, method: :get, class: "flex gap-2", local: true do |f| %>
+          <%= f.text_field :q, placeholder: "Search by voter ID (min 3 chars)...", value: params[:q], class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" %>
+          <%= f.submit "Search", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+        <% end %>
+
+        <% if @search_hint %>
+          <p class="text-xs text-amber-600 dark:text-amber-400"><%= @search_hint %></p>
+        <% elsif !params[:q].present? %>
+          <p class="text-xs text-gray-500 dark:text-gray-400">📌 Showing recently added voters (ordered by created date)</p>
         <% end %>
       </div>
     </div>

@@ -58,6 +58,24 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     assert_equal 0, Voter.count
   end
 
+  test "reports the script error instead of the bottom backtrace frame" do
+    importer = Eci::ImportBoothVoters.new(@booth)
+    message = importer.send(:script_failure, <<~ERR)
+      cannot load such file -- pdf-reader (LoadError)
+      \tfrom <internal:gem_prelude>:2:in `<internal:gem_prelude>'
+    ERR
+
+    assert_equal "cannot load such file -- pdf-reader (LoadError)", message
+  end
+
+  test "the extract process uses the pdf-reader ruby instead of the Rails bundle" do
+    env = Eci::ImportBoothVoters.new(@booth).send(:extract_env)
+
+    assert_nil env["BUNDLE_GEMFILE"]
+    assert_nil env["RUBYOPT"]
+    assert_equal File.expand_path("~/.rvm/gems/ruby-3.3.9"), env["GEM_HOME"]
+  end
+
   test "asks the script for the english draft-roll pdf of this assembly and part" do
     seen = nil
     downloader = lambda { |url, path|

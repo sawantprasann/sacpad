@@ -24,6 +24,12 @@
                       class: "mr-3 text-brand-500 hover:text-brand-600",
                       form: { style: "display:inline" },
                       data: { turbo_confirm: "Fetch assemblies, villages, booths, and voters for #{record.name}?", turbo_submits_with: "Fetching…" } %>
+              <% elsif record.is_a?(Assembly) %>
+                <%= button_to "Sync", sync_voters_console_assembly_path(record),
+                      method: :post,
+                      class: "mr-3 text-brand-500 hover:text-brand-600",
+                      form: { style: "display:inline" },
+                      data: { turbo_confirm: "Sync voters for #{record.name}? This reads each booth PDF in the background.", turbo_submits_with: "Syncing…" } %>
               <% end %>
               <%= link_to "Edit", url_for(action: :edit, id: record), class: "text-brand-500 hover:text-brand-600" %>
               <%= button_to "Delete", url_for(action: :destroy, id: record), method: :delete,

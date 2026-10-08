@@ -26,7 +26,11 @@ Rails.application.routes.draw do
       end
     end
     resources :talukas
-    resources :assemblies
+    resources :assemblies do
+      member do
+        post :sync_voters
+      end
+    end
     resources :villages
     resources :booths
     resources :voters, only: %i[index show]

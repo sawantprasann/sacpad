@@ -68,11 +68,8 @@ module Eci
 
       raise Error, "Voter extract script was not found at #{SCRIPT}." unless File.file?(SCRIPT)
 
-      stdout, stderr, status = Open3.capture3(extract_ruby, SCRIPT, "--pdf", path)
-      unless status.success?
-        detail = stderr.to_s.lines.map(&:strip).reject(&:empty?).last
-        raise Error, detail.presence || "The voter extract script failed."
-      end
+      stdout, stderr, status = Open3.capture3(extract_env, extract_ruby, SCRIPT, "--pdf", path, unsetenv_others: true)
+      raise Error, script_failure(stderr) unless status.success?
 
       JSON.parse(stdout)
     rescue JSON::ParserError
@@ -85,6 +82,29 @@ module Eci
 
       bundled = File.expand_path("~/.rvm/rubies/ruby-3.3.9/bin/ruby")
       File.executable?(bundled) ? bundled : RbConfig.ruby
+    end
+
+    # The Rails process points GEM_HOME and BUNDLE_* at this app. The extract
+    # script runs on the Ruby that has pdf-reader, with that Ruby's own gems.
+    def extract_env
+      gem_home = File.expand_path("~/.rvm/gems/ruby-3.3.9")
+      env = {
+        "HOME" => ENV["HOME"],
+        "PATH" => ENV["PATH"],
+        "LANG" => ENV["LANG"].presence || "en_US.UTF-8",
+        "TMPDIR" => ENV["TMPDIR"]
+      }
+      if File.directory?(gem_home)
+        env["GEM_HOME"] = gem_home
+        env["GEM_PATH"] = [ gem_home, "#{gem_home}@global" ].select { |path| File.directory?(path) }.join(File::PATH_SEPARATOR)
+      end
+      env.compact
+    end
+
+    def script_failure(stderr)
+      lines = stderr.to_s.lines.map(&:strip).reject(&:empty?)
+      lines.find { |line| !line.start_with?("from ", "Ignoring ") } ||
+        "The voter extract script failed."
     end
 
     def save_voters(voters, loksabha, assembly)
