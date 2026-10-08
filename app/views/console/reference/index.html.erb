@@ -18,6 +18,13 @@
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
             <% managed_fields.each { |f| %><td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= record.public_send(f) %></td><% } %>
             <td class="px-5 py-3 text-right whitespace-nowrap">
+              <% if record.is_a?(Loksabha) %>
+                <%= button_to "Fetch data", fetch_roll_console_loksabha_path(record),
+                      method: :post,
+                      class: "mr-3 text-brand-500 hover:text-brand-600",
+                      form: { style: "display:inline" },
+                      data: { turbo_confirm: "Fetch assemblies, villages, and booths for #{record.name}?", turbo_submits_with: "Fetching…" } %>
+              <% end %>
               <%= link_to "Edit", url_for(action: :edit, id: record), class: "text-brand-500 hover:text-brand-600" %>
               <%= button_to "Delete", url_for(action: :destroy, id: record), method: :delete,
                     class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>

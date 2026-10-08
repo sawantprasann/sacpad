@@ -1,0 +1,67 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Voters</h1>
+    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Global electoral roll data (shared across all organizations)</p>
+  </div>
+
+  <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+      <div class="flex items-center gap-3">
+        <%= form_with url: console_voters_path, method: :get, class: "flex-1", local: true do |f| %>
+          <div class="flex gap-2">
+            <%= f.text_field :q, placeholder: "Search by voter ID...", value: params[:q], class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" %>
+            <%= f.submit "Search", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50">
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Voter ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Name</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Mobile</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Booth</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Created</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+          <% @voters.each do |voter| %>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %></td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= "#{voter.first_name} #{voter.last_name}" %>
+                <% if voter.middle_name.present? %>
+                  <span class="text-gray-500">(<%= voter.middle_name %>)</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= voter.mobile %></td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <% if voter.booth %>
+                  <%= link_to voter.booth.name, console_booth_path(voter.booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><%= voter.created_at.strftime("%b %d, %Y") %></td>
+              <td class="px-6 py-4 text-right text-sm">
+                <%= link_to "View", console_voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+      <%== pagy_nav(@pagy) %>
+    </div>
+  </div>
+
+  <div class="text-sm text-gray-600 dark:text-gray-400">
+    Total: <strong><%= Voter.count %></strong> voters
+  </div>
+</div>

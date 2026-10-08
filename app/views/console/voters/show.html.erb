@@ -1,0 +1,126 @@
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <%= link_to "← Back", console_voters_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+      <%= "#{@voter.first_name} #{@voter.last_name}" %>
+    </h1>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <!-- Voter Data -->
+    <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+      <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Voter Information</h2>
+      </div>
+      <div class="px-6 py-4 space-y-4">
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voter ID</label>
+          <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @voter.voter_id %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">First Name</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.first_name %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Last Name</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.last_name %></p>
+        </div>
+        <% if @voter.middle_name.present? %>
+          <div>
+            <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Middle Name</label>
+            <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.middle_name %></p>
+          </div>
+        <% end %>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Mobile</label>
+          <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @voter.mobile %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Booth</label>
+          <% if @voter.booth %>
+            <p class="mt-1 text-sm">
+              <%= link_to @voter.booth.name, console_booth_path(@voter.booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+            </p>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-400">—</p>
+          <% end %>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Created</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.created_at.strftime("%b %d, %Y at %H:%M") %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Trail -->
+    <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+      <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Audit Trail</h2>
+      </div>
+      <div class="px-6 py-4">
+        <% if @voter.versions.any? %>
+          <div class="space-y-3 max-h-64 overflow-y-auto">
+            <% @voter.versions.reverse.each do |version| %>
+              <div class="text-xs border-l-2 border-gray-200 pl-3 dark:border-gray-700">
+                <p class="font-medium text-gray-700 dark:text-gray-300"><%= version.event.upcase %></p>
+                <p class="text-gray-500 dark:text-gray-400"><%= version.created_at.strftime("%b %d, %Y %H:%M") %></p>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-500 dark:text-gray-400">No changes recorded</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sentiment Tracking Across Organizations -->
+  <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sentiment Tracking by Organization</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50">
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Organization</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Sentiment</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Updated By</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Updated At</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+          <% @voter.voter_sentiments.includes(:organization).each do |sentiment| %>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
+              <td class="px-6 py-4 text-sm text-gray-900 dark:text-white"><%= sentiment.organization.name %></td>
+              <td class="px-6 py-4 text-sm">
+                <% color_map = { "pleased" => "green", "transit" => "amber", "displeased" => "red" } %>
+                <% color = color_map[sentiment.sentiment_status] || "gray" %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= color %>-100 text-<%= color %>-800 dark:bg-<%= color %>-900/30 dark:text-<%= color %>-400">
+                  <%= sentiment.sentiment_status %>
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <% if sentiment.sentiment_updated_by_id %>
+                  <%= sentiment.sentiment_updated_by_id %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                <% if sentiment.sentiment_updated_at %>
+                  <%= sentiment.sentiment_updated_at.strftime("%b %d, %Y %H:%M") %>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @voter.voter_sentiments.empty? %>
+      <div class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">No sentiment tracking yet</div>
+    <% end %>
+  </div>
+</div>

@@ -20,11 +20,16 @@ Rails.application.routes.draw do
     # Global reference-data catalogs (Admin-managed, Story 0.4)
     resources :states
     resources :districts
-    resources :loksabhas
+    resources :loksabhas do
+      member do
+        post :fetch_roll
+      end
+    end
     resources :talukas
     resources :assemblies
     resources :villages
     resources :booths
+    resources :voters, only: %i[index show]
     resources :parties
     # Kitchen Cabinet ticket-category catalog (Story 1.1) — global, Admin-managed
     resources :ticket_categories
