@@ -13,8 +13,7 @@
   <% end %>
 
   <div>
-    <%= f.label :village_id, "Village", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
-    <%= f.collection_select :village_id, Village.order(:name), :id, :name, { include_blank: "Select a village" }, class: "mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white" %>
+    <%= searchable_collection_select(f, :village_id, Village.order(:name), :id, :name, label: "Village") %>
     <% if @booth.errors[:village_id].any? %>
       <p class="mt-1 text-sm text-red-600 dark:text-red-400"><%= @booth.errors[:village_id].first %></p>
     <% end %>
