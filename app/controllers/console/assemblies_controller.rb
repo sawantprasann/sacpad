@@ -1,22 +1,80 @@
 module Console
   class AssembliesController < ReferenceController
     self.managed_model = Assembly
-    self.managed_fields = %i[loksabha_id name constituency_no]
+    self.managed_fields = %i[name constituency_no]
     self.managed_title = "Assembly"
 
-    def sync_voters
-      record = managed_model.includes(loksabha: :state).find(params[:id])
-      if record.constituency_no.blank? || record.loksabha&.state&.cd.blank?
-        redirect_to({ action: :index }, alert: "This assembly needs a constituency number and its state's Election Commission code.")
-        return
-      end
-      unless Booth.joins(:village).exists?(villages: { assembly_id: record.id })
-        redirect_to({ action: :index }, alert: "This assembly has no booths yet. Fetch the Lok Sabha roll first.")
-        return
-      end
+    prepend_before_action :set_loksabha
+    skip_before_action :set_record
+    before_action :set_record, only: %i[show edit update destroy]
 
-      ImportAssemblyVotersJob.perform_later(record.id)
-      redirect_to({ action: :index }, notice: "Voter sync started for #{record.name}. Names are saved as each booth PDF is read.")
+    helper_method :village_filters
+
+    def show
+      @village_total = @record.villages.count
+      @villages = filtered_villages.load
+    end
+
+    def new
+      @record = @loksabha.assemblies.new
+      render "console/reference/new"
+    end
+
+    def create
+      @record = @loksabha.assemblies.new(record_params)
+      if @record.save
+        redirect_to console_loksabha_assembly_path(@loksabha, @record), notice: "Assembly created."
+      else
+        render "console/reference/new", status: :unprocessable_entity
+      end
+    end
+
+    def update
+      if @record.update(record_params)
+        redirect_to console_loksabha_assembly_path(@loksabha, @record), notice: "Assembly updated."
+      else
+        render "console/reference/edit", status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      @record.destroy
+      redirect_to console_loksabha_path(@loksabha), notice: "Assembly deleted."
+    rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotDestroyed
+      redirect_to console_loksabha_path(@loksabha), alert: "Can't delete — it still has dependent records."
+    end
+
+    private
+
+    def set_loksabha
+      @loksabha = Loksabha.find(params[:loksabha_id])
+    end
+
+    def set_record
+      @record = @loksabha.assemblies.find(params[:id])
+    end
+
+    def filtered_villages
+      relation = @record.villages
+      relation = relation.where("villages.name ILIKE ?", like(params[:name])) if params[:name].present?
+      if params[:police_station].present?
+        relation = relation.where("villages.police_station ILIKE ?", like(params[:police_station]))
+      end
+      relation = relation.where("villages.pin_code ILIKE ?", like(params[:pin_code])) if params[:pin_code].present?
+      relation = relation.where("talukas.name ILIKE ?", like(params[:taluka])) if params[:taluka].present?
+      relation
+        .select("villages.*, talukas.name AS taluka_name, COUNT(voters.id) AS voters_count")
+        .left_joins(:voters, :taluka)
+        .group("villages.id, talukas.name")
+        .order(:name, :id)
+    end
+
+    def village_filters
+      params.permit(:name, :taluka, :police_station, :pin_code)
+    end
+
+    def like(value)
+      "%#{ActiveRecord::Base.sanitize_sql_like(value.strip)}%"
     end
   end
 end

@@ -2,6 +2,7 @@ class Village < ApplicationRecord
   belongs_to :assembly
   belongs_to :taluka, optional: true
   has_many :booths, dependent: :restrict_with_error
+  has_many :voters, dependent: :restrict_with_error
   has_many :ground_reports, class_name: "GroundReports::GroundReport", dependent: :restrict_with_error
   has_many :worship_places, class_name: "GroundReports::WorshipPlace", dependent: :restrict_with_error
   has_one :village_yatra, class_name: "GroundReports::VillageYatra", dependent: :restrict_with_error

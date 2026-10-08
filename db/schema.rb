@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_012000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -98,6 +98,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
     t.string "number", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
+    t.string "address"
+    t.string "station_type"
     t.index ["village_id"], name: "index_booths_on_village_id"
   end
 
@@ -620,6 +623,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "taluka_id"
+    t.string "police_station"
+    t.string "pin_code"
     t.index ["assembly_id"], name: "index_villages_on_assembly_id"
     t.index ["taluka_id"], name: "index_villages_on_taluka_id"
   end
@@ -661,10 +666,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
 
   create_table "voters", force: :cascade do |t|
     t.bigint "booth_id"
-    t.string "state"
-    t.string "loksabha"
-    t.string "assembly"
-    t.string "village"
     t.text "voter_id"
     t.text "mobile"
     t.datetime "created_at", null: false
@@ -672,7 +673,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
     t.text "first_name"
     t.text "last_name"
     t.text "middle_name"
+    t.bigint "state_id"
+    t.bigint "loksabha_id"
+    t.bigint "assembly_id"
+    t.bigint "village_id"
+    t.integer "age"
+    t.text "house_no"
+    t.text "gender"
+    t.index ["assembly_id"], name: "index_voters_on_assembly_id"
     t.index ["booth_id"], name: "index_voters_on_booth_id"
+    t.index ["loksabha_id"], name: "index_voters_on_loksabha_id"
+    t.index ["state_id"], name: "index_voters_on_state_id"
+    t.index ["village_id"], name: "index_voters_on_village_id"
+    t.index ["voter_id"], name: "index_voters_on_voter_id", unique: true
   end
 
   create_table "worship_places", force: :cascade do |t|
@@ -766,7 +779,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_230000) do
   add_foreign_key "villages", "talukas"
   add_foreign_key "voter_sentiments", "organizations"
   add_foreign_key "voter_sentiments", "voters"
+  add_foreign_key "voters", "assemblies"
   add_foreign_key "voters", "booths"
+  add_foreign_key "voters", "loksabhas"
+  add_foreign_key "voters", "states"
+  add_foreign_key "voters", "villages"
   add_foreign_key "worship_places", "organizations"
   add_foreign_key "worship_places", "villages"
 end

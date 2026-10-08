@@ -1,0 +1,41 @@
+<% content_for :title, "Loksabhas" %>
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="<%= ta_page_title %>">Loksabhas</h1>
+  <%= link_to "New Loksabha", new_console_loksabha_path, class: ta_btn_primary %>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <%= render "console/filters", url: console_loksabhas_path, fields: [ [ :state, "State" ], [ :district, "District" ], [ :name, "Name" ], [ :constituency_no, "Constituency no" ] ] %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">State</th>
+          <th class="px-5 py-3 font-medium">District</th>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Constituency no</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @records.each do |loksabha| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.state.name %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.district&.name || "—" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.name %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.constituency_no %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <%= link_to "View", console_loksabha_path(loksabha), class: "mr-3 text-brand-500 hover:text-brand-600" %>
+              <%= link_to "Edit", edit_console_loksabha_path(loksabha), class: "text-brand-500 hover:text-brand-600" %>
+              <%= button_to "Delete", console_loksabha_path(loksabha), method: :delete,
+                    class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @records.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400"><%= loksabha_filters.values.any?(&:present?) ? "No loksabhas match." : "No loksabhas yet." %></p>
+    <% end %>
+  </div>
+</div>

@@ -6,6 +6,10 @@ class Voter < ApplicationRecord
   include FullyVersioned   # Tier-1 VoterVersion history for PII edits
 
   belongs_to :booth, optional: true
+  belongs_to :state, optional: true
+  belongs_to :loksabha, optional: true
+  belongs_to :assembly, optional: true
+  belongs_to :village, optional: true
   has_many :voter_sentiments, dependent: :destroy
 
   # PII encrypted at rest (NFR18). voter_id is deterministic so the loose Ticket lookup can query it.

@@ -1,0 +1,79 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Booths</h1>
+      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Polling booth reference catalog — geography hierarchy</p>
+    </div>
+    <%= link_to "New Booth", console_new_booth_path, class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+  </div>
+
+  <div class="<%= ta_card_classes %> overflow-hidden">
+    <%= render "console/filters",
+          url: console_booths_path,
+          fields: [ [ :booth_number, "Booth number" ], [ :village, "Village" ] ],
+          hint: @pagy.count > 0 ? nil : "No booths found. Create one to get started." %>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50">
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Booth #</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Village</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Taluka</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">District</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">State</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+          <% @booths.each do |booth| %>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
+              <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                <%= link_to booth.number, console_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= link_to booth.village.name, console_village_path(booth.village), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= link_to booth.village.taluka.name, console_taluka_path(booth.village.taluka), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village&.taluka %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= link_to booth.village.taluka.district.name, console_district_path(booth.village.taluka.district), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village&.taluka&.district %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                <%= link_to booth.village.taluka.district.state.name, console_state_path(booth.village.taluka.district.state), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village&.taluka&.district&.state %>
+              </td>
+              <td class="px-6 py-4 text-right text-sm space-x-2">
+                <%= link_to "View", console_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <%= link_to "Edit", console_edit_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <%= button_to "Delete", console_booth_path(booth), method: :delete, form: { style: "display:inline" }, class: "text-red-600 hover:underline dark:text-red-400" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if @pagy.last > 1 %>
+      <div class="border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            Page <%= @pagy.page %> of <%= @pagy.last %> (<%= @pagy.count %> booths)
+          </div>
+          <div class="flex gap-2">
+            <% if @pagy.previous %>
+              <%= link_to "← Prev", console_booths_path(booth_filters.merge(page: @pagy.previous)), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
+            <% end %>
+            <% if @pagy.next %>
+              <%= link_to "Next →", console_booths_path(booth_filters.merge(page: @pagy.next)), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="text-sm text-gray-600 dark:text-gray-400">
+    Total: <strong><%= Booth.count %></strong> booths
+  </div>
+</div>

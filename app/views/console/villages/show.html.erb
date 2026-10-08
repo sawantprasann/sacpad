@@ -1,0 +1,91 @@
+<% content_for :title, @record.name %>
+<% breadcrumb "Loksabhas", console_loksabhas_path %>
+<% breadcrumb @loksabha.name, console_loksabha_path(@loksabha) %>
+<% breadcrumb @assembly.name, console_loksabha_assembly_path(@loksabha, @assembly) %>
+<% breadcrumb @record.name %>
+
+<div class="mb-6 flex items-center justify-between">
+  <div>
+    <h1 class="<%= ta_page_title %>"><%= @record.name %></h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      <%= link_to @assembly.name, console_loksabha_assembly_path(@loksabha, @assembly), class: "text-brand-500 hover:text-brand-600" %>
+    </p>
+  </div>
+  <%= link_to "Edit", edit_console_loksabha_assembly_village_path(@loksabha, @assembly, @record), class: ta_btn_secondary %>
+</div>
+
+<div class="<%= ta_card_classes %> mb-6 p-6">
+  <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Taluka</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.taluka&.name || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Police station</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.police_station.presence || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Pin code</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.pin_code.presence || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voters</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @voter_total %></dd>
+    </div>
+  </dl>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Voters</h2>
+  </div>
+  <%= render "console/filters", url: console_loksabha_assembly_village_path(@loksabha, @assembly, @record), fields: [ [ :voter_id, "Voter ID" ], [ :name, "Name" ], [ :age, "Age" ], [ :gender, "Gender" ], [ :house_no, "House no" ], [ :booth, "Booth" ] ] %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Voter ID</th>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Age</th>
+          <th class="px-5 py-3 font-medium">Gender</th>
+          <th class="px-5 py-3 font-medium">House no</th>
+          <th class="px-5 py-3 font-medium">Booth</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @voters.each do |voter| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= [ voter.first_name, voter.middle_name, voter.last_name ].compact_blank.join(" ") %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.age || "—" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.gender.presence || "—" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.house_no.presence || "—" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300">
+              <% if voter.booth %>
+                <%= link_to voter.booth.number, console_booth_path(voter.booth), class: "text-brand-500 hover:text-brand-600" %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @voters.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400"><%= voter_filters.values.any?(&:present?) ? "No voters match." : "No voters yet." %></p>
+    <% end %>
+  </div>
+  <% if @pagy.last > 1 %>
+    <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4 text-sm dark:border-gray-800">
+      <p class="text-gray-500 dark:text-gray-400">Page <%= @pagy.page %> of <%= @pagy.last %></p>
+      <div class="flex gap-2">
+        <% if @pagy.previous %>
+          <%= link_to "← Prev", console_loksabha_assembly_village_path(@loksabha, @assembly, @record, voter_filters.merge(page: @pagy.previous)), class: "text-brand-500 hover:text-brand-600" %>
+        <% end %>
+        <% if @pagy.next %>
+          <%= link_to "Next →", console_loksabha_assembly_village_path(@loksabha, @assembly, @record, voter_filters.merge(page: @pagy.next)), class: "text-brand-500 hover:text-brand-600" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

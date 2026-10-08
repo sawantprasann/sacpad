@@ -36,6 +36,35 @@
           <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @voter.mobile %></p>
         </div>
         <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Age</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.age || "—" %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Gender</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.gender.presence || "—" %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">House No.</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.house_no.presence || "—" %></p>
+        </div>
+        <% [
+          [ "State", @voter.state, @voter.state && console_state_path(@voter.state) ],
+          [ "Lok Sabha", @voter.loksabha, @voter.loksabha && console_loksabha_path(@voter.loksabha) ],
+          [ "Assembly", @voter.assembly, @voter.assembly && @voter.loksabha && console_loksabha_assembly_path(@voter.loksabha, @voter.assembly) ],
+          [ "Village", @voter.village, @voter.village && @voter.loksabha && @voter.assembly && console_loksabha_assembly_village_path(@voter.loksabha, @voter.assembly, @voter.village) ]
+        ].each do |label, record, path| %>
+          <div>
+            <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= label %></label>
+            <% if record %>
+              <p class="mt-1 text-sm">
+                <%= link_to record.name, path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              </p>
+            <% else %>
+              <p class="mt-1 text-sm text-gray-400">—</p>
+            <% end %>
+          </div>
+        <% end %>
+        <div>
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Booth</label>
           <% if @voter.booth %>
             <p class="mt-1 text-sm">

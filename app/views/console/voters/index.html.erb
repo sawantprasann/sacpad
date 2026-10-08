@@ -4,21 +4,11 @@
     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Global electoral roll data (shared across all organizations)</p>
   </div>
 
-  <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-      <div class="space-y-3">
-        <%= form_with url: console_voters_path, method: :get, class: "flex gap-2", local: true do |f| %>
-          <%= f.text_field :q, placeholder: "Search by voter ID (min 3 chars)...", value: params[:q], class: "flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" %>
-          <%= f.submit "Search", class: "rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
-        <% end %>
-
-        <% if @search_hint %>
-          <p class="text-xs text-amber-600 dark:text-amber-400"><%= @search_hint %></p>
-        <% elsif !params[:q].present? %>
-          <p class="text-xs text-gray-500 dark:text-gray-400">📌 Showing recently added voters (ordered by created date)</p>
-        <% end %>
-      </div>
-    </div>
+  <div class="<%= ta_card_classes %> overflow-hidden">
+    <%= render "console/filters",
+          url: console_voters_path,
+          fields: [ [ :voter_id, "Voter ID" ], [ :name, "Name" ], [ :village, "Village" ], [ :booth, "Booth number" ] ],
+          hint: @search_hint %>
 
     <div class="overflow-x-auto">
       <table class="w-full">
@@ -27,6 +17,7 @@
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Voter ID</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Name</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Mobile</th>
+            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Village</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Booth</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Created</th>
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400"></th>
@@ -43,6 +34,7 @@
                 <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= voter.mobile %></td>
+              <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= voter.village&.name || "—" %></td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <% if voter.booth %>
                   <%= link_to "Booth #{voter.booth.number}", console_booth_path(voter.booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
@@ -68,10 +60,10 @@
           </div>
           <div class="flex gap-2">
             <% if @pagy.previous %>
-              <%= link_to "← Prev", console_voters_path(page: @pagy.previous, q: params[:q]), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
+              <%= link_to "← Prev", console_voters_path(voter_filters.merge(page: @pagy.previous)), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
             <% end %>
             <% if @pagy.next %>
-              <%= link_to "Next →", console_voters_path(page: @pagy.next, q: params[:q]), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
+              <%= link_to "Next →", console_voters_path(voter_filters.merge(page: @pagy.next)), class: "rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700" %>
             <% end %>
           </div>
         </div>

@@ -1,0 +1,72 @@
+<% content_for :title, @loksabha.name %>
+<% breadcrumb "Loksabhas", console_loksabhas_path %>
+<% breadcrumb @loksabha.name %>
+
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="<%= ta_page_title %>"><%= @loksabha.name %></h1>
+  <%= link_to "Edit", edit_console_loksabha_path(@loksabha), class: ta_btn_secondary %>
+</div>
+
+<div class="<%= ta_card_classes %> mb-6 p-6">
+  <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">State</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @loksabha.state.name, console_state_path(@loksabha.state), class: "text-brand-500 hover:text-brand-600" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90">
+        <% if @loksabha.district %>
+          <%= link_to @loksabha.district.name, console_district_path(@loksabha.district), class: "text-brand-500 hover:text-brand-600" %>
+        <% else %>
+          —
+        <% end %>
+      </dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Constituency no</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @loksabha.constituency_no %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Assemblies</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @assembly_total %></dd>
+    </div>
+  </dl>
+</div>
+
+<div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Assemblies</h2>
+    <%= link_to "New Assembly", new_console_loksabha_assembly_path(@loksabha), class: ta_btn_primary %>
+  </div>
+  <%= render "console/filters", url: console_loksabha_path(@loksabha), fields: [ [ :name, "Name" ], [ :constituency_no, "Constituency no" ] ] %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Constituency no</th>
+          <th class="px-5 py-3 font-medium">Villages</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @assemblies.each do |assembly| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to assembly.name, console_loksabha_assembly_path(@loksabha, assembly), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= assembly.constituency_no %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= assembly.villages_count %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <%= link_to "Edit", edit_console_loksabha_assembly_path(@loksabha, assembly), class: "text-brand-500 hover:text-brand-600" %>
+              <%= button_to "Delete", console_loksabha_assembly_path(@loksabha, assembly), method: :delete,
+                    class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @assemblies.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400"><%= assembly_filters.values.any?(&:present?) ? "No assemblies match." : "No assemblies yet." %></p>
+    <% end %>
+  </div>
+</div>

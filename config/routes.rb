@@ -21,17 +21,11 @@ Rails.application.routes.draw do
     resources :states
     resources :districts
     resources :loksabhas do
-      member do
-        post :fetch_roll
+      resources :assemblies, except: :index do
+        resources :villages, except: :index
       end
     end
     resources :talukas
-    resources :assemblies do
-      member do
-        post :sync_voters
-      end
-    end
-    resources :villages
     resources :booths
     resources :voters, only: %i[index show]
     resources :parties

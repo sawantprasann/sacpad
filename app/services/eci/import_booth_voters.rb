@@ -7,6 +7,11 @@ module Eci
     class Error < StandardError; end
 
     SCRIPT = Rails.root.join("script/eroll/extract_pdf.rb").to_s.freeze
+    UPSERT_BATCH = 500
+    UPSERT_COLUMNS = %i[
+      first_name middle_name last_name age house_no gender
+      booth_id state_id loksabha_id assembly_id village_id
+    ].freeze
 
     def initialize(booth, downloader: nil, extractor: nil)
       @booth = booth
@@ -15,6 +20,7 @@ module Eci
     end
 
     def call
+      load_geography!
       assembly = @booth.village.assembly
       loksabha = assembly.loksabha
       url = pdf_url(loksabha.state.cd, assembly.constituency_no, @booth.number)
@@ -27,6 +33,7 @@ module Eci
         raise Error, "Could not download the roll PDF for booth #{@booth.number}." if status == :failed
 
         payload = extract(path)
+        apply_cover(payload["cover"], loksabha)
         saved = save_voters(payload["voters"] || [], loksabha, assembly)
       end
       saved
@@ -41,6 +48,25 @@ module Eci
     end
 
     private
+
+    def load_geography!
+      return if geography_loaded?
+
+      @booth = Booth.includes(village: { assembly: { loksabha: [ :state, :district ] } }).find(@booth.id)
+    end
+
+    def geography_loaded?
+      village = @booth.association(:village)
+      return false unless village.loaded? && village.target
+
+      assembly = village.target.association(:assembly)
+      return false unless assembly.loaded? && assembly.target
+
+      loksabha = assembly.target.association(:loksabha)
+      return false unless loksabha.loaded? && loksabha.target
+
+      loksabha.target.association(:state).loaded? && loksabha.target.association(:district).loaded?
+    end
 
     def download(url, path)
       return @downloader.call(url, path) if @downloader
@@ -81,29 +107,78 @@ module Eci
         "The voter extract script failed."
     end
 
-    def save_voters(voters, loksabha, assembly)
+    def apply_cover(cover, loksabha)
+      return if cover.blank?
+
+      @booth.update!(
+        name: cover["Polling Station No. and Name"].presence,
+        address: cover["Polling Station Address"].presence,
+        station_type: cover["Type of Polling Station"].presence
+      )
+      assign_village(cover, loksabha)
+    end
+
+    def assign_village(cover, loksabha)
       village = @booth.village
-      saved = 0
+      village.police_station = cover["Police Station"].presence if cover["Police Station"].present?
+      village.pin_code = cover["Pin Code"].presence if cover["Pin Code"].present?
+      taluka = taluka_for(cover["Taluka"].presence, loksabha)
+      village.taluka = taluka if taluka && village.taluka_id != taluka.id
+      village.save! if village.changed?
+    end
+
+    def taluka_for(name, loksabha)
+      district = loksabha.district
+      return if name.blank? || district.nil?
+
+      district.talukas.find_or_create_by!(name: name)
+    end
+
+    def save_voters(voters, loksabha, assembly)
+      rows = voter_rows(voters, loksabha, assembly)
+      return 0 if rows.empty?
+
+      rows.each_slice(UPSERT_BATCH) do |slice|
+        Voter.upsert_all(slice, unique_by: :voter_id, update_only: UPSERT_COLUMNS)
+      end
+      rows.size
+    end
+
+    def voter_rows(voters, loksabha, assembly)
+      village_id = @booth.village.id
+      by_epic = {}
       voters.each do |row|
         epic = row["epic"].to_s.strip
         next if epic.blank?
 
         names = split_name(row["name"])
-        voter = Voter.find_or_initialize_by(voter_id: epic)
-        voter.assign_attributes(
-          booth: @booth,
+        by_epic[epic] = {
+          voter_id: epic,
           first_name: names[:first],
           middle_name: names[:middle],
           last_name: names[:last],
-          state: loksabha.state.name,
-          loksabha: loksabha.name,
-          assembly: assembly.name,
-          village: village.name
-        )
-        voter.save!
-        saved += 1
+          age: integer_or_nil(row["age"]),
+          house_no: blank_to_nil(row["house"]),
+          gender: blank_to_nil(row["gender"]),
+          booth_id: @booth.id,
+          state_id: loksabha.state_id,
+          loksabha_id: loksabha.id,
+          assembly_id: assembly.id,
+          village_id: village_id
+        }
       end
-      saved
+      by_epic.values
+    end
+
+    def blank_to_nil(value)
+      text = value.to_s.strip
+      return if text.blank? || text == "N/A"
+
+      text
+    end
+
+    def integer_or_nil(value)
+      Integer(value, exception: false)
     end
 
     def split_name(name)

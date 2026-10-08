@@ -3,7 +3,7 @@ class ImportAssemblyVotersJob < ApplicationJob
   queue_as :default
 
   def perform(assembly_id)
-    assembly = Assembly.includes(villages: :booths).find(assembly_id)
+    assembly = Assembly.includes(loksabha: [ :state, :district ], villages: :booths).find(assembly_id)
     assembly.villages.each do |village|
       village.booths.each do |booth|
         Eci::ImportBoothVoters.new(booth).call

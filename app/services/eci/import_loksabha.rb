@@ -19,9 +19,10 @@ module Eci
       end
     end
 
-    def initialize(loksabha, client: Client.new)
+    def initialize(loksabha, client: Client.new, enqueue_voters: true)
       @loksabha = loksabha
       @client = client
+      @enqueue_voters = enqueue_voters
     end
 
     def call
@@ -53,7 +54,7 @@ module Eci
       end
 
       result = Result.new(assemblies: assemblies, villages: village_ids.uniq.size, booths: booths)
-      ImportLoksabhaVotersJob.perform_later(@loksabha.id) if booths.positive?
+      ImportLoksabhaVotersJob.perform_later(@loksabha.id) if @enqueue_voters && booths.positive?
       result
     end
 

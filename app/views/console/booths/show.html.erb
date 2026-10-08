@@ -1,0 +1,84 @@
+<div class="space-y-6">
+  <div class="flex items-center gap-4">
+    <%= link_to "← Back", console_booths_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Booth <%= @booth.number %></h1>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <!-- Booth Details -->
+    <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+      <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Booth Information</h2>
+      </div>
+      <div class="px-6 py-4 space-y-4">
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Booth Number</label>
+          <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @booth.number %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Village</label>
+          <% if @booth.village %>
+            <p class="mt-1 text-sm">
+              <%= link_to @booth.village.name, console_village_path(@booth.village), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+            </p>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-400">—</p>
+          <% end %>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Taluka</label>
+          <% if @booth.village&.taluka %>
+            <p class="mt-1 text-sm">
+              <%= link_to @booth.village.taluka.name, console_taluka_path(@booth.village.taluka), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+            </p>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-400">—</p>
+          <% end %>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</label>
+          <% if @booth.village&.taluka&.district %>
+            <p class="mt-1 text-sm">
+              <%= link_to @booth.village.taluka.district.name, console_district_path(@booth.village.taluka.district), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+            </p>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-400">—</p>
+          <% end %>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">State</label>
+          <% if @booth.village&.taluka&.district&.state %>
+            <p class="mt-1 text-sm">
+              <%= link_to @booth.village.taluka.district.state.name, console_state_path(@booth.village.taluka.district.state), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+            </p>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-400">—</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+      <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Actions</h2>
+      </div>
+      <div class="px-6 py-4 space-y-3">
+        <%= link_to "Edit Booth", console_edit_booth_path(@booth), class: "block rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700" %>
+        <%= button_to "Delete Booth", console_booth_path(@booth), method: :delete, class: "block rounded-lg bg-red-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-red-700", form: { onsubmit: "return confirm('Are you sure?')" } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Associated Voters Count -->
+  <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Voter Statistics</h2>
+    </div>
+    <div class="px-6 py-4">
+      <p class="text-sm text-gray-600 dark:text-gray-400">
+        <strong><%= @booth.voters.count %></strong> voters registered at this booth
+      </p>
+    </div>
+  </div>
+</div>
