@@ -6,7 +6,11 @@ class VotersController < ApplicationController
 
   def index
     relation = Voter.all
-    relation = relation.where("voter_id ILIKE ?", "%#{params[:q]}%") if params[:q].present?
+    if params[:q].present?
+      search_term = "%#{params[:q]}%"
+      relation = relation.where("voter_id ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ? OR middle_name ILIKE ?",
+                               search_term, search_term, search_term, search_term)
+    end
     if params[:village].present?
       relation = relation.joins(:village).where("villages.name ILIKE ?", "%#{like(params[:village])}%")
     end
