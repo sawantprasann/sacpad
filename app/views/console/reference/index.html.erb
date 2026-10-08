@@ -23,7 +23,7 @@
                       method: :post,
                       class: "mr-3 text-brand-500 hover:text-brand-600",
                       form: { style: "display:inline" },
-                      data: { turbo_confirm: "Fetch assemblies, villages, and booths for #{record.name}?", turbo_submits_with: "Fetching…" } %>
+                      data: { turbo_confirm: "Fetch assemblies, villages, booths, and voters for #{record.name}?", turbo_submits_with: "Fetching…" } %>
               <% end %>
               <%= link_to "Edit", url_for(action: :edit, id: record), class: "text-brand-500 hover:text-brand-600" %>
               <%= button_to "Delete", url_for(action: :destroy, id: record), method: :delete,

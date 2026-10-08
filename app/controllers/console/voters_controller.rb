@@ -5,9 +5,9 @@ module Console
     before_action :set_voter, only: [:show]
 
     def index
-      @voters = Voter.all
-      @voters = @voters.where("voter_id ILIKE ?", "%#{params[:q]}%") if params[:q].present?
-      @voters, @pagy = pagy(@voters.order(:voter_id), items: 50)
+      relation = Voter.all
+      relation = relation.where("voter_id ILIKE ?", "%#{params[:q]}%") if params[:q].present?
+      @pagy, @voters = pagy(:offset, relation.order(:voter_id))
     end
 
     def show

@@ -51,7 +51,7 @@ class Eci::ImportLoksabhaTest < ActiveSupport::TestCase
     assert_equal 1, result.assemblies
     assert_equal 2, result.villages
     assert_equal 3, result.booths
-    assert_equal "Fetched 1 assembly, 2 villages, and 3 booths for Belagavi.", result.summary("Belagavi")
+    assert_equal "Fetched 1 assembly, 2 villages, and 3 booths for Belagavi. Voter names are being read from the roll PDFs.", result.summary("Belagavi")
 
     assembly = @loksabha.assemblies.find_by!(constituency_no: "8")
     assert_equal "Arabhavi", assembly.name

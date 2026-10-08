@@ -11,9 +11,11 @@ module Eci
 
     Result = Struct.new(:assemblies, :villages, :booths, keyword_init: true) do
       def summary(name)
-        "Fetched #{assemblies} #{'assembly'.pluralize(assemblies)}, " \
+        text = "Fetched #{assemblies} #{'assembly'.pluralize(assemblies)}, " \
           "#{villages} #{'village'.pluralize(villages)}, and " \
           "#{booths} #{'booth'.pluralize(booths)} for #{name}."
+        text += " Voter names are being read from the roll PDFs." if booths.positive?
+        text
       end
     end
 
@@ -50,7 +52,9 @@ module Eci
         end
       end
 
-      Result.new(assemblies: assemblies, villages: village_ids.uniq.size, booths: booths)
+      result = Result.new(assemblies: assemblies, villages: village_ids.uniq.size, booths: booths)
+      ImportLoksabhaVotersJob.perform_later(@loksabha.id) if booths.positive?
+      result
     end
 
     private
