@@ -50,10 +50,18 @@
             <% sentiment = ActsAsTenant.with_tenant(current_user.organization) { voter.voter_sentiments.first } %>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
               <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                <%= link_to voter.voter_id, voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <% begin %>
+                  <%= link_to voter.voter_id, voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                <%= "#{voter.first_name} #{voter.last_name}" %>
+                <% begin %>
+                  <%= "#{voter.first_name} #{voter.last_name}" %>
+                <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <%= voter.village&.name || "—" %>

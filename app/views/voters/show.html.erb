@@ -2,7 +2,11 @@
   <div class="flex items-center gap-4">
     <%= link_to "← Back", voters_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
     <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-      <%= "#{@voter.first_name} #{@voter.last_name}" %>
+      <% begin %>
+        <%= "#{@voter.first_name} #{@voter.last_name}" %>
+      <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+        <span class="text-gray-400">Voter (unable to decrypt)</span>
+      <% end %>
     </h1>
   </div>
 
@@ -15,19 +19,32 @@
       <div class="px-6 py-4 space-y-4">
         <div>
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voter ID</label>
-          <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @voter.voter_id %></p>
+          <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white">
+            <% begin %>
+              <%= @voter.voter_id %>
+            <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+              <span class="text-gray-400">—</span>
+            <% end %>
+          </p>
         </div>
         <div>
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Full Name</label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white">
-            <%= [@voter.first_name, @voter.middle_name, @voter.last_name].compact.join(" ") %>
+            <% begin %>
+              <%= [@voter.first_name, @voter.middle_name, @voter.last_name].compact.join(" ") %>
+            <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+              <span class="text-gray-400">—</span>
+            <% end %>
           </p>
         </div>
-        <% if @voter.mobile.present? %>
-          <div>
-            <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Mobile</label>
-            <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @voter.mobile %></p>
-          </div>
+        <% begin %>
+          <% if @voter.mobile.present? %>
+            <div>
+              <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Mobile</label>
+              <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white"><%= @voter.mobile %></p>
+            </div>
+          <% end %>
+        <% rescue ActiveRecord::Encryption::Errors::Decryption %>
         <% end %>
         <div>
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Village</label>
