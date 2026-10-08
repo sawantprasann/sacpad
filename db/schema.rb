@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_08_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -89,10 +89,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_080000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "taluka_id"
     t.string "constituency_no"
     t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
-    t.index ["taluka_id"], name: "index_assemblies_on_taluka_id"
   end
 
   create_table "booths", force: :cascade do |t|
@@ -621,7 +619,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_080000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "taluka_id"
     t.index ["assembly_id"], name: "index_villages_on_assembly_id"
+    t.index ["taluka_id"], name: "index_villages_on_taluka_id"
   end
 
   create_table "voter_versions", force: :cascade do |t|
@@ -675,7 +675,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_080000) do
   add_foreign_key "admin_organizations", "admins"
   add_foreign_key "admin_organizations", "organizations"
   add_foreign_key "assemblies", "loksabhas"
-  add_foreign_key "assemblies", "talukas"
   add_foreign_key "booths", "villages"
   add_foreign_key "cadre_activities", "organizations"
   add_foreign_key "cadre_activities", "users", column: "owner_id"
@@ -743,6 +742,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_080000) do
   add_foreign_key "village_yatras", "users", column: "updated_by_id"
   add_foreign_key "village_yatras", "villages"
   add_foreign_key "villages", "assemblies"
+  add_foreign_key "villages", "talukas"
   add_foreign_key "voters", "booths"
   add_foreign_key "voters", "organizations"
   add_foreign_key "worship_places", "organizations"
