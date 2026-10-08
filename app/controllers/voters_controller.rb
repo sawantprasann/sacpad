@@ -6,17 +6,25 @@ class VotersController < ApplicationController
 
   def index
     relation = Voter.all
-    if params[:q].present?
-      search_term = "%#{params[:q]}%"
-      relation = relation.where("voter_id ILIKE ? OR first_name ILIKE ? OR last_name ILIKE ? OR middle_name ILIKE ?",
-                               search_term, search_term, search_term, search_term)
-    end
     if params[:village].present?
       relation = relation.joins(:village).where("villages.name ILIKE ?", "%#{like(params[:village])}%")
     end
     if params[:sentiment].present?
       org_sentiment = VoterSentiment.where(organization_id: current_organization.id, sentiment_status: params[:sentiment])
       relation = relation.joins(:voter_sentiments).where(voter_sentiments: { id: org_sentiment.select(:id) })
+    end
+
+    # Search by q (first_name, last_name, middle_name) — encrypted fields need in-memory filtering.
+    if params[:q].present?
+      search_term = params[:q].strip.downcase
+      voters = relation.to_a.filter do |voter|
+        begin
+          [voter.first_name, voter.middle_name, voter.last_name].compact.join(" ").downcase.include?(search_term)
+        rescue ActiveRecord::Encryption::Errors::Decryption
+          false
+        end
+      end
+      relation = Voter.where(id: voters.map(&:id)).order(created_at: :desc)
     end
 
     @pagy, @voters = pagy(:offset, relation.order(created_at: :desc))
