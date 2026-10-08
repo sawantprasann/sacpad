@@ -28,6 +28,7 @@ Rails.application.routes.draw do
     resources :talukas
     resources :booths
     resources :voters, only: %i[index show]
+    resources :voter_imports, only: %i[index new create]
     resources :parties
     # Kitchen Cabinet ticket-category catalog (Story 1.1) — global, Admin-managed
     resources :ticket_categories
