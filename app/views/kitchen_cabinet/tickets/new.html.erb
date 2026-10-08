@@ -28,11 +28,10 @@
         </div>
         <div>
           <%= f.label :village, "Village / ward", class: ta_label_classes %>
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">💡 Type to search villages</p>
           <%= f.select :village,
                 options_for_select(Village.order(:name).pluck(:name), @ticket.village),
                 { include_blank: "Select a village..." },
-                class: "#{ta_field_classes} min-h-11 mt-1" %>
+                class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
           <%= f.label :mobile, "Mobile number", class: ta_label_classes %>
