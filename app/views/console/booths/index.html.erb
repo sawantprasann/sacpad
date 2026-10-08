@@ -4,7 +4,7 @@
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Booths</h1>
       <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Polling booth reference catalog — geography hierarchy</p>
     </div>
-    <%= link_to "New Booth", console_new_booth_path, class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+    <%= link_to "New Booth", new_console_booth_path, class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
   </div>
 
   <div class="<%= ta_card_classes %> overflow-hidden">
@@ -32,20 +32,32 @@
                 <%= link_to booth.number, console_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                <%= link_to booth.village.name, console_village_path(booth.village), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village %>
+                <%= booth.village&.name || "—" %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                <%= link_to booth.village.taluka.name, console_taluka_path(booth.village.taluka), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village&.taluka %>
+                <% if booth.village&.taluka %>
+                  <%= link_to booth.village.taluka.name, console_taluka_path(booth.village.taluka), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <% else %>
+                  —
+                <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                <%= link_to booth.village.taluka.district.name, console_district_path(booth.village.taluka.district), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village&.taluka&.district %>
+                <% if booth.village&.taluka&.district %>
+                  <%= link_to booth.village.taluka.district.name, console_district_path(booth.village.taluka.district), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <% else %>
+                  —
+                <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                <%= link_to booth.village.taluka.district.state.name, console_state_path(booth.village.taluka.district.state), class: "text-blue-600 hover:underline dark:text-blue-400" if booth.village&.taluka&.district&.state %>
+                <% if booth.village&.taluka&.district&.state %>
+                  <%= link_to booth.village.taluka.district.state.name, console_state_path(booth.village.taluka.district.state), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <% else %>
+                  —
+                <% end %>
               </td>
               <td class="px-6 py-4 text-right text-sm space-x-2">
                 <%= link_to "View", console_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
-                <%= link_to "Edit", console_edit_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <%= link_to "Edit", edit_console_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
                 <%= button_to "Delete", console_booth_path(booth), method: :delete, form: { style: "display:inline" }, class: "text-red-600 hover:underline dark:text-red-400" %>
               </td>
             </tr>
