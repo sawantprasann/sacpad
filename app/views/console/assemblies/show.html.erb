@@ -12,10 +12,18 @@
 </div>
 
 <div class="<%= ta_card_classes %> mb-6 p-6">
-  <dl class="grid gap-4 sm:grid-cols-3">
+  <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Constituency no</dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.constituency_no %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">First part</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.first_part || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Last part</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.last_part || "—" %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Villages</dt>

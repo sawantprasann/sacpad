@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_012000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -90,6 +90,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_012000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "constituency_no"
+    t.integer "first_part"
+    t.integer "last_part"
     t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
   end
 
@@ -439,6 +441,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_012000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["district_id", "name"], name: "index_talukas_on_district_id_and_name", unique: true
     t.index ["district_id"], name: "index_talukas_on_district_id"
   end
 
@@ -625,6 +628,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_012000) do
     t.bigint "taluka_id"
     t.string "police_station"
     t.string "pin_code"
+    t.index ["assembly_id", "name"], name: "index_villages_on_assembly_id_and_name", unique: true
     t.index ["assembly_id"], name: "index_villages_on_assembly_id"
     t.index ["taluka_id"], name: "index_villages_on_taluka_id"
   end

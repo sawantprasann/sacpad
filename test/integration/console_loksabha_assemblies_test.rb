@@ -45,10 +45,15 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
 
   test "editing an assembly stays on that assembly" do
     sign_in @admin
-    patch console_loksabha_assembly_path(@loksabha, @assembly), params: { record: { name: "Paranda Updated", constituency_no: "244" } }
+    patch console_loksabha_assembly_path(@loksabha, @assembly), params: {
+      record: { name: "Paranda Updated", constituency_no: "244", first_part: "1", last_part: "355" }
+    }
 
     assert_redirected_to console_loksabha_assembly_path(@loksabha, @assembly)
-    assert_equal "Paranda Updated", @assembly.reload.name
+    @assembly.reload
+    assert_equal "Paranda Updated", @assembly.name
+    assert_equal 1, @assembly.first_part
+    assert_equal 355, @assembly.last_part
   end
 
   test "an assembly opens onto its villages and a village lists its voters" do

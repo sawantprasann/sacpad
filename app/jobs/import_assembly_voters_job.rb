@@ -1,15 +1,18 @@
-# Reads every booth PDF for one assembly and writes the voters into the roll table.
+# Queues one job per roll PDF in the assembly's first-to-last part range.
 class ImportAssemblyVotersJob < ApplicationJob
   queue_as :default
 
+  # bin/jobs runs this many part jobs at once. Keep config/queue.yml in step.
+  PARTS_AT_A_TIME = 1
+
   def perform(assembly_id)
-    assembly = Assembly.includes(loksabha: [ :state, :district ], villages: :booths).find(assembly_id)
-    assembly.villages.each do |village|
-      village.booths.each do |booth|
-        Eci::ImportBoothVoters.new(booth).call
-      rescue Eci::ImportBoothVoters::Error => e
-        Rails.logger.error("Booth #{booth.id} voter import failed: #{e.message}")
-      end
+    assembly = Assembly.find(assembly_id)
+    from = assembly.first_part
+    to = assembly.last_part
+    return if from.blank? || to.blank? || to < from
+
+    (from..to).each do |part|
+      ImportAssemblyPartJob.perform_later(assembly.id, part)
     end
   end
 end

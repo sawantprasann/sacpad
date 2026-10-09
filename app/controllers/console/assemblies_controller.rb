@@ -1,7 +1,7 @@
 module Console
   class AssembliesController < ReferenceController
     self.managed_model = Assembly
-    self.managed_fields = %i[name constituency_no]
+    self.managed_fields = %i[name constituency_no first_part last_part]
     self.managed_title = "Assembly"
 
     prepend_before_action :set_loksabha

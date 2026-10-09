@@ -1,8 +1,6 @@
 module Eci
-  # Open Election Commission gateway calls used by the public roll download form.
+  # Open Election Commission gateway calls for the assembly list.
   # District assemblies: GET /common/acs/:districtCd
-  # Booth list for an assembly: GET /citizen/sir/getPartByAc?Asmbly=:acNumber
-  #   (requires the state code in the `state` header)
   class Client
     class Error < StandardError; end
 
@@ -24,14 +22,6 @@ module Eci
       raise Error, "No assembly list was returned for this district." unless body.is_a?(Array)
 
       body
-    end
-
-    def parts(state_cd, ac_number)
-      body = get("citizen/sir/getPartByAc", { "Asmbly" => ac_number }, { "state" => state_cd })
-      payload = body.is_a?(Hash) ? body["payload"] : nil
-      raise Error, "No booth list was returned for assembly #{ac_number}." unless payload.is_a?(Array)
-
-      payload
     end
 
     private

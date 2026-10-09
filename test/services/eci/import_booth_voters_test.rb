@@ -89,7 +89,8 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
           "Type of Polling Station" => "Rural",
           "Police Station" => "Paranda",
           "Pin Code" => "413502",
-          "Taluka" => "Paranda"
+          "Taluka" => "Paranda",
+          "Main Town or Village" => "Nagathali"
         },
         "voters" => []
       }
@@ -101,7 +102,9 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     assert_equal "1 - Zilla Parishad School", @booth.name
     assert_equal "Nagathali, Paranda", @booth.address
     assert_equal "Rural", @booth.station_type
-    @village.reload
+    assert_equal "Nagathali", @booth.village.name
+    assert_nil @assembly.villages.find_by(name: "Shindewadi")
+    @village = @booth.village
     assert_equal "Paranda", @village.police_station
     assert_equal "413502", @village.pin_code
     assert_equal "Paranda", @village.taluka.name
@@ -117,8 +120,7 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
   end
 
   test "reports the script error instead of the bottom backtrace frame" do
-    importer = Eci::ImportBoothVoters.new(@booth)
-    message = importer.send(:script_failure, <<~ERR)
+    message = Eci::ImportBoothVoters.script_failure(<<~ERR)
       cannot load such file -- pdf-reader (LoadError)
       \tfrom <internal:gem_prelude>:2:in `<internal:gem_prelude>'
     ERR
