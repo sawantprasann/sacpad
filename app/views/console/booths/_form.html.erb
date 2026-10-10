@@ -28,7 +28,7 @@
   </div>
 
   <div class="flex gap-3">
-    <%= f.submit @booth.new_record? ? "Create Booth" : "Update Booth", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+    <%= f.submit @booth.new_record? ? "Create Booth" : "Update Booth", class: ta_btn_primary %>
     <%= link_to "Cancel", console_booths_path, class: "rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" %>
   </div>
 <% end %>

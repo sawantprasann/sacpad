@@ -1,13 +1,16 @@
+<% voter_name = begin
+     "#{@voter.first_name} #{@voter.last_name}"
+   rescue ActiveRecord::Encryption::Errors::Decryption
+     "Voter (unable to decrypt)"
+   end %>
 <div class="space-y-6">
-  <div class="flex items-center gap-4">
-    <%= link_to "← Back", voters_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-      <% begin %>
-        <%= "#{@voter.first_name} #{@voter.last_name}" %>
-      <% rescue ActiveRecord::Encryption::Errors::Decryption %>
-        <span class="text-gray-400">Voter (unable to decrypt)</span>
-      <% end %>
-    </h1>
+  <%= render layout: "ui/campaign_hero", locals: {
+        kicker: "Voters",
+        title: voter_name,
+        meta: current_user.organization.name
+      } do %><% end %>
+  <div class="flex justify-end">
+    <%= link_to "Back to list", voters_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
   </div>
 
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2">

@@ -34,6 +34,18 @@ class Organization < ApplicationRecord
   def deactivate! = update!(active: false)
   def reactivate! = update!(active: true)
 
+  # Close the open party_memberships row and open a new one when affiliation changes (§3.1b).
+  # Call after current_party_id has already been saved. Independent (nil) only closes history.
+  def record_party_change!(previous_party_id)
+    return if previous_party_id == current_party_id
+
+    now = Time.current
+    party_memberships.active.update_all(ended_at: now, updated_at: now)
+    return if current_party_id.nil?
+
+    party_memberships.create!(party_id: current_party_id, started_at: now)
+  end
+
   private
 
   # Keep the own-candidate's name in sync with the organization name (§6.3a).

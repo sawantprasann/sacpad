@@ -6,12 +6,13 @@
 <% breadcrumb action_label %>
 
 <div>
-  <div class="mb-6">
-    <h1 class="<%= ta_page_title %>"><%= action_label %></h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record media coverage details and attachments.</p>
-  </div>
+  <%= render layout: "ui/campaign_hero", locals: {
+        kicker: "PR Records",
+        title: action_label,
+        subtitle: "Record media coverage details and attachments."
+      } do %><% end %>
 
-  <div class="<%= ta_card_classes %> p-6 md:p-8">
+  <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
     <%= form_with model: @record, scope: :pr_record, url: pr_records_path, method: :post, multipart: true do |f| %>
       <% if @record.errors.any? %>
         <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>

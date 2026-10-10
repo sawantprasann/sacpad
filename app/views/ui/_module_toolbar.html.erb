@@ -11,7 +11,7 @@
   <% if local_assigns[:new_url] %>
     <%= link_to new_url,
           class: "inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full shadow-sm transition hover:opacity-90",
-          style: "background: var(--org-party-color); color: var(--org-party-contrast)",
+          style: "background: #{local_assigns[:accent].presence || "var(--org-party-color)"}; color: #{local_assigns[:accent_ink].presence || "var(--org-party-contrast)"};",
           aria: { label: local_assigns[:new_label].presence || "Create" } do %>
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>

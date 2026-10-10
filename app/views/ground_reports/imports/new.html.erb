@@ -3,12 +3,14 @@
 <% breadcrumb @village.name, ground_reports_village_path(@village) if @village %>
 <% breadcrumb @import.mock_poll? ? "Upload mock poll" : "Import" %>
 
-<div class="mb-4">
-  <h1 class="<%= ta_page_title %>"><%= @import.mock_poll? ? "Upload mock poll" : "Import" %></h1>
-  <p class="mt-1 text-sm text-gray-600">Excel workbook. One sheet. The first row is the column names.</p>
-</div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Ground Reports",
+      title: @import.mock_poll? ? "Upload mock poll" : "Import",
+      subtitle: "Excel workbook. One sheet. The first row is the column names.",
+      meta: @village&.name
+    } do %><% end %>
 
-<div class="<%= ta_card_classes %> p-6">
+<div class="mt-6 <%= ta_card_classes %> p-6">
   <% if @import.errors.any? %>
     <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @import.errors.full_messages.to_sentence %></div>
   <% end %>

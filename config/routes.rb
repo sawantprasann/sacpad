@@ -14,6 +14,13 @@ Rails.application.routes.draw do
       end
       # Per-org Politician roster (Story 0.12)
       resources :politicians
+      # Login accounts that belong to this organization
+      resources :org_users, only: [] do
+        member do
+          patch :reset_password
+          post :send_reset
+        end
+      end
       # Org-level Kitchen Cabinet ticket management (Story 0.16 - admin CRUD)
       resources :org_tickets, only: %i[show edit update destroy]
     end

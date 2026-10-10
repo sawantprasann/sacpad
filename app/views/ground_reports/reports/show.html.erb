@@ -3,18 +3,15 @@
 <% breadcrumb @village.name, ground_reports_village_path(@village) %>
 <% breadcrumb truncate(@report.issue_text, length: 48) %>
 
-<div class="<%= ta_card_classes %> mb-4 overflow-hidden">
-  <div class="h-1" style="background: var(--org-party-color)"></div>
-  <div class="flex flex-wrap items-start justify-between gap-4 px-6 py-5">
-    <div class="min-w-0">
-      <p class="text-xs font-medium tracking-wide text-gray-400 uppercase">Issue</p>
-      <h1 class="mt-1 <%= ta_page_title %>"><%= @report.issue_text %></h1>
-      <p class="mt-2 text-sm text-gray-500">
-        Logged by <%= @report.owner.name %> · <%= @report.reported_at.strftime("%d %b %Y") %>
-      </p>
-    </div>
-    <%= link_to "Back to village", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
-  </div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Ground Reports",
+      title: @report.issue_text,
+      subtitle: @village.name,
+      meta: "Logged by #{@report.owner.name} · #{@report.reported_at.strftime("%d %b %Y")}"
+    } do %><% end %>
+
+<div class="mt-4 mb-4 flex justify-end">
+  <%= link_to "Back to village", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
 </div>
 
 <div class="grid gap-4 xl:grid-cols-3">

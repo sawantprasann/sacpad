@@ -1,3 +1,5 @@
 <% content_for :title, "New Role" %>
-<div class="mb-6"><h1 class="<%= ta_page_title %>">New role</h1></div>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "New role" } do %><% end %>
+<div class="mt-6">
 <%= render "form" %>
+</div>

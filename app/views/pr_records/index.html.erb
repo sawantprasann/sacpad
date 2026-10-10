@@ -3,19 +3,24 @@
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
-<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0">
-    <h1 class="<%= ta_page_title %>">PR Records</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= @category ? "#{@category.name} — " : "" %><%= pluralize(@pagy.count, "record") %></p>
-  </div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "PR Records",
+      title: @category&.name || "PR Records",
+      subtitle: pluralize(@pagy.count, "record"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<div class="mt-4 flex flex-wrap items-center justify-end gap-2">
   <%= render "ui/module_toolbar",
         export_url: pr_records_path(format: :xlsx, category: @category&.slug),
         new_url: (new_path if current_user.role.can_write?("pr")),
-        new_label: (@category ? "Log #{@category.name}" : "Log record") %>
+        new_label: (@category ? "Log #{@category.name}" : "Log record"),
+        accent: "#c2410c",
+        accent_ink: "#ffffff" %>
 </div>
 
 <% if @category %>
-  <div class="<%= ta_card_classes %> overflow-hidden">
+  <div class="mt-6 <%= ta_card_classes %> overflow-hidden">
     <div class="hidden xl:block">
       <table class="w-full text-sm">
         <thead class="bg-gray-50 dark:bg-white/[0.03]">
@@ -101,7 +106,7 @@
     <% end %>
   </div>
 <% else %>
-  <div class="<%= ta_card_classes %> p-12 text-center">
+  <div class="mt-6 <%= ta_card_classes %> p-12 text-center">
     <p class="text-gray-500 dark:text-gray-400">Select a category from the sidebar to view records.</p>
   </div>
 <% end %>

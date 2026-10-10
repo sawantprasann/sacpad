@@ -3,12 +3,14 @@
 <% breadcrumb @village.name, ground_reports_village_path(@village) %>
 <% breadcrumb "Create report" %>
 
-<div class="mb-6">
-  <h1 class="<%= ta_page_title %>">Create report</h1>
-  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record the issue, any resolution, and what villagers said.</p>
-</div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Ground Reports",
+      title: "Create report",
+      subtitle: "Record the issue, any resolution, and what villagers said.",
+      meta: @village.name
+    } do %><% end %>
 
-<div class="<%= ta_card_classes %> p-6 md:p-8">
+<div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
   <%# scope: :ground_report — GroundReports::GroundReport would otherwise nest params under
       ground_reports_ground_report. %>
   <%= form_with model: @report, scope: :ground_report, url: ground_reports_village_reports_path(@village), method: :post, multipart: true do |f| %>

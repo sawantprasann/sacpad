@@ -13,29 +13,27 @@
   [ "Likely winner", @likely_winners.map(&:name).to_sentence.presence || "None" ]
 ] %>
 
-<div class="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border px-6 py-5"
-     style="background: color-mix(in srgb, var(--org-party-color) 12%, white); border-color: color-mix(in srgb, var(--org-party-color) 28%, white)">
-  <div class="min-w-0">
-    <h1 class="text-xl font-semibold tracking-tight text-gray-900"><%= @village.name %></h1>
-    <p class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-      <span><%= @village.assembly.name %></span>
-      <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
-            style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= pluralize(@pagy.count, "report") %></span>
-    </p>
-  </div>
-  <% if can_write %>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Ground Reports",
+      title: @village.name,
+      subtitle: @village.assembly.name,
+      meta: pluralize(@pagy.count, "report")
+    } do %><% end %>
+
+<% if can_write %>
+  <div class="mt-4 mb-4 flex justify-end">
     <%= link_to new_ground_reports_village_report_path(@village),
           class: "inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full shadow-sm transition hover:opacity-90",
-          style: "background: var(--org-party-color); color: var(--org-party-contrast)",
+          style: "background: #c2410c; color: #ffffff",
           aria: { label: "Create report" } do %>
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
       </svg>
     <% end %>
-  <% end %>
-</div>
+  </div>
+<% end %>
 
-<div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+<div class="mt-6 mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
   <% snapshot.each do |label, value| %>
     <div class="<%= ta_card_classes %> px-4 py-3">
       <p class="text-xs font-medium text-gray-500"><%= label %></p>

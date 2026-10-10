@@ -3,184 +3,157 @@
 <% breadcrumb "Kitchen Cabinet", kitchen_cabinet_tickets_path %>
 <% breadcrumb @ticket.ticket_category.name, list_path %>
 <% breadcrumb @ticket.person_name %>
-<% field = "rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]" %>
-<% label = "text-xs font-medium tracking-wide text-gray-400 uppercase" %>
-<% section = "border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90" %>
+<% field = "rounded-xl bg-amber-50/70 px-4 py-3 ring-1 ring-amber-100 dark:bg-white/[0.03] dark:ring-white/10" %>
+<% label = "text-xs font-medium tracking-wide text-amber-700/80 uppercase dark:text-amber-200" %>
 
-<header class="<%= ta_card_classes %> mb-4 overflow-hidden">
-  <div class="h-1" style="background: var(--org-party-color)"></div>
-  <div class="flex flex-wrap items-start justify-between gap-4 p-6">
-    <div class="min-w-0">
-      <div class="flex flex-wrap items-center gap-3">
-        <h1 class="<%= ta_page_title %>"><%= @ticket.person_name %></h1>
-        <%= render "ui/status_pill", status: @ticket.status %>
-      </div>
-      <dl class="mt-4 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-        <div>
-          <dt class="<%= label %>">Ticket</dt>
-          <dd class="mt-0.5 font-medium tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.ticket_number %></dd>
-        </div>
-        <div>
-          <dt class="<%= label %>">Category</dt>
-          <dd class="mt-0.5 font-medium text-gray-800 dark:text-white/90"><%= @ticket.ticket_category.name %></dd>
-        </div>
-        <div>
-          <dt class="<%= label %>">Reported</dt>
-          <dd class="mt-0.5 font-medium tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_at&.strftime("%d %b %Y") || "—" %></dd>
-        </div>
-        <div>
-          <dt class="<%= label %>">Logged by</dt>
-          <dd class="mt-0.5 font-medium text-gray-800 dark:text-white/90"><%= @ticket.owner.name %></dd>
-        </div>
-      </dl>
+<%= render layout: "ui/campaign_hero", locals: {
+        kicker: "Kitchen Cabinet",
+        title: @ticket.person_name,
+        subtitle: [ @ticket.ticket_number, @ticket.ticket_category.name, @ticket.village.presence ].compact.join(" · "),
+        meta: "Reported #{@ticket.reported_at&.strftime("%d %b %Y") || "—"} · #{@ticket.owner.name}"
+      } do %><% end %>
+
+  <div class="mt-4 flex flex-wrap items-center justify-end gap-2">
+    <div class="rounded-full bg-white px-1 py-1 shadow-sm">
+      <%= render "ui/status_pill", status: @ticket.status %>
     </div>
-    <div class="flex gap-2">
-      <% if policy(@ticket).edit? %>
-        <%= link_to "Edit", edit_kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
-      <% end %>
-      <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
-    </div>
+    <% if policy(@ticket).edit? %>
+      <%= link_to "Edit", edit_kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    <% end %>
+    <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
   </div>
-</header>
 
-<div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
-  <div class="space-y-4 xl:col-span-2">
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>">Ticket</h2>
-      <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div class="<%= field %>">
-          <dt class="<%= label %>">Person / represents</dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.person_name %></dd>
-        </div>
-        <div class="<%= field %>">
-          <dt class="<%= label %>">Village / ward</dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.village.presence || "—" %></dd>
-        </div>
-        <div class="<%= field %>">
-          <dt class="<%= label %>">Mobile</dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.mobile.presence || "—" %></dd>
-        </div>
-        <div class="<%= field %>">
-          <dt class="<%= label %>">Reported date</dt>
-          <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_at&.strftime("%d %b %Y") || "—" %></dd>
-        </div>
-        <div class="<%= field %>">
-          <dt class="<%= label %>">Nature of issue</dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.nature_of_issue.presence || "—" %></dd>
-        </div>
-        <div class="<%= field %>">
-          <dt class="<%= label %>">Reported value</dt>
-          <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_value.present? ? number_to_currency(@ticket.reported_value, unit: "₹") : "—" %></dd>
-        </div>
-        <div class="<%= field %> sm:col-span-2">
-          <dt class="<%= label %>">Description</dt>
-          <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= @ticket.description.presence || "—" %></dd>
-        </div>
-      </dl>
-    </section>
-
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>">Attachments</h2>
-      <% if @ticket.attachments.attached? %>
-        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <% @ticket.attachments.each do |att| %>
-            <% if att.image? %>
-              <%= image_tag att, class: "aspect-square w-full rounded-xl object-cover" %>
-            <% else %>
-              <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm text-brand-500 hover:text-brand-600" %>
-            <% end %>
-          <% end %>
-        </div>
-      <% else %>
-        <p class="mt-4 rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-400 dark:border-gray-700">No attachments.</p>
-      <% end %>
-    </section>
-
-    <%# Follow-up action log (Story 1.5) — append-only, newest-first. %>
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>">Follow-up log</h2>
-
-      <% if policy(@ticket).update? %>
-        <%= form_with url: kitchen_cabinet_ticket_follow_ups_path(@ticket), scope: :ticket_follow_up,
-              method: :post, multipart: true, class: "mt-4 mb-6" do |f| %>
-          <%= f.text_area :note, rows: 3, placeholder: "What was done about this issue?", class: ta_field_classes %>
-          <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-            <%= f.file_field :attachment, accept: "image/*,.pdf",
-                  class: "block cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
-            <%= f.submit "Add follow-up", class: "#{ta_btn_primary} min-h-11 cursor-pointer" %>
+  <div class="mt-6 grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
+    <div class="space-y-4 xl:col-span-2">
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 0, title: "Ticket" } do %>
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Person / represents</dt>
+            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.person_name %></dd>
           </div>
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Village / ward</dt>
+            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.village.presence || "—" %></dd>
+          </div>
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Mobile</dt>
+            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.mobile.presence || "—" %></dd>
+          </div>
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Reported date</dt>
+            <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_at&.strftime("%d %b %Y") || "—" %></dd>
+          </div>
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Nature of issue</dt>
+            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.nature_of_issue.presence || "—" %></dd>
+          </div>
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Reported value</dt>
+            <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_value.present? ? number_to_currency(@ticket.reported_value, unit: "₹") : "—" %></dd>
+          </div>
+          <div class="<%= field %> sm:col-span-2">
+            <dt class="<%= label %>">Description</dt>
+            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= @ticket.description.presence || "—" %></dd>
+          </div>
+        </dl>
+      <% end %>
+
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 1, title: "Attachments" } do %>
+        <% if @ticket.attachments.attached? %>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <% @ticket.attachments.each do |att| %>
+              <% if att.image? %>
+                <%= image_tag att, class: "aspect-square w-full rounded-xl object-cover" %>
+              <% else %>
+                <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm font-medium text-cyan-700 hover:text-cyan-800" %>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="rounded-xl border border-dashed border-cyan-200 px-4 py-8 text-center text-sm text-cyan-800/70 dark:border-cyan-900">No attachments.</p>
         <% end %>
       <% end %>
 
-      <% entries = @ticket.follow_ups.order(created_at: :desc) %>
-      <% if entries.any? %>
-        <ol class="mt-4 space-y-3">
-          <% entries.each do |fu| %>
-            <li class="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-              <div class="mb-1 flex items-center justify-between text-xs text-gray-400">
-                <span class="font-medium text-gray-600 dark:text-gray-300"><%= fu.created_by.name %></span>
-                <span class="tabular-nums"><%= fu.created_at.strftime("%d %b %Y %H:%M") %></span>
-              </div>
-              <p class="whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= fu.note %></p>
-              <% if fu.attachment.attached? %>
-                <div class="mt-2">
-                  <% if fu.attachment.image? %>
-                    <%= image_tag fu.attachment, class: "h-20 w-20 rounded-lg object-cover" %>
-                  <% else %>
-                    <%= link_to fu.attachment.filename, rails_blob_path(fu.attachment, disposition: "attachment"), class: "text-xs text-brand-500 hover:text-brand-600" %>
-                  <% end %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 2, title: "Follow-up log" } do %>
+        <% if policy(@ticket).update? %>
+          <%= form_with url: kitchen_cabinet_ticket_follow_ups_path(@ticket), scope: :ticket_follow_up,
+                method: :post, multipart: true, class: "mb-6" do |f| %>
+            <%= f.text_area :note, rows: 3, placeholder: "What was done about this issue?", class: ta_field_classes %>
+            <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+              <%= f.file_field :attachment, accept: "image/*,.pdf",
+                    class: "block cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-indigo-800" %>
+              <%= f.submit "Add follow-up", class: "#{ta_btn_primary} min-h-11 cursor-pointer" %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% entries = @ticket.follow_ups.order(created_at: :desc) %>
+        <% if entries.any? %>
+          <ol class="space-y-3">
+            <% entries.each do |fu| %>
+              <li class="rounded-xl bg-indigo-50/70 p-4 ring-1 ring-indigo-100 dark:bg-white/[0.03] dark:ring-white/10">
+                <div class="mb-1 flex items-center justify-between text-xs text-gray-400">
+                  <span class="font-medium text-gray-600 dark:text-gray-300"><%= fu.created_by.name %></span>
+                  <span class="tabular-nums"><%= fu.created_at.strftime("%d %b %Y %H:%M") %></span>
                 </div>
-              <% end %>
-            </li>
-          <% end %>
-        </ol>
-      <% else %>
-        <p class="mt-4 text-sm text-gray-400">No follow-ups yet.</p>
-      <% end %>
-    </section>
-  </div>
-
-  <div class="space-y-4">
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>">Status</h2>
-      <div class="mt-4"><%= render "ui/status_pill", status: @ticket.status %></div>
-
-      <% allowed = KitchenCabinet::Ticket::TRANSITIONS.fetch(@ticket.status, []) %>
-      <% if allowed.any? %>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <% allowed.each do |to| %>
-            <% if to == "closed" %>
-              <%= link_to "Close…", new_kitchen_cabinet_ticket_closure_path(@ticket),
-                    class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
-            <% else %>
-              <%= button_to to.humanize, status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
-                    params: { to_status: to }, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+                <p class="whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= fu.note %></p>
+                <% if fu.attachment.attached? %>
+                  <div class="mt-2">
+                    <% if fu.attachment.image? %>
+                      <%= image_tag fu.attachment, class: "h-20 w-20 rounded-lg object-cover" %>
+                    <% else %>
+                      <%= link_to fu.attachment.filename, rails_blob_path(fu.attachment, disposition: "attachment"), class: "text-xs font-medium text-indigo-700 hover:text-indigo-800" %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </li>
             <% end %>
-          <% end %>
-        </div>
-      <% else %>
-        <p class="mt-3 text-xs text-gray-400">This ticket is closed.</p>
+          </ol>
+        <% else %>
+          <p class="text-sm text-gray-400">No follow-ups yet.</p>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="space-y-4">
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 4, title: "Status" } do %>
+        <div><%= render "ui/status_pill", status: @ticket.status %></div>
+
+        <% allowed = KitchenCabinet::Ticket::TRANSITIONS.fetch(@ticket.status, []) %>
+        <% if allowed.any? %>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <% allowed.each do |to| %>
+              <% if to == "closed" %>
+                <%= link_to "Close…", new_kitchen_cabinet_ticket_closure_path(@ticket),
+                      class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+              <% else %>
+                <%= button_to to.humanize, status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
+                      params: { to_status: to }, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="mt-3 text-xs text-gray-400">This ticket is closed.</p>
+        <% end %>
+
+        <h3 class="mt-5 mb-2 text-xs font-semibold tracking-wide text-amber-700/80 uppercase">History</h3>
+        <% changes = @ticket.status_changes.order(:created_at) %>
+        <% if changes.any? %>
+          <ul class="space-y-2 text-xs text-gray-500">
+            <% changes.each do |c| %>
+              <li>
+                <%= c.from_status&.humanize || "—" %> → <strong class="text-gray-700 dark:text-gray-300"><%= c.to_status.humanize %></strong>
+                · <%= c.actor.name %> · <span class="tabular-nums"><%= c.created_at.strftime("%d %b %Y %H:%M") %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-xs text-gray-400">No changes yet.</p>
+        <% end %>
       <% end %>
 
-      <h3 class="mt-5 mb-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">History</h3>
-      <% changes = @ticket.status_changes.order(:created_at) %>
-      <% if changes.any? %>
-        <ul class="space-y-2 text-xs text-gray-500">
-          <% changes.each do |c| %>
-            <li>
-              <%= c.from_status&.humanize || "—" %> → <strong class="text-gray-700 dark:text-gray-300"><%= c.to_status.humanize %></strong>
-              · <%= c.actor.name %> · <span class="tabular-nums"><%= c.created_at.strftime("%d %b %Y %H:%M") %></span>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="text-xs text-gray-400">No changes yet.</p>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 3, title: "Voter ID" } do %>
+        <%= render "ui/voter_gate_field", ticket: @ticket %>
       <% end %>
-    </section>
-
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>">Voter ID</h2>
-      <div class="mt-4"><%= render "ui/voter_gate_field", ticket: @ticket %></div>
-    </section>
+    </div>
   </div>
-</div>

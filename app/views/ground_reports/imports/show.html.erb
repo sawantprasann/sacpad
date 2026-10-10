@@ -2,11 +2,12 @@
 <% breadcrumb "Ground Reports", ground_reports_villages_path %>
 <% breadcrumb @import.report? ? "Report import" : "Mock poll import" %>
 
-<div class="mb-4">
-  <h1 class="<%= ta_page_title %>"><%= @import.report? ? "Report import" : "Mock poll import" %></h1>
-</div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Ground Reports",
+      title: @import.report? ? "Report import" : "Mock poll import"
+    } do %><% end %>
 
-<div class="<%= ta_card_classes %> p-6">
+<div class="mt-6 <%= ta_card_classes %> p-6">
   <% if @import.pending? %>
     <p class="text-sm text-gray-600">Import is running.</p>
   <% else %>

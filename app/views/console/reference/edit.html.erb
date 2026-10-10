@@ -1,3 +1,5 @@
 <% content_for :title, "Edit #{managed_title}" %>
-<div class="mb-6"><h1 class="<%= ta_page_title %>">Edit <%= managed_title %></h1></div>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Edit #{managed_title}" } do %><% end %>
+<div class="mt-6">
 <%= render "console/reference/form" %>
+</div>

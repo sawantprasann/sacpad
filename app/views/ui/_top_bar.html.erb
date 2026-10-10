@@ -1,11 +1,11 @@
-<%# App header. Neutral chrome so it matches the sidebar; party color stays on page actions. %>
-<header class="sticky top-0 z-30 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+<%# App header. Quiet white bar so the page banner carries the color. %>
+<header class="campaign-header sticky top-0 z-30">
   <div class="flex h-16 items-center gap-3 px-4 xl:px-6">
     <button
       type="button"
       @click.stop="sidebarToggle = !sidebarToggle"
       aria-label="Toggle sidebar"
-      class="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 xl:hidden dark:text-gray-400 dark:hover:bg-white/5"
+      class="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 xl:hidden dark:text-gray-300 dark:hover:bg-white/5"
     >
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd"/>
@@ -34,10 +34,10 @@
           <% if current_user.photo.attached? %>
             <%= image_tag current_user.photo, class: "h-9 w-9 rounded-full object-cover", alt: "" %>
           <% else %>
-            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-200"><%= current_user.name.to_s.first&.upcase %></span>
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white" style="background: #000080"><%= current_user.name.to_s.first&.upcase %></span>
           <% end %>
           <div class="hidden min-w-0 leading-tight sm:block">
-            <p class="truncate text-sm font-semibold text-gray-800 dark:text-white/90"><%= current_user.name %></p>
+            <p class="campaign-user-name truncate text-sm font-semibold"><%= current_user.name %></p>
             <p class="truncate text-xs text-gray-500 dark:text-gray-400">
               <%= current_user.role.name %>
               · logins: <span class="tabular-nums"><%= current_user.sign_in_count %></span>

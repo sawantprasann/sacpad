@@ -6,13 +6,14 @@
 <% breadcrumb action_label %>
 
 <div x-data='<%= { category: @activity.category.to_s, labels: CadreProgram::CadreActivity::CATEGORY_LABELS }.to_json %>'>
-  <div class="mb-6">
-    <h1 class="<%= ta_page_title %>"
-        x-text="labels[category] ? ('Create ' + labels[category]) : 'Create activity'"><%= action_label %></h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record what happened, the political impact, and any photos.</p>
-  </div>
+  <%= render layout: "ui/campaign_hero", locals: {
+        kicker: "Cadre Program",
+        title: action_label,
+        subtitle: "Record what happened, the political impact, and any photos.",
+        title_bind: "labels[category] ? ('Create ' + labels[category]) : 'Create activity'"
+      } do %><% end %>
 
-  <div class="<%= ta_card_classes %> p-6 md:p-8">
+  <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
     <%# scope: :cadre_activity — CadreProgram::CadreActivity would otherwise nest params under
         cadre_program_cadre_activity, and require(:cadre_activity) would miss them. %>
     <%= form_with model: @activity, scope: :cadre_activity, url: cadre_program_activities_path, method: :post, multipart: true do |f| %>

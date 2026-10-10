@@ -3,8 +3,13 @@
 <% breadcrumb @record.title, pr_record_path(@record) %>
 <% breadcrumb "Edit" %>
 
-<div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-8 max-w-2xl">
-  <h1 class="<%= ta_page_title %> mb-6">Edit PR record <%= @record.record_number %></h1>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "PR Records",
+      title: "Edit PR record #{@record.record_number}",
+      subtitle: @record.title
+    } do %><% end %>
+
+<div class="mt-6 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-8 max-w-2xl">
 
   <%= form_with model: @record, scope: :pr_record, local: true, class: "space-y-6" do |f| %>
     <% if @record.errors.any? %>

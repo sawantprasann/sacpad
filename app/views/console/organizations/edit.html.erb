@@ -1,0 +1,15 @@
+<% content_for :title, "Edit #{@organization.name}" %>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Edit organization", subtitle: @organization.name } do %><% end %>
+
+<div class="mt-6 <%= ta_card_classes %> p-6">
+  <%= form_with model: @organization, url: console_organization_path(@organization) do |f| %>
+    <% if @organization.errors.any? %>
+      <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @organization.errors.full_messages.to_sentence %></div>
+    <% end %>
+    <%= render "fields", f: f %>
+    <div class="mt-6 flex items-center gap-3">
+      <%= f.submit "Save", class: ta_btn_primary %>
+      <%= link_to "Cancel", console_organization_path(@organization), class: ta_btn_secondary %>
+    </div>
+  <% end %>
+</div>

@@ -1,9 +1,7 @@
 <div class="space-y-6">
-  <div class="flex items-center gap-4">
-    <%= link_to "← Back", console_voters_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-      <%= "#{@voter.first_name} #{@voter.last_name}" %>
-    </h1>
+  <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "#{@voter.first_name} #{@voter.last_name}" } do %><% end %>
+  <div class="flex justify-end">
+    <%= link_to "Back to list", console_voters_path, class: ta_btn_secondary %>
   </div>
 
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -104,12 +102,12 @@
   </div>
 
   <!-- Sentiment Tracking Across Organizations -->
-  <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-    <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+  <div class="campaign-sheet">
+    <div class="border-b border-amber-100 px-6 py-4 dark:border-gray-800">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sentiment Tracking by Organization</h2>
     </div>
     <div class="overflow-x-auto">
-      <table class="w-full">
+      <table class="campaign-table w-full">
         <thead>
           <tr class="border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900/50">
             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-400">Organization</th>

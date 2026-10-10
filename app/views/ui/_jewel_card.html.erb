@@ -1,0 +1,12 @@
+<%# Colored card chrome. Jewel tones are decoration; they are not the reserved sentiment colors. %>
+<% jewel = dashboard_jewel(local_assigns[:accent_index] || 0) %>
+<section class="relative overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 <%= jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10">
+  <div class="h-1.5 bg-gradient-to-r <%= jewel[:bar] %>"></div>
+  <div class="pointer-events-none absolute -top-10 -right-8 h-24 w-24 rounded-full opacity-70 <%= jewel[:wash] %>"></div>
+  <div class="relative <%= local_assigns[:flush] ? "" : "p-6" %>">
+    <% if local_assigns[:title].present? %>
+      <h2 class="mb-4 text-sm font-semibold text-gray-800 dark:text-white/90"><%= title %></h2>
+    <% end %>
+    <%= yield %>
+  </div>
+</section>

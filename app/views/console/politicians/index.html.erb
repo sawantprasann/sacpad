@@ -1,12 +1,12 @@
 <% content_for :title, "#{@organization.name} — Politicians" %>
-<div class="mb-6 flex items-center justify-between">
-  <h1 class="<%= ta_page_title %>"><%= @organization.name %> — Roster</h1>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "#{@organization.name} — Roster" } do %><% end %>
+<div class="mt-4 mb-6 flex justify-end">
   <%= link_to "Add politician", new_console_organization_politician_path(@organization), class: ta_btn_primary %>
 </div>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="campaign-sheet">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
           <th class="px-5 py-3 font-medium">Name</th>

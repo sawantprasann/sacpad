@@ -2,20 +2,20 @@
     Alpine sidebarToggle (body x-data). Our nav + SAC-PAD branding (not TailAdmin's logo). %>
 <aside
   :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full'"
-  class="sidebar fixed top-0 left-0 z-50 flex h-screen w-[290px] flex-col overflow-y-auto border-r border-gray-200 bg-white px-5 transition-all duration-300 xl:static xl:translate-x-0 dark:border-gray-800 dark:bg-black"
+  class="campaign-sidebar sidebar fixed top-0 left-0 z-50 flex h-screen w-[290px] flex-col overflow-y-auto px-5 transition-all duration-300 xl:static xl:translate-x-0"
   @click.outside="if (window.innerWidth < 1280) sidebarToggle = false"
 >
   <div class="flex items-center gap-2 pt-8 pb-7">
     <%= link_to root_path, class: "flex items-center gap-2" do %>
-      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-brand-500 text-sm font-bold text-white">SP</span>
-      <span class="text-lg font-semibold text-gray-800 dark:text-white/90">SAC-PAD</span>
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold" style="background: #f59e0b; color: #0b1f44">SP</span>
+      <span class="campaign-wordmark text-lg font-semibold">SAC-PAD</span>
     <% end %>
   </div>
 
   <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
     <nav>
       <div>
-        <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">Menu</h3>
+        <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]">Menu</h3>
         <ul class="mb-6 flex flex-col gap-1">
           <li>
             <%= link_to root_path, class: "menu-item group #{current_page?(root_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
@@ -31,7 +31,7 @@
           <% end %>
         </ul>
 
-        <h3 class="mb-4 text-xs leading-5 text-gray-400 uppercase">Modules</h3>
+        <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]">Modules</h3>
         <ul class="flex flex-col gap-1">
           <%# Kitchen Cabinet (Story 1.1): expandable submenu of Admin-managed ticket categories,
               each driving the ?category= filter. Shown only to roles with Kitchen Cabinet access. %>

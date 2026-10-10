@@ -1,0 +1,44 @@
+<%# Small mark for dashboard desks. Decorative chrome, not a status indicator. %>
+<% mark = local_assigns[:name].to_s %>
+<span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm <%= local_assigns[:chip_class] %>">
+  <% case mark %>
+  <% when "kitchen_cabinet" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h5"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 3.5h12a1.5 1.5 0 011.5 1.5v14a1.5 1.5 0 01-1.5 1.5H6A1.5 1.5 0 014.5 19V5A1.5 1.5 0 016 3.5z"/>
+    </svg>
+  <% when "cadre_program" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" d="M8 11a3 3 0 100-6 3 3 0 000 6zM16.5 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/>
+      <path stroke-linecap="round" d="M3.5 19.5c.6-2.6 2.6-4 4.5-4s3.9 1.4 4.5 4M13 15.6c1.2-.7 2.6-1 4-.6 1.6.5 2.7 1.8 3.2 3.5"/>
+    </svg>
+  <% when "ground_reports" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s6-5.2 6-10a6 6 0 10-12 0c0 4.8 6 10 6 10z"/>
+      <circle cx="12" cy="11" r="2"/>
+    </svg>
+  <% when "pr" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 10v4a2 2 0 002 2h2l5 3V5L8 8H6a2 2 0 00-2 2z"/>
+      <path stroke-linecap="round" d="M16.5 9.5a3.5 3.5 0 010 5M18.5 7.5a6 6 0 010 9"/>
+    </svg>
+  <% when "voters" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h11M8 12h11M8 18h11"/>
+      <path stroke-linecap="round" d="M4 6h.01M4 12h.01M4 18h.01"/>
+    </svg>
+  <% when "rag_mapping" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" d="M4 19V5M4 19h16"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 15l3-4 3 2 4-6"/>
+    </svg>
+  <% when "social_media" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 19l1.2-4.2A7 7 0 1112 19H5z"/>
+    </svg>
+  <% else %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.2 4.6L19 8.2l-3.5 3.4.8 4.9L12 14.8 7.7 16.5l.8-4.9L5 8.2l4.8-.6L12 3z"/>
+    </svg>
+  <% end %>
+</span>

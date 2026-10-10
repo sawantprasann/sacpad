@@ -1,7 +1,7 @@
 <div class="space-y-6">
-  <div class="flex items-center gap-4">
-    <%= link_to "← Back", console_booths_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Booth <%= @booth.number %></h1>
+  <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Booth #{@booth.number}" } do %><% end %>
+  <div class="flex justify-end">
+    <%= link_to "Back to list", console_booths_path, class: ta_btn_secondary %>
   </div>
 
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -58,7 +58,7 @@
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Actions</h2>
       </div>
       <div class="px-6 py-4 space-y-3">
-        <%= link_to "Edit Booth", edit_console_booth_path(@booth), class: "block rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700" %>
+        <%= link_to "Edit Booth", edit_console_booth_path(@booth), class: "#{ta_btn_primary} block text-center" %>
         <%= button_to "Delete Booth", console_booth_path(@booth), method: :delete, class: "block rounded-lg bg-red-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-red-700", form: { onsubmit: "return confirm('Are you sure?')" } %>
       </div>
     </div>

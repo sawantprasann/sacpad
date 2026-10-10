@@ -1,7 +1,7 @@
 module Console
   # Organization lifecycle (Story 0.5/0.6): onboarding wizard, health list, deactivation cascade.
   class OrganizationsController < BaseController
-    before_action :set_organization, only: %i[show deactivate reactivate]
+    before_action :set_organization, only: %i[show edit update deactivate reactivate]
 
     def index
       @organizations = current_admin.assignable_organizations.order(:id)
@@ -27,6 +27,7 @@ module Console
     def show
       record_activity("organization.viewed", record: @organization, organization: @organization)
       @viewing_org = @organization
+      @users = @organization.users.includes(:role, :parent).order(:name, :id) if overview_tab?
 
       # Load Kitchen Cabinet tickets if tab is selected (Story 0.16, AC 1).
       if params[:tab] == "kitchen_cabinet"
@@ -46,6 +47,19 @@ module Console
           relation = relation.order(reported_at: :desc, id: :desc)
           @pagy, @tickets = pagy(:offset, relation)
         end
+      end
+    end
+
+    def edit; end
+
+    def update
+      previous_party_id = @organization.current_party_id
+      if @organization.update(organization_params)
+        @organization.record_party_change!(previous_party_id)
+        record_activity("organization.updated", record: @organization, organization: @organization)
+        redirect_to console_organization_path(@organization), notice: "Organization updated."
+      else
+        render :edit, status: :unprocessable_entity
       end
     end
 
@@ -89,8 +103,16 @@ module Console
       { ok: false, organization: org, error: e.message }
     end
 
+    def overview_tab?
+      params[:tab].blank? || params[:tab] == "overview"
+    end
+
     def organization_params
-      params.require(:organization).permit(:name, :constituency_type, :constituency_id, :current_party_id)
+      permitted = params.require(:organization).permit(:name, :constituency_type, :constituency_id, :current_party_id)
+      permitted[:constituency_type] = nil if permitted[:constituency_type].blank?
+      permitted[:constituency_id] = nil if permitted[:constituency_id].blank?
+      permitted[:current_party_id] = nil if permitted[:current_party_id].blank?
+      permitted
     end
   end
 end

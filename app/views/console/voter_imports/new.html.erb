@@ -1,8 +1,7 @@
 <div class="space-y-6">
-  <div>
-    <%= link_to "← Back", console_voter_imports_path, class: "text-blue-600 hover:underline dark:text-blue-400" %>
-    <h1 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">Import Voters</h1>
-    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Upload a CSV file to add voters to the global electoral roll</p>
+  <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Import Voters", subtitle: "Upload a CSV file to add voters to the global electoral roll" } do %><% end %>
+  <div class="flex justify-end">
+    <%= link_to "Back to list", console_voter_imports_path, class: ta_btn_secondary %>
   </div>
 
   <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950 p-6">
@@ -13,7 +12,7 @@
         <div class="mt-2 rounded-lg border-2 border-dashed border-gray-300 p-6 text-center dark:border-gray-600">
           <%= f.file_field :file,
                 accept: ".csv",
-                class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-10 file:cursor-pointer file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700 dark:text-gray-300" %>
+                class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-10 file:cursor-pointer file:rounded-lg file:border-0 file:bg-[#c2410c] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[#9a3412] dark:text-gray-300" %>
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">CSV format only (.csv)</p>
         </div>
       </div>
@@ -46,7 +45,7 @@ VTR003,Bob,Johnson,,9876543212,3,Maharashtra,Mumbai South,South Mumbai,Mahim</co
 
       <!-- Submit -->
       <div class="flex gap-3 border-t border-gray-200 pt-6 dark:border-gray-800">
-        <%= f.submit "Upload & Import", class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+        <%= f.submit "Upload & Import", class: ta_btn_primary %>
         <%= link_to "Cancel", console_voter_imports_path, class: "rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600" %>
       </div>
     <% end %>

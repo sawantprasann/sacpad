@@ -1,10 +1,7 @@
 <div class="space-y-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Voter Bulk Import</h1>
-      <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Upload CSV to add voters to the global electoral roll</p>
-    </div>
-    <%= link_to "Import Voters", new_console_voter_import_path, class: "rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" %>
+  <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Voter Bulk Import", subtitle: "Upload a CSV to add voters to the global electoral roll" } do %><% end %>
+  <div class="flex justify-end">
+    <%= link_to "Import Voters", new_console_voter_import_path, class: ta_btn_primary %>
   </div>
 
   <!-- Instructions -->

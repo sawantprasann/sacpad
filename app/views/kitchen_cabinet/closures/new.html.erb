@@ -1,10 +1,12 @@
 <% content_for :title, "Close ticket #{@ticket.ticket_number}" %>
 
-<div class="mx-auto max-w-xl">
-  <div class="mb-6">
-    <h1 class="<%= ta_page_title %>">Close ticket</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= @ticket.ticket_number %> · <%= @ticket.person_name %></p>
-  </div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Kitchen Cabinet",
+      title: "Close ticket",
+      subtitle: "#{@ticket.ticket_number} · #{@ticket.person_name}"
+    } do %><% end %>
+
+<div class="mx-auto mt-6 max-w-xl">
 
   <%= form_with url: kitchen_cabinet_ticket_closure_path(@ticket), method: :post, class: "space-y-6" do %>
     <div class="<%= ta_card_classes %> p-6">

@@ -1,37 +1,52 @@
 <% content_for :title, "Platform Console" %>
 
-<div class="mb-6">
-  <h1 class="<%= ta_page_title %>">Platform Console</h1>
-  <p class="text-sm text-gray-500 dark:text-gray-400">Operator view (<%= current_admin.tier %> tier) · <%= current_admin.email %></p>
-</div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Platform Console",
+      title: "Platform Console",
+      subtitle: "Operator view (#{current_admin.tier} tier)",
+      meta: current_admin.email
+    } do %><% end %>
 
-<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
-  <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-    <p class="text-xs uppercase tracking-wider text-gray-400">Organizations</p>
-    <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= current_admin.assignable_organizations.count %></p>
-  </div>
-  <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-    <p class="text-xs uppercase tracking-wider text-gray-400">Roles</p>
-    <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= Role.count %></p>
-  </div>
-  <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-    <p class="text-xs uppercase tracking-wider text-gray-400">Admins</p>
-    <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= Admin.count %></p>
-  </div>
-</div>
+<% stats = [
+     [ "Organizations", current_admin.assignable_organizations.count ],
+     [ "Roles", Role.count ],
+     [ "Admins", Admin.count ]
+   ] %>
+<% desks = [
+     [ "Organizations", "Onboard & manage campaigns", console_organizations_path ],
+     [ "Roles", "Define roles & module permissions", console_roles_path ],
+     [ "Parties", "Party reference catalog", console_parties_path ],
+     [ "Geography", "States → Loksabhas → … → Booths", console_states_path ],
+     [ "Audit log", "Cross-org access & activity", console_audit_logs_path ],
+     [ "Platform health", "Jobs, queues, integrations", console_platform_health_path ]
+   ] %>
 
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
-  <% [
-       [ "Organizations", "Onboard & manage campaigns", console_organizations_path ],
-       [ "Roles", "Define roles & module permissions", console_roles_path ],
-       [ "Parties", "Party reference catalog", console_parties_path ],
-       [ "Geography", "States → Loksabhas → … → Booths", console_states_path ],
-       [ "Audit log", "Cross-org access & activity", console_audit_logs_path ],
-       [ "Platform health", "Jobs, queues, integrations", console_platform_health_path ]
-     ].each do |title, desc, path| %>
-    <%= link_to path, class: "block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-white/[0.03]" do %>
-      <p class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= title %></p>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= desc %></p>
-    <% end %>
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
+  <% stats.each_with_index do |(label, value), index| %>
+    <% jewel = dashboard_jewel(index) %>
+    <div class="relative overflow-hidden rounded-2xl bg-white p-5 shadow-theme-md ring-1 <%= jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10">
+      <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= jewel[:bar] %>"></span>
+      <p class="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200"><%= label %></p>
+      <p class="mt-1 text-title-sm font-semibold tabular-nums text-gray-800 dark:text-white/90"><%= value %></p>
+    </div>
   <% end %>
+</div>
+
+<div class="mt-8">
+  <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Open a desk</h2>
+  <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <% desks.each_with_index do |(title, desc, path), index| %>
+      <% jewel = dashboard_jewel(index) %>
+      <%= link_to path, class: "group relative overflow-hidden rounded-2xl bg-white p-4 shadow-theme-md ring-1 #{jewel[:ring]} transition hover:-translate-y-0.5 hover:shadow-theme-lg dark:bg-gray-900 dark:ring-white/10" do %>
+        <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= jewel[:bar] %>"></span>
+        <div class="mt-1 flex items-center gap-3">
+          <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold text-white shadow-sm <%= jewel[:chip] %>"><%= title[0] %></span>
+          <div>
+            <p class="text-sm font-semibold text-gray-900 group-hover:text-gray-950 dark:text-white/90"><%= title %></p>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"><%= desc %></p>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 </div>

@@ -4,18 +4,23 @@
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
-<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0">
-    <h1 class="<%= ta_page_title %>">Cadre Program</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@pagy.count, "activity") %></p>
-  </div>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Cadre Program",
+      title: @category_label || "Cadre Program",
+      subtitle: pluralize(@pagy.count, "activity"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<div class="mt-4 flex flex-wrap items-center justify-end gap-2">
   <%= render "ui/module_toolbar",
         export_url: cadre_program_activities_path(format: :xlsx, category: @category_key),
         new_url: (new_path if current_user.role.can_write?("cadre_program")),
-        new_label: (@category_label ? "Create #{@category_label}" : "Create activity") %>
+        new_label: (@category_label ? "Create #{@category_label}" : "Create activity"),
+        accent: "#c2410c",
+        accent_ink: "#ffffff" %>
 </div>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="mt-6 <%= ta_card_classes %> overflow-hidden">
   <div class="hidden xl:block">
     <table class="w-full text-sm">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">

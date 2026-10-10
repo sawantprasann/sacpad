@@ -1,7 +1,7 @@
 <div class="space-y-6">
-  <div>
-    <%= link_to "← Back", console_booth_path(@booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
-    <h1 class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">Edit Booth <%= @booth.number %></h1>
+  <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Edit Booth #{@booth.number}" } do %><% end %>
+  <div class="flex justify-end">
+    <%= link_to "Back", console_booth_path(@booth), class: ta_btn_secondary %>
   </div>
 
   <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950 p-6">

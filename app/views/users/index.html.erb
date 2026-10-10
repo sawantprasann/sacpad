@@ -1,15 +1,17 @@
 <% content_for :title, "Team" %>
-<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0">
-    <h1 class="<%= ta_page_title %>">Team</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= pluralize(@users.size, "member") %></p>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Team",
+      title: "Team",
+      subtitle: pluralize(@users.size, "member"),
+      meta: current_user.organization.name
+    } do %><% end %>
+<% if policy(User).create? %>
+  <div class="mt-4 flex justify-end">
+    <%= link_to "New user", new_user_path, class: "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition", style: "background: #c2410c" %>
   </div>
-  <% if policy(User).create? %>
-    <%= link_to "New user", new_user_path, class: "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition", style: "background: var(--org-party-color)" %>
-  <% end %>
-</div>
+<% end %>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="<%= policy(User).create? ? "mt-4" : "mt-6" %> <%= ta_card_classes %> overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">

@@ -6,12 +6,13 @@
 <% breadcrumb action_label %>
 
 <div>
-  <div class="mb-6">
-    <h1 class="<%= ta_page_title %>"><%= action_label %></h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Record the person, the issue, and any photos.</p>
-  </div>
+  <%= render layout: "ui/campaign_hero", locals: {
+        kicker: "Kitchen Cabinet",
+        title: action_label,
+        subtitle: "Record the person, the issue, and any photos."
+      } do %><% end %>
 
-  <div class="<%= ta_card_classes %> p-6 md:p-8">
+  <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
     <%# scope: :ticket — the model is KitchenCabinet::Ticket, so without this the params would be
         nested under `kitchen_cabinet_ticket` and the controller's require(:ticket) would miss them. %>
     <%= form_with model: @ticket, scope: :ticket, url: kitchen_cabinet_tickets_path, method: :post, multipart: true do |f| %>

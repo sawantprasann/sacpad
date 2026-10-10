@@ -1,9 +1,10 @@
 <% content_for :title, "Audit log" %>
-<div class="mb-6"><h1 class="<%= ta_page_title %>">Audit log</h1></div>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Audit log" } do %><% end %>
+<div class="mt-6">
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="campaign-sheet">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
           <th class="px-5 py-3 font-medium">When</th>
@@ -27,4 +28,5 @@
     </table>
     <% if @logs.empty? %><p class="px-5 py-10 text-center text-sm text-gray-400">No activity logged yet.</p><% end %>
   </div>
+</div>
 </div>

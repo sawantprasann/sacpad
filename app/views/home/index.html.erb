@@ -1,19 +1,64 @@
 <% content_for :title, "Dashboard" %>
-
-<div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-  <div>
-    <h1 class="<%= ta_page_title %>">Dashboard</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= current_user.organization.name %></p>
-  </div>
-  <%= render "ui/module_toolbar" %>
-</div>
-
-<% if @widgets.any? %>
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
-    <% @widgets.each do |widget| %>
-      <%= render "ui/dashboard_widget", widget: widget %>
-    <% end %>
-  </div>
-<% else %>
-  <p class="text-sm text-gray-500">No modules are available to your role yet.</p>
+<% party = current_user.organization.current_party %>
+<% desks = [] %>
+<% if current_user.role.can_access?("kitchen_cabinet") %>
+  <% desks << { title: "Kitchen Cabinet", blurb: "People waiting on help", path: kitchen_cabinet_tickets_path, mark: "kitchen_cabinet", jewel: 0 } %>
 <% end %>
+<% if current_user.role.can_access?("cadre_program") %>
+  <% desks << { title: "Cadre Program", blurb: "Work happening on the ground", path: cadre_program_activities_path, mark: "cadre_program", jewel: 1 } %>
+<% end %>
+<% if current_user.role.can_access?("ground_reports") %>
+  <% desks << { title: "Ground Reports", blurb: "What the field is hearing", path: ground_reports_villages_path, mark: "ground_reports", jewel: 2 } %>
+<% end %>
+<% if current_user.role.can_access?("pr") %>
+  <% desks << { title: "PR Records", blurb: "Press, posts, and coverage", path: pr_records_path, mark: "pr", jewel: 3 } %>
+<% end %>
+<% desks << { title: "Voter Lists", blurb: "Your constituency roll", path: voters_path, mark: "voters", jewel: 4 } %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+        kicker: "Namaste",
+        title: "#{dashboard_greeting}, #{current_user.name}",
+        subtitle: [ current_user.organization.name, current_user.role.name, party&.name ].compact.join(" · "),
+        meta: dashboard_now.strftime("%A, %-d %B %Y")
+      } do %><% end %>
+
+  <% if desks.any? %>
+    <div class="mt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Open a desk</h2>
+      <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+        <% desks.each do |desk| %>
+          <% jewel = dashboard_jewel(desk[:jewel]) %>
+          <%= link_to desk[:path],
+                class: "group relative overflow-hidden rounded-2xl bg-white p-4 shadow-theme-md ring-1 #{jewel[:ring]} transition hover:-translate-y-0.5 hover:shadow-theme-lg dark:bg-gray-900 dark:ring-white/10" do %>
+            <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= jewel[:bar] %>"></span>
+            <div class="mt-1 flex items-center gap-3">
+              <%= render "ui/desk_mark", name: desk[:mark], chip_class: jewel[:chip] %>
+              <div>
+                <p class="text-sm font-semibold text-gray-900 group-hover:text-gray-950 dark:text-white/90"><%= desk[:title] %></p>
+                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"><%= desk[:blurb] %></p>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="mt-8 mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90">At a glance</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">The work sitting on your campaign desk today.</p>
+    </div>
+  </div>
+
+  <% if @widgets.any? %>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 md:gap-6">
+      <% @widgets.each_with_index do |widget, index| %>
+        <%= render "ui/dashboard_widget", widget: widget, accent_index: index %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="rounded-2xl border border-dashed border-amber-300 bg-white/80 px-5 py-8 text-center text-sm text-amber-900 dark:border-amber-700/40 dark:bg-gray-900 dark:text-amber-100">
+      No modules are available to your role yet.
+    </div>
+  <% end %>

@@ -1,13 +1,13 @@
 <% content_for :title, "Loksabhas" %>
-<div class="mb-6 flex items-center justify-between">
-  <h1 class="<%= ta_page_title %>">Loksabhas</h1>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Loksabhas" } do %><% end %>
+<div class="mt-4 mb-6 flex justify-end">
   <%= link_to "New Loksabha", new_console_loksabha_path, class: ta_btn_primary %>
 </div>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="campaign-sheet">
   <%= render "console/filters", url: console_loksabhas_path, fields: [ [ :state, "State" ], [ :district, "District" ], [ :name, "Name" ], [ :constituency_no, "Constituency no" ] ] %>
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
           <th class="px-5 py-3 font-medium">State</th>

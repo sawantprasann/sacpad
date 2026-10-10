@@ -2,8 +2,8 @@
 <% breadcrumb "Loksabhas", console_loksabhas_path %>
 <% breadcrumb @loksabha.name %>
 
-<div class="mb-6 flex items-center justify-between">
-  <h1 class="<%= ta_page_title %>"><%= @loksabha.name %></h1>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: @loksabha.name, subtitle: "Loksabha" } do %><% end %>
+<div class="mt-4 mb-6 flex justify-end">
   <%= link_to "Edit", edit_console_loksabha_path(@loksabha), class: ta_btn_secondary %>
 </div>
 
@@ -34,14 +34,14 @@
   </dl>
 </div>
 
-<div class="<%= ta_card_classes %> overflow-hidden">
+<div class="campaign-sheet">
   <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
     <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Assemblies</h2>
     <%= link_to "New Assembly", new_console_loksabha_assembly_path(@loksabha), class: ta_btn_primary %>
   </div>
   <%= render "console/filters", url: console_loksabha_path(@loksabha), fields: [ [ :name, "Name" ], [ :constituency_no, "Constituency no" ] ] %>
   <div class="overflow-x-auto">
-    <table class="w-full text-sm">
+    <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
           <th class="px-5 py-3 font-medium">Name</th>

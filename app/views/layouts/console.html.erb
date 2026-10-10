@@ -12,13 +12,11 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <%# Platform Console: TailAdmin shell, but a constant STEEL operator identity (never party-themed,
-      DESIGN.md UX-DR15). --console-accent drives the operator brand mark. %>
-  <body class="font-outfit text-sm text-gray-800 dark:text-white/90" style="--console-accent:#1d2939" x-data="{ sidebarToggle: false, darkMode: false }" :class="{ 'dark bg-gray-900': darkMode }">
+  <body class="font-outfit text-sm text-gray-800 dark:text-white/90" style="--console-accent:#0b1f44" x-data="{ sidebarToggle: false, darkMode: false }" :class="{ 'dark bg-gray-900': darkMode }">
     <div class="flex h-screen overflow-hidden">
       <%= render "ui/console_sidebar" %>
 
-      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
         <div x-show="sidebarToggle" @click="sidebarToggle = false" class="fixed inset-0 z-40 bg-gray-900/50 xl:hidden" x-cloak></div>
         <%= render "ui/console_top_bar" %>
 

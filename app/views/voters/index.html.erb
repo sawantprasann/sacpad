@@ -1,8 +1,10 @@
 <div class="space-y-6">
-  <div>
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Voters</h1>
-    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Electoral roll with sentiment tracking</p>
-  </div>
+  <%= render layout: "ui/campaign_hero", locals: {
+        kicker: "Voters",
+        title: "Voters",
+        subtitle: "Electoral roll with sentiment tracking",
+        meta: current_user.organization.name
+      } do %><% end %>
 
   <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
     <!-- Filters -->
