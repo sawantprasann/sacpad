@@ -48,7 +48,7 @@ gem "image_processing", "~> 1.2"
 gem "devise", "~> 5.0"          # authentication (two scopes: users + admins) — Story 0.3/0.7
 gem "pundit", "~> 2.5"          # authorization policies — Story 0.8/0.9
 gem "closure_tree", "~> 9.8"    # user hierarchy / subtree queries — Story 0.9
-gem "acts_as_tenant", "~> 2.0"  # model-layer tenant isolation net — Story 0.2
+gem "acts_as_tenant", "~> 2.2"  # model-layer tenant isolation net — Story 0.2
 gem "discard", "~> 2.0"         # soft delete — Story 0.10
 gem "paper_trail", "~> 17.0"    # versioning (custom per-model version classes) — Story 0.10
 gem "pagy", "~> 43.7"           # pagination on every listing (NFR12) — 43.x API (Pagy::Method)
