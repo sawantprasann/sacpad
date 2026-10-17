@@ -37,8 +37,12 @@ def vision_box(left, top, width, height, image_width, image_height)
   }
 end
 
-def recognize_lines(path, psm:)
-  stdout, status = Open3.capture2("tesseract", path, "stdout", "--psm", psm.to_s, "tsv")
+def recognize_lines(path, psm:, whitelist: false)
+  command = [ "tesseract", path, "stdout", "--psm", psm.to_s, "tsv" ]
+  if whitelist
+    command += [ "-c", "tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" ]
+  end
+  stdout, status = Open3.capture2(*command)
   abort "tesseract failed for #{path}" unless status.success?
 
   words = []
@@ -128,11 +132,35 @@ ensure
 end
 
 if mode.nil?
-  image_width, image_height = dimensions(image_path)
-  recognize_lines(image_path, psm: 3).each do |line|
+  bigger = upscale(image_path, 2)
+  page_path = bigger ? bigger.path : image_path
+  image_width, image_height = dimensions(page_path)
+  recognize_lines(page_path, psm: 3).each do |line|
     box = vision_box(line[:left], line[:top], line[:width], line[:height], image_width, image_height)
     text = line[:text].gsub("\t", " ")
     printf("%.5f\t%.5f\t%.5f\t%.5f\t%s\n", box[:x], box[:y], box[:w], box[:h], text)
+  end
+  bigger&.close!
+elsif mode == "--epics"
+  $stdin.each_line do |line|
+    next if line.strip.empty?
+
+    parts = line.chomp.split("\t", -1)
+    id = parts[0].to_s
+    unless parts.length == 5
+      puts "#{id}\t"
+      next
+    end
+
+    vx, vy, vw, vh = parts[1, 4].map(&:to_f)
+    text = ""
+    with_crop(image_path, vx, vy, vw, vh) do |cropped|
+      bigger = upscale(cropped, 3)
+      target = bigger ? bigger.path : cropped
+      text = recognize_lines(target, psm: 7, whitelist: true).map { |hit| hit[:text] }.join(" ")
+      bigger&.close!
+    end
+    puts "#{id}\t#{text}"
   end
 elsif mode == "--serials"
   $stdin.each_line do |line|
@@ -189,5 +217,5 @@ elsif mode == "--lines"
     end
   end
 else
-  abort "usage: ocr_page <image> [--serials|--lines]"
+  abort "usage: ocr_page <image> [--serials|--lines|--epics]"
 end

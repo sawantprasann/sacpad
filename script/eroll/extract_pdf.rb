@@ -17,6 +17,7 @@ SKIP_PAGES = 2
 
 EPIC_RE = /\A[A-Z]{3}\d{7}\z/
 EPIC_IN_TEXT = /[A-Za-z]{3}\s*\d{7}/
+NAME_LINE = /\A\d{0,4}\s*(?:Name|[A-Za-z]{0,3}ame)\s*:/i
 SERIAL_RE = /\A\d{1,4}\z/
 VOTER_HEADERS = [ "Part No", "Serial No", "EPIC", "Elector Name", "Relative Name", "House No", "Age", "Gender" ].freeze
 COVER_HEADERS = [
@@ -568,6 +569,78 @@ def cover_metadata(reader)
   end
 end
 
+def epic_in(text)
+  text.to_s.scan(EPIC_IN_TEXT).filter_map { |raw| normalize_epic(raw) }.first
+end
+
+def name_columns(boxes)
+  columns = []
+  boxes.select { |box| box[:text].match?(NAME_LINE) }.sort_by { |box| box[:x] }.each do |box|
+    column = columns.find { |group| (group.first[:x] - box[:x]).abs < 0.08 }
+    column ? column << box : columns << [ box ]
+  end
+  columns.each { |column| column.sort_by! { |box| -box[:y] } }
+  columns
+end
+
+def name_already_saved?(records, name_box)
+  records.any? do |record|
+    record[:x] >= name_box[:x] - 0.03 &&
+      record[:x] <= name_box[:x] + 0.28 &&
+      (record[:y] - name_box[:y]).abs < 0.05
+  end
+end
+
+def header_epic_mode
+  ocr_argv.last.to_s.end_with?(".rb") ? "--epics" : "--lines"
+end
+
+# The EPIC sits on the line above "Name :". Read that strip when the full page missed it.
+def read_header_epics(image_path, names)
+  return {} if names.empty?
+
+  jobs = names.each_with_index.map do |box, index|
+    x = [ box[:x] - 0.02, 0 ].max
+    y = [ box[:y] + 0.002, 0 ].max
+    [ index, format("%.5f", x), format("%.5f", y), "0.34000", "0.03000" ].join("\t")
+  end
+  stdout, status = Open3.capture2(*ocr_argv, image_path, header_epic_mode, stdin_data: "#{jobs.join("\n")}\n")
+  return {} unless status.success?
+
+  found = {}
+  stdout.each_line do |line|
+    id, text = line.strip.split("\t", 2)
+    epic = epic_in(text)
+    found[id.to_i] = epic if epic
+  end
+  found
+end
+
+def cards_from_names(image_path, boxes, records)
+  pending = []
+  name_columns(boxes).each do |column|
+    column.each_with_index do |name_box, index|
+      next if name_already_saved?(records, name_box)
+
+      pending << [ name_box, column[index + 1] ]
+    end
+  end
+  epics = read_header_epics(image_path, pending.map(&:first))
+  pending.filter_map.with_index do |(name_box, next_name), index|
+    epic = epics[index]
+    next if epic.nil? || records.any? { |record| record[:epic] == epic }
+
+    epic_box = { x: name_box[:x] + 0.22, y: name_box[:y] + 0.014, w: 0.07, h: 0.01, text: epic }
+    lines = boxes.select do |box|
+      box[:x] >= name_box[:x] - 0.04 &&
+        box[:x] <= name_box[:x] + 0.26 &&
+        box[:y] <= name_box[:y] + 0.012 &&
+        (next_name.nil? || box[:y] > next_name[:y] + 0.012)
+    end
+    parse_card(epic_box, lines)
+  end
+end
+
 def voters_from_reader(reader)
   part_records = []
   reader.pages.each_with_index do |page, index|
@@ -590,6 +663,7 @@ def voters_from_reader(reader)
       found_epics = records.map { |record| record[:epic] }
       missed = boxes.select { |box| box[:text].match?(EPIC_RE) && !found_epics.include?(box[:text]) }
       records.concat(reread_cards(image.path, missed))
+      records.concat(cards_from_names(image.path, boxes, records))
       records = sort_records(records)
       fill_missing_serials(image.path, records)
 
