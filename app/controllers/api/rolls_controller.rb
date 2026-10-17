@@ -17,6 +17,9 @@ module Api
       render json: { error: "Assembly or booth was not found." }, status: :not_found
     rescue Eci::ImportBoothVoters::Error => e
       render json: { error: e.message }, status: :unprocessable_entity
+    rescue StandardError => e
+      Rails.logger.error("Roll import failed: #{e.class}: #{e.message}")
+      render json: { error: e.message }, status: :internal_server_error
     end
 
     private

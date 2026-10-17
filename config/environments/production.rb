@@ -79,6 +79,17 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  # Voter ids and names are encrypted. Production reads these from .env.
+  # Generate each once with `openssl rand -hex 16` and do not rotate them.
+  {
+    "PRIMARY_KEY" => :primary_key,
+    "DETERMINISTIC_KEY" => :deterministic_key,
+    "KEY_DERIVATION_SALT" => :key_derivation_salt
+  }.each do |suffix, setting|
+    value = ENV["ACTIVE_RECORD_ENCRYPTION_#{suffix}"].presence
+    config.active_record.encryption[setting] = value if value
+  end
+
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
   #   "example.com",     # Allow requests from example.com

@@ -45,6 +45,28 @@ class Api::RollsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 22, voter.age
   end
 
+  test "returns the import failure as json" do
+    Eci::ImportAssemblyRoll.class_eval do
+      alias_method :store_payload_without_stub, :store_payload unless method_defined?(:store_payload_without_stub)
+      define_method(:store_payload) do |*_args|
+        raise ActiveRecord::Encryption::Errors::Configuration, "Missing Active Record encryption credential: active_record_encryption.primary_key"
+      end
+    end
+
+    post "/api/assemblies/#{@assembly.id}/parts/2",
+      params: { cover: { "Main Town or Village" => "Padegaon" }, voters: [] },
+      as: :json,
+      headers: { "Authorization" => "Bearer test-token" }
+
+    assert_response :internal_server_error
+    assert_equal "application/json", response.media_type
+    assert_match "active_record_encryption.primary_key", JSON.parse(response.body)["error"]
+  ensure
+    Eci::ImportAssemblyRoll.class_eval do
+      alias_method :store_payload, :store_payload_without_stub
+    end
+  end
+
   test "rejects a missing token" do
     post "/api/assemblies/#{@assembly.id}/parts/2",
       params: { cover: {}, voters: [] },
