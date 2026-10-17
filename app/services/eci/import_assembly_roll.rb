@@ -17,14 +17,21 @@ module Eci
     end
 
     def import_part(part)
+      puts "Part #{part}: start"
       payload = payload_for(part)
-      return false if payload.nil?
+      if payload.nil?
+        puts "Part #{part}: PDF was not published"
+        return false
+      end
 
       cover = payload["cover"] || {}
+      puts "Part #{part}: cover town=#{cover["Main Town or Village"].inspect} voters_read=#{Array(payload["voters"]).size}"
       name = village_name(cover, part)
+      puts "Part #{part}: village name=#{name.inspect}"
       village = @assembly.villages.create_or_find_by!(name: name)
       booth = booth_for(part, village)
-      ImportBoothVoters.new(booth, payload: payload).call
+      saved = ImportBoothVoters.new(booth, payload: payload).call
+      puts "Part #{part}: saved #{saved} voters on booth #{booth.number}"
       release_placeholder(part, village)
       true
     rescue ImportBoothVoters::Error => e
@@ -37,12 +44,17 @@ module Eci
     def payload_for(part)
       state_cd = @assembly.loksabha.state.cd
       url = ImportBoothVoters.pdf_url(state_cd, @assembly.constituency_no, part)
+      puts "Part #{part}: downloading #{url}"
       Dir.mktmpdir("eroll") do |dir|
         path = File.join(dir, "part.pdf")
         status = download(url, path)
-        return nil if status == :missing
+        if status == :missing
+          puts "Part #{part}: download returned 404"
+          return nil
+        end
         raise ImportBoothVoters::Error, "Could not download the roll PDF for part #{part}." if status == :failed
 
+        puts "Part #{part}: downloaded #{File.size(path)} bytes, starting OCR"
         extract(path)
       end
     end

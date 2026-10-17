@@ -39,11 +39,26 @@ module Eci
     def self.extract(path)
       raise Error, "Voter extract script is missing from this app." unless File.file?(SCRIPT)
 
-      stdout, stderr, status = Open3.capture3(
+      puts "OCR script: #{SCRIPT}"
+      stdout = +""
+      stderr_lines = []
+      status = nil
+      Open3.popen3(
         { "BUNDLE_GEMFILE" => Rails.root.join("Gemfile").to_s },
         RbConfig.ruby, "-rbundler/setup", SCRIPT, "--pdf", path
-      )
-      raise Error, script_failure(stderr) unless status.success?
+      ) do |_stdin, out, err, wait|
+        err_thread = Thread.new do
+          err.each_line do |line|
+            stderr_lines << line
+            $stderr.write(line)
+            $stderr.flush
+          end
+        end
+        stdout = out.read
+        err_thread.join
+        status = wait.value
+      end
+      raise Error, script_failure(stderr_lines.join) unless status.success?
 
       JSON.parse(stdout)
     rescue JSON::ParserError
@@ -71,8 +86,13 @@ module Eci
       payload = @payload || downloaded_payload(loksabha, assembly)
       return 0 if payload.nil?
 
+      puts "Booth #{@booth.number}: applying cover"
       apply_cover(payload["cover"], loksabha)
+      puts "Booth #{@booth.number}: village is now #{@booth.village.name.inspect}"
+      voter_count = Array(payload["voters"]).size
+      puts "Booth #{@booth.number}: writing #{voter_count} voters"
       saved = save_voters(payload["voters"] || [], loksabha, assembly)
+      puts "Booth #{@booth.number}: write finished, #{saved} rows"
       drop_empty_village(previous_village) if previous_village.id != @booth.village_id
       saved
     end

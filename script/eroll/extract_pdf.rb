@@ -55,6 +55,11 @@ def ocr_argv
   [ RbConfig.ruby, OCR_SCRIPT ]
 end
 
+def step(message)
+  $stderr.puts message
+  $stderr.flush
+end
+
 def norm_space(text)
   text.to_s.gsub(/\s+/, " ").strip
 end
@@ -555,15 +560,22 @@ def parse_cover(boxes)
 end
 
 def cover_metadata(reader)
+  step "Cover: reading page 1"
   jpeg = page_jpeg(reader.pages[0])
-  return COVER_HEADERS.to_h { |header| [ header, "" ] } unless jpeg
+  unless jpeg
+    step "Cover: no page image"
+    return COVER_HEADERS.to_h { |header| [ header, "" ] }
+  end
 
   image = Tempfile.new([ "eroll-cover", ".jpg" ])
   begin
     image.binmode
     image.write(jpeg)
     image.close
-    parse_cover(ocr_boxes(image.path))
+    step "Cover: running OCR"
+    cover = parse_cover(ocr_boxes(image.path))
+    step "Cover: town=#{cover["Main Town or Village"].inspect} station=#{cover["Polling Station No. and Name"].inspect}"
+    cover
   ensure
     image.close!
   end
@@ -597,7 +609,12 @@ end
 
 # The EPIC sits on the line above "Name :". Read that strip when the full page missed it.
 def read_header_epics(image_path, names)
-  return {} if names.empty?
+  if names.empty?
+    step "  no name lines left to reread"
+    return {}
+  end
+
+  step "  rereading #{names.size} name headers for EPICs"
 
   jobs = names.each_with_index.map do |box, index|
     x = [ box[:x] - 0.02, 0 ].max
@@ -646,29 +663,36 @@ def voters_from_reader(reader)
   reader.pages.each_with_index do |page, index|
     next if index < SKIP_PAGES
 
+    page_no = index + 1
     jpeg = page_jpeg(page)
     if jpeg.nil?
-      warn "  Page #{index + 1}: no page image, skipped"
+      step "Page #{page_no}: no page image, skipped"
       next
     end
 
-    image = Tempfile.new([ "eroll-p#{index + 1}", ".jpg" ])
+    image = Tempfile.new([ "eroll-p#{page_no}", ".jpg" ])
     begin
       image.binmode
       image.write(jpeg)
       image.close
+      step "Page #{page_no}: OCR of the full page"
 
       boxes = ocr_boxes(image.path)
       records = cards_from_boxes(boxes)
+      step "Page #{page_no}: #{records.length} voters from the first read, #{boxes.size} text lines"
       found_epics = records.map { |record| record[:epic] }
       missed = boxes.select { |box| box[:text].match?(EPIC_RE) && !found_epics.include?(box[:text]) }
+      step "Page #{page_no}: rereading #{missed.length} missed cards"
       records.concat(reread_cards(image.path, missed))
+      before_names = records.length
       records.concat(cards_from_names(image.path, boxes, records))
+      step "Page #{page_no}: #{records.length - before_names} voters added from name headers"
       records = sort_records(records)
+      step "Page #{page_no}: filling missing serial numbers"
       fill_missing_serials(image.path, records)
 
       part_records.concat(records)
-      warn "  Page #{index + 1}: #{records.length} voters"
+      step "Page #{page_no}: done, #{records.length} voters (total #{part_records.length})"
     ensure
       image.close!
     end
@@ -679,9 +703,13 @@ def voters_from_reader(reader)
 end
 
 def extract_pdf(path)
+  step "Opening #{path}"
   ocr_argv
   reader = PDF::Reader.new(path)
-  { cover: cover_metadata(reader), voters: voters_from_reader(reader) }
+  step "PDF has #{reader.page_count} pages. Voter cards start on page #{SKIP_PAGES + 1}."
+  result = { cover: cover_metadata(reader), voters: voters_from_reader(reader) }
+  step "Extract finished: #{result[:voters].length} voters"
+  result
 end
 
 def download_part(part_no, filepath)
