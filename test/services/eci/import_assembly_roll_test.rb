@@ -31,4 +31,38 @@ class Eci::ImportAssemblyRollTest < ActiveSupport::TestCase
     assert_equal [ "3" ], @assembly.villages.find_by!(name: "Adarki").booths.pluck(:number)
     assert_nil @assembly.villages.find_by(name: "Shirsuphal")
   end
+
+  test "names the village from the polling station when the town line is blank" do
+    roll = Eci::ImportAssemblyRoll.new(@assembly, downloader: pdf_downloader, extractor: lambda { |_path|
+      { "cover" => { "Main Town or Village" => "", "Polling Station No. and Name" => "2 - Padegaon" }, "voters" => [] }
+    })
+
+    roll.import_part(2)
+
+    booth = Booth.joins(:village).find_by!(villages: { assembly_id: @assembly.id }, number: "2")
+    assert_equal "Padegaon", booth.village.name
+    assert_nil @assembly.villages.find_by(name: "Part 2")
+  end
+
+  test "keeps a real village when a later read misses the town" do
+    @assembly.villages.create!(name: "Padegaon").booths.create!(number: "2")
+    roll = Eci::ImportAssemblyRoll.new(@assembly, downloader: pdf_downloader, extractor: lambda { |_path|
+      { "cover" => {}, "voters" => [] }
+    })
+
+    roll.import_part(2)
+
+    booth = Booth.joins(:village).find_by!(villages: { assembly_id: @assembly.id }, number: "2")
+    assert_equal "Padegaon", booth.village.name
+    assert_nil @assembly.villages.find_by(name: "Part 2")
+  end
+
+  private
+
+  def pdf_downloader
+    lambda { |_url, path|
+      File.binwrite(path, "%PDF")
+      :ok
+    }
+  end
 end

@@ -21,10 +21,11 @@ module Eci
       return false if payload.nil?
 
       cover = payload["cover"] || {}
-      name = cover["Main Town or Village"].to_s.strip.presence || "Part #{part}"
+      name = village_name(cover, part)
       village = @assembly.villages.create_or_find_by!(name: name)
       booth = booth_for(part, village)
       ImportBoothVoters.new(booth, payload: payload).call
+      release_placeholder(part, village)
       true
     rescue ImportBoothVoters::Error => e
       Rails.logger.error("Assembly #{@assembly.id} part #{part} voter import failed: #{e.message}")
@@ -64,6 +65,36 @@ module Eci
       return if from.blank? || to.blank? || to < from
 
       from..to
+    end
+
+    def village_name(cover, part)
+      town = cover["Main Town or Village"].to_s.strip.presence
+      town ||= station_place(cover["Polling Station No. and Name"])
+      return town if town.present?
+
+      current = existing_booth(part)&.village&.name.to_s.strip
+      return current if current.present? && current != "Part #{part}"
+
+      "Part #{part}"
+    end
+
+    # "2 - Padegaon" is the polling-station line. The place after the dash is the town.
+    def station_place(text)
+      text.to_s.strip[/\A\d+\s*[-–]\s*(.+)\z/, 1]&.strip.presence
+    end
+
+    def existing_booth(part)
+      Booth.joins(:village).find_by(villages: { assembly_id: @assembly.id }, number: part.to_s)
+    end
+
+    def release_placeholder(part, village)
+      placeholder = @assembly.villages.find_by(name: "Part #{part}")
+      return if placeholder.nil? || placeholder.id == village.id
+      return if Booth.where(village_id: placeholder.id).exists? || Voter.where(village_id: placeholder.id).exists?
+
+      ActsAsTenant.without_tenant { placeholder.reload.destroy }
+    rescue ActiveRecord::RecordNotDestroyed, ActiveRecord::InvalidForeignKey
+      nil
     end
 
     def booth_for(part, village)

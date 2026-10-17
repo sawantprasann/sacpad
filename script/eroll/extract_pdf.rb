@@ -16,7 +16,7 @@ MAX_PARTS = 2
 SKIP_PAGES = 2
 
 EPIC_RE = /\A[A-Z]{3}\d{7}\z/
-EPIC_IN_TEXT = /[A-Za-z0-9]{3}\s*[A-Za-z0-9]{7}/
+EPIC_IN_TEXT = /[A-Za-z]{3}\s*\d{7}/
 SERIAL_RE = /\A\d{1,4}\z/
 VOTER_HEADERS = [ "Part No", "Serial No", "EPIC", "Elector Name", "Relative Name", "House No", "Age", "Gender" ].freeze
 COVER_HEADERS = [
@@ -546,6 +546,10 @@ def parse_cover(boxes)
   meta["Assembly Constituency Name"] = assembly_name
   meta["Parliamentary Constituency No."] = parliament_no
   meta["Parliamentary Constituency Name"] = parliament_name
+  if meta["Main Town or Village"].to_s.strip.empty?
+    place = meta["Polling Station No. and Name"].to_s[/\A\d+\s*[-–]\s*(.+)\z/, 1].to_s.strip
+    meta["Main Town or Village"] = place unless place.empty?
+  end
   meta
 end
 
