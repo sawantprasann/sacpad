@@ -4,8 +4,18 @@
       title: @organization.name,
       subtitle: "You're viewing this organization's data. This access is logged."
     } do %><% end %>
-<div class="mt-4 mb-8 flex justify-end">
+<div class="mt-4 mb-8 flex flex-wrap justify-end gap-3">
   <%= link_to "Edit organization", edit_console_organization_path(@organization), class: ta_btn_primary %>
+  <% if @organization.active? %>
+    <%= button_to "Deactivate", deactivate_console_organization_path(@organization), method: :patch,
+          class: "inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-error-500 px-4 text-sm font-semibold text-white",
+          form: { class: "inline-flex" },
+          data: { turbo_confirm: "Deactivate this organization? Every user will be locked out." } %>
+  <% else %>
+    <%= button_to "Reactivate", reactivate_console_organization_path(@organization), method: :patch,
+          class: "inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-success-600 px-4 text-sm font-semibold text-white",
+          form: { class: "inline-flex" } %>
+  <% end %>
 </div>
 
 <%# Clear Tab Navigation -%>
@@ -20,7 +30,7 @@
 
     <a href="<%= console_organization_path(@organization, tab: 'kitchen_cabinet') %>"
        class="px-6 py-4 font-semibold border-b-4 transition-all <%= current_tab == 'kitchen_cabinet' ? 'campaign-tab-active' : 'text-gray-700 border-transparent dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100' %>">
-      Kitchen Cabinet
+      Beneficiaries
     </a>
 
     <a href="<%= console_organization_path(@organization, tab: 'cadre') %>"
@@ -62,6 +72,25 @@
       </div>
       <p class="text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-300"><%= pluralize(@users.size, "user") %></p>
     </div>
+
+    <%= form_with url: console_organization_path(@organization), method: :get, class: "grid grid-cols-1 gap-3 border-b border-gray-200 px-6 py-4 sm:grid-cols-2 lg:grid-cols-4 dark:border-gray-700" do %>
+      <div>
+        <%= label_tag :user_q, "Name or email", class: ta_label_classes %>
+        <%= text_field_tag :user_q, params[:user_q], class: ta_field_classes %>
+      </div>
+      <div>
+        <%= label_tag :role_id, "Role", class: ta_label_classes %>
+        <%= select_tag :role_id, options_from_collection_for_select(@user_roles, :id, :name, params[:role_id]), include_blank: "Any role", class: ta_field_classes %>
+      </div>
+      <div>
+        <%= label_tag :user_status, "Status", class: ta_label_classes %>
+        <%= select_tag :user_status, options_for_select([ [ "Active", "active" ], [ "Inactive", "inactive" ] ], params[:user_status]), include_blank: "Any status", class: ta_field_classes %>
+      </div>
+      <div class="flex items-end gap-2">
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer">Search</button>
+        <%= link_to "Clear", console_organization_path(@organization), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+      </div>
+    <% end %>
 
     <% if @users.any? %>
       <div class="overflow-x-auto">
@@ -127,7 +156,7 @@
         </table>
       </div>
     <% else %>
-      <p class="px-6 py-10 text-center text-sm text-gray-500">No users in this organization yet.</p>
+      <p class="px-6 py-10 text-center text-sm text-gray-500"><%= params[:user_q].present? || params[:role_id].present? || params[:user_status].present? ? "No users match these filters." : "No users in this organization yet." %></p>
     <% end %>
   </div>
 
@@ -211,7 +240,9 @@
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 tabular-nums"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
                 <td class="px-6 py-4 text-sm">
                   <div class="flex gap-3">
-                    <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+                    <% unless ticket.closed? %>
+                      <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+                    <% end %>
                     <%= link_to "Delete", console_organization_org_ticket_path(@organization, ticket), method: :delete, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-700 font-semibold" %>
                   </div>
                 </td>
@@ -247,7 +278,9 @@
               <span><%= ticket.reported_at&.strftime("%d %b") %></span>
             </div>
             <div class="flex gap-3 text-sm border-t border-gray-200 dark:border-gray-700 pt-3">
-              <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+              <% unless ticket.closed? %>
+                <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+              <% end %>
               <%= link_to "Delete", console_organization_org_ticket_path(@organization, ticket), method: :delete, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-700 font-semibold" %>
             </div>
           </div>

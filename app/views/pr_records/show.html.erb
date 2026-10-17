@@ -35,10 +35,21 @@
           <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.sentiment.humanize %></dd>
         </div>
         <div class="<%= field %> sm:col-span-2">
-          <dt class="<%= label %>">URL</dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90">
-            <% if @record.url.present? %>
-              <%= link_to truncate(@record.url, length: 60), @record.url, target: "_blank", rel: "noopener", class: "text-brand-500 hover:text-brand-600" %>
+          <dt class="<%= label %>">Links</dt>
+          <dd class="mt-2 space-y-3 text-sm text-gray-800 dark:text-white/90">
+            <% links = @record.links.to_a %>
+            <% if links.empty? && @record.url.present? %>
+              <% links = [ Struct.new(:url, :thumbnail_url).new(@record.url, @record.thumbnail_url) ] %>
+            <% end %>
+            <% if links.any? %>
+              <% links.each do |link| %>
+                <div class="flex items-center gap-3">
+                  <% if link.thumbnail_url.present? %>
+                    <img src="<%= link.thumbnail_url %>" alt="" class="h-12 w-20 rounded object-cover">
+                  <% end %>
+                  <%= link_to truncate(link.url, length: 60), link.url, target: "_blank", rel: "noopener", class: "text-brand-500 hover:text-brand-600" %>
+                </div>
+              <% end %>
             <% else %>
               —
             <% end %>
@@ -65,7 +76,7 @@
       </section>
     <% end %>
 
-    <% if @record.pr_category.slug == "podcasts-interviews" && @record.podcast %>
+    <% if @record.pr_category.slug == "podcasts" && @record.podcast %>
       <section class="<%= ta_card_classes %> p-6">
         <h2 class="<%= section %>">Podcast Recording</h2>
         <div class="<%= field %>">

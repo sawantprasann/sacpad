@@ -1,0 +1,28 @@
+# Voter list export. Rows follow the same filters as the list.
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Voters") do |sheet|
+  sheet.add_row [ "Sr no", "Voter ID", "Name", "Booth no", "Village", "Sentiment", "Voted" ]
+  @voters.each do |voter|
+    sentiment = @sentiments[voter.id]
+    turnout = @turnouts[voter.id]
+    name = begin
+      [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ")
+    rescue ActiveRecord::Encryption::Errors::Decryption
+      ""
+    end
+    voter_id = begin
+      voter.voter_id
+    rescue ActiveRecord::Encryption::Errors::Decryption
+      ""
+    end
+    sheet.add_row [
+      voter.sr_no,
+      voter_id,
+      name,
+      voter.booth&.number,
+      voter.village&.name,
+      sentiment&.sentiment_status&.humanize,
+      turnout&.voted? ? "Voted" : "Not voted"
+    ]
+  end
+end

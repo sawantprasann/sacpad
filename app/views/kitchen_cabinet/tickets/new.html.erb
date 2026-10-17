@@ -1,15 +1,13 @@
-<% action_label = @ticket.ticket_category ? "Create #{@ticket.ticket_category.name}" : "Create ticket" %>
-<% content_for :title, action_label %>
-<% back_path = @ticket.ticket_category ? kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) : kitchen_cabinet_tickets_path %>
-<% breadcrumb "Kitchen Cabinet", kitchen_cabinet_tickets_path %>
-<% breadcrumb @ticket.ticket_category.name, back_path if @ticket.ticket_category %>
-<% breadcrumb action_label %>
+<% content_for :title, "Create ticket" %>
+<% back_path = kitchen_cabinet_tickets_path %>
+<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
+<% breadcrumb "Create ticket" %>
 
 <div>
   <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Kitchen Cabinet",
-        title: action_label,
-        subtitle: "Record the person, the issue, and any photos."
+        kicker: "Beneficiaries",
+        title: "Create ticket",
+        subtitle: "Choose a category, then record the person, the issue, and any photos."
       } do %><% end %>
 
   <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
@@ -20,9 +18,13 @@
         <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @ticket.errors.full_messages.to_sentence %></div>
       <% end %>
 
-      <%= f.hidden_field :ticket_category_id %>
-
       <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="md:col-span-2">
+          <%= f.label :ticket_category_id, "Category", class: ta_label_classes %>
+          <%= f.collection_select :ticket_category_id, @categories, :id, :name,
+                { include_blank: "Choose a category..." },
+                class: "#{ta_field_classes} min-h-11", required: true %>
+        </div>
         <div>
           <%= f.label :person_name, "Person / represents", class: ta_label_classes %>
           <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
@@ -66,7 +68,7 @@
 
       <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= action_label %></button>
+                style="background: var(--org-party-color); color: var(--org-party-contrast)">Create ticket</button>
         <%= link_to "Cancel", back_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
       </div>
     <% end %>

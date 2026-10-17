@@ -11,6 +11,9 @@ class Voter < ApplicationRecord
   belongs_to :assembly, optional: true
   belongs_to :village, optional: true
   has_many :voter_sentiments, dependent: :destroy
+  has_many :voter_turnouts, dependent: :destroy
+
+  # sr_no is the voter's position on that booth's published roll.
 
   # PII encrypted at rest (NFR18). Name fields deterministic for searchability.
   # voter_id is deterministic for Ticket lookup; name fields deterministic for voter search/filter.
@@ -21,4 +24,8 @@ class Voter < ApplicationRecord
   encrypts :mobile
 
   validates :first_name, :last_name, presence: true
+
+  def name
+    [ first_name, middle_name, last_name ].compact_blank.join(" ")
+  end
 end

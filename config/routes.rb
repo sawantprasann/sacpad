@@ -42,6 +42,7 @@ Rails.application.routes.draw do
     # PR catalogs (Story 4.1) — global, Admin-managed
     resources :pr_categories
     resources :media_platforms
+    resources :admin_contact_roles
     resources :outdoor_ad_types
     # Role & permission catalog (Story 0.8) — the only place roles are defined
     resources :roles
@@ -67,7 +68,12 @@ Rails.application.routes.draw do
   resources :voters, only: %i[index show] do
     member do
       patch :update_sentiment
+      patch :update_voted
     end
+  end
+
+  resources :booths, only: %i[index show], module: :booth_management do
+    resources :checklist_items, only: %i[create update]
   end
 
   # Cadre Program (Epic 2). Story 2.1 is the shared base capture; detail forms (2.2) and
@@ -83,7 +89,7 @@ Rails.application.routes.draw do
         resources :testimonials, only: :create
       end
       resources :worship_places, only: :create
-      resource :yatra, only: :update, controller: "yatra"
+      resources :village_works, only: :create
       resources :political_positions, only: :create
       resources :local_karyakartas, only: :create
       resources :local_admin_contacts, only: :create
@@ -99,6 +105,7 @@ Rails.application.routes.draw do
       member do
         patch :status
         patch :voter
+        post :match_voter
       end
       resources :follow_ups, only: :create
       resource :closure, only: %i[new create]  # two-step closure + voter-sentiment (Story 1.7)
@@ -106,7 +113,11 @@ Rails.application.routes.draw do
   end
 
   # PR Records (Epic 4). Story 4.2 captures media coverage; Story 4.3 adds category-specific details.
-  resources :pr_records, only: %i[index new create show edit update]
+  resources :pr_records, only: %i[index new create show edit update] do
+    collection do
+      post :thumbnail
+    end
+  end
 
   # Defines the root path route ("/")
   root "home#index"

@@ -3,7 +3,7 @@ module Console
   # Reuses the Story 0.4 catalog-editor pattern. Admin-only, global scope.
   class MediaPlatformsController < ReferenceController
     self.managed_model = MediaPlatform
-    self.managed_fields = %i[name slug active]
+    self.managed_fields = %i[name pr_category_id slug active]
     self.managed_title = "Media Platform"
   end
 end

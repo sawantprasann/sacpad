@@ -1,4 +1,4 @@
-name: CI
+name: CI / Deploy
 
 on:
   pull_request:
@@ -150,3 +150,41 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [scan_ruby, scan_js, lint, test, system-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DO_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: ssh-keyscan -H 143.110.248.201 >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: ssh deploy@143.110.248.201 "bash /var/www/sacpad/deploy.sh"
+
+      - name: Health check
+        run: |
+          for _ in 1 2 3 4 5 6; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://143.110.248.201/up || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Health check passed (HTTP $STATUS)"
+              exit 0
+            fi
+            echo "Waiting for app (HTTP $STATUS)..."
+            sleep 5
+          done
+          echo "Health check failed"
+          exit 1

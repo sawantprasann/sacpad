@@ -32,6 +32,16 @@ module KitchenCabinet
       end
     end
 
+    test "an exact name match can link the voter id before the ticket is closed" do
+      ActsAsTenant.with_tenant(@org) do
+        t = new_open_ticket
+        voter = Voter.create!(voter_id: "VTR123", first_name: "Asha", last_name: "Patil")
+        t.link_matched_voter!(voter, by: @user)
+        assert_equal "VTR123", t.reload.voter_id
+        assert VoterSentiment.find_by!(voter: voter).sentiment_transit?
+      end
+    end
+
     test "voter_id can be set once the ticket is closed" do
       ActsAsTenant.with_tenant(@org) do
         t = new_open_ticket

@@ -96,12 +96,14 @@ class GroundReportsTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
-  test "a writer maintains worship places, the yatra note, and political history" do
+  test "a writer maintains worship places, including a yatra, work inline, and political history" do
     party = Party.create!(name: "Sample Party")
     sign_in @alice
     get ground_reports_village_path(@village)
     assert_response :success
     assert_match "Worship places", @response.body
+    assert_match "Work inline", @response.body
+    assert_no_match(/Save yatra/, @response.body)
     assert_select "button", text: "Add place"
 
     assert_difference -> { GroundReports::WorshipPlace.unscoped.count }, 1 do
@@ -114,12 +116,18 @@ class GroundReportsTest < ActionDispatch::IntegrationTest
     assert_equal @org, place.organization
     assert_equal "Mosque", place.place_type
 
-    patch ground_reports_village_yatra_path(@village), params: { village_yatra: { notes: "First walk" } }
-    patch ground_reports_village_yatra_path(@village), params: { village_yatra: { notes: "Updated walk" } }
-    yatras = GroundReports::VillageYatra.unscoped.where(village: @village, organization: @org)
-    assert_equal 1, yatras.count
-    assert_equal "Updated walk", yatras.first.notes
-    assert_equal @alice, yatras.first.updated_by
+    post ground_reports_village_worship_places_path(@village), params: { worship_place: {
+      name: "Pandharpur yatra", place_type: "Yatra"
+    } }
+    assert_difference -> { GroundReports::VillageWork.unscoped.count }, 1 do
+      post ground_reports_village_village_works_path(@village), params: { village_work: {
+        title: "Road from Nimgaon to the highway", concern_person: "Gram Sevak", nidhi_asked: "250000",
+        nidhi_category: "mla_fund", status: "not_started", organization_id: 0
+      } }
+    end
+    work = GroundReports::VillageWork.unscoped.order(:id).last
+    assert_equal @org, work.organization
+    assert_equal "mla_fund", work.nidhi_category
 
     post ground_reports_village_political_positions_path(@village), params: { village_political_position: {
       party_id: party.id, representative_name: "Old", position_title: "Sarpanch", started_at: "2020-01-01"
@@ -133,7 +141,8 @@ class GroundReportsTest < ActionDispatch::IntegrationTest
 
     get ground_reports_village_path(@village)
     assert_match "Jama Masjid", @response.body
-    assert_match "Updated walk", @response.body
+    assert_match "Pandharpur yatra", @response.body
+    assert_match "Road from Nimgaon to the highway", @response.body
     assert_match "Current", @response.body
 
     other = ActsAsTenant.without_tenant { Organization.create!(name: "Org B", constituency: @org.constituency) }

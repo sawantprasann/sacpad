@@ -8,7 +8,16 @@ module GroundReports
     include VillageInConstituency
 
     belongs_to :village
+    belongs_to :admin_contact_role, optional: true
 
     validates :name, :role_title, presence: true
+
+    before_validation :copy_role_title
+
+    private
+
+    def copy_role_title
+      self.role_title = admin_contact_role.name if admin_contact_role
+    end
   end
 end

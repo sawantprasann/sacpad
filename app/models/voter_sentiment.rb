@@ -13,6 +13,9 @@ class VoterSentiment < ApplicationRecord
   validates :voter, presence: true
   validates :voter_id, uniqueness: { scope: :organization_id }
 
+  # Sentiment stays on this row. Whether the voter has voted is stored on VoterTurnout
+  # for the organization's current election, not on this boolean.
+
   def rag_color
     { "pleased" => :green, "transit" => :amber, "displeased" => :red }[sentiment_status]
   end

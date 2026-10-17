@@ -92,6 +92,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
+    host: <%= ENV.fetch("DB_HOST", "localhost") %>
     database: sacpad_production
     username: sacpad
     password: <%= ENV["SACPAD_DATABASE_PASSWORD"] %>

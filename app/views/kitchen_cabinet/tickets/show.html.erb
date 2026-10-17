@@ -1,13 +1,13 @@
 <% content_for :title, "#{@ticket.person_name} · #{@ticket.ticket_number}" %>
 <% list_path = kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) %>
-<% breadcrumb "Kitchen Cabinet", kitchen_cabinet_tickets_path %>
+<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
 <% breadcrumb @ticket.ticket_category.name, list_path %>
 <% breadcrumb @ticket.person_name %>
 <% field = "rounded-xl bg-amber-50/70 px-4 py-3 ring-1 ring-amber-100 dark:bg-white/[0.03] dark:ring-white/10" %>
 <% label = "text-xs font-medium tracking-wide text-amber-700/80 uppercase dark:text-amber-200" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Kitchen Cabinet",
+        kicker: "Beneficiaries",
         title: @ticket.person_name,
         subtitle: [ @ticket.ticket_number, @ticket.ticket_category.name, @ticket.village.presence ].compact.join(" · "),
         meta: "Reported #{@ticket.reported_at&.strftime("%d %b %Y") || "—"} · #{@ticket.owner.name}"
@@ -153,7 +153,26 @@
       <% end %>
 
       <%= render layout: "ui/jewel_card", locals: { accent_index: 3, title: "Voter ID" } do %>
-        <%= render "ui/voter_gate_field", ticket: @ticket %>
+        <% if @voter_matches.to_a.many? && @ticket.voter_id.blank? %>
+          <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">Several voters in this village share this name. Select one to link the voter id and set sentiment to transit.</p>
+          <ul class="space-y-2">
+            <% @voter_matches.each do |voter| %>
+              <li class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50/70 px-3 py-2 ring-1 ring-amber-100">
+                <span class="text-sm text-gray-800">
+                  <span class="font-medium"><%= voter.name %></span>
+                  · <%= voter.voter_id %>
+                  · Booth <%= voter.booth&.number || "—" %>
+                  <% if voter.sr_no %>· Sr <%= voter.sr_no %><% end %>
+                </span>
+                <%= button_to "Select", match_voter_kitchen_cabinet_ticket_path(@ticket), method: :post,
+                      params: { matched_voter_id: voter.id },
+                      class: "#{ta_btn_secondary} min-h-9 cursor-pointer text-xs" %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <%= render "ui/voter_gate_field", ticket: @ticket %>
+        <% end %>
       <% end %>
     </div>
   </div>

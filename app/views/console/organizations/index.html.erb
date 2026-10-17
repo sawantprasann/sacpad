@@ -4,12 +4,37 @@
   <%= link_to "Onboard organization", new_console_organization_path, class: ta_btn_primary %>
 </div>
 
+<%= form_with url: console_organizations_path, method: :get, class: "campaign-sheet mb-6 p-5" do %>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <%= label_tag :name, "Name", class: ta_label_classes %>
+      <%= text_field_tag :name, params[:name], class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :party_id, "Party", class: ta_label_classes %>
+      <%= select_tag :party_id,
+            options_for_select([ [ "Independent", "none" ] ] + @parties.map { |party| [ party.name, party.id ] }, params[:party_id]),
+            include_blank: "Any party",
+            class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :status, "Status", class: ta_label_classes %>
+      <%= select_tag :status, options_for_select([ [ "Active", "active" ], [ "Inactive", "inactive" ] ], params[:status]), include_blank: "Any status", class: ta_field_classes %>
+    </div>
+    <div class="flex items-end gap-2">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer">Filter</button>
+      <%= link_to "Clear", console_organizations_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+    </div>
+  </div>
+<% end %>
+
 <div class="campaign-sheet">
   <div class="overflow-x-auto">
     <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
           <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Party</th>
           <th class="px-5 py-3 font-medium">Status</th>
           <th class="px-5 py-3 font-medium">Users</th>
           <th class="px-5 py-3 font-medium">Last activity</th>
@@ -20,21 +45,17 @@
         <% @organizations.each do |org| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
             <td class="px-5 py-3"><%= link_to org.name, console_organization_path(org), class: "font-medium text-gray-800 hover:text-brand-600 dark:text-white/90" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= org.current_party&.name || "Independent" %></td>
             <td class="px-5 py-3"><%= render "ui/badge", label: (org.active? ? "active" : "inactive"), tone: (org.active? ? "green" : "gray") %></td>
             <td class="px-5 py-3 tabular-nums text-gray-700 dark:text-gray-300"><%= org.users.count %></td>
             <td class="px-5 py-3 text-gray-500"><%= org.users.maximum(:current_sign_in_at)&.strftime("%d %b %H:%M") || "—" %></td>
             <td class="px-5 py-3 text-right whitespace-nowrap">
-              <%= link_to "Edit", edit_console_organization_path(org), class: "mr-3 text-brand-500 hover:text-brand-600" %>
-              <% if org.active? %>
-                <%= button_to "Deactivate", deactivate_console_organization_path(org), method: :patch, class: "text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
-              <% else %>
-                <%= button_to "Reactivate", reactivate_console_organization_path(org), method: :patch, class: "text-success-600 hover:text-success-700", form: { style: "display:inline" } %>
-              <% end %>
+              <%= link_to "Edit", edit_console_organization_path(org), class: "text-brand-500 hover:text-brand-600" %>
             </td>
           </tr>
         <% end %>
       </tbody>
     </table>
-    <% if @organizations.empty? %><p class="px-5 py-10 text-center text-sm text-gray-400">No organizations yet — onboard one.</p><% end %>
+    <% if @organizations.empty? %><p class="px-5 py-10 text-center text-sm text-gray-400">No organizations match these filters.</p><% end %>
   </div>
 </div>

@@ -16,7 +16,7 @@ module GroundReports
     private
 
     def contact_params
-      params.require(:village_local_karyakarta).permit(:name, :phone, :notes)
+      params.require(:village_local_karyakarta).permit(:name, :phone, :address, :notes)
     end
   end
 end

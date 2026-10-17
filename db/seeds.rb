@@ -8,7 +8,7 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# System roles (Story 0.8): org_admin + dreamline_user, seeded idempotently.
+# System roles: org_admin, plus PA, Karyakarta, and Manager under that admin, and dreamline_user.
 Role.seed_system_roles!
 
 # Kitchen Cabinet ticket categories (Story 1.1): the 12 global, Admin-managed categories
@@ -18,8 +18,11 @@ TicketCategory.seed_defaults!
 # PR categories (Story 4.1): the 6 fixed PR categories, seeded idempotently.
 PrCategory.seed_defaults!
 
-# Media platforms (Story 4.1): extensible catalog of media outlets for PR records, seeded idempotently.
+# Media platforms: TV channels for electronic media, mainline papers for print. Local outlets are added in the console.
 MediaPlatform.seed_defaults!
+
+# Administrative contact roles used by the Ground Reports dropdown.
+AdminContactRole.seed_defaults!
 
 # Bootstrap platform Admin (Story 0.3) — the only way into the Console (no self-service sign-up).
 # Configurable via env; in production a password MUST be provided (no insecure default).

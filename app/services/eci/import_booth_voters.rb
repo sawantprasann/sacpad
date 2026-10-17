@@ -9,7 +9,7 @@ module Eci
     SCRIPT = Rails.root.join("script/eroll/extract_pdf.rb").to_s.freeze
     UPSERT_BATCH = 500
     UPSERT_COLUMNS = %i[
-      first_name middle_name last_name age house_no gender
+      first_name middle_name last_name age house_no gender sr_no
       booth_id state_id loksabha_id assembly_id village_id
     ].freeze
 
@@ -197,6 +197,7 @@ module Eci
           middle_name: names[:middle],
           last_name: names[:last],
           age: integer_or_nil(row["age"]),
+          sr_no: integer_or_nil(row["serial"]),
           house_no: blank_to_nil(row["house"]),
           gender: blank_to_nil(row["gender"]),
           booth_id: @booth.id,

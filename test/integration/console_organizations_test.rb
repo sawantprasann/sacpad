@@ -131,4 +131,49 @@ class ConsoleOrganizationsTest < ActionDispatch::IntegrationTest
     assert_match "Assigned", @response.body
     assert_no_match(/Other/, @response.body)
   end
+
+  test "deactivation lives on the organization page and is logged" do
+    org = ActsAsTenant.without_tenant { Organization.create!(name: "Org A") }
+    sign_in @admin
+
+    get console_organizations_path
+    assert_no_match(/Deactivate/, @response.body)
+
+    get console_organization_path(org)
+    assert_match "Deactivate", @response.body
+
+    assert_difference -> { ActivityLog.where(action: "organization.deactivated").count }, 1 do
+      patch deactivate_console_organization_path(org)
+    end
+    assert_redirected_to console_organization_path(org)
+    assert_not org.reload.active?
+    assert_equal @admin, ActivityLog.where(action: "organization.deactivated").last.actor
+
+    patch reactivate_console_organization_path(org)
+    assert org.reload.active?
+    assert ActivityLog.exists?(action: "organization.reactivated", organization_id: org.id)
+  end
+
+  test "organizations can be filtered by party, name, and status" do
+    party = Party.create!(name: "Sample Party", color: "#112233")
+    match = ActsAsTenant.without_tenant { Organization.create!(name: "Indapur Office", current_party: party, active: true) }
+    ActsAsTenant.without_tenant { Organization.create!(name: "Other Office", active: false) }
+
+    sign_in @admin
+    get console_organizations_path(name: "Indapur", party_id: party.id, status: "active")
+    assert_match match.name, @response.body
+    assert_no_match(/Other Office/, @response.body)
+  end
+
+  test "the organization page can search its users" do
+    org = ActsAsTenant.without_tenant { Organization.create!(name: "Org A") }
+    role = Role.find_by!(slug: "org_admin")
+    User.create!(organization: org, role: role, name: "Meera", email: "meera@example.com", password: "password123")
+    User.create!(organization: org, role: role, name: "Rohan", email: "rohan@example.com", password: "password123", active: false)
+
+    sign_in @admin
+    get console_organization_path(org, user_q: "rohan", user_status: "inactive")
+    assert_match "rohan@example.com", @response.body
+    assert_no_match(/meera@example.com/, @response.body)
+  end
 end

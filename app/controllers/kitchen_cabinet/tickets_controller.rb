@@ -11,25 +11,20 @@ module KitchenCabinet
     # organization (acts_as_tenant) ∩ viewer subtree ∩ kept; "Get All Details" returns this
     # paginated relation, never an unpaged dump (NFR12). Pagination via pagy 43.x (Pagy::Method).
     def index
-      @category = TicketCategory.active.find_by(slug: params[:category])
-
-      relation = policy_scope(KitchenCabinet::Ticket).includes(:ticket_category, :owner)
-      relation = relation.where(ticket_category_id: @category.id) if @category
-      if params[:status].present? && KitchenCabinet::Ticket.statuses.key?(params[:status])
-        relation = relation.where(status: params[:status])
-      end
-      if params[:q].present?
-        term = "%#{params[:q].strip}%"
-        relation = relation.where("person_name ILIKE :t OR village ILIKE :t", t: term)
-      end
-      relation = relation.order(reported_at: :desc, id: :desc)
+      @categories = TicketCategory.active.order(:display_order, :name)
+      @category = @categories.find_by(slug: params[:category])
+      @villages = Village.order(:name)
+      relation = filtered_tickets
 
       respond_to do |format|
-        format.html { @pagy, @tickets = pagy(:offset, relation) }
+        format.html do
+          @charts = chart_series(relation)
+          @pagy, @tickets = pagy(:offset, relation)
+        end
         format.xlsx do
           # Export the full scoped+filtered set (unpaginated), scoped to the viewer (Story 1.8, FR49).
           @tickets = relation
-          response.headers["Content-Disposition"] = "attachment; filename=kitchen_cabinet_tickets.xlsx"
+          response.headers["Content-Disposition"] = "attachment; filename=beneficiaries.xlsx"
         end
       end
     end
@@ -39,6 +34,7 @@ module KitchenCabinet
     def show
       @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
       authorize @ticket
+      @voter_matches = @ticket.voter_id.blank? ? KitchenCabinet::VoterMatch.for_ticket(@ticket) : []
     end
 
     # Status transition (Story 1.4). The model guard + policy are the authority; the view only
@@ -56,9 +52,10 @@ module KitchenCabinet
       end
     end
 
-    # Mobile-first capture (Story 1.2): pre-fill to the category tapped in the sidebar.
+    # Category is chosen on the form. A ?category= slug still pre-selects that option.
     def new
       @ticket = Ticket.new(ticket_category: TicketCategory.active.find_by(slug: params[:category]))
+      @categories = TicketCategory.active.order(:display_order, :name)
       authorize @ticket
     end
 
@@ -67,9 +64,9 @@ module KitchenCabinet
       @ticket.owner = current_user          # organization is set by acts_as_tenant, never from params
       authorize @ticket
       if @ticket.save
-        redirect_to kitchen_cabinet_tickets_path(category: @ticket.ticket_category&.slug),
-                    notice: "Ticket ##{@ticket.ticket_number} logged."
+        redirect_after_create
       else
+        @categories = TicketCategory.active.order(:display_order, :name)
         render :new, status: :unprocessable_entity
       end
     end
@@ -103,6 +100,22 @@ module KitchenCabinet
       end
     end
 
+    # Representative picks one voter when several people in the village share the exact name.
+    def match_voter
+      @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
+      authorize @ticket, :update?
+      voter = Voter.find_by(id: params[:matched_voter_id])
+      matches = KitchenCabinet::VoterMatch.for_ticket(@ticket)
+      if @ticket.voter_id.present? || voter.nil? || matches.none? { |row| row.id == voter.id }
+        redirect_to kitchen_cabinet_ticket_path(@ticket), alert: "Choose one of the matched voters."
+        return
+      end
+
+      @ticket.link_matched_voter!(voter, by: current_user)
+      redirect_to kitchen_cabinet_ticket_path(@ticket),
+                  notice: "Linked #{voter.name}. Sentiment set to transit. You'll confirm how they feel when this is closed."
+    end
+
     private
 
     def ticket_params
@@ -110,10 +123,66 @@ module KitchenCabinet
         :reported_at, :nature_of_issue, :reported_value, :ticket_category_id, attachments: [])
     end
 
+    def filtered_tickets
+      relation = policy_scope(KitchenCabinet::Ticket).includes(:ticket_category, :owner)
+      relation = relation.where(ticket_category_id: @category.id) if @category
+      if params[:status].present? && KitchenCabinet::Ticket.statuses.key?(params[:status])
+        relation = relation.where(status: params[:status])
+      end
+      if params[:name].present?
+        relation = relation.where("tickets.person_name ILIKE ?", like_term(params[:name]))
+      end
+      if params[:village].present?
+        relation = relation.where(village: params[:village])
+      end
+      if params[:reporter].present?
+        relation = relation.joins(:owner).where("users.name ILIKE ?", like_term(params[:reporter]))
+      end
+      if params[:q].present?
+        term = like_term(params[:q])
+        relation = relation.where("tickets.person_name ILIKE :t OR tickets.village ILIKE :t", t: term)
+      end
+      relation.order(reported_at: :desc, id: :desc)
+    end
+
+    def chart_series(relation)
+      base = relation.unscope(:order)
+      status_counts = base.group("tickets.status").count
+      pie = KitchenCabinet::Ticket.statuses.each_with_object({}) do |(name, value), series|
+        count = status_counts[name] || status_counts[value] || status_counts[value.to_s] || 0
+        series[name.humanize] = count if count.positive?
+      end
+
+      {
+        line: base.group("tickets.reported_at").order("tickets.reported_at").count,
+        bar: base.joins(:ticket_category).group("ticket_categories.name").order("ticket_categories.name").count,
+        pie: pie,
+        pie_by_category: base.joins(:ticket_category).group("ticket_categories.name").order("ticket_categories.name").count
+      }
+    end
+
+    def redirect_after_create
+      list = kitchen_cabinet_tickets_path(category: @ticket.ticket_category&.slug)
+      matches = KitchenCabinet::VoterMatch.for_ticket(@ticket)
+      if matches.one?
+        @ticket.link_matched_voter!(matches.first, by: current_user)
+        redirect_to list, notice: "Ticket ##{@ticket.ticket_number} logged. Matched #{matches.first.name} and set sentiment to transit."
+      elsif matches.many?
+        redirect_to kitchen_cabinet_ticket_path(@ticket),
+                    notice: "Ticket logged. Several voters in this village share this name — select the right one."
+      else
+        redirect_to list, notice: "Ticket ##{@ticket.ticket_number} logged."
+      end
+    end
+
+    def like_term(value)
+      "%#{KitchenCabinet::Ticket.sanitize_sql_like(value.to_s.strip)}%"
+    end
+
     # Nav visibility is gated in the sidebar, but access is also enforced here (not UI-only):
-    # a user whose role has no Kitchen Cabinet access cannot reach the module even by URL.
+    # a user whose role has no Beneficiaries access cannot reach the module even by URL.
     def require_kitchen_cabinet_access
-      redirect_to root_path, alert: "You don't have access to Kitchen Cabinet." unless
+      redirect_to root_path, alert: "You don't have access to Beneficiaries." unless
         current_user.role.can_access?("kitchen_cabinet")
     end
   end

@@ -1,7 +1,7 @@
 <% content_for :title, "Close ticket #{@ticket.ticket_number}" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Kitchen Cabinet",
+      kicker: "Beneficiaries",
       title: "Close ticket",
       subtitle: "#{@ticket.ticket_number} · #{@ticket.person_name}"
     } do %><% end %>
@@ -21,7 +21,10 @@
       <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Attach a voter and record how they feel. Both are optional — a blank or unmatched voter ID still closes the ticket.</p>
       <div class="mb-4">
         <label class="<%= ta_label_classes %>">Voter ID</label>
-        <%= text_field_tag :voter_id, nil, placeholder: "Voter ID", class: "#{ta_field_classes} min-h-11" %>
+        <%= text_field_tag :voter_id, @ticket.voter_id, placeholder: "Voter ID", class: "#{ta_field_classes} min-h-11" %>
+        <% if @ticket.voter_id.present? %>
+          <p class="mt-2 text-xs text-gray-500">This voter was matched when the ticket was logged. Record how they feel now.</p>
+        <% end %>
       </div>
       <%= render "ui/sentiment_picker" %>
     </div>

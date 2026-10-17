@@ -47,9 +47,9 @@ module BreadcrumbHelper
 
   def org_section
     {
-      "kitchen_cabinet/tickets" => [ "Kitchen Cabinet", kitchen_cabinet_tickets_path ],
-      "kitchen_cabinet/closures" => [ "Kitchen Cabinet", kitchen_cabinet_tickets_path ],
-      "kitchen_cabinet/follow_ups" => [ "Kitchen Cabinet", kitchen_cabinet_tickets_path ],
+      "kitchen_cabinet/tickets" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
+      "kitchen_cabinet/closures" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
+      "kitchen_cabinet/follow_ups" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
       "cadre_program/activities" => [ "Cadre Program", cadre_program_activities_path ],
       "ground_reports/villages" => [ "Ground Reports", ground_reports_villages_path ],
       "ground_reports/reports" => [ "Ground Reports", ground_reports_villages_path ],

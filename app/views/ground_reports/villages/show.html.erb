@@ -6,7 +6,7 @@
 <% can_write = current_user.role.can_write?("ground_reports") %>
 <% snapshot = [
   [ "Worship places", @worship_places.size ],
-  [ "Yatra", @yatra.notes.present? ? "On file" : "None" ],
+  [ "Work inline", @works.size ],
   [ "Current post", current_position&.representative_name || "None" ],
   [ "Karyakartas", @karyakartas.size ],
   [ "Admin contacts", @admin_contacts.size ],
@@ -103,7 +103,7 @@
 </section>
 
 <h2 class="mb-3 mt-8 border-b border-gray-200 pb-2 text-base font-semibold text-gray-900 dark:border-gray-700 dark:text-white">Village record</h2>
-<div class="grid gap-4 xl:grid-cols-3">
+<div class="grid gap-4 xl:grid-cols-2">
   <section class="<%= ta_card_classes %> overflow-hidden">
     <div class="px-5 py-4">
       <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Worship places</h3>
@@ -134,7 +134,10 @@
           </div>
           <div>
             <%= f.label :place_type, "Type", class: ta_label_classes %>
-            <%= f.text_field :place_type, required: true, placeholder: "Temple, mosque, church…", class: ta_field_classes %>
+            <%= f.select :place_type,
+                  [ "Temple", "Mosque", "Church", "Gurudwara", "Yatra", "Other" ],
+                  { prompt: "Select a type" },
+                  required: true, class: ta_field_classes %>
           </div>
           <div>
             <%= f.label :notes, class: ta_label_classes %>
@@ -199,30 +202,9 @@
       <% end %>
     <% end %>
   </section>
-
-  <section class="<%= ta_card_classes %> overflow-hidden">
-    <div class="px-5 py-4">
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">Yatra</h3>
-      <p class="mt-0.5 text-xs text-gray-500">One note for this village</p>
-    </div>
-    <% if @yatra.notes.present? %>
-      <p class="whitespace-pre-wrap border-t border-gray-100 px-5 py-4 text-sm text-gray-700 dark:border-gray-800 dark:text-gray-300"><%= @yatra.notes %></p>
-    <% else %>
-      <p class="border-t border-gray-100 px-5 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No yatra note yet.</p>
-    <% end %>
-    <% if can_write %>
-      <%= render "ground_reports/villages/add_panel", label: @yatra.notes.present? ? "Edit note" : "Add note" do %>
-        <%= form_with model: @yatra, scope: :village_yatra,
-              url: ground_reports_village_yatra_path(@village), method: :patch, class: "space-y-3" do |f| %>
-          <%= f.label :notes, "Note", class: ta_label_classes %>
-          <%= f.text_area :notes, rows: 4, class: "#{ta_field_classes} h-auto" %>
-          <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Save yatra</button>
-        <% end %>
-      <% end %>
-    <% end %>
-  </section>
 </div>
+
+<%= render "ground_reports/villages/work_inline", village: @village, works: @works, can_write: can_write %>
 
 <h2 class="mb-3 mt-8 border-b border-gray-200 pb-2 text-base font-semibold text-gray-900 dark:border-gray-700 dark:text-white">People</h2>
 <div class="grid gap-4 xl:grid-cols-2">
@@ -236,6 +218,9 @@
         <% @karyakartas.each do |contact| %>
           <li class="px-5 py-3">
             <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
+            <% if contact.address.present? %>
+              <p class="mt-0.5 text-xs text-gray-500"><%= contact.address %></p>
+            <% end %>
             <% if contact.phone.present? %>
               <p class="mt-0.5 text-xs tabular-nums text-gray-500"><%= contact.phone %></p>
             <% end %>
@@ -261,6 +246,10 @@
             <%= f.telephone_field :phone, class: ta_field_classes %>
           </div>
           <div>
+            <%= f.label :address, class: ta_label_classes %>
+            <%= f.text_field :address, class: ta_field_classes %>
+          </div>
+          <div>
             <%= f.label :notes, class: ta_label_classes %>
             <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
           </div>
@@ -281,7 +270,7 @@
         <% @admin_contacts.each do |contact| %>
           <li class="px-5 py-3">
             <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
-            <p class="mt-0.5 text-xs text-gray-500"><%= contact.role_title %><% if contact.phone.present? %> · <span class="tabular-nums"><%= contact.phone %></span><% end %></p>
+            <p class="mt-0.5 text-xs text-gray-500"><%= contact.admin_contact_role&.name || contact.role_title %><% if contact.phone.present? %> · <span class="tabular-nums"><%= contact.phone %></span><% end %></p>
             <% if contact.notes.present? %>
               <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= contact.notes %></p>
             <% end %>
@@ -300,8 +289,10 @@
             <%= f.text_field :name, required: true, class: ta_field_classes %>
           </div>
           <div>
-            <%= f.label :role_title, "Role", class: ta_label_classes %>
-            <%= f.text_field :role_title, required: true, placeholder: "Sarpanch, Gram Sevak, Police…", class: ta_field_classes %>
+            <%= f.label :admin_contact_role_id, "Role", class: ta_label_classes %>
+            <%= f.collection_select :admin_contact_role_id, @admin_roles, :id, :name,
+                  { prompt: "Select a role" },
+                  required: true, class: ta_field_classes %>
           </div>
           <div>
             <%= f.label :phone, class: ta_label_classes %>

@@ -21,7 +21,7 @@ module KitchenCabinet
     private
 
     def require_kitchen_cabinet_access
-      redirect_to root_path, alert: "You don't have access to Kitchen Cabinet." unless
+      redirect_to root_path, alert: "You don't have access to Beneficiaries." unless
         current_user.role.can_access?("kitchen_cabinet")
     end
 

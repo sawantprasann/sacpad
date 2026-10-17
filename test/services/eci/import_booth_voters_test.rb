@@ -18,7 +18,7 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     extractor = lambda { |_path|
       {
         "voters" => [
-          { "epic" => "ABC1234567", "name" => "Asha Ramesh Patil", "age" => "34", "house" => "12/A", "gender" => "Female" },
+          { "epic" => "ABC1234567", "name" => "Asha Ramesh Patil", "age" => "34", "house" => "12/A", "gender" => "Female", "serial" => "12" },
           { "epic" => "XYZ7654321", "name" => "Ravi Kale", "age" => "N/A", "house" => "N/A", "gender" => "" }
         ]
       }
@@ -35,6 +35,7 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     assert_equal 34, asha.age
     assert_equal "12/A", asha.house_no
     assert_equal "Female", asha.gender
+    assert_equal 12, asha.sr_no
     ravi = Voter.find_by!(voter_id: "XYZ7654321")
     assert_nil ravi.age
     assert_nil ravi.house_no

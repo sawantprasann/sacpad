@@ -1,0 +1,95 @@
+<% village = local_assigns[:village] %>
+<% works = local_assigns[:works] %>
+<% can_write = local_assigns[:can_write] %>
+<section class="<%= ta_card_classes %> mt-8 overflow-hidden">
+  <div class="px-6 py-4">
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Work inline</h2>
+    <p class="mt-0.5 text-xs text-gray-500">Development taken up for this village, the fund asked, and the work order.</p>
+  </div>
+
+  <% if works.any? %>
+    <div class="overflow-x-auto border-t border-gray-100 dark:border-gray-800">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 dark:bg-white/[0.03]">
+          <tr>
+            <% [ "Title", "Concern person", "Nidhi asked", "Category", "Work order", "Status" ].each do |heading| %>
+              <th class="border-b border-gray-200 px-5 py-3 text-left text-xs font-medium text-gray-500"><%= heading %></th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% works.each do |work| %>
+            <tr class="last:[&>td]:border-b-0">
+              <td class="border-b border-gray-100 px-5 py-3 font-medium text-gray-900 dark:border-gray-800 dark:text-white/90">
+                <%= work.title %>
+                <% if work.attachments.attached? %>
+                  <p class="mt-1 text-xs font-normal text-gray-500"><%= pluralize(work.attachments.size, "attachment") %></p>
+                <% end %>
+              </td>
+              <td class="border-b border-gray-100 px-5 py-3 text-gray-700 dark:border-gray-800"><%= work.concern_person %></td>
+              <td class="border-b border-gray-100 px-5 py-3 tabular-nums text-gray-700 dark:border-gray-800"><%= number_with_delimiter(work.nidhi_asked) %></td>
+              <td class="border-b border-gray-100 px-5 py-3 text-gray-700 dark:border-gray-800"><%= work.nidhi_label %></td>
+              <td class="border-b border-gray-100 px-5 py-3 tabular-nums text-gray-500 dark:border-gray-800"><%= work.work_order_created_at&.strftime("%d %b %Y") || "—" %></td>
+              <td class="border-b border-gray-100 px-5 py-3 text-gray-700 dark:border-gray-800"><%= work.status.humanize %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No work inline yet.</p>
+  <% end %>
+
+  <% if can_write %>
+    <%= render "ground_reports/villages/add_panel", label: "Add work" do %>
+      <div x-data="{ category: '' }">
+      <%= form_with model: GroundReports::VillageWork.new, scope: :village_work,
+            url: ground_reports_village_village_works_path(village), class: "space-y-3" do |f| %>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <%= f.label :title, class: ta_label_classes %>
+            <%= f.text_field :title, required: true, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :concern_person, "Concern person", class: ta_label_classes %>
+            <%= f.text_field :concern_person, required: true, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :nidhi_asked, "Nidhi asked", class: ta_label_classes %>
+            <%= f.number_field :nidhi_asked, required: true, min: 0, step: "0.01", class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :nidhi_category, "Nidhi category", class: ta_label_classes %>
+            <%= f.select :nidhi_category,
+                  GroundReports::VillageWork::NIDHI_CATEGORY_LABELS.map { |key, label| [ label, key ] },
+                  { prompt: "Select a category" },
+                  required: true, class: ta_field_classes,
+                  "@change": "category = $event.target.value" %>
+          </div>
+          <div x-show="category === 'other'" x-cloak>
+            <%= f.label :nidhi_category_name, "Other category name", class: ta_label_classes %>
+            <%= f.text_field :nidhi_category_name, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :work_order_created_at, "Work order created at", class: ta_label_classes %>
+            <%= f.datetime_field :work_order_created_at, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :status, class: ta_label_classes %>
+            <%= f.select :status,
+                  GroundReports::VillageWork.statuses.keys.map { |key| [ key.humanize, key ] },
+                  {}, class: ta_field_classes %>
+          </div>
+          <div class="md:col-span-2">
+            <%= f.label :attachments, "Attachments", class: ta_label_classes %>
+            <%= f.file_field :attachments, multiple: true,
+                  class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+          </div>
+        </div>
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)">Add work</button>
+      <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</section>

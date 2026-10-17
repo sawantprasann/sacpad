@@ -4,7 +4,22 @@ module Console
     before_action :set_organization, only: %i[show edit update deactivate reactivate]
 
     def index
-      @organizations = current_admin.assignable_organizations.order(:id)
+      relation = current_admin.assignable_organizations.includes(:current_party)
+      if params[:name].present?
+        relation = relation.where("organizations.name ILIKE ?", "%#{Organization.sanitize_sql_like(params[:name].strip)}%")
+      end
+      if params[:party_id] == "none"
+        relation = relation.where(current_party_id: nil)
+      elsif params[:party_id].present?
+        relation = relation.where(current_party_id: params[:party_id])
+      end
+      if params[:status] == "active"
+        relation = relation.where(active: true)
+      elsif params[:status] == "inactive"
+        relation = relation.where(active: false)
+      end
+      @organizations = relation.order(:name, :id)
+      @parties = Party.order(:name)
     end
 
     def new
@@ -27,7 +42,7 @@ module Console
     def show
       record_activity("organization.viewed", record: @organization, organization: @organization)
       @viewing_org = @organization
-      @users = @organization.users.includes(:role, :parent).order(:name, :id) if overview_tab?
+      load_users if overview_tab?
 
       # Load Kitchen Cabinet tickets if tab is selected (Story 0.16, AC 1).
       if params[:tab] == "kitchen_cabinet"
@@ -65,12 +80,14 @@ module Console
 
     def deactivate
       @organization.deactivate!
-      redirect_to console_organizations_path, notice: "Organization deactivated — all its users are now locked out."
+      record_activity("organization.deactivated", record: @organization, organization: @organization)
+      redirect_to console_organization_path(@organization), notice: "Organization deactivated — all its users are now locked out."
     end
 
     def reactivate
       @organization.reactivate!
-      redirect_to console_organizations_path, notice: "Organization reactivated."
+      record_activity("organization.reactivated", record: @organization, organization: @organization)
+      redirect_to console_organization_path(@organization), notice: "Organization reactivated."
     end
 
     private
@@ -105,6 +122,22 @@ module Console
 
     def overview_tab?
       params[:tab].blank? || params[:tab] == "overview"
+    end
+
+    def load_users
+      @user_roles = Role.where(id: @organization.users.select(:role_id)).order(:name)
+      users = @organization.users.includes(:role, :parent)
+      if params[:user_q].present?
+        term = "%#{User.sanitize_sql_like(params[:user_q].strip)}%"
+        users = users.where("users.name ILIKE :t OR users.email ILIKE :t", t: term)
+      end
+      users = users.where(role_id: params[:role_id]) if params[:role_id].present?
+      if params[:user_status] == "active"
+        users = users.where(active: true)
+      elsif params[:user_status] == "inactive"
+        users = users.where(active: false)
+      end
+      @users = users.order(:name, :id)
     end
 
     def organization_params

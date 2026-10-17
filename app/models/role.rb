@@ -3,7 +3,7 @@ class Role < ApplicationRecord
   # NOT OrganizationScoped — roles are shared reference data, not tenant data.
   MODULES = %w[
     kitchen_cabinet cadre_program ground_reports pr
-    mainline_fan_page_media social_media voter_lists rag_mapping
+    mainline_fan_page_media social_media voter_lists booth_management
   ].freeze
 
   belongs_to :organization, optional: true
@@ -22,24 +22,29 @@ class Role < ApplicationRecord
   def can_access?(mod) = access_for(mod) != "none"
   def can_write?(mod)  = access_for(mod) == "write"
 
-  # Seeds the two v1 system roles (idempotent): org_admin (full write + can_create_users)
-  # and dreamline_user (full write, no user creation). Both write-all per the v1 decision (§4/§9 #1).
+  # System roles. Org Admin can create users. PA, Karyakarta, and Manager sit under
+  # that admin: full module write, no user creation. Dreamline User stays the same.
+  SYSTEM_ROLES = [
+    { slug: "org_admin", name: "Org Admin", can_create_users: true },
+    { slug: "manager", name: "Manager", can_create_users: false },
+    { slug: "pa", name: "PA", can_create_users: false },
+    { slug: "karyakarta", name: "Karyakarta", can_create_users: false },
+    { slug: "dreamline_user", name: "Dreamline User", can_create_users: false },
+    { slug: "booth_manager", name: "Booth Manager", can_create_users: false, access: { "voter_lists" => "write" } }
+  ].freeze
+
   def self.seed_system_roles!
-    org_admin = find_or_create_by!(slug: "org_admin") do |r|
-      r.name = "Org Admin"
-      r.is_system = true
-      r.can_create_users = true
-    end
-    dreamline = find_or_create_by!(slug: "dreamline_user") do |r|
-      r.name = "Dreamline User"
-      r.is_system = true
-      r.can_create_users = false
-    end
-    [ org_admin, dreamline ].each do |role|
-      MODULES.each do |m|
-        role.role_permissions.find_or_create_by!(module_name: m) { |p| p.access_level = "write" }
+    SYSTEM_ROLES.map do |attrs|
+      role = find_or_create_by!(slug: attrs[:slug]) do |r|
+        r.name = attrs[:name]
+        r.is_system = true
+        r.can_create_users = attrs[:can_create_users]
       end
+      access = attrs[:access] || MODULES.index_with { "write" }
+      access.each do |mod, level|
+        role.role_permissions.find_or_create_by!(module_name: mod) { |p| p.access_level = level }
+      end
+      role
     end
-    [ org_admin, dreamline ]
   end
 end

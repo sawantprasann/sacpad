@@ -1,7 +1,6 @@
 module GroundReports
   # Villages the organization covers, then the reports logged in each one (Story 3.1).
-  # Show also loads worship places, the yatra note, political history (Story 3.2),
-  # local contacts who are not system users (Story 3.3), and the mock poll (Story 3.4).
+  # Show also loads worship places, political history, work inline, local contacts, and the mock poll.
   class VillagesController < ApplicationController
     before_action :authenticate_user!
     before_action :require_ground_reports_access
@@ -20,11 +19,12 @@ module GroundReports
                                            .order(reported_at: :desc, id: :desc)
       @pagy, @reports = pagy(:offset, relation)
       @worship_places = WorshipPlace.where(village: @village).order(:name)
-      @yatra = VillageYatra.find_or_initialize_by(village: @village)
+      @works = VillageWork.where(village: @village).with_attached_attachments.order(created_at: :desc)
       @positions = VillagePoliticalPosition.where(village: @village).includes(:party).order(started_at: :desc, id: :desc)
       @parties = Party.order(:name)
       @karyakartas = VillageLocalKaryakarta.where(village: @village).order(:name)
-      @admin_contacts = VillageLocalAdminContact.where(village: @village).order(:name)
+      @admin_contacts = VillageLocalAdminContact.where(village: @village).includes(:admin_contact_role).order(:name)
+      @admin_roles = AdminContactRole.active
       @poll_responses = MockPollResponse.where(village: @village).includes(:politician).order(created_at: :desc, id: :desc)
       @poll_tally = MockPollResponse.tally_for(@village)
       @likely_winners = MockPollResponse.likely_winners(@poll_tally)

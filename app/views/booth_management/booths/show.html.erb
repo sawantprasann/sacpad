@@ -1,0 +1,40 @@
+<% content_for :title, "Booth #{@booth.number}" %>
+<% breadcrumb "Booth Management", booths_path %>
+<% breadcrumb "Booth #{@booth.number}" %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Booth Management",
+      title: "Booth #{@booth.number}",
+      subtitle: [ @booth.name, @booth.village.name ].compact.join(" · "),
+      meta: "#{@voted_count} of #{@voter_count} marked voted · #{@election.name}"
+    } do %><% end %>
+
+<div class="mt-4 flex justify-end">
+  <%= link_to "Voter list", voters_path(booth: @booth.number, village_id: @booth.village_id), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+</div>
+
+<section class="<%= ta_card_classes %> mt-6 p-6">
+  <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500">Booth no</dt>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.number %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500">Name</dt>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.name.presence || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500">Village</dt>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.village.name %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500">Station type</dt>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.station_type.presence || "—" %></dd>
+    </div>
+    <div class="sm:col-span-2">
+      <dt class="text-xs font-medium uppercase text-gray-500">Address</dt>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.address.presence || "—" %></dd>
+    </div>
+  </dl>
+  <p class="mt-6 text-sm text-gray-500">Voted marks belong to <%= @election.name %>. A booth manager records them from the voter list.</p>
+</section>

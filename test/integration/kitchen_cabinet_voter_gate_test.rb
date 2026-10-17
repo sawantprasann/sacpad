@@ -29,12 +29,12 @@ class KitchenCabinetVoterGateTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "voter_id can be saved on a closed ticket" do
+  test "voter_id cannot be changed once the ticket is closed" do
     t = ticket_for(@alice, closed: true)
     sign_in @alice
     patch voter_kitchen_cabinet_ticket_path(t), params: { voter_id: "VTR123" }
-    assert_redirected_to kitchen_cabinet_ticket_path(t)
-    assert_equal "VTR123", t.reload.voter_id
+    assert_response :not_found
+    assert_nil t.reload.voter_id
   end
 
   test "voter_id is rejected on an open ticket (not persisted)" do
@@ -44,7 +44,7 @@ class KitchenCabinetVoterGateTest < ActionDispatch::IntegrationTest
     assert_nil t.reload.voter_id
   end
 
-  test "the gate field is locked on an open ticket and editable once closed" do
+  test "the gate field stays locked, including after the ticket is closed" do
     sign_in @alice
 
     open_ticket = ticket_for(@alice)
@@ -54,7 +54,8 @@ class KitchenCabinetVoterGateTest < ActionDispatch::IntegrationTest
 
     closed_ticket = ticket_for(@alice, closed: true)
     get kitchen_cabinet_ticket_path(closed_ticket)
-    assert_match voter_kitchen_cabinet_ticket_path(closed_ticket), @response.body
+    assert_match "This ticket is closed", @response.body
+    assert_no_match(/#{Regexp.escape(voter_kitchen_cabinet_ticket_path(closed_ticket))}/, @response.body)
   end
 
   test "a read-only user cannot set voter_id (404)" do

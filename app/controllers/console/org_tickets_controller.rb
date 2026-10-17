@@ -12,12 +12,12 @@ module Console
     end
 
     def edit
-      @ticket = ActsAsTenant.with_tenant(@organization) do
-        KitchenCabinet::Ticket.kept.find(params[:id])
-      end
+      return unless closed_ticket_locked
     end
 
     def update
+      return unless closed_ticket_locked
+
       if @ticket.update(ticket_params)
         redirect_to console_organization_path(@organization, tab: "kitchen_cabinet"),
                     notice: "Ticket updated successfully."
@@ -42,6 +42,14 @@ module Console
       @ticket = ActsAsTenant.with_tenant(@organization) do
         KitchenCabinet::Ticket.kept.find(params[:id])
       end
+    end
+
+    def closed_ticket_locked
+      return true unless @ticket.closed?
+
+      redirect_to console_organization_path(@organization, tab: "kitchen_cabinet"),
+                  alert: "Closed tickets can't be edited."
+      false
     end
 
     def ticket_params

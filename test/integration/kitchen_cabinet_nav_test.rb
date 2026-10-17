@@ -1,7 +1,7 @@
 require "test_helper"
 
-# Story 1.1 — categories drive the Kitchen Cabinet sidebar submenu + ?category= filter, gated on
-# the viewer's Kitchen Cabinet module permission (enforced in the controller, not UI-only).
+# Beneficiaries is a single nav item. Category is a filter and a field on the ticket form,
+# gated on the module permission (enforced in the controller, not UI-only).
 class KitchenCabinetNavTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
@@ -24,29 +24,33 @@ class KitchenCabinetNavTest < ActionDispatch::IntegrationTest
                  email: "nisha@example.com", password: "password123")
   end
 
-  test "a KC-permitted user sees the category submenu with active categories only" do
+  test "a permitted user sees Beneficiaries with no category submenu" do
     sign_in user_with_kc_access
     get root_path
     assert_response :success
-    assert_match "Kitchen Cabinet", @response.body
-    assert_match "Water", @response.body
+    assert_match "Beneficiaries", @response.body
+    assert_no_match(/Kitchen Cabinet/, @response.body)
+    assert_select "a.menu-dropdown-item", text: "Water", count: 0
+    assert_select "a[href=?]", kitchen_cabinet_tickets_path
     assert_no_match(/Archived/, @response.body)
-    assert_match kitchen_cabinet_tickets_path(category: "water"), @response.body
   end
 
-  test "a user without KC access sees no Kitchen Cabinet nav entry" do
+  test "a user without access sees no Beneficiaries nav entry" do
     sign_in user_without_kc_access
     get root_path
     assert_response :success
-    assert_no_match(/Kitchen Cabinet/, @response.body)
+    assert_no_match(/Beneficiaries/, @response.body)
   end
 
-  test "the stub list honors the category filter for a permitted user" do
+  test "the list honors the category filter for a permitted user" do
     sign_in user_with_kc_access
     get kitchen_cabinet_tickets_path(category: "water")
     assert_response :success
     assert_match "Water", @response.body
     assert_select "a[href=?]", new_kitchen_cabinet_ticket_path(category: "water")
+    assert_select "button[role=tab]", text: "Line"
+    assert_select "button[role=tab]", text: "Bar"
+    assert_select "button[role=tab]", text: "Pie"
   end
 
   test "a user without KC access cannot reach the module by URL" do

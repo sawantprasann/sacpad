@@ -2,7 +2,7 @@
 <% party = current_user.organization.current_party %>
 <% desks = [] %>
 <% if current_user.role.can_access?("kitchen_cabinet") %>
-  <% desks << { title: "Kitchen Cabinet", blurb: "People waiting on help", path: kitchen_cabinet_tickets_path, mark: "kitchen_cabinet", jewel: 0 } %>
+  <% desks << { title: "Beneficiaries", blurb: "People waiting on help", path: kitchen_cabinet_tickets_path, mark: "kitchen_cabinet", jewel: 0 } %>
 <% end %>
 <% if current_user.role.can_access?("cadre_program") %>
   <% desks << { title: "Cadre Program", blurb: "Work happening on the ground", path: cadre_program_activities_path, mark: "cadre_program", jewel: 1 } %>
@@ -13,7 +13,12 @@
 <% if current_user.role.can_access?("pr") %>
   <% desks << { title: "PR Records", blurb: "Press, posts, and coverage", path: pr_records_path, mark: "pr", jewel: 3 } %>
 <% end %>
-<% desks << { title: "Voter Lists", blurb: "Your constituency roll", path: voters_path, mark: "voters", jewel: 4 } %>
+<% if current_user.role.can_access?("voter_lists") %>
+  <% desks << { title: "Voter Lists", blurb: "Your constituency roll", path: voters_path, mark: "voters", jewel: 4 } %>
+<% end %>
+<% if current_user.role.can_access?("booth_management") %>
+  <% desks << { title: "Booth Management", blurb: "Booths, checklists, and turnout", path: booths_path, mark: "booths", jewel: 5 } %>
+<% end %>
 
 <%= render layout: "ui/campaign_hero", locals: {
         kicker: "Namaste",

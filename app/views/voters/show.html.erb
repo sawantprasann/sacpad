@@ -50,6 +50,14 @@
         <% rescue ActiveRecord::Encryption::Errors::Decryption %>
         <% end %>
         <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Sr no</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.sr_no || "—" %></p>
+        </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Booth no</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.booth&.number || "—" %></p>
+        </div>
+        <div>
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Village</label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.village&.name || "—" %></p>
         </div>
@@ -102,11 +110,21 @@
         <% if @voter_sentiment&.sentiment_updated_at %>
           <div class="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 pt-4 dark:border-gray-700">
             <p>Last updated: <%= @voter_sentiment.sentiment_updated_at.strftime("%b %d, %Y at %H:%M") %></p>
-            <% if @voter_sentiment.sentiment_updated_by_id %>
-              <p>By: User <%= @voter_sentiment.sentiment_updated_by_id %></p>
-            <% end %>
           </div>
         <% end %>
+
+        <div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voted · <%= @election.name %></label>
+          <p class="mt-2 text-sm text-gray-800"><%= @turnout&.voted? ? "Voted" : "Not voted" %></p>
+          <% if current_user.role.can_write?("voter_lists") %>
+            <%= button_to (@turnout&.voted? ? "Mark not voted" : "Mark voted"),
+                  update_voted_voter_path(@voter),
+                  method: :patch,
+                  params: { voted: @turnout&.voted? ? "0" : "1" },
+                  class: "#{ta_btn_primary} mt-3 min-h-11 cursor-pointer",
+                  style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
+          <% end %>
+        </div>
       </div>
     </div>
   </div>

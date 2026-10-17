@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,6 +56,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.index ["record_type", "record_id"], name: "index_activity_logs_on_record"
   end
 
+  create_table "admin_contact_roles", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_admin_contact_roles_on_slug", unique: true
+  end
+
   create_table "admin_organizations", force: :cascade do |t|
     t.bigint "admin_id", null: false
     t.bigint "organization_id", null: false
@@ -93,6 +102,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.integer "first_part"
     t.integer "last_part"
     t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
+  end
+
+  create_table "booth_checklist_items", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "booth_id", null: false
+    t.string "label", null: false
+    t.boolean "done", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["booth_id"], name: "index_booth_checklist_items_on_booth_id"
+    t.index ["organization_id", "booth_id"], name: "index_booth_checklist_items_on_organization_id_and_booth_id"
+    t.index ["organization_id"], name: "index_booth_checklist_items_on_organization_id"
   end
 
   create_table "booths", force: :cascade do |t|
@@ -208,6 +229,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.index ["state_id"], name: "index_districts_on_state_id"
   end
 
+  create_table "elections", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.string "name", null: false
+    t.string "constituency_type"
+    t.bigint "constituency_id"
+    t.boolean "current", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["constituency_type", "constituency_id"], name: "index_elections_on_constituency_type_and_constituency_id"
+    t.index ["organization_id"], name: "index_elections_on_organization_id"
+    t.index ["organization_id"], name: "index_elections_one_current_per_organization", unique: true, where: "(current = true)"
+  end
+
   create_table "ground_report_imports", force: :cascade do |t|
     t.bigint "organization_id", null: false
     t.bigint "user_id", null: false
@@ -274,6 +308,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "pr_category_id"
+    t.index ["pr_category_id"], name: "index_media_platforms_on_pr_category_id"
     t.index ["slug"], name: "index_media_platforms_on_slug", unique: true
   end
 
@@ -361,6 +397,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_pr_categories_on_slug", unique: true
+  end
+
+  create_table "pr_record_links", force: :cascade do |t|
+    t.bigint "pr_record_id", null: false
+    t.string "url", null: false
+    t.string "thumbnail_url"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pr_record_id"], name: "index_pr_record_links_on_pr_record_id"
   end
 
   create_table "pr_record_outdoor_ad_counts", force: :cascade do |t|
@@ -566,6 +612,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.bigint "discarded_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "admin_contact_role_id"
+    t.index ["admin_contact_role_id"], name: "index_village_local_admin_contacts_on_admin_contact_role_id"
     t.index ["discarded_at"], name: "index_village_local_admin_contacts_on_discarded_at"
     t.index ["organization_id", "village_id"], name: "idx_on_organization_id_village_id_9698e53fd0"
     t.index ["organization_id"], name: "index_village_local_admin_contacts_on_organization_id"
@@ -582,6 +630,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.bigint "discarded_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "address"
     t.index ["discarded_at"], name: "index_village_local_karyakartas_on_discarded_at"
     t.index ["organization_id", "village_id"], name: "idx_on_organization_id_village_id_4a876deaf0"
     t.index ["organization_id"], name: "index_village_local_karyakartas_on_organization_id"
@@ -605,6 +654,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.index ["party_id"], name: "index_village_political_positions_on_party_id"
     t.index ["village_id", "organization_id"], name: "one_current_position_per_village_org", unique: true, where: "((ended_at IS NULL) AND (discarded_at IS NULL))"
     t.index ["village_id"], name: "index_village_political_positions_on_village_id"
+  end
+
+  create_table "village_works", force: :cascade do |t|
+    t.bigint "village_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "title", null: false
+    t.string "concern_person", null: false
+    t.decimal "nidhi_asked", precision: 12, scale: 2, null: false
+    t.integer "nidhi_category", null: false
+    t.string "nidhi_category_name"
+    t.datetime "work_order_created_at"
+    t.integer "status", default: 0, null: false
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_village_works_on_discarded_at"
+    t.index ["organization_id", "village_id"], name: "index_village_works_on_organization_id_and_village_id"
+    t.index ["organization_id"], name: "index_village_works_on_organization_id"
+    t.index ["village_id"], name: "index_village_works_on_village_id"
   end
 
   create_table "village_yatras", force: :cascade do |t|
@@ -652,9 +721,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.datetime "sentiment_updated_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "voted", default: false, null: false
+    t.datetime "voted_at"
+    t.bigint "voted_by_id"
     t.index ["organization_id"], name: "index_voter_sentiments_on_organization_id"
     t.index ["voter_id", "organization_id"], name: "index_voter_sentiments_on_voter_id_and_organization_id", unique: true
     t.index ["voter_id"], name: "index_voter_sentiments_on_voter_id"
+  end
+
+  create_table "voter_turnouts", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "election_id", null: false
+    t.bigint "voter_id", null: false
+    t.boolean "voted", default: false, null: false
+    t.datetime "voted_at"
+    t.bigint "voted_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["election_id", "voter_id"], name: "index_voter_turnouts_on_election_id_and_voter_id", unique: true
+    t.index ["election_id"], name: "index_voter_turnouts_on_election_id"
+    t.index ["organization_id"], name: "index_voter_turnouts_on_organization_id"
+    t.index ["voter_id"], name: "index_voter_turnouts_on_voter_id"
   end
 
   create_table "voter_versions", force: :cascade do |t|
@@ -684,9 +771,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
     t.integer "age"
     t.text "house_no"
     t.text "gender"
+    t.integer "sr_no"
     t.index ["assembly_id"], name: "index_voters_on_assembly_id"
+    t.index ["booth_id", "sr_no"], name: "index_voters_on_booth_id_and_sr_no"
     t.index ["booth_id"], name: "index_voters_on_booth_id"
     t.index ["loksabha_id"], name: "index_voters_on_loksabha_id"
+    t.index ["sr_no"], name: "index_voters_on_sr_no"
     t.index ["state_id"], name: "index_voters_on_state_id"
     t.index ["village_id"], name: "index_voters_on_village_id"
     t.index ["voter_id"], name: "index_voters_on_voter_id", unique: true
@@ -713,6 +803,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "admin_organizations", "admins"
   add_foreign_key "admin_organizations", "organizations"
   add_foreign_key "assemblies", "loksabhas"
+  add_foreign_key "booth_checklist_items", "booths"
+  add_foreign_key "booth_checklist_items", "organizations"
   add_foreign_key "booths", "villages"
   add_foreign_key "cadre_activities", "organizations"
   add_foreign_key "cadre_activities", "users", column: "owner_id"
@@ -728,6 +820,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
   add_foreign_key "districts", "states"
+  add_foreign_key "elections", "organizations"
   add_foreign_key "ground_report_imports", "organizations"
   add_foreign_key "ground_report_imports", "users"
   add_foreign_key "ground_report_testimonials", "ground_reports"
@@ -738,6 +831,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "ground_reports", "villages"
   add_foreign_key "loksabhas", "districts"
   add_foreign_key "loksabhas", "states"
+  add_foreign_key "media_platforms", "pr_categories"
   add_foreign_key "mock_poll_responses", "organizations"
   add_foreign_key "mock_poll_responses", "politicians"
   add_foreign_key "mock_poll_responses", "users", column: "created_by_id"
@@ -746,6 +840,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "party_memberships", "parties"
   add_foreign_key "politicians", "organizations"
   add_foreign_key "politicians", "parties"
+  add_foreign_key "pr_record_links", "pr_records"
   add_foreign_key "pr_record_outdoor_ad_counts", "outdoor_ad_types"
   add_foreign_key "pr_record_outdoor_ad_counts", "pr_records"
   add_foreign_key "pr_record_podcasts", "pr_records"
@@ -769,6 +864,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "users", "organizations"
   add_foreign_key "users", "roles"
   add_foreign_key "users", "users", column: "parent_id"
+  add_foreign_key "village_local_admin_contacts", "admin_contact_roles"
   add_foreign_key "village_local_admin_contacts", "organizations"
   add_foreign_key "village_local_admin_contacts", "villages"
   add_foreign_key "village_local_karyakartas", "organizations"
@@ -776,6 +872,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "village_political_positions", "organizations"
   add_foreign_key "village_political_positions", "parties"
   add_foreign_key "village_political_positions", "villages"
+  add_foreign_key "village_works", "organizations"
+  add_foreign_key "village_works", "villages"
   add_foreign_key "village_yatras", "organizations"
   add_foreign_key "village_yatras", "users", column: "updated_by_id"
   add_foreign_key "village_yatras", "villages"
@@ -783,6 +881,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_020000) do
   add_foreign_key "villages", "talukas"
   add_foreign_key "voter_sentiments", "organizations"
   add_foreign_key "voter_sentiments", "voters"
+  add_foreign_key "voter_turnouts", "elections"
+  add_foreign_key "voter_turnouts", "organizations"
+  add_foreign_key "voter_turnouts", "voters"
   add_foreign_key "voters", "assemblies"
   add_foreign_key "voters", "booths"
   add_foreign_key "voters", "loksabhas"

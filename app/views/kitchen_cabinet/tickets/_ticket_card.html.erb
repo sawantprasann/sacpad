@@ -12,6 +12,7 @@
   <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
     <span class="inline-flex rounded-full px-2 py-0.5 font-semibold text-white <%= jewel[:chip] %>"><%= ticket.ticket_category.name %></span>
     <span class="tabular-nums"><%= ticket.ticket_number %></span>
+    <span><%= ticket.owner.name %></span>
     <span class="tabular-nums"><%= ticket.reported_at&.strftime("%d %b %Y") %></span>
   </div>
 <% end %>

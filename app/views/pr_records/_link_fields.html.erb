@@ -1,0 +1,23 @@
+<div class="rounded-xl border border-gray-200 p-4 dark:border-gray-700" data-link-row>
+  <div class="grid gap-3 md:grid-cols-2">
+    <div class="md:col-span-2">
+      <%= f.label :url, "Link", class: ta_label_classes %>
+      <%= f.url_field :url, class: "#{ta_field_classes} min-h-11", data: { link_url: true } %>
+    </div>
+    <div class="md:col-span-2">
+      <%= f.label :thumbnail_url, "Thumbnail URL", class: ta_label_classes %>
+      <%= f.url_field :thumbnail_url, class: "#{ta_field_classes} min-h-11", placeholder: "Filled when this link has a thumbnail", data: { link_thumb: true } %>
+    </div>
+  </div>
+  <% if f.object.persisted? %>
+    <%= f.hidden_field :_destroy, value: "0", data: { link_destroy: true } %>
+  <% end %>
+  <div class="mt-3 flex flex-wrap items-center gap-3">
+    <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#fetchThumbnail">Fetch thumbnail</button>
+    <button type="button" class="text-sm text-gray-500" data-action="pr-record-form#removeLink">Remove</button>
+    <p class="text-xs text-gray-500" data-link-status></p>
+  </div>
+  <% if f.object.thumbnail_url.present? %>
+    <img src="<%= f.object.thumbnail_url %>" alt="" class="mt-3 h-16 w-28 rounded object-cover">
+  <% end %>
+</div>

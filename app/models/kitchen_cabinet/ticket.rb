@@ -28,7 +28,10 @@ module KitchenCabinet
     validates :person_name, presence: true
     # Voter-ID gate (Story 1.6, FR21): a voter_id can only be attached once the ticket is closed,
     # so a voter_id on file always means help was actually delivered. Model-level invariant, not UI.
+    # The one exception is an exact name match at create time, which links the voter id early.
     validate :voter_id_locked_until_closed
+
+    attr_accessor :linking_matched_voter
 
     after_initialize :set_defaults, if: :new_record?
     before_create :assign_ticket_number
@@ -67,9 +70,19 @@ module KitchenCabinet
       Voter.find_by(voter_id: voter_id)
     end
 
+    # Used only after an exact village + full-name match. Sets the voter id while the ticket
+    # is still open and records transit sentiment. Close still asks for the final sentiment.
+    def link_matched_voter!(voter, by:)
+      self.linking_matched_voter = true
+      update!(voter_id: voter.voter_id)
+      VoterSentiment.find_or_create_by!(voter: voter).record_sentiment!("transit", by: by)
+    end
+
     private
 
     def voter_id_locked_until_closed
+      return if linking_matched_voter
+
       errors.add(:voter_id, "unlocks once this issue is closed") if voter_id.present? && !closed?
     end
 

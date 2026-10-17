@@ -19,15 +19,14 @@ class KitchenCabinetTicketsTest < ActionDispatch::IntegrationTest
 
   def last_ticket = KitchenCabinet::Ticket.unscoped.order(:id).last
 
-  test "a KC-write user sees the new-ticket form pre-filled to the category" do
+  test "a KC-write user sees the new-ticket form with a category dropdown" do
     sign_in @writer
     get new_kitchen_cabinet_ticket_path(category: "water")
     assert_response :success
-    assert_match "Create Water", @response.body
     assert_select "div.max-w-xl", count: 0
-    assert_select "h1", text: "Create Water"
-    assert_select "button[type=submit].cursor-pointer", text: "Create Water"
-    assert_select "input[name=?][value=?]", "ticket[ticket_category_id]", @water.id.to_s
+    assert_select "h1", text: "Create ticket"
+    assert_select "button[type=submit].cursor-pointer", text: "Create ticket"
+    assert_select "select[name=?] option[selected][value=?]", "ticket[ticket_category_id]", @water.id.to_s
   end
 
   test "a KC-write user can log a ticket with an attachment; owner + org come from the session" do

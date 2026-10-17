@@ -8,6 +8,7 @@ class Village < ApplicationRecord
   has_one :village_yatra, class_name: "GroundReports::VillageYatra", dependent: :restrict_with_error
   has_many :political_positions, class_name: "GroundReports::VillagePoliticalPosition", dependent: :restrict_with_error
   has_many :local_karyakartas, class_name: "GroundReports::VillageLocalKaryakarta", dependent: :restrict_with_error
+  has_many :village_works, class_name: "GroundReports::VillageWork", dependent: :restrict_with_error
   has_many :local_admin_contacts, class_name: "GroundReports::VillageLocalAdminContact", dependent: :restrict_with_error
   has_many :mock_poll_responses, class_name: "GroundReports::MockPollResponse", dependent: :restrict_with_error
   validates :name, presence: true

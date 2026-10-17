@@ -15,6 +15,14 @@ class VoterTest < ActiveSupport::TestCase
     assert Voter.find_by(voter_id: "VID123"), "deterministic encryption allows lookup by voter_id"
   end
 
+  test "name joins the stored name parts and skips a blank middle name" do
+    with_middle = Voter.new(first_name: "Asha", middle_name: "Ramesh", last_name: "Patil")
+    assert_equal "Asha Ramesh Patil", with_middle.name
+
+    without_middle = Voter.new(first_name: "Asha", middle_name: "", last_name: "Patil")
+    assert_equal "Asha Patil", without_middle.name
+  end
+
   test "Tier-1 versioning records a dedicated VoterVersion on change" do
     v = Voter.create!(voter_id: "V1", first_name: "A", last_name: "Test")
     assert_difference -> { VoterVersion.where(item_id: v.id).count }, 1 do

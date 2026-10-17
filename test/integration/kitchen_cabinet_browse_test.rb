@@ -40,6 +40,29 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     assert_not_includes @response.body, kitchen_cabinet_ticket_path(peers)
   end
 
+  test "name, village, and reporter filters narrow the list" do
+    make_ticket(owner: @alice, person: "Asha Patil", category: @water)
+    ActsAsTenant.with_tenant(@org) do
+      KitchenCabinet::Ticket.create!(owner: @alice, ticket_category: @road, person_name: "Bimal Rao", village: "Peth")
+    end
+    reporter = User.create!(organization: @org, role: @write, name: "Suresh",
+                            email: "suresh@example.com", password: "password123", parent: @alice)
+    make_ticket(owner: reporter, person: "Child Case", category: @water)
+
+    sign_in @alice
+    get kitchen_cabinet_tickets_path(name: "Asha")
+    assert_match "Asha Patil", @response.body
+    assert_no_match(/Bimal Rao/, @response.body)
+
+    get kitchen_cabinet_tickets_path(village: "Peth")
+    assert_match "Bimal Rao", @response.body
+    assert_no_match(/Asha Patil/, @response.body)
+
+    get kitchen_cabinet_tickets_path(reporter: "Suresh")
+    assert_match "Child Case", @response.body
+    assert_no_match(/Asha Patil/, @response.body)
+  end
+
   test "category and status filters narrow the list" do
     make_ticket(owner: @alice, category: @water, person: "Water One")
     make_ticket(owner: @alice, category: @road,  person: "Road One")
@@ -80,7 +103,7 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Asha", @response.body
     assert_match t.ticket_number, @response.body
-    assert_select "nav[aria-label=Breadcrumb] a", text: "Kitchen Cabinet"
+    assert_select "nav[aria-label=Breadcrumb] a", text: "Beneficiaries"
     assert_select "nav[aria-label=Breadcrumb] a", text: "Water"
     assert_select "nav[aria-label=Breadcrumb] [aria-current=page]", text: "Asha"
   end

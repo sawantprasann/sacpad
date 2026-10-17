@@ -9,7 +9,8 @@ module KitchenCabinet
     def create? = user.role.can_write?("kitchen_cabinet")
     def new?    = create?
     # Status change (Story 1.4): write permission + the ticket is in the viewer's subtree.
-    def update? = user.role.can_write?("kitchen_cabinet") && (org_admin? || record.owner_id.in?(user.subtree_user_ids))
+    # Closed tickets are read-only. Closure itself authorizes while the ticket can still move to closed.
+    def update? = !record.closed? && user.role.can_write?("kitchen_cabinet") && (org_admin? || record.owner_id.in?(user.subtree_user_ids))
     def edit?   = update?
 
     # Browse list (Story 1.3): organization is already enforced by acts_as_tenant; here we add the

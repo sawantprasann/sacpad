@@ -65,7 +65,6 @@ module ApplicationHelper
       { title: "Open tickets by status", mod: "kitchen_cabinet" },
       { title: "Recent cadre activity",  mod: "cadre_program" },
       { title: "Recent ground reports",  mod: "ground_reports" },
-      { title: "RAG summary",            mod: "rag_mapping" },
       { title: "Reach trend",            mod: "social_media" }
     ].select { |w| user.role.can_access?(w[:mod]) }
 

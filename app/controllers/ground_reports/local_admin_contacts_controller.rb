@@ -16,7 +16,7 @@ module GroundReports
     private
 
     def contact_params
-      params.require(:village_local_admin_contact).permit(:name, :role_title, :phone, :notes)
+      params.require(:village_local_admin_contact).permit(:name, :role_title, :admin_contact_role_id, :phone, :notes)
     end
   end
 end

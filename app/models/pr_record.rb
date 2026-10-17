@@ -9,11 +9,15 @@ class PrRecord < ApplicationRecord
   belongs_to :pr_category
   belongs_to :media_platform, optional: true  # FK if using catalog; nil if free-text fallback
   has_many :outdoor_ad_counts, class_name: "PrRecordOutdoorAdCount", dependent: :destroy
+  has_many :links, class_name: "PrRecordLink", dependent: :destroy
   has_one :podcast, class_name: "PrRecordPodcast", dependent: :destroy
   has_many_attached :attachments
 
   accepts_nested_attributes_for :outdoor_ad_counts, allow_destroy: true, reject_if: :all_blank
   accepts_nested_attributes_for :podcast, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :links, allow_destroy: true, reject_if: ->(attrs) { attrs[:url].blank? && attrs["url"].blank? }
+
+  before_save :sync_primary_link
 
   enum :sentiment, { neutral: 0, positive: 1, negative: 2 }, default: :neutral
 
@@ -25,12 +29,24 @@ class PrRecord < ApplicationRecord
 
   before_create :assign_record_number
 
+  # Podcasts are links only. Outdoor records use ad types. The other categories pick a catalog name.
+  PLATFORM_OPTIONAL_SLUGS = %w[podcasts outdoor-media].freeze
+
   private
 
   def media_platform_required
-    if media_platform_id.blank? && media_platform_name.blank?
-      errors.add(:media_platform_name, "is required if no platform is selected")
-    end
+    return if PLATFORM_OPTIONAL_SLUGS.include?(pr_category&.slug)
+    return if media_platform_id.present? || media_platform_name.present?
+
+    errors.add(:media_platform_name, "is required if no platform is selected")
+  end
+
+  def sync_primary_link
+    first = links.reject(&:marked_for_destruction?).find { |link| link.url.present? }
+    return if first.blank?
+
+    self.url = first.url
+    self.thumbnail_url = first.thumbnail_url if first.thumbnail_url.present?
   end
 
   # Human-readable per-org reference: PR-{org_id}-{5-digit-sequence}
