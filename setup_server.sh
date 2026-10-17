@@ -33,7 +33,7 @@ apt-get install -y \
   autoconf bison patch \
   libgdbm6 libgdbm-dev libgdbm-compat-dev libdb-dev uuid-dev \
   nginx postgresql postgresql-contrib \
-  libvips42 \
+  libvips42 libvips-tools tesseract-ocr \
   ufw
 
 systemctl enable --now postgresql

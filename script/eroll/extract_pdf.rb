@@ -40,18 +40,17 @@ COVER_HEADERS = [
   "Male",
   "Female"
 ].freeze
-OCR_SRC = File.expand_path("ocr_page.swift", __dir__)
-OCR_BIN = File.expand_path("ocr_page", __dir__)
+OCR_SCRIPT = File.expand_path("ocr_page.rb", __dir__)
 
-def ensure_ocr_bin!
-  if !File.exist?(OCR_BIN) || File.mtime(OCR_SRC) > File.mtime(OCR_BIN)
-    swiftc = ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).any? { |dir| File.executable?(File.join(dir, "swiftc")) }
-    abort "swiftc is required to build the roll OCR helper (#{OCR_SRC})" unless swiftc
-    warn "Compiling OCR helper..."
-    ok = system("swiftc", "-O", "-o", OCR_BIN, OCR_SRC)
-    abort "Failed to compile #{OCR_SRC}" unless ok
-  end
-  OCR_BIN
+def executable_on_path?(name)
+  ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).any? { |dir| File.executable?(File.join(dir, name)) }
+end
+
+def ocr_argv
+  missing = %w[tesseract vips].reject { |name| executable_on_path?(name) }
+  abort "Install #{missing.join(" and ")} to read roll pages (packages: tesseract-ocr libvips-tools)." if missing.any?
+
+  [ RbConfig.ruby, OCR_SCRIPT ]
 end
 
 def norm_space(text)
@@ -107,7 +106,7 @@ def page_jpeg(page)
 end
 
 def ocr_boxes(image_path)
-  stdout, status = Open3.capture2(OCR_BIN, image_path)
+  stdout, status = Open3.capture2(*ocr_argv, image_path)
   abort "OCR failed for #{image_path}" unless status.success?
 
   stdout.each_line.filter_map do |line|
@@ -142,7 +141,7 @@ def fill_missing_serials(image_path, records)
     ].join("\t")
   end
 
-  stdout, status = Open3.capture2(OCR_BIN, image_path, "--serials", stdin_data: jobs.join("\n") + "\n")
+  stdout, status = Open3.capture2(*ocr_argv, image_path, "--serials", stdin_data: jobs.join("\n") + "\n")
   unless status.success?
     warn "Serial OCR failed for #{image_path}"
     return
@@ -166,7 +165,7 @@ def reread_cards(image_path, epics)
     y = [ epic[:y] - 0.060, 0 ].max
     [ epic[:text], format("%.5f", x), format("%.5f", y), "0.22500", "0.05800" ].join("\t")
   end
-  stdout, status = Open3.capture2(OCR_BIN, image_path, "--lines", stdin_data: "#{jobs.join("\n")}\n")
+  stdout, status = Open3.capture2(*ocr_argv, image_path, "--lines", stdin_data: "#{jobs.join("\n")}\n")
   unless status.success?
     warn "Card reread failed for #{image_path}"
     return []
@@ -503,7 +502,7 @@ def voters_from_reader(reader)
 end
 
 def extract_pdf(path)
-  ensure_ocr_bin!
+  ocr_argv
   reader = PDF::Reader.new(path)
   { cover: cover_metadata(reader), voters: voters_from_reader(reader) }
 end
@@ -531,7 +530,7 @@ def download_part(part_no, filepath)
 end
 
 def run!
-  ensure_ocr_bin!
+  ocr_argv
   FileUtils.mkdir_p(SAVE_DIRECTORY)
 
   CSV.open(CSV_FILENAME, "w", write_headers: true, headers: VOTER_HEADERS + COVER_HEADERS) do |csv|

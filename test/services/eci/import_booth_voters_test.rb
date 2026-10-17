@@ -132,7 +132,7 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
   test "the extract script ships inside the application" do
     assert Eci::ImportBoothVoters::SCRIPT.start_with?(Rails.root.to_s)
     assert File.file?(Eci::ImportBoothVoters::SCRIPT)
-    assert File.file?(Rails.root.join("script/eroll/ocr_page.swift"))
+    assert File.file?(Rails.root.join("script/eroll/ocr_page.rb"))
   end
 
   test "reads state, lok sabha, assembly, and village once for the whole booth" do
