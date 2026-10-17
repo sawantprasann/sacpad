@@ -21,6 +21,8 @@ def run!(*command)
 end
 
 def dimensions(path)
+  abort "could not read image size" if path.nil? || path.empty?
+
   width = run!("vipsheader", "-f", "width", path).to_i
   height = run!("vipsheader", "-f", "height", path).to_i
   abort "could not read image size" if width <= 0 || height <= 0
@@ -37,13 +39,37 @@ def vision_box(left, top, width, height, image_width, image_height)
   }
 end
 
+# Tesseract drops text when a box touches the edge of the image.
+PAD = 32
+
+def pad(path, margin)
+  width, height = dimensions(path)
+  file = Tempfile.new([ "eroll-pad", ".jpg" ])
+  file.close
+  File.unlink(file.path)
+  _stdout, status = Open3.capture2(
+    "vips", "embed", path, file.path,
+    margin.to_s, margin.to_s,
+    (width + (margin * 2)).to_s, (height + (margin * 2)).to_s,
+    "--extend", "white"
+  )
+  return nil unless status.success? && File.file?(file.path)
+
+  file
+end
+
 def recognize_lines(path, psm:, whitelist: false)
-  command = [ "tesseract", path, "stdout", "--psm", psm.to_s, "tsv" ]
+  padded = pad(path, PAD)
+  target = padded ? padded.path : path
+  margin = padded ? PAD : 0
+  # "tsv" is a config file, so -c must come before it or Tesseract tries to open "-c".
+  command = [ "tesseract", target, "stdout", "--psm", psm.to_s ]
   if whitelist
     command += [ "-c", "tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" ]
   end
-  stdout, status = Open3.capture2(*command)
-  abort "tesseract failed for #{path}" unless status.success?
+  command << "tsv"
+  stdout, stderr, status = Open3.capture3(*command)
+  abort "tesseract failed for #{path}: #{stderr}" unless status.success?
 
   words = []
   stdout.each_line.with_index do |line, index|
@@ -57,8 +83,8 @@ def recognize_lines(path, psm:, whitelist: false)
 
     words << {
       key: cols[1, 4],
-      left: cols[6].to_i,
-      top: cols[7].to_i,
+      left: cols[6].to_i - margin,
+      top: cols[7].to_i - margin,
       width: cols[8].to_i,
       height: cols[9].to_i,
       text: text
@@ -66,18 +92,20 @@ def recognize_lines(path, psm:, whitelist: false)
   end
 
   words.group_by { |word| word[:key] }.map do |_key, group|
-    left = group.map { |word| word[:left] }.min
-    top = group.map { |word| word[:top] }.min
+    left = [ group.map { |word| word[:left] }.min, 0 ].max
+    top = [ group.map { |word| word[:top] }.min, 0 ].max
     right = group.map { |word| word[:left] + word[:width] }.max
     bottom = group.map { |word| word[:top] + word[:height] }.max
     {
       left: left,
       top: top,
-      width: right - left,
-      height: bottom - top,
+      width: [ right - left, 1 ].max,
+      height: [ bottom - top, 1 ].max,
       text: group.map { |word| word[:text] }.join(" ")
     }
   end
+ensure
+  padded&.close!
 end
 
 def pure_serial(lines)
@@ -92,6 +120,10 @@ def pure_serial(lines)
 end
 
 def crop(path, vx, vy, vw, vh)
+  vx = 0.0 if vx.negative?
+  vy = 0.0 if vy.negative?
+  vw = 1.0 - vx if vx + vw > 1.0
+  vh = 1.0 - vy if vy + vh > 1.0
   image_width, image_height = dimensions(path)
   x = (vx * image_width).floor
   y = ((1.0 - vy - vh) * image_height).floor
@@ -101,7 +133,7 @@ def crop(path, vx, vy, vw, vh)
   y = 0 if y.negative?
   width = image_width - x if x + width > image_width
   height = image_height - y if y + height > image_height
-  return nil if width <= 2 || height <= 2
+  return nil if width < 10 || height < 10
 
   file = Tempfile.new([ "eroll-crop", ".jpg" ])
   file.close
@@ -198,16 +230,14 @@ elsif mode == "--lines"
     vx, vy, vw, vh = parts[1, 4].map(&:to_f)
     with_crop(image_path, vx, vy, vw, vh) do |cropped|
       bigger = upscale(cropped, 2)
-      next if bigger.nil?
-
-      hits = recognize_lines(bigger.path, psm: 6)
-      bigger.close!
+      target = bigger ? bigger.path : cropped
+      hits = recognize_lines(target, psm: 6)
+      image_width, image_height = dimensions(target)
+      bigger&.close!
       if hits.empty?
         puts "#{id}\t"
         next
       end
-
-      image_width, image_height = dimensions(bigger.path)
       hits
         .map { |hit| hit.merge(vision_box(hit[:left], hit[:top], hit[:width], hit[:height], image_width, image_height)) }
         .sort_by { |hit| -hit[:y] }
