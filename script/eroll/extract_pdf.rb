@@ -42,17 +42,22 @@ COVER_HEADERS = [
   "Male",
   "Female"
 ].freeze
-OCR_SCRIPT = File.expand_path("ocr_page.rb", __dir__)
+OCR_SRC = File.expand_path("ocr_page.swift", __dir__)
+OCR_BIN = File.expand_path("ocr_page", __dir__)
 
 def executable_on_path?(name)
   ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).any? { |dir| File.executable?(File.join(dir, name)) }
 end
 
+# macOS Vision reader. Compile script/eroll/ocr_page.swift when the binary is missing.
 def ocr_argv
-  missing = %w[tesseract vips].reject { |name| executable_on_path?(name) }
-  abort "Install #{missing.join(" and ")} to read roll pages (packages: tesseract-ocr libvips-tools)." if missing.any?
+  if !File.exist?(OCR_BIN) || File.mtime(OCR_SRC) > File.mtime(OCR_BIN)
+    abort "swiftc is required to build the roll OCR helper (#{OCR_SRC}). This reader runs on macOS." unless executable_on_path?("swiftc")
 
-  [ RbConfig.ruby, OCR_SCRIPT ]
+    ok = system("swiftc", "-O", "-o", OCR_BIN, OCR_SRC)
+    abort "Failed to compile #{OCR_SRC}" unless ok
+  end
+  [ OCR_BIN ]
 end
 
 def step(message)
