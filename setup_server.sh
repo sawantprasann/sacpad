@@ -206,6 +206,9 @@ SOLID_QUEUE_IN_PUMA=true
 
 SACPAD_ADMIN_EMAIL=${ADMIN_EMAIL}
 SACPAD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+
+# Mac posts roll JSON to POST /api/assemblies/:id/parts/:part
+SACPAD_ROLL_TOKEN=$(openssl rand -hex 24)
 ENV
   chown $DEPLOY_USER:$DEPLOY_USER $ENV_FILE
   chmod 600 $ENV_FILE

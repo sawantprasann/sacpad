@@ -24,22 +24,38 @@ module Eci
         return false
       end
 
-      cover = payload["cover"] || {}
-      puts "Part #{part}: cover town=#{cover["Main Town or Village"].inspect} voters_read=#{Array(payload["voters"]).size}"
-      name = village_name(cover, part)
-      puts "Part #{part}: village name=#{name.inspect}"
-      village = @assembly.villages.create_or_find_by!(name: name)
-      booth = booth_for(part, village)
-      saved = ImportBoothVoters.new(booth, payload: payload).call
-      puts "Part #{part}: saved #{saved} voters on booth #{booth.number}"
-      release_placeholder(part, village)
+      saved = store_payload(part, payload)
+      puts "Part #{part}: saved #{saved} voters"
       true
     rescue ImportBoothVoters::Error => e
       Rails.logger.error("Assembly #{@assembly.id} part #{part} voter import failed: #{e.message}")
       true
     end
 
+    # Save a roll that was already read on a Mac. payload is the extract JSON:
+    # { "cover" => {...}, "voters" => [ { "epic" => ..., "name" => ... } ] }
+    def store_payload(part, payload)
+      cover = stringify_record(payload["cover"] || payload[:cover])
+      voters = Array(payload["voters"] || payload[:voters]).map { |row| stringify_record(row) }
+      puts "Part #{part}: cover town=#{cover["Main Town or Village"].inspect} voters_read=#{voters.size}"
+      name = village_name(cover, part)
+      puts "Part #{part}: village name=#{name.inspect}"
+      village = @assembly.villages.create_or_find_by!(name: name)
+      booth = booth_for(part, village)
+      saved = ImportBoothVoters.new(booth, payload: { "cover" => cover, "voters" => voters }).call
+      release_placeholder(part, village)
+      saved
+    end
+
     private
+
+    def stringify_record(record)
+      return {} if record.blank?
+
+      record.to_h.each_with_object({}) do |(key, value), out|
+        out[key.to_s] = value.is_a?(Hash) ? stringify_record(value) : value
+      end
+    end
 
     def payload_for(part)
       state_cd = @assembly.loksabha.state.cd
