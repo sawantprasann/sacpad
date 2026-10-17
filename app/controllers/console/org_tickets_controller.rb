@@ -12,7 +12,7 @@ module Console
     end
 
     def edit
-      return unless closed_ticket_locked
+      closed_ticket_locked
     end
 
     def update

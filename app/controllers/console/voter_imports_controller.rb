@@ -20,8 +20,9 @@ module Console
         return
       end
 
-      # Save temp file and queue import job
-      temp_path = Rails.root.join("tmp/voter_imports/#{SecureRandom.hex(8)}_#{file.original_filename}")
+      # Save temp file and queue import job. The stored name is generated so the
+      # uploaded filename cannot change the path.
+      temp_path = Rails.root.join("tmp", "voter_imports", "#{SecureRandom.hex(8)}.csv")
       FileUtils.mkdir_p(temp_path.dirname)
       file.tempfile.rewind
       FileUtils.copy(file.tempfile.path, temp_path)

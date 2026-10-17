@@ -77,9 +77,9 @@ class PrRecordsController < ApplicationController
     params.require(:pr_record).permit(:title, :description, :url, :thumbnail_url,
       :published_on, :sentiment, :pr_category_id, :media_platform_id,
       :media_platform_name, attachments: [],
-      outdoor_ad_counts_attributes: [:id, :outdoor_ad_type_id, :count, :_destroy],
-      podcast_attributes: [:id, :recording_date, :_destroy],
-      links_attributes: [:id, :url, :thumbnail_url, :_destroy])
+      outdoor_ad_counts_attributes: [ :id, :outdoor_ad_type_id, :count, :_destroy ],
+      podcast_attributes: [ :id, :recording_date, :_destroy ],
+      links_attributes: [ :id, :url, :thumbnail_url, :_destroy ])
   end
 
   def prepare_form

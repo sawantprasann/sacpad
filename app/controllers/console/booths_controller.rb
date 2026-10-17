@@ -1,7 +1,7 @@
 module Console
   # Booth administration — geography reference data with village/taluka context
   class BoothsController < BaseController
-    before_action :set_booth, only: [:show, :edit, :update, :destroy]
+    before_action :set_booth, only: [ :show, :edit, :update, :destroy ]
     helper_method :booth_filters, :voter_filters
 
     def index

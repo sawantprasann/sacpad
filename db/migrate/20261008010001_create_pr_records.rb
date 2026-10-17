@@ -21,6 +21,6 @@ class CreatePrRecords < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :pr_records, [:organization_id, :record_number], unique: true
+    add_index :pr_records, [ :organization_id, :record_number ], unique: true
   end
 end

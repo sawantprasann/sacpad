@@ -8,7 +8,7 @@ class CreatePrRecordExtensions < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :pr_record_outdoor_ad_counts, [:pr_record_id, :outdoor_ad_type_id], unique: true
+    add_index :pr_record_outdoor_ad_counts, [ :pr_record_id, :outdoor_ad_type_id ], unique: true
     add_foreign_key :pr_record_outdoor_ad_counts, :pr_records
     add_foreign_key :pr_record_outdoor_ad_counts, :outdoor_ad_types
 

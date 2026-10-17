@@ -25,7 +25,7 @@ class RestructureVotersToGlobalWithOrgSentiments < ActiveRecord::Migration[8.1]
       t.datetime :sentiment_updated_at
       t.timestamps
     end
-    add_index :voter_sentiments, [:voter_id, :organization_id], unique: true
+    add_index :voter_sentiments, [ :voter_id, :organization_id ], unique: true
 
     # Tier-1 PaperTrail custom version table for VoterSentiment audit trail
     create_table :voter_sentiment_versions do |t|
@@ -37,6 +37,6 @@ class RestructureVotersToGlobalWithOrgSentiments < ActiveRecord::Migration[8.1]
       t.text     :object_changes
       t.datetime :created_at
     end
-    add_index :voter_sentiment_versions, [:item_type, :item_id]
+    add_index :voter_sentiment_versions, [ :item_type, :item_id ]
   end
 end
