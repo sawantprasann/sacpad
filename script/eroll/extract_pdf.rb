@@ -16,6 +16,7 @@ MAX_PARTS = 2
 SKIP_PAGES = 2
 
 EPIC_RE = /\A[A-Z]{3}\d{7}\z/
+EPIC_IN_TEXT = /[A-Za-z0-9]{3}\s*[A-Za-z0-9]{7}/
 SERIAL_RE = /\A\d{1,4}\z/
 VOTER_HEADERS = [ "Part No", "Serial No", "EPIC", "Elector Name", "Relative Name", "House No", "Age", "Gender" ].freeze
 COVER_HEADERS = [
@@ -105,15 +106,63 @@ def page_jpeg(page)
   data
 end
 
+def normalize_epic(raw)
+  compact = raw.to_s.upcase.gsub(/[^A-Z0-9]/, "")
+  return unless compact.length == 10
+
+  letters = compact[0, 3].tr("0158", "OISB")
+  digits = compact[3, 7].tr("OILSZBG", "0115286")
+  epic = "#{letters}#{digits}"
+  epic if epic.match?(EPIC_RE)
+end
+
+# The serial and the EPIC share one printed line, so Tesseract returns
+# "1 SSE8212128". Pull the EPIC out or the page has no voters.
+def split_epic_box(box)
+  text = box[:text]
+  return [ box ] if text.match?(EPIC_RE)
+
+  spans = []
+  cursor = 0
+  text.scan(EPIC_IN_TEXT) do
+    match = Regexp.last_match
+    next if normalize_epic(match[0]).nil?
+
+    spans << [ cursor, match.begin(0), false ]
+    spans << [ match.begin(0), match.end(0), true ]
+    cursor = match.end(0)
+  end
+  return [ box ] if cursor.zero?
+
+  spans << [ cursor, text.length, false ] if cursor < text.length
+  total = text.length.to_f
+  spans.filter_map do |from, to, epic|
+    raw = text[from...to]
+    piece = epic ? normalize_epic(raw) : raw.strip
+    next if piece.nil? || piece.empty?
+
+    start = from + (raw.length - raw.lstrip.length)
+    {
+      x: box[:x] + (box[:w] * (start / total)),
+      y: box[:y],
+      w: [ box[:w] * (piece.length / total), 0.02 ].max,
+      h: box[:h],
+      text: piece
+    }
+  end
+end
+
 def ocr_boxes(image_path)
   stdout, status = Open3.capture2(*ocr_argv, image_path)
   abort "OCR failed for #{image_path}" unless status.success?
 
-  stdout.each_line.filter_map do |line|
+  boxes = stdout.each_line.filter_map do |line|
     x, y, w, h, text = line.strip.split("\t", 5)
     next if text.nil? || text.empty?
+
     { x: x.to_f, y: y.to_f, w: w.to_f, h: h.to_f, text: norm_space(text) }
   end
+  boxes.flat_map { |box| split_epic_box(box) }
 end
 
 def serial_needs_reread?(record, records)
@@ -215,6 +264,18 @@ def apply_field(text, state)
     return true
   end
 
+  if (match = text.match(/\AAge\s*:?\s*(\d{1,3})\s*\z/i))
+    state[:age] = match[1]
+    state[:target] = nil
+    return true
+  end
+
+  if (match = text.match(/\A\S{0,3}ender\s*:?\s*([A-Za-z]+)\s*\z/i))
+    state[:gender] = canon_gender(match[1])
+    state[:target] = nil
+    return true
+  end
+
   if (match = text.match(/\A(?:[A-Za-z]{0,3}ame|[A-Za-z]?me)\s*:\s*(.*)\z/i))
     state[:name] = norm_space(match[1]).sub(/[\s\-–]+$/, "")
     state[:target] = :name
@@ -240,7 +301,8 @@ def parse_card(epic, lines)
       next
     end
 
-    pieces = label_pieces(text)
+    field_text = text.sub(/\A\d{1,4}\s+(?=(?:Name|Father|Husband|Mother|House|Age)\b)/i, "")
+    pieces = label_pieces(field_text)
     consumed = false
     pieces.each { |piece| consumed = true if apply_field(piece, state) }
     next if consumed
@@ -258,7 +320,7 @@ def parse_card(epic, lines)
   age = state[:age]
   gender = state[:gender]
 
-  return nil if name.nil? || name.empty? || age.nil?
+  return nil if name.nil? || name.empty?
 
   house = nil if house.to_s.empty?
   house = house.gsub(/\s+/, "") if house&.match?(/\A[\d\s]+\z/)
