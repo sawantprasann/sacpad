@@ -356,6 +356,43 @@ def cover_label(boxes, regex, y_range = 0.05..0.98)
   boxes.find { |box| box[:y].between?(y_range.begin, y_range.end) && box[:text].match?(regex) }
 end
 
+# Stop a glued line at the next cover label so "PADEGAON" is not "PADEGAON Police Station".
+NEXT_COVER_LABEL = /Police\s+Station|Taluka|District|Pin\s*code|Main\s+Town/i
+
+def value_after_label(text, match)
+  tail = text[match.end(0)..].to_s.split(NEXT_COVER_LABEL).first.to_s
+  clean_cover_value(tail)
+end
+
+# Tesseract often glues "Main Town or Village" and "PADEGAON" into one line.
+# The value is whatever follows the label on that line.
+def field_on_row(boxes, label_re)
+  boxes.each do |box|
+    match = box[:text].match(label_re)
+    next unless match
+
+    value = value_after_label(box[:text], match)
+    return value unless value.empty?
+
+    right = value_right_of(boxes, box)
+    return right unless right.empty?
+  end
+
+  boxes.each do |anchor|
+    pieces = boxes
+      .select { |box| (box[:y] - anchor[:y]).abs < 0.004 && box[:x] < 0.62 }
+      .sort_by { |box| box[:x] }
+    text = pieces.map { |box| box[:text] }.join(" ")
+    match = text.match(label_re)
+    next unless match
+    next unless value_after_label(text, match).empty?
+
+    right = value_right_of(boxes, pieces.last)
+    return right unless right.empty?
+  end
+  ""
+end
+
 def value_right_of(boxes, label)
   return "" unless label
 
@@ -405,11 +442,11 @@ end
 
 def parse_cover(boxes)
   meta = COVER_HEADERS.to_h { |header| [ header, "" ] }
-  meta["Main Town or Village"] = value_right_of(boxes, cover_label(boxes, /\AMain Town or Village\z/i))
-  meta["Police Station"] = value_right_of(boxes, cover_label(boxes, /\APolice Station\z/i))
-  meta["Taluka"] = value_right_of(boxes, cover_label(boxes, /\ATaluka\z/i))
-  meta["District"] = value_right_of(boxes, cover_label(boxes, /\ADistrict\z/i))
-  meta["Pin Code"] = value_right_of(boxes, cover_label(boxes, /\APin code\z/i))
+  meta["Main Town or Village"] = field_on_row(boxes, /Main\s+Town\s+or\s+V[A-Za-z]{2,10}(?=\s|:|$)/i)
+  meta["Police Station"] = field_on_row(boxes, /Police\s+Station(?=\s|:|$)/i)
+  meta["Taluka"] = field_on_row(boxes, /Taluka(?=\s|:|$)/i)
+  meta["District"] = field_on_row(boxes, /District(?=\s|:|$)/i)
+  meta["Pin Code"] = field_on_row(boxes, /Pin\s*code(?=\s|:|$)/i)
   meta["Type of Polling Station"] = value_right_of(boxes, cover_label(boxes, /\AType of Polling Station\z/i))
 
   station = cover_label(boxes, /No\. and Name of Polling Station/i)
