@@ -5,7 +5,7 @@ module Console
     helper_method :booth_filters, :voter_filters
 
     def index
-      relation = Booth.includes(:village).order(:number)
+      relation = Booth.includes(:village).by_number
       relation = relation.where(number: params[:booth_number].strip) if params[:booth_number].present?
       if params[:village].present?
         relation = relation.joins(:village).where("villages.name ILIKE ?", "%#{like(params[:village])}%")
@@ -52,10 +52,13 @@ module Console
     end
 
     def destroy
-      @booth.destroy
-      redirect_to console_booths_path, notice: "Booth deleted."
-    rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotDestroyed
-      redirect_to console_booths_path, alert: "Can't delete — it still has dependent records."
+      if @booth.destroy
+        redirect_to console_booths_path, notice: "Booth deleted."
+      else
+        redirect_to console_booths_path, alert: deletion_failure_message(@booth)
+      end
+    rescue ActiveRecord::InvalidForeignKey
+      redirect_to console_booths_path, alert: deletion_failure_message(@booth)
     end
 
     private

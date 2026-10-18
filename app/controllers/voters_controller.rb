@@ -21,7 +21,7 @@ class VotersController < ApplicationController
       end
     end
     @villages = current_organization.villages.order(:name)
-    @booth_numbers = Booth.where(village_id: @villages.select(:id)).distinct.order(:number).pluck(:number)
+    @booth_numbers = Booth.where(village_id: @villages.select(:id)).by_number.pluck(:number).uniq
   end
 
   def show

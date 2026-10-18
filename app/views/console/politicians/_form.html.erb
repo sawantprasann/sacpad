@@ -10,6 +10,9 @@
       <%= f.check_box :is_own_politician, class: "h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/20" %>
       Own candidate
     </label>
-    <%= f.submit class: ta_btn_primary %>
+    <div class="flex items-center gap-3">
+      <%= f.submit class: ta_btn_primary %>
+      <%= link_to "Cancel", console_organization_politicians_path(@organization), class: ta_btn_secondary %>
+    </div>
   <% end %>
 </div>

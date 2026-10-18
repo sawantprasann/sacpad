@@ -1,7 +1,6 @@
 <% content_for :title, "Booth Management" %>
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500" %>
 <% td = "border-b border-gray-100 px-6 py-4 text-sm" %>
-<% page_link = "inline-flex min-h-10 items-center rounded-lg bg-white px-3 text-sm font-medium text-gray-700 ring-1 ring-gray-200" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Booths",
@@ -66,16 +65,4 @@
     <p class="px-6 py-16 text-center text-sm text-gray-400">No booths match these filters.</p>
   <% end %>
 </div>
-<% if @pagy.last > 1 %>
-  <nav class="mt-4 flex items-center justify-between" aria-label="Booth pages">
-    <% if @pagy.previous %>
-      <%= link_to "← Prev", booths_path(booth_filters.merge(page: @pagy.previous)), class: page_link %>
-    <% else %>
-      <span></span>
-    <% end %>
-    <span class="text-sm tabular-nums text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
-    <% if @pagy.next %>
-      <%= link_to "Next →", booths_path(booth_filters.merge(page: @pagy.next)), class: page_link %>
-    <% end %>
-  </nav>
-<% end %>
+<%= render "ui/pagination", pagy: @pagy, nav_class: "pagination-nav mt-4 flex items-center gap-2" %>

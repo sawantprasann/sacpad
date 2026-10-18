@@ -18,9 +18,10 @@
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
             <% managed_fields.each { |f| %><td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= record.public_send(f) %></td><% } %>
             <td class="px-5 py-3 text-right whitespace-nowrap">
-              <%= link_to "Edit", url_for(action: :edit, id: record), class: "text-brand-500 hover:text-brand-600" %>
-              <%= button_to "Delete", url_for(action: :destroy, id: record), method: :delete,
-                    class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :edit, url_for(action: :edit, id: record) %>
+                <%= icon_action_button :delete, url_for(action: :destroy, id: record) %>
+              </div>
             </td>
           </tr>
         <% end %>

@@ -959,6 +959,18 @@ pre[class*="language-"] {
 .campaign-btn:hover {
   background: #9a3412;
 }
+.pagination-nav {
+  justify-content: space-between;
+}
+@media (min-width: 640px) {
+  .pagination-nav {
+    justify-content: flex-end;
+  }
+}
+.pagination-page:hover {
+  background: #c2410c;
+  color: #ffffff;
+}
 .campaign-tab-active {
   color: #c2410c;
   border-color: #c2410c;
@@ -1019,4 +1031,75 @@ pre[class*="language-"] {
 }
 .dark .campaign-table tbody tr:hover {
   background: rgba(255, 255, 255, 0.04);
+}
+.action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 0.625rem;
+  border: 1px solid transparent;
+  line-height: 0;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.action-icon svg {
+  width: 1rem;
+  height: 1rem;
+  display: block;
+}
+.action-icon:hover {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+.action-icon:focus-visible {
+  outline: 2px solid #465fff;
+  outline-offset: 2px;
+}
+.action-icon-view {
+  color: #3538cd;
+  background: #eef4ff;
+  border-color: #c7d7fe;
+}
+.action-icon-view:hover {
+  color: #2d31a6;
+  background: #e0eaff;
+  border-color: #a4bcfd;
+}
+.action-icon-edit {
+  color: #b54708;
+  background: #fffaeb;
+  border-color: #fedf89;
+}
+.action-icon-edit:hover {
+  color: #93370d;
+  background: #fef0c7;
+  border-color: #fec84b;
+}
+.action-icon-delete {
+  color: #d92d20;
+  background: #fef3f2;
+  border-color: #fecdca;
+}
+.action-icon-delete:hover {
+  color: #b42318;
+  background: #fee4e2;
+  border-color: #fda29b;
+}
+.dark .action-icon-view {
+  color: #c7d7fe;
+  background: rgba(70, 95, 255, 0.16);
+  border-color: rgba(164, 188, 253, 0.35);
+}
+.dark .action-icon-edit {
+  color: #fec84b;
+  background: rgba(247, 144, 9, 0.16);
+  border-color: rgba(254, 200, 75, 0.35);
+}
+.dark .action-icon-delete {
+  color: #fda29b;
+  background: rgba(240, 68, 56, 0.16);
+  border-color: rgba(253, 162, 155, 0.35);
 }

@@ -70,17 +70,5 @@
       <p class="px-5 py-10 text-center text-sm text-gray-400"><%= voter_filters.values.any?(&:present?) ? "No voters match." : "No voters yet." %></p>
     <% end %>
   </div>
-  <% if @pagy.last > 1 %>
-    <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4 text-sm dark:border-gray-800">
-      <p class="text-gray-500 dark:text-gray-400">Page <%= @pagy.page %> of <%= @pagy.last %></p>
-      <div class="flex gap-2">
-        <% if @pagy.previous %>
-          <%= link_to "← Prev", console_loksabha_assembly_village_path(@loksabha, @assembly, @record, voter_filters.merge(page: @pagy.previous)), class: "text-brand-500 hover:text-brand-600" %>
-        <% end %>
-        <% if @pagy.next %>
-          <%= link_to "Next →", console_loksabha_assembly_village_path(@loksabha, @assembly, @record, voter_filters.merge(page: @pagy.next)), class: "text-brand-500 hover:text-brand-600" %>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
+  <%= render "ui/pagination", pagy: @pagy %>
 </div>

@@ -129,19 +129,5 @@
       <p class="px-6 py-16 text-center text-sm text-gray-400">No voters match these filters.</p>
     <% end %>
   </div>
-  <% if @pagy.last > 1 %>
-    <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4">
-      <div>
-        <% if @pagy.previous %>
-          <%= link_to "← Previous", voters_path(voter_filters.merge(page: @pagy.previous)), class: ta_btn_secondary %>
-        <% end %>
-      </div>
-      <p class="text-sm text-gray-600">Page <%= @pagy.page %> of <%= @pagy.last %> · <%= @pagy.count %> voters</p>
-      <div>
-        <% if @pagy.next %>
-          <%= link_to "Next →", voters_path(voter_filters.merge(page: @pagy.next)), class: ta_btn_secondary %>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
+  <%= render "ui/pagination", pagy: @pagy %>
 </div>

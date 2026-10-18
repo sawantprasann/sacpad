@@ -25,6 +25,22 @@ class ConsolePrCatalogsTest < ActionDispatch::IntegrationTest
     assert PrCategory.find_by(slug: "test-category")
   end
 
+  test "PR category edit form links Cancel back to the list" do
+    cat = PrCategory.create!(name: "Original", slug: "original-cancel", display_order: 1, active: true)
+    sign_in @admin
+    get edit_console_pr_category_path(cat)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_pr_categories_path, links.first["href"]
+    end
+
+    get new_console_pr_category_path
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_pr_categories_path, links.first["href"]
+    end
+  end
+
   test "admin can edit a PR category" do
     PrCategory.create!(name: "Original", slug: "original", display_order: 1, active: true)
     sign_in @admin

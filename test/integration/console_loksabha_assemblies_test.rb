@@ -19,12 +19,38 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     )
   end
 
+  test "deleting a loksabha that still has assemblies is blocked and shows why" do
+    sign_in @admin
+
+    assert_no_difference -> { Loksabha.count } do
+      delete console_loksabha_path(@loksabha)
+    end
+
+    assert_redirected_to console_loksabhas_path
+    follow_redirect!
+    assert_select "[role=alertdialog] p", text: /Ahmednagar can't be deleted while it still has assemblies\. Remove them first, then try again\./
+    assert_no_match "Loksabha deleted", response.body
+  end
+
+  test "an admin can delete a loksabha that has no assemblies" do
+    sign_in @admin
+    empty = Loksabha.create!(name: "Empty", state: @loksabha.state, district: @loksabha.district, constituency_no: "99")
+
+    assert_difference -> { Loksabha.count }, -1 do
+      delete console_loksabha_path(empty)
+    end
+
+    assert_redirected_to console_loksabhas_path
+    follow_redirect!
+    assert_select "[role=dialog] p", text: "Loksabha deleted."
+  end
+
   test "a Lok Sabha opens onto its assemblies" do
     sign_in @admin
     get console_loksabhas_path
 
     assert_response :success
-    assert_select "a", text: "View"
+    assert_select "a[aria-label=View]"
     assert_select "a", text: "Assemblies", count: 0
 
     get console_loksabha_path(@loksabha)
@@ -41,6 +67,46 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     end
     assembly = @loksabha.assemblies.find_by!(name: "Ashti")
     assert_redirected_to console_loksabha_assembly_path(@loksabha, assembly)
+  end
+
+  test "edit forms link Cancel back to the record or its parent list" do
+    sign_in @admin
+
+    get edit_console_loksabha_path(@loksabha)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_loksabha_path(@loksabha), links.first["href"]
+    end
+
+    get new_console_loksabha_path
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_loksabhas_path, links.first["href"]
+    end
+
+    get edit_console_loksabha_assembly_path(@loksabha, @assembly)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_loksabha_assembly_path(@loksabha, @assembly), links.first["href"]
+    end
+
+    get new_console_loksabha_assembly_path(@loksabha)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_loksabha_path(@loksabha), links.first["href"]
+    end
+
+    get edit_console_loksabha_assembly_village_path(@loksabha, @assembly, @village)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_loksabha_assembly_village_path(@loksabha, @assembly, @village), links.first["href"]
+    end
+
+    get new_console_loksabha_assembly_village_path(@loksabha, @assembly)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_loksabha_assembly_path(@loksabha, @assembly), links.first["href"]
+    end
   end
 
   test "editing an assembly stays on that assembly" do
@@ -84,7 +150,7 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     )
 
     get console_loksabhas_path(name: "Beed")
-    assert_select "a[href='#{console_loksabha_path(@other)}']", text: "View"
+    assert_select "a[href='#{console_loksabha_path(@other)}'][aria-label=View]"
     assert_select "a[href='#{console_loksabha_path(@loksabha)}']", count: 0
 
     get console_loksabha_path(@loksabha, name: "Ashti")

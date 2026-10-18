@@ -44,7 +44,7 @@ module BoothManagement
       if params[:station_type].present?
         relation = relation.where(station_type: params[:station_type])
       end
-      relation.order("villages.name", "booths.number")
+      relation.by_number
     end
 
     def booth_filters

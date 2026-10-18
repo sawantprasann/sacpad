@@ -1,0 +1,42 @@
+<%# locals: pagy, nav_class (optional) %>
+<% return if pagy.blank? || pagy.last <= 1 %>
+<% nav_class = local_assigns[:nav_class].presence || "pagination-nav flex items-center gap-2 border-t border-gray-200 px-6 py-4 dark:border-gray-800" %>
+<nav class="<%= nav_class %>" aria-label="Pagination">
+  <% if pagy.previous %>
+    <%= link_to pagy.page_url(pagy.previous), class: pagination_arrow_class, aria: { label: "Previous page" }, rel: "prev" do %>
+      <%= pagination_chevron(:previous) %>
+    <% end %>
+  <% else %>
+    <span class="<%= pagination_arrow_class(disabled: true) %>" aria-disabled="true">
+      <%= pagination_chevron(:previous) %>
+    </span>
+  <% end %>
+
+  <span class="block text-sm font-medium text-gray-700 sm:hidden dark:text-gray-400">
+    Page <%= pagy.page %> of <%= pagy.last %>
+  </span>
+
+  <ul class="hidden items-center gap-0.5 sm:flex">
+    <% pagination_series(pagy).each do |item| %>
+      <li>
+        <% if item == :gap %>
+          <span class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium text-gray-500 dark:text-gray-400">...</span>
+        <% elsif item.is_a?(String) %>
+          <span class="<%= pagination_page_class(current: true) %>" aria-current="page"><%= item %></span>
+        <% else %>
+          <%= link_to item, pagy.page_url(item), class: pagination_page_class, aria: { label: "Page #{item}" } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if pagy.next %>
+    <%= link_to pagy.page_url(pagy.next), class: pagination_arrow_class, aria: { label: "Next page" }, rel: "next" do %>
+      <%= pagination_chevron(:next) %>
+    <% end %>
+  <% else %>
+    <span class="<%= pagination_arrow_class(disabled: true) %>" aria-disabled="true">
+      <%= pagination_chevron(:next) %>
+    </span>
+  <% end %>
+</nav>

@@ -38,19 +38,5 @@
     <p class="px-6 py-16 text-center text-sm text-gray-400">No villages in this constituency.</p>
   <% end %>
 
-  <% if @pagy.last > 1 %>
-    <nav class="flex items-center justify-between gap-3 border-t border-gray-200 px-6 py-3 dark:border-gray-800">
-      <% if @pagy.previous %>
-        <%= link_to "← Prev", ground_reports_villages_path(page: @pagy.previous), class: page_link %>
-      <% else %>
-        <span class="text-sm text-gray-300">← Prev</span>
-      <% end %>
-      <span class="text-sm tabular-nums text-gray-500">Page <%= @pagy.page %> of <%= @pagy.last %></span>
-      <% if @pagy.next %>
-        <%= link_to "Next →", ground_reports_villages_path(page: @pagy.next), class: page_link %>
-      <% else %>
-        <span class="text-sm text-gray-300">Next →</span>
-      <% end %>
-    </nav>
-  <% end %>
+  <%= render "ui/pagination", pagy: @pagy %>
 </div>

@@ -19,5 +19,26 @@ module Console
     def not_found
       raise ActionController::RoutingError, "Not Found"
     end
+
+    def deletion_failure_message(record)
+      blockers = blocked_dependents(record)
+      subject = record.try(:name).presence || "This #{record.class.model_name.human.downcase}"
+
+      if blockers.any?
+        "#{subject} can't be deleted while it still has #{blockers.to_sentence}. Remove them first, then try again."
+      else
+        record.errors.full_messages.to_sentence.presence ||
+          "#{subject} can't be deleted because other records still depend on it."
+      end
+    end
+
+    def blocked_dependents(record)
+      record.errors.filter_map do |error|
+        name = error.options[:record].to_s.presence
+        next unless name && error.type.to_s.start_with?("restrict_dependent_destroy")
+
+        error.type.to_s.end_with?("has_one") ? "a #{name}" : name
+      end
+    end
   end
 end

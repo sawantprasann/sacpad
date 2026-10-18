@@ -29,3 +29,9 @@
 
 en:
   hello: "Hello world"
+  activerecord:
+    errors:
+      messages:
+        restrict_dependent_destroy:
+          has_one: "It still has a related %{record}. Remove it first, then try again."
+          has_many: "It still has %{record}. Remove them first, then try again."

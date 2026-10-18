@@ -6,6 +6,16 @@ class ConsoleRolesTest < ActionDispatch::IntegrationTest
 
   setup { @admin = Admin.create!(name: "Dev", email: "dev@example.com", password: "password123") }
 
+  test "role edit form links Cancel back to the list" do
+    sign_in @admin
+    role = Role.create!(name: "Editor", slug: "editor")
+    get edit_console_role_path(role)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_roles_path, links.first["href"]
+    end
+  end
+
   test "role editor requires admin auth" do
     get "/console/roles"
     assert_redirected_to new_admin_session_path

@@ -22,8 +22,8 @@
 
         <main>
           <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
-            <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
-            <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+            <%= render "ui/flash_dialog", message: notice, title: "Done", role: "dialog", dialog_id: "notice-dialog-title" %>
+            <%= render "ui/flash_dialog", message: alert, title: "Couldn't complete that", role: "alertdialog", dialog_id: "error-dialog-title" %>
             <%= yield %>
           </div>
         </main>

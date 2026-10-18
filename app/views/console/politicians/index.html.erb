@@ -22,7 +22,7 @@
             <td class="px-5 py-3 text-gray-500"><%= p.party&.name || "—" %></td>
             <td class="px-5 py-3"><% if p.is_own_politician? %><%= render "ui/badge", label: "own", tone: "brand" %><% else %><span class="text-gray-400">—</span><% end %></td>
             <td class="px-5 py-3 text-right whitespace-nowrap">
-              <%= link_to "Edit", edit_console_organization_politician_path(@organization, p), class: "text-brand-500 hover:text-brand-600" %>
+              <%= icon_action_link :edit, edit_console_organization_politician_path(@organization, p) %>
               <%= button_to "Retire", console_organization_politician_path(@organization, p), method: :delete, class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
             </td>
           </tr>

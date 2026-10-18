@@ -41,13 +41,20 @@ module Console
     end
 
     def destroy
-      @record.destroy
-      redirect_to({ action: :index }, notice: "#{managed_title} deleted.")
-    rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotDestroyed
-      redirect_to({ action: :index }, alert: "Can't delete — it still has dependent records.")
+      destroy_and_redirect({ action: :index })
     end
 
     private
+
+    def destroy_and_redirect(redirect_path)
+      if @record.destroy
+        redirect_to redirect_path, notice: "#{managed_title} deleted."
+      else
+        redirect_to redirect_path, alert: deletion_failure_message(@record)
+      end
+    rescue ActiveRecord::InvalidForeignKey
+      redirect_to redirect_path, alert: deletion_failure_message(@record)
+    end
 
     def set_record
       @record = managed_model.find(params[:id])
@@ -56,6 +63,13 @@ module Console
     def record_params
       params.require(:record).permit(*managed_fields)
     end
-    helper_method :managed_fields, :managed_title
+
+    # Where Cancel returns. Catalogs without a show page go back to the list.
+    # The id from the edit URL must be dropped, or this resolves to the member path.
+    # Subclasses with a detail page (loksabha, assembly, village) override this.
+    def reference_cancel_path
+      polymorphic_path([ :console, managed_model ])
+    end
+    helper_method :managed_fields, :managed_title, :reference_cancel_path
   end
 end

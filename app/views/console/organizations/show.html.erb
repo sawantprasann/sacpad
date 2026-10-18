@@ -239,11 +239,11 @@
                 <td class="px-6 py-4"><%= render "ui/status_pill", status: ticket.status %></td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 tabular-nums"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
                 <td class="px-6 py-4 text-sm">
-                  <div class="flex gap-3">
+                  <div class="flex gap-1">
                     <% unless ticket.closed? %>
-                      <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+                      <%= icon_action_link :edit, edit_console_organization_org_ticket_path(@organization, ticket) %>
                     <% end %>
-                    <%= link_to "Delete", console_organization_org_ticket_path(@organization, ticket), method: :delete, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-700 font-semibold" %>
+                    <%= icon_action_button :delete, console_organization_org_ticket_path(@organization, ticket), confirm: "Are you sure?" %>
                   </div>
                 </td>
               </tr>
@@ -277,11 +277,11 @@
               <span>Owner: <%= ticket.owner.name %></span>
               <span><%= ticket.reported_at&.strftime("%d %b") %></span>
             </div>
-            <div class="flex gap-3 text-sm border-t border-gray-200 dark:border-gray-700 pt-3">
+            <div class="flex gap-1 border-t border-gray-200 pt-3 dark:border-gray-700">
               <% unless ticket.closed? %>
-                <%= link_to "Edit", edit_console_organization_org_ticket_path(@organization, ticket), class: "text-blue-600 hover:text-blue-700 font-semibold" %>
+                <%= icon_action_link :edit, edit_console_organization_org_ticket_path(@organization, ticket) %>
               <% end %>
-              <%= link_to "Delete", console_organization_org_ticket_path(@organization, ticket), method: :delete, data: { confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-700 font-semibold" %>
+              <%= icon_action_button :delete, console_organization_org_ticket_path(@organization, ticket), confirm: "Are you sure?" %>
             </div>
           </div>
         <% end %>
@@ -292,28 +292,7 @@
       <% end %>
     </div>
 
-    <%# Pagination -%>
-    <% if @pagy && @pagy.last > 1 %>
-      <div class="mt-6 flex items-center justify-between">
-        <div>
-          <% if @pagy.previous %>
-            <%= link_to "← Previous", console_organization_path(@organization, tab: 'kitchen_cabinet', category: params[:category], status: params[:status], q: params[:q], page: @pagy.previous), class: "px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white font-semibold rounded-lg hover:bg-gray-400 dark:hover:bg-gray-700 transition-colors" %>
-          <% else %>
-            <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold rounded-lg cursor-not-allowed">← Previous</button>
-          <% end %>
-        </div>
-
-        <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Page <span class="tabular-nums"><%= @pagy.page %></span> of <span class="tabular-nums"><%= @pagy.last %></span></p>
-
-        <div>
-          <% if @pagy.next %>
-            <%= link_to "Next →", console_organization_path(@organization, tab: 'kitchen_cabinet', category: params[:category], status: params[:status], q: params[:q], page: @pagy.next), class: "campaign-btn rounded-lg px-4 py-2 text-sm font-semibold text-white" %>
-          <% else %>
-            <button class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold rounded-lg cursor-not-allowed">Next →</button>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
+    <%= render "ui/pagination", pagy: @pagy, nav_class: "pagination-nav mt-6 flex items-center gap-2" %>
   <% end %>
 <% end %>
 

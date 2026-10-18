@@ -9,6 +9,16 @@ class ConsolePoliticiansTest < ActionDispatch::IntegrationTest
     @org = ActsAsTenant.without_tenant { Organization.create!(name: "Candidate A") }
   end
 
+  test "politician edit form links Cancel back to the roster" do
+    sign_in @admin
+    politician = ActsAsTenant.with_tenant(@org) { Politician.create!(name: "Opponent X") }
+    get edit_console_organization_politician_path(@org, politician)
+    assert_response :success
+    assert_select "a", text: "Cancel" do |links|
+      assert_equal console_organization_politicians_path(@org), links.first["href"]
+    end
+  end
+
   test "admin adds a politician scoped to the organization" do
     sign_in @admin
     assert_difference -> { ActsAsTenant.with_tenant(@org) { Politician.count } }, 1 do

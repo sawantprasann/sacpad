@@ -70,5 +70,9 @@ module Console
     def like(value)
       "%#{ActiveRecord::Base.sanitize_sql_like(value.strip)}%"
     end
+
+    def reference_cancel_path
+      @record&.persisted? ? console_loksabha_path(@record) : console_loksabhas_path
+    end
   end
 end

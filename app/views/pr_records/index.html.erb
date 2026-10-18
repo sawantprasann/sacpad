@@ -86,19 +86,5 @@
     <% end %>
   </div>
 
-  <% if @pagy.last > 1 %>
-    <div class="flex items-center justify-between border-t border-gray-100 px-6 py-4 dark:border-gray-800">
-      <div>
-        <% if @pagy.previous %>
-          <%= link_to "← Previous", pr_records_path(list_params.merge(page: @pagy.previous)), class: ta_btn_secondary %>
-        <% end %>
-      </div>
-      <p class="text-sm text-gray-600">Page <%= @pagy.page %> of <%= @pagy.last %></p>
-      <div>
-        <% if @pagy.next %>
-          <%= link_to "Next →", pr_records_path(list_params.merge(page: @pagy.next)), class: ta_btn_secondary %>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
+  <%= render "ui/pagination", pagy: @pagy %>
 </div>

@@ -25,10 +25,11 @@
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.name %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.constituency_no %></td>
             <td class="px-5 py-3 text-right whitespace-nowrap">
-              <%= link_to "View", console_loksabha_path(loksabha), class: "mr-3 text-brand-500 hover:text-brand-600" %>
-              <%= link_to "Edit", edit_console_loksabha_path(loksabha), class: "text-brand-500 hover:text-brand-600" %>
-              <%= button_to "Delete", console_loksabha_path(loksabha), method: :delete,
-                    class: "ml-3 text-error-500 hover:text-error-600", form: { style: "display:inline" } %>
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :view, console_loksabha_path(loksabha) %>
+                <%= icon_action_link :edit, edit_console_loksabha_path(loksabha) %>
+                <%= icon_action_button :delete, console_loksabha_path(loksabha) %>
+              </div>
             </td>
           </tr>
         <% end %>

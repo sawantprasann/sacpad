@@ -40,6 +40,9 @@
       </table>
     </div>
 
-    <div class="mt-6"><%= f.submit class: ta_btn_primary %></div>
+    <div class="mt-6 flex items-center gap-3">
+      <%= f.submit class: ta_btn_primary %>
+      <%= link_to "Cancel", console_roles_path, class: ta_btn_secondary %>
+    </div>
   <% end %>
 </div>

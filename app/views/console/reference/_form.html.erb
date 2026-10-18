@@ -27,6 +27,9 @@
         <% end %>
       </div>
     <% end %>
-    <%= f.submit class: ta_btn_primary %>
+    <div class="flex items-center gap-3">
+      <%= f.submit class: ta_btn_primary %>
+      <%= link_to "Cancel", reference_cancel_path, class: ta_btn_secondary %>
+    </div>
   <% end %>
 </div>

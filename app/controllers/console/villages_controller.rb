@@ -50,10 +50,7 @@ module Console
     end
 
     def destroy
-      @record.destroy
-      redirect_to console_loksabha_assembly_path(@loksabha, @assembly), notice: "Village deleted."
-    rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotDestroyed
-      redirect_to console_loksabha_assembly_path(@loksabha, @assembly), alert: "Can't delete — it still has dependent records."
+      destroy_and_redirect(console_loksabha_assembly_path(@loksabha, @assembly))
     end
 
     private
@@ -83,6 +80,14 @@ module Console
 
     def like(value)
       "%#{ActiveRecord::Base.sanitize_sql_like(value.strip)}%"
+    end
+
+    def reference_cancel_path
+      if @record&.persisted?
+        console_loksabha_assembly_village_path(@loksabha, @assembly, @record)
+      else
+        console_loksabha_assembly_path(@loksabha, @assembly)
+      end
     end
   end
 end
