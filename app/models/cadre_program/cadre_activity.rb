@@ -46,6 +46,51 @@ module CadreProgram
       "one_to_one" => "One To One"
     }.freeze
 
+    # Columns for a category submenu. The unfiltered list keeps a short shared set because
+    # the shapes do not line up.
+    PROGRAM_LIST_COLUMNS = [
+      [ "Program name", ->(activity) { activity.program&.program_name } ],
+      [ "Occasion", ->(activity) { activity.program&.occasion } ],
+      [ "Location", ->(activity) { activity.program&.location } ],
+      [ "Host", ->(activity) { activity.program&.host } ],
+      [ "Occurred on", ->(activity) { activity.program&.occurred_on } ]
+    ].freeze
+    LIST_COLUMNS = {
+      "program_by_party" => PROGRAM_LIST_COLUMNS,
+      "personal_program" => PROGRAM_LIST_COLUMNS,
+      "leadership_meets" => [
+        [ "Whom to meet", ->(activity) { activity.leadership_meet&.whom_to_meet } ],
+        [ "Point of discussion", ->(activity) { activity.leadership_meet&.point_of_discussion } ],
+        [ "Work submitted", ->(activity) { activity.leadership_meet&.work_submitted } ],
+        [ "Submitted on", ->(activity) { activity.leadership_meet&.submitted_on } ],
+        [ "Follow up on", ->(activity) { activity.leadership_meet&.followup_on } ]
+      ].freeze,
+      "party_programs_hosted" => [
+        [ "Program name", ->(activity) { activity.party_program_hosted&.program_name } ],
+        [ "Location", ->(activity) { activity.party_program_hosted&.location } ],
+        [ "Total attendees", ->(activity) { activity.party_program_hosted&.total_attendees } ],
+        [ "Print media", ->(activity) { activity.party_program_hosted&.print_media } ],
+        [ "Electronic media", ->(activity) { activity.party_program_hosted&.electronic_media } ],
+        [ "Hosted on", ->(activity) { activity.party_program_hosted&.hosted_on } ]
+      ].freeze,
+      "one_to_one" => [
+        [ "Karyakarta", ->(activity) { activity.one_to_one&.karyakarta_user&.name || activity.one_to_one&.karyakarta_name_text } ],
+        [ "Assignment", ->(activity) { activity.one_to_one&.assignment } ],
+        [ "Resolved", ->(activity) { detail = activity.one_to_one; detail && (detail.resolved? ? "Yes" : "No") } ],
+        [ "From", ->(activity) { activity.one_to_one&.from_date } ],
+        [ "To", ->(activity) { activity.one_to_one&.to_date } ]
+      ].freeze
+    }.freeze
+    DEFAULT_LIST_COLUMNS = [
+      [ "Activity", ->(activity) { activity.detail_headline } ],
+      [ "Category", ->(activity) { activity.category_label } ],
+      [ "Occurred on", ->(activity) { activity.occurred_on } ]
+    ].freeze
+
+    def self.list_columns(category_key)
+      LIST_COLUMNS.fetch(category_key.to_s, DEFAULT_LIST_COLUMNS)
+    end
+
     validates :category, presence: true
 
     before_validation :keep_only_matching_detail

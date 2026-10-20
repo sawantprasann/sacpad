@@ -30,7 +30,29 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_operator queries.count { |sql| sql.include?('"booths"') }, :<=, 1
+    # One preload for the table rows, plus the coverage total across booths.
+    assert_operator queries.count { |sql| sql.include?('"booths"') }, :<=, 2
+  end
+
+  test "the list shows serial numbers and filters by them" do
+    Voter.find_by!(voter_id: "AAA1111111").update!(sr_no: 12)
+    Voter.find_by!(voter_id: "BBB2222222").update!(sr_no: 4)
+    sign_in @admin
+
+    get console_voters_path
+    assert_response :success
+    assert_select "th", text: "Sr no"
+    assert_select "input[name=sr_no]"
+
+    get console_voters_path(sr_no: 12)
+    assert_response :success
+    assert_match "Asha", response.body
+    assert_no_match "Ravi", response.body
+
+    get console_voter_path(Voter.find_by!(voter_id: "AAA1111111"))
+    assert_response :success
+    assert_match "Sr no", response.body
+    assert_match "12", response.body
   end
 
   test "filters by voter id, village, booth, and name together" do
@@ -71,13 +93,52 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
     assert_equal "9999999999", voter.mobile
   end
 
+  test "the index compares fetched voters with the counts stored from booth PDFs" do
+    Booth.find_by!(number: "1").update!(male_electors: 3, female_electors: 2, other_electors: 1)
+    Voter.find_by!(voter_id: "AAA1111111").update!(gender: "Male")
+    Voter.find_by!(voter_id: "BBB2222222").update!(gender: "Female")
+    Voter.create!(
+      voter_id: "CCC3333333", first_name: "Neel", last_name: "Shah",
+      gender: "Third Gender", booth: @village.booths.find_by!(number: "1"), village: @village
+    )
+    sign_in @admin
+
+    get console_voters_path
+
+    assert_response :success
+    assert_select "h2", text: "Voter coverage"
+    assert_select "[data-coverage=fetched-total]", text: "3"
+    assert_select "[data-coverage=pdf-total]", text: "6"
+    assert_select "[data-coverage=missing-total]", text: "3"
+    assert_select "[data-coverage=fetched-male]", text: "1"
+    assert_select "[data-coverage=pdf-male]", text: "3"
+    assert_select "[data-coverage=missing-male]", text: "2"
+    assert_select "[data-coverage=fetched-female]", text: "1"
+    assert_select "[data-coverage=pdf-female]", text: "2"
+    assert_select "[data-coverage=missing-female]", text: "1"
+    assert_select "[data-coverage=fetched-others]", text: "1"
+    assert_select "[data-coverage=pdf-others]", text: "1"
+    assert_select "[data-coverage=missing-others]", text: "0"
+  end
+
+  test "coverage leaves the PDF columns blank when no booth has stored counts" do
+    sign_in @admin
+
+    get console_voters_path
+
+    assert_response :success
+    assert_select "[data-coverage=fetched-total]", text: "2"
+    assert_select "[data-coverage=pdf-total]", text: "—"
+    assert_select "[data-coverage=missing-total]", text: "—"
+  end
+
   test "a name search alone asks for another filter" do
     sign_in @admin
 
     get console_voters_path(name: "Asha")
 
     assert_response :success
-    assert_match "Add a village, booth, or voter ID to search by name.", response.body
+    assert_match "Add a village, booth, voter ID, or Sr no to search by name.", response.body
     assert_match "Ravi", response.body
   end
 end

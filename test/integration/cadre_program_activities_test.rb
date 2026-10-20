@@ -120,6 +120,28 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "a category list uses that submenu's columns" do
+    make_activity(owner: @alice, category: :one_to_one, notes: "Lane meeting")
+    make_activity(owner: @alice, category: :leadership_meets, notes: "Met the sarpanch")
+    sign_in @alice
+
+    get cadre_program_activities_path(category: "one_to_one")
+    assert_response :success
+    assert_select "th", text: "Karyakarta"
+    assert_select "th", text: "Assignment"
+    assert_select "th", text: "Resolved"
+    assert_select "th", text: "From"
+    assert_select "th", text: "Activity", count: 0
+    assert_match "Sita", @response.body
+    assert_no_match(/Met the sarpanch/, @response.body)
+
+    get cadre_program_activities_path(category: "leadership_meets")
+    assert_select "th", text: "Whom to meet"
+    assert_select "th", text: "Submitted on"
+    assert_select "th", text: "Karyakarta", count: 0
+    assert_match "Sarpanch", @response.body
+  end
+
   test "category filter narrows the list" do
     make_activity(owner: @alice, category: :leadership_meets, notes: "Met the sarpanch")
     make_activity(owner: @alice, category: :one_to_one, notes: "Lane meeting")

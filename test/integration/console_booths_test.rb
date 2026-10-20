@@ -15,11 +15,11 @@ class ConsoleBoothsTest < ActionDispatch::IntegrationTest
     other = @village.booths.create!(number: "3")
     Voter.create!(
       voter_id: "BBB2222222", first_name: "Ravi", middle_name: "S", last_name: "Kale",
-      age: 34, gender: "Male", house_no: "12", booth: @booth, village: @village
+      age: 34, gender: "Male", house_no: "12", sr_no: 4, booth: @booth, village: @village
     )
     Voter.create!(
       voter_id: "AAA1111111", first_name: "Asha", last_name: "Patil",
-      age: 40, gender: "Female", house_no: "4", booth: @booth, village: @village
+      age: 40, gender: "Female", house_no: "4", sr_no: 12, booth: @booth, village: @village
     )
     Voter.create!(
       voter_id: "CCC3333333", first_name: "Other", last_name: "Booth",
@@ -100,6 +100,12 @@ class ConsoleBoothsTest < ActionDispatch::IntegrationTest
     get console_booth_path(@booth, name: "Asha", gender: "Female")
 
     assert_response :success
+    assert_select "th", text: "Sr no"
+    assert_select "input[name=sr_no]"
+    assert_match "Asha", response.body
+    assert_no_match "Ravi", response.body
+
+    get console_booth_path(@booth, sr_no: 12)
     assert_match "Asha", response.body
     assert_no_match "Ravi", response.body
   end

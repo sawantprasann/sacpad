@@ -93,6 +93,7 @@
     </div>
     <%= render "console/filters", url: console_booth_path(@booth), fields: [
           [ :voter_id, "Voter ID" ],
+          [ :sr_no, "Sr no" ],
           [ :name, "Name" ],
           [ :age, "Age" ],
           [ :gender, "Gender", [ [ "Male", "Male" ], [ "Female", "Female" ], [ "Others", "Others" ] ] ],
@@ -102,6 +103,7 @@
       <table class="campaign-table w-full text-sm">
         <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
           <tr>
+            <th class="px-5 py-3 font-medium">Sr no</th>
             <th class="px-5 py-3 font-medium">Voter ID</th>
             <th class="px-5 py-3 font-medium">Name</th>
             <th class="px-5 py-3 font-medium">Age</th>
@@ -112,6 +114,7 @@
         <tbody>
           <% @voters.each do |voter| %>
             <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+              <td class="px-5 py-3 tabular-nums text-gray-700 dark:text-gray-300"><%= voter.sr_no || "—" %></td>
               <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-brand-500 hover:text-brand-600" %></td>
               <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.name %></td>
               <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.age || "—" %></td>

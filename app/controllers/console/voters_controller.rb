@@ -9,12 +9,14 @@ module Console
       @villages = Village.order(:name)
       relation = Voter.includes(:booth, :village).order(created_at: :desc)
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
+      relation = filter_by_sr_no(relation)
       relation = relation.where(village_id: params[:village_id]) if params[:village_id].present?
       if params[:booth].present?
         relation = relation.joins(:booth).where(booths: { number: params[:booth].strip })
       end
       relation = filter_by_name(relation) if params[:name].present?
       @pagy, @voters = pagy(:offset, relation)
+      @coverage = Voter.coverage
       @search_hint = "Showing recently added voters." if voter_filters.values.all?(&:blank?)
     end
 
@@ -45,7 +47,7 @@ module Console
     end
 
     def voter_filters
-      params.permit(:voter_id, :name, :village_id, :booth).to_h
+      params.permit(:voter_id, :sr_no, :name, :village_id, :booth).to_h
     end
 
     def voter_params
@@ -85,9 +87,16 @@ module Console
       false
     end
 
+    def filter_by_sr_no(relation)
+      return relation if params[:sr_no].blank?
+
+      sr_no = Integer(params[:sr_no], exception: false)
+      sr_no ? relation.where(sr_no: sr_no) : relation.none
+    end
+
     def filter_by_name(relation)
-      unless params[:village_id].present? || params[:booth].present? || params[:voter_id].present?
-        @search_hint = "Add a village, booth, or voter ID to search by name."
+      unless params[:village_id].present? || params[:booth].present? || params[:voter_id].present? || params[:sr_no].present?
+        @search_hint = "Add a village, booth, voter ID, or Sr no to search by name."
         return relation
       end
 

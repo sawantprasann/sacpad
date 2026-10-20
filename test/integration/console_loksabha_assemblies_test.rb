@@ -15,7 +15,7 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     booth = @village.booths.create!(number: "2")
     Voter.create!(
       voter_id: "BBB2222222", first_name: "Ravi", last_name: "Kale",
-      age: 34, gender: "Male", house_no: "12", booth: booth, village: @village
+      age: 34, gender: "Male", house_no: "12", sr_no: 4, booth: booth, village: @village
     )
   end
 
@@ -146,7 +146,7 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     booth = @village.booths.create!(number: "3")
     Voter.create!(
       voter_id: "AAA1111111", first_name: "Asha", last_name: "Patil",
-      age: 40, gender: "Female", house_no: "4", booth: booth, village: @village
+      age: 40, gender: "Female", house_no: "4", sr_no: 12, booth: booth, village: @village
     )
 
     get console_loksabhas_path(name: "Beed")
@@ -166,6 +166,12 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     assert_no_match "Shindewadi", response.body
 
     get console_loksabha_assembly_village_path(@loksabha, @assembly, @village, name: "Asha", gender: "Female")
+    assert_select "th", text: "Sr no"
+    assert_select "input[name=sr_no]"
+    assert_match "Asha", response.body
+    assert_no_match "Ravi", response.body
+
+    get console_loksabha_assembly_village_path(@loksabha, @assembly, @village, sr_no: 12)
     assert_match "Asha", response.body
     assert_no_match "Ravi", response.body
   end

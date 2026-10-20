@@ -14,6 +14,7 @@ module Console
       @voter_total = @record.voters.count
       relation = @record.voters.includes(:booth).order(:id)
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
+      relation = filter_voters_by_sr_no(relation)
       if params[:age].present?
         age = Integer(params[:age], exception: false)
         relation = age ? relation.where(age: age) : relation.none
@@ -64,6 +65,13 @@ module Console
       @record = @assembly.villages.includes(:taluka).find(params[:id])
     end
 
+    def filter_voters_by_sr_no(relation)
+      return relation if params[:sr_no].blank?
+
+      sr_no = Integer(params[:sr_no], exception: false)
+      sr_no ? relation.where(sr_no: sr_no) : relation.none
+    end
+
     def filter_voters_by_name(relation)
       term = params[:name].strip.downcase
       ids = relation.filter_map { |voter| voter.id if voter_name(voter).include?(term) }
@@ -75,7 +83,7 @@ module Console
     end
 
     def voter_filters
-      params.permit(:voter_id, :name, :age, :gender, :house_no, :booth)
+      params.permit(:voter_id, :sr_no, :name, :age, :gender, :house_no, :booth)
     end
 
     def like(value)

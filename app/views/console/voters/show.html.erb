@@ -46,6 +46,10 @@
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">House No.</label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.house_no.presence || "—" %></p>
         </div>
+        <div>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Sr no</label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.sr_no || "—" %></p>
+        </div>
         <% [
           [ "State", @voter.state, @voter.state && console_state_path(@voter.state) ],
           [ "Lok Sabha", @voter.loksabha, @voter.loksabha && console_loksabha_path(@voter.loksabha) ],

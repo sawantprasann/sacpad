@@ -81,7 +81,7 @@ class CadreProgramFeedTest < ActionDispatch::IntegrationTest
 
     cells = xlsx_cells
     assert_includes cells, "Met the sarpanch"
-    assert_includes cells, "Leadership Meets"
+    assert_includes cells, "Whom to meet"
     assert_not_includes cells, "Party rally"
   end
 

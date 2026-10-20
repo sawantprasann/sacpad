@@ -34,11 +34,12 @@
   <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
     <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Voters</h2>
   </div>
-  <%= render "console/filters", url: console_loksabha_assembly_village_path(@loksabha, @assembly, @record), fields: [ [ :voter_id, "Voter ID" ], [ :name, "Name" ], [ :age, "Age" ], [ :gender, "Gender" ], [ :house_no, "House no" ], [ :booth, "Booth" ] ] %>
+  <%= render "console/filters", url: console_loksabha_assembly_village_path(@loksabha, @assembly, @record), fields: [ [ :voter_id, "Voter ID" ], [ :sr_no, "Sr no" ], [ :name, "Name" ], [ :age, "Age" ], [ :gender, "Gender" ], [ :house_no, "House no" ], [ :booth, "Booth" ] ] %>
   <div class="overflow-x-auto">
     <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
+          <th class="px-5 py-3 font-medium">Sr no</th>
           <th class="px-5 py-3 font-medium">Voter ID</th>
           <th class="px-5 py-3 font-medium">Name</th>
           <th class="px-5 py-3 font-medium">Age</th>
@@ -50,6 +51,7 @@
       <tbody>
         <% @voters.each do |voter| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 tabular-nums text-gray-700 dark:text-gray-300"><%= voter.sr_no || "—" %></td>
             <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-brand-500 hover:text-brand-600" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= [ voter.first_name, voter.middle_name, voter.last_name ].compact_blank.join(" ") %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.age || "—" %></td>

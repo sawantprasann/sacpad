@@ -6,11 +6,20 @@ class Booth < ApplicationRecord
 
   # Roll-cover totals live on the booth. These are the voters actually stored for that booth.
   def voter_gender_counts
-    totals = { male: 0, female: 0, others: 0, unspecified: 0 }
-    voters.group(:gender).count.each do |gender, count|
-      totals[gender_bucket(gender)] += count
-    end
-    totals
+    Voter.gender_counts(voters)
+  end
+
+  # Elector counts read from roll PDFs and saved on booths. Nil when no booth has them yet.
+  def self.elector_totals
+    male, female, other, recorded = pick(
+      Arel.sql("COALESCE(SUM(male_electors), 0)"),
+      Arel.sql("COALESCE(SUM(female_electors), 0)"),
+      Arel.sql("COALESCE(SUM(other_electors), 0)"),
+      Arel.sql("COUNT(*) FILTER (WHERE male_electors IS NOT NULL OR female_electors IS NOT NULL OR other_electors IS NOT NULL)")
+    )
+    return if recorded.to_i.zero?
+
+    { male: male.to_i, female: female.to_i, others: other.to_i }
   end
 
   # `number` is text. Numeric values sort as integers (2 before 10); anything else follows, by the text itself.
@@ -21,15 +30,4 @@ class Booth < ApplicationRecord
       :id
     )
   }
-
-  private
-
-  def gender_bucket(gender)
-    case gender.to_s.strip
-    when /\A(male|m)\z/i then :male
-    when /\A(female|f)\z/i then :female
-    when "" then :unspecified
-    else :others
-    end
-  end
 end
