@@ -45,8 +45,11 @@
                 <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><%= voter.created_at.strftime("%b %d, %Y") %></td>
-              <td class="px-6 py-4 text-right text-sm">
-                <%= icon_action_link :view, console_voter_path(voter) %>
+              <td class="px-6 py-4 text-right text-sm whitespace-nowrap">
+                <div class="inline-flex items-center justify-end gap-1">
+                  <%= icon_action_link :view, console_voter_path(voter) %>
+                  <%= icon_action_link :edit, edit_console_voter_path(voter) %>
+                </div>
               </td>
             </tr>
           <% end %>

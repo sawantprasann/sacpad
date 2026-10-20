@@ -52,6 +52,25 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
     assert_no_match "Asha", response.body
   end
 
+  test "the list offers edit and an admin can correct the voter" do
+    voter = Voter.find_by!(voter_id: "AAA1111111")
+    sign_in @admin
+
+    get console_voters_path
+    assert_response :success
+    assert_select "a[href=?][aria-label=Edit]", edit_console_voter_path(voter)
+
+    get edit_console_voter_path(voter)
+    assert_response :success
+    assert_select "input[name=?][value=?]", "voter[first_name]", "Asha"
+
+    patch console_voter_path(voter), params: { voter: { first_name: "Asha", last_name: "More", mobile: "9999999999" } }
+    assert_redirected_to console_voter_path(voter)
+    voter.reload
+    assert_equal "More", voter.last_name
+    assert_equal "9999999999", voter.mobile
+  end
+
   test "a name search alone asks for another filter" do
     sign_in @admin
 
