@@ -103,4 +103,28 @@ class ConsoleBoothsTest < ActionDispatch::IntegrationTest
     assert_match "Asha", response.body
     assert_no_match "Ravi", response.body
   end
+
+  test "gender filter matches male and female exactly" do
+    Voter.create!(
+      voter_id: "DDD4444444", first_name: "Dev", last_name: "Patil",
+      gender: "Third Gender", booth: @booth, village: @village
+    )
+    sign_in @admin
+
+    get console_booth_path(@booth, gender: "Male")
+    assert_response :success
+    assert_select "select[name=gender] option[selected]", text: "Male"
+    assert_select "tbody a", text: "BBB2222222"
+    assert_select "tbody a", text: "AAA1111111", count: 0
+    assert_select "tbody a", text: "DDD4444444", count: 0
+
+    get console_booth_path(@booth, gender: "Female")
+    assert_select "tbody a", text: "AAA1111111"
+    assert_select "tbody a", text: "BBB2222222", count: 0
+
+    get console_booth_path(@booth, gender: "Others")
+    assert_select "tbody a", text: "DDD4444444"
+    assert_select "tbody a", text: "AAA1111111", count: 0
+    assert_select "tbody a", text: "BBB2222222", count: 0
+  end
 end

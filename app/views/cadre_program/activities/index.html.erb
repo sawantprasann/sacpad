@@ -29,8 +29,7 @@
           <th class="<%= th %>">Media value</th>
           <th class="<%= th %>">Logged by</th>
           <th class="<%= th %> text-right">Photos</th>
-          <th class="<%= th %> text-right">Date</th>
-          <th class="<%= th %> text-right">Last updated</th>
+          <th class="<%= th %> text-right">Occurred on</th>
           <th class="<%= th %> w-28"><span class="sr-only">Actions</span></th>
         </tr>
       </thead>
@@ -48,8 +47,7 @@
             </td>
             <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
             <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.photos.size %></td>
-            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></td>
-            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.updated_at.strftime("%d %b %Y, %H:%M") %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.occurred_on&.strftime("%d %b %Y") || "—" %></td>
             <td class="<%= td %> text-right">
               <div class="inline-flex items-center justify-end gap-3">
                 <% if policy(activity).edit? %>
@@ -78,11 +76,10 @@
             <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= activity.detail_headline.presence || activity.category_label %></p>
             <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "gray" %></p>
           </div>
-          <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></p>
+          <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.occurred_on&.strftime("%d %b %Y") || "—" %></p>
         </div>
         <p class="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
         <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
-        <p class="mt-1 text-xs tabular-nums text-gray-400">Last updated <%= activity.updated_at.strftime("%d %b %Y, %H:%M") %></p>
       <% end %>
       <% if policy(activity).edit? %>
         <div class="px-6 pb-4">

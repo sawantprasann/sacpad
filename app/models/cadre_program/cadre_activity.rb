@@ -69,6 +69,17 @@ module CadreProgram
       name && public_send(name)
     end
 
+    # The day the work happened. Programs store occurred_on; the other categories use their own date.
+    def occurred_on
+      detail = matching_detail
+      case detail
+      when CadreActivityProgram then detail.occurred_on
+      when CadreActivityPartyProgramHosted then detail.hosted_on
+      when CadreActivityLeadershipMeet then detail.submitted_on
+      when CadreActivityOneToOne then detail.from_date
+      end
+    end
+
     # One-line label for the list: the name of the program, the person met, or the karyakarta.
     def detail_headline
       detail = matching_detail

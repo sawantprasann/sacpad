@@ -28,7 +28,7 @@ module Console
         age = Integer(params[:age], exception: false)
         relation = age ? relation.where(age: age) : relation.none
       end
-      relation = relation.where("voters.gender ILIKE ?", like_pattern(params[:gender])) if params[:gender].present?
+      relation = filter_voters_by_gender(relation) if params[:gender].present?
       relation = relation.where("voters.house_no ILIKE ?", like_pattern(params[:house_no])) if params[:house_no].present?
       relation = filter_voters_by_name(relation) if params[:name].present?
       @pagy, @voters = pagy(:offset, relation)
@@ -84,6 +84,21 @@ module Console
 
     def voter_filters
       params.permit(:voter_id, :name, :age, :gender, :house_no).to_h
+    end
+
+    # "Male" is a substring of "Female", so this is an exact bucket match, not ILIKE.
+    def filter_voters_by_gender(relation)
+      case params[:gender].to_s.strip.downcase
+      when "male", "m"
+        relation.where("LOWER(BTRIM(voters.gender)) IN (?)", %w[male m])
+      when "female", "f"
+        relation.where("LOWER(BTRIM(voters.gender)) IN (?)", %w[female f])
+      when "others", "other"
+        relation.where("BTRIM(voters.gender) <> ''")
+                .where("LOWER(BTRIM(voters.gender)) NOT IN (?)", %w[male m female f])
+      else
+        relation.none
+      end
     end
 
     def filter_voters_by_name(relation)

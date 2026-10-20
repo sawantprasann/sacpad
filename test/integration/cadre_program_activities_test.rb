@@ -181,15 +181,22 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     activity = make_activity(owner: @alice, notes: "Warm reaction")
     sign_in @alice
 
+    ActsAsTenant.with_tenant(@org) do
+      activity.program.update!(occurred_on: Date.new(2026, 10, 12))
+      activity.reload
+    end
+
     get cadre_program_activities_path
     assert_response :success
-    assert_match "Last updated", @response.body
-    assert_match activity.updated_at.strftime("%d %b %Y, %H:%M"), @response.body
+    assert_match "Occurred on", @response.body
+    assert_match "12 Oct 2026", @response.body
+    assert_no_match(/Last updated/, @response.body)
     assert_select "a[href=?]", edit_cadre_program_activity_path(activity), text: "Edit"
 
     get cadre_program_activity_path(activity)
     assert_response :success
     assert_match "Last updated #{activity.updated_at.strftime("%d %b %Y, %H:%M")}", @response.body
+    assert_match "Occurred on", @response.body
     assert_select "a[href=?]", edit_cadre_program_activity_path(activity), text: "Edit"
   end
 
