@@ -91,7 +91,10 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
           "Police Station" => "Paranda",
           "Pin Code" => "413502",
           "Taluka" => "Paranda",
-          "Main Town or Village" => "Nagathali"
+          "Main Town or Village" => "Nagathali",
+          "Male Electors" => "120",
+          "Female Electors" => "118",
+          "Third Gender Electors" => "1"
         },
         "voters" => []
       }
@@ -103,6 +106,9 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     assert_equal "1 - Zilla Parishad School", @booth.name
     assert_equal "Nagathali, Paranda", @booth.address
     assert_equal "Rural", @booth.station_type
+    assert_equal 120, @booth.male_electors
+    assert_equal 118, @booth.female_electors
+    assert_equal 1, @booth.other_electors
     assert_equal "Nagathali", @booth.village.name
     assert_nil @assembly.villages.find_by(name: "Shindewadi")
     @village = @booth.village

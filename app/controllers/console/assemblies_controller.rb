@@ -12,6 +12,7 @@ module Console
 
     def show
       @village_total = @record.villages.count
+      @talukas = Taluka.order(:name)
       @villages = filtered_villages.load
     end
 
@@ -58,7 +59,7 @@ module Console
         relation = relation.where("villages.police_station ILIKE ?", like(params[:police_station]))
       end
       relation = relation.where("villages.pin_code ILIKE ?", like(params[:pin_code])) if params[:pin_code].present?
-      relation = relation.where("talukas.name ILIKE ?", like(params[:taluka])) if params[:taluka].present?
+      relation = relation.where(taluka_id: params[:taluka_id]) if params[:taluka_id].present?
       relation
         .select("villages.*, talukas.name AS taluka_name, COUNT(voters.id) AS voters_count")
         .left_joins(:voters, :taluka)
@@ -67,7 +68,7 @@ module Console
     end
 
     def village_filters
-      params.permit(:name, :taluka, :police_station, :pin_code)
+      params.permit(:name, :taluka_id, :police_station, :pin_code)
     end
 
     def like(value)

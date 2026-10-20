@@ -5,10 +5,7 @@
   </div>
 
   <div class="campaign-sheet">
-    <%= render "console/filters",
-          url: console_booths_path,
-          fields: [ [ :booth_number, "Booth number" ], [ :village, "Village" ] ],
-          hint: @pagy.count > 0 ? nil : "No booths found. Create one to get started." %>
+    <%= render "console/booths/filters" %>
 
     <div class="overflow-x-auto">
       <table class="campaign-table w-full">
@@ -53,11 +50,7 @@
                 <% end %>
               </td>
               <td class="px-6 py-4 text-right text-sm">
-                <div class="inline-flex items-center justify-end gap-1">
-                  <%= icon_action_link :view, console_booth_path(booth) %>
-                  <%= icon_action_link :edit, edit_console_booth_path(booth) %>
-                  <%= icon_action_button :delete, console_booth_path(booth) %>
-                </div>
+                <%= icon_action_link :view, console_booth_path(booth) %>
               </td>
             </tr>
           <% end %>

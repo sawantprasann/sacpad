@@ -28,20 +28,22 @@ module CadreProgram
       assert_equal "cadre_activities", CadreActivity.table_name
     end
 
-    test "category is a fixed six-value integer enum" do
+    test "category is a fixed five-value integer enum" do
       assert_equal 0, CadreActivity.categories[:program_by_party]
       assert_equal 1, CadreActivity.categories[:leadership_meets]
       assert_equal 2, CadreActivity.categories[:party_programs_hosted]
       assert_equal 3, CadreActivity.categories[:personal_program]
-      assert_equal 4, CadreActivity.categories[:personal_activities]
       assert_equal 5, CadreActivity.categories[:one_to_one]
-      assert_equal 6, CadreActivity.categories.size
+      assert_nil CadreActivity.categories[:personal_activities]
+      assert_equal 5, CadreActivity.categories.size
     end
 
     test "category labels are the product names, not humanized keys" do
       assert_equal "Program By Party", CadreActivity::CATEGORY_LABELS["program_by_party"]
+      assert_equal "Personal Program", CadreActivity::CATEGORY_LABELS["personal_program"]
       assert_equal "One To One", CadreActivity::CATEGORY_LABELS["one_to_one"]
-      assert_equal 6, CadreActivity::CATEGORY_LABELS.size
+      assert_nil CadreActivity::CATEGORY_LABELS["personal_activities"]
+      assert_equal 5, CadreActivity::CATEGORY_LABELS.size
     end
 
     test "category is required and media value plus photos are optional" do

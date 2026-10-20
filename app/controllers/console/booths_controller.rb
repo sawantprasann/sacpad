@@ -5,16 +5,23 @@ module Console
     helper_method :booth_filters, :voter_filters
 
     def index
-      relation = Booth.includes(:village).by_number
+      relation = Booth.includes(village: { taluka: { district: :state } }).by_number
       relation = relation.where(number: params[:booth_number].strip) if params[:booth_number].present?
-      if params[:village].present?
-        relation = relation.joins(:village).where("villages.name ILIKE ?", "%#{like(params[:village])}%")
+      relation = relation.where(village_id: params[:village_id]) if params[:village_id].present?
+      if params[:taluka_id].present? || params[:district_id].present?
+        relation = relation.joins(village: :taluka)
+        relation = relation.where(villages: { taluka_id: params[:taluka_id] }) if params[:taluka_id].present?
+        relation = relation.where(talukas: { district_id: params[:district_id] }) if params[:district_id].present?
       end
+      @districts = District.order(:name)
+      @talukas = Taluka.order(:name)
+      @villages = Village.includes(:taluka).order(:name)
       @pagy, @booths = pagy(:offset, relation)
     end
 
     def show
       @voter_total = @booth.voters.count
+      @gender_counts = @booth.voter_gender_counts
       relation = @booth.voters.order(:id)
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
       if params[:age].present?
@@ -72,7 +79,7 @@ module Console
     end
 
     def booth_filters
-      params.permit(:booth_number, :village).to_h
+      params.permit(:booth_number, :district_id, :taluka_id, :village_id).to_h
     end
 
     def voter_filters

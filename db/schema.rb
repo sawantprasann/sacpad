@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_20_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -124,6 +124,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_190000) do
     t.string "name"
     t.string "address"
     t.string "station_type"
+    t.integer "male_electors"
+    t.integer "female_electors"
+    t.integer "other_electors"
     t.index ["village_id"], name: "index_booths_on_village_id"
   end
 
@@ -188,21 +191,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_190000) do
     t.datetime "updated_at", null: false
     t.index ["cadre_activity_id"], name: "idx_on_cadre_activity_id_3c508384a4", unique: true
     t.index ["organization_id"], name: "index_cadre_activity_party_program_hosteds_on_organization_id"
-  end
-
-  create_table "cadre_activity_personal_activities", force: :cascade do |t|
-    t.bigint "cadre_activity_id", null: false
-    t.bigint "organization_id", null: false
-    t.string "activity_name", null: false
-    t.string "occasion"
-    t.string "total_submission"
-    t.date "from_date"
-    t.date "to_date"
-    t.text "notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["cadre_activity_id"], name: "index_cadre_activity_personal_activities_on_cadre_activity_id", unique: true
-    t.index ["organization_id"], name: "index_cadre_activity_personal_activities_on_organization_id"
   end
 
   create_table "cadre_activity_programs", force: :cascade do |t|
@@ -815,8 +803,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_190000) do
   add_foreign_key "cadre_activity_one_to_ones", "users", column: "karyakarta_user_id"
   add_foreign_key "cadre_activity_party_program_hosteds", "cadre_activities"
   add_foreign_key "cadre_activity_party_program_hosteds", "organizations"
-  add_foreign_key "cadre_activity_personal_activities", "cadre_activities"
-  add_foreign_key "cadre_activity_personal_activities", "organizations"
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
   add_foreign_key "districts", "states"

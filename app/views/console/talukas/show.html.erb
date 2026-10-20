@@ -1,0 +1,69 @@
+<% content_for :title, @record.name %>
+<% breadcrumb "Talukas", console_talukas_path %>
+<% breadcrumb @record.district.name, console_district_path(@record.district) %>
+<% breadcrumb @record.name %>
+
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: @record.name, subtitle: @record.district.name } do %><% end %>
+<div class="mt-4 mb-6 flex justify-end">
+  <%= link_to "Edit", edit_console_taluka_path(@record), class: ta_btn_secondary %>
+</div>
+
+<div class="<%= ta_card_classes %> mb-6 p-6">
+  <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @record.district.name, console_district_path(@record.district), class: "text-brand-500 hover:text-brand-600" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Villages</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village_total %></dd>
+    </div>
+  </dl>
+</div>
+
+<div class="campaign-sheet">
+  <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Villages</h2>
+  </div>
+  <%= render "console/filters",
+        url: console_taluka_path(@record),
+        fields: [
+          [ :village_id, "Village", @village_choices.map { |village| [ village.name, village.id ] } ],
+          [ :police_station, "Police station" ],
+          [ :pin_code, "Pin code" ]
+        ] %>
+  <div class="overflow-x-auto">
+    <table class="campaign-table w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">Assembly</th>
+          <th class="px-5 py-3 font-medium">Voters</th>
+          <th class="px-5 py-3 font-medium">Police station</th>
+          <th class="px-5 py-3 font-medium">Pin code</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @villages.each do |village| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.name, console_loksabha_assembly_village_path(village.assembly.loksabha, village.assembly, village), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.assembly.name, console_loksabha_assembly_path(village.assembly.loksabha, village.assembly), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.voters_count %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.police_station.presence || "—" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.pin_code.presence || "—" %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :edit, edit_console_loksabha_assembly_village_path(village.assembly.loksabha, village.assembly, village) %>
+                <%= icon_action_button :delete, console_loksabha_assembly_village_path(village.assembly.loksabha, village.assembly, village) %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @villages.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400"><%= village_filters.values.any?(&:present?) ? "No villages match." : "No villages yet." %></p>
+    <% end %>
+  </div>
+</div>

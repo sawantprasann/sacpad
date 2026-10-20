@@ -63,6 +63,8 @@ module Console
           @pagy, @tickets = pagy(:offset, relation)
         end
       end
+
+      load_cadre_activities if params[:tab] == "cadre"
     end
 
     def edit; end
@@ -122,6 +124,42 @@ module Console
 
     def overview_tab?
       params[:tab].blank? || params[:tab] == "overview"
+    end
+
+    # Org-wide cadre feed for the console (not the user's subtree). Tenant must be set:
+    # cadre activities and their detail rows are organization-scoped.
+    def load_cadre_activities
+      ActsAsTenant.with_tenant(@organization) do
+        relation = CadreProgram::CadreActivity.kept
+        if params[:category].present? && CadreProgram::CadreActivity.categories.key?(params[:category])
+          relation = relation.where(category: params[:category])
+        end
+        relation = filter_cadre_activities(relation) if params[:q].present?
+        relation = relation.includes(
+          :owner, :program, :leadership_meet, :party_program_hosted,
+          one_to_one: :karyakarta_user
+        ).with_attached_photos.order(created_at: :desc, id: :desc)
+        @pagy, @activities = pagy(:offset, relation)
+      end
+    end
+
+    def filter_cadre_activities(relation)
+      term = "%#{CadreProgram::CadreActivity.sanitize_sql_like(params[:q].strip)}%"
+      matching = relation
+        .left_joins(:program, :leadership_meet, :party_program_hosted, :one_to_one)
+        .joins("LEFT OUTER JOIN users cadre_owners ON cadre_owners.id = cadre_activities.owner_id")
+        .joins("LEFT OUTER JOIN users cadre_karyakartas ON cadre_karyakartas.id = cadre_activity_one_to_ones.karyakarta_user_id")
+        .where(<<~SQL.squish, t: term)
+          cadre_activities.impact_notes ILIKE :t
+          OR cadre_owners.name ILIKE :t
+          OR cadre_activity_programs.program_name ILIKE :t
+          OR cadre_activity_leadership_meets.whom_to_meet ILIKE :t
+          OR cadre_activity_party_program_hosteds.program_name ILIKE :t
+          OR cadre_activity_one_to_ones.karyakarta_name_text ILIKE :t
+          OR cadre_karyakartas.name ILIKE :t
+        SQL
+        .select("cadre_activities.id")
+      relation.where(id: matching)
     end
 
     def load_users

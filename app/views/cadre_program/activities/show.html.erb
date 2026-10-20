@@ -12,8 +12,16 @@
       meta: "Logged by #{@activity.owner.name} · #{@activity.created_at.strftime("%d %b %Y")} · #{pluralize(@activity.photos.size, "photo")}"
     } do %><% end %>
 
-<div class="mt-4 mb-4 flex justify-end">
-  <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+<div class="mt-4 mb-4 flex flex-wrap items-center justify-between gap-3">
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    Last updated <%= @activity.updated_at.strftime("%d %b %Y, %H:%M") %>
+  </p>
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    <% if policy(@activity).edit? %>
+      <%= link_to "Edit", edit_cadre_program_activity_path(@activity), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    <% end %>
+    <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+  </div>
 </div>
 
 <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">

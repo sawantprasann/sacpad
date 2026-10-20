@@ -5,7 +5,12 @@
 </div>
 
 <div class="campaign-sheet">
-  <%= render "console/filters", url: console_loksabhas_path, fields: [ [ :state, "State" ], [ :district, "District" ], [ :name, "Name" ], [ :constituency_no, "Constituency no" ] ] %>
+  <%= render "console/filters", url: console_loksabhas_path, fields: [
+        [ :state_id, "State", @states.map { |state| [ state.name, state.id ] } ],
+        [ :district_id, "District", @districts.map { |district| [ district.name, district.id ] } ],
+        [ :name, "Name" ],
+        [ :constituency_no, "Constituency no" ]
+      ] %>
   <div class="overflow-x-auto">
     <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">

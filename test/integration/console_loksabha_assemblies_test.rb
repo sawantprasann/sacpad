@@ -157,7 +157,11 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{console_loksabha_assembly_path(@loksabha, ashti)}']", text: "Ashti"
     assert_select "a[href='#{console_loksabha_assembly_path(@loksabha, @assembly)}']", count: 0
 
-    get console_loksabha_assembly_path(@loksabha, @assembly, taluka: "Paranda", pin_code: "413502")
+    get console_loksabha_assembly_path(@loksabha, @assembly)
+    assert_select "select[name=taluka_id] option", text: "Paranda"
+    assert_select "input[name=taluka]", count: 0
+
+    get console_loksabha_assembly_path(@loksabha, @assembly, taluka_id: taluka.id, pin_code: "413502")
     assert_match "Nagathali", response.body
     assert_no_match "Shindewadi", response.body
 

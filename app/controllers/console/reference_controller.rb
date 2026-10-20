@@ -66,7 +66,7 @@ module Console
 
     # Where Cancel returns. Catalogs without a show page go back to the list.
     # The id from the edit URL must be dropped, or this resolves to the member path.
-    # Subclasses with a detail page (loksabha, assembly, village) override this.
+    # Subclasses with a detail page (district, taluka, loksabha, assembly, village) override this.
     def reference_cancel_path
       polymorphic_path([ :console, managed_model ])
     end

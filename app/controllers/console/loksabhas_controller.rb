@@ -8,16 +8,14 @@ module Console
 
     def index
       relation = managed_model.includes(:state, :district).order(:id)
-      if params[:state].present?
-        relation = relation.where("states.name ILIKE ?", like(params[:state])).references(:state)
-      end
-      if params[:district].present?
-        relation = relation.where("districts.name ILIKE ?", like(params[:district])).references(:district)
-      end
+      relation = relation.where(state_id: params[:state_id]) if params[:state_id].present?
+      relation = relation.where(district_id: params[:district_id]) if params[:district_id].present?
       relation = relation.where("loksabhas.name ILIKE ?", like(params[:name])) if params[:name].present?
       if params[:constituency_no].present?
         relation = relation.where("loksabhas.constituency_no ILIKE ?", like(params[:constituency_no]))
       end
+      @states = State.order(:name)
+      @districts = District.order(:name)
       @records = relation
     end
 
@@ -60,7 +58,7 @@ module Console
     end
 
     def loksabha_filters
-      params.permit(:state, :district, :name, :constituency_no)
+      params.permit(:state_id, :district_id, :name, :constituency_no)
     end
 
     def assembly_filters

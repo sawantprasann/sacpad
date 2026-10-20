@@ -18,9 +18,7 @@ module CadreProgram
     end
 
     def show
-      @activity = policy_scope(CadreActivity).includes(
-        :program, :leadership_meet, :party_program_hosted, :personal_activity, one_to_one: :karyakarta_user
-      ).find(params[:id])
+      set_activity
       authorize @activity
     end
 
@@ -46,6 +44,28 @@ module CadreProgram
       end
     end
 
+    def edit
+      set_activity
+      authorize @activity, :edit?
+      build_detail_shells
+      load_org_users
+    end
+
+    def update
+      set_activity
+      authorize @activity, :update?
+      photos = uploaded_photos
+      if @activity.update(activity_params.except(:photos))
+        @activity.photos.attach(photos) if photos.any?
+        record_activity("cadre_activity.updated", record: @activity)
+        redirect_to cadre_program_activity_path(@activity), notice: "Cadre activity updated."
+      else
+        build_detail_shells
+        load_org_users
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
     private
 
     def filtered_activities
@@ -60,25 +80,42 @@ module CadreProgram
 
     def with_list_includes(relation)
       relation.includes(
-        :owner, :program, :leadership_meet, :party_program_hosted, :personal_activity, one_to_one: :karyakarta_user
+        :owner, :program, :leadership_meet, :party_program_hosted, one_to_one: :karyakarta_user
       ).with_attached_photos
     end
 
+    def set_activity
+      @activity = policy_scope(CadreActivity).includes(
+        :program, :leadership_meet, :party_program_hosted, one_to_one: :karyakarta_user
+      ).with_attached_photos.find(params[:id])
+    end
+
     def activity_params
-      params.require(:cadre_activity).permit(
+      permitted = params.require(:cadre_activity).permit(
         :category, :impact_notes, photos: [],
-        program_attributes: %i[program_name occasion location occurred_on host notes],
+        program_attributes: %i[id program_name occasion location occurred_on host notes],
         leadership_meet_attributes: %i[
-          whom_to_meet point_of_discussion work_submitted submitted_on followup_on resolution_notes
+          id whom_to_meet point_of_discussion work_submitted submitted_on followup_on resolution_notes
         ],
         party_program_hosted_attributes: %i[
-          program_name hosted_on location total_attendees print_media electronic_media
+          id program_name hosted_on location total_attendees print_media electronic_media
         ],
-        personal_activity_attributes: %i[activity_name occasion total_submission from_date to_date notes],
         one_to_one_attributes: %i[
-          karyakarta_user_id karyakarta_name_text assignment resolved from_date to_date notes
+          id karyakarta_user_id karyakarta_name_text assignment resolved from_date to_date notes
         ]
       )
+      # An empty file input posts a blank. Drop it so create does not try to attach nothing.
+      photos = Array(permitted[:photos]).reject(&:blank?)
+      if photos.empty?
+        permitted.delete(:photos)
+      else
+        permitted[:photos] = photos
+      end
+      permitted
+    end
+
+    def uploaded_photos
+      Array(activity_params[:photos])
     end
 
     # fields_for renders nothing until the association exists in memory. These shells are saved
@@ -87,7 +124,6 @@ module CadreProgram
       @activity.build_program unless @activity.program
       @activity.build_leadership_meet unless @activity.leadership_meet
       @activity.build_party_program_hosted unless @activity.party_program_hosted
-      @activity.build_personal_activity unless @activity.personal_activity
       @activity.build_one_to_one unless @activity.one_to_one
     end
 

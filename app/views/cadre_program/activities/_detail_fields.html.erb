@@ -101,38 +101,6 @@
   <% end %>
 </fieldset>
 
-<fieldset class="mb-6" x-show="category == 'personal_activities'" x-cloak :disabled="category !== 'personal_activities'">
-  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Personal activity</h2>
-  <%= f.fields_for :personal_activity do |p| %>
-    <div class="<%= grid %>">
-      <div>
-        <%= p.label :activity_name, "Activity name", class: ta_label_classes %>
-        <%= p.text_field :activity_name, class: field %>
-      </div>
-      <div>
-        <%= p.label :occasion, class: ta_label_classes %>
-        <%= p.text_field :occasion, class: field %>
-      </div>
-      <div>
-        <%= p.label :total_submission, "Total submission", class: ta_label_classes %>
-        <%= p.text_field :total_submission, class: field %>
-      </div>
-      <div>
-        <%= p.label :from_date, "From", class: ta_label_classes %>
-        <%= p.date_field :from_date, class: field %>
-      </div>
-      <div>
-        <%= p.label :to_date, "To", class: ta_label_classes %>
-        <%= p.date_field :to_date, class: field %>
-      </div>
-      <div class="<%= wide %>">
-        <%= p.label :notes, class: ta_label_classes %>
-        <%= p.text_area :notes, rows: 3, class: ta_field_classes %>
-      </div>
-    </div>
-  <% end %>
-</fieldset>
-
 <fieldset class="mb-6" x-show="category == 'one_to_one'" x-cloak :disabled="category !== 'one_to_one'">
   <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">One to one</h2>
   <%= f.fields_for :one_to_one do |p| %>

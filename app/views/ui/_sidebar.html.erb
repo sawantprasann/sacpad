@@ -44,7 +44,7 @@
             </li>
           <% end %>
 
-          <%# Cadre Program: expandable submenu of the six fixed categories, each driving the
+          <%# Cadre Program: expandable submenu of the five fixed categories, each driving the
               ?category= filter. Same pattern as Kitchen Cabinet. Shown only with module access. %>
           <% if user_signed_in? && current_user.role.can_access?("cadre_program") %>
             <li x-data="{ open: <%= params[:controller] == 'cadre_program/activities' %> }">

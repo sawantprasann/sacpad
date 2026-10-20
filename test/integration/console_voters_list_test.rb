@@ -9,12 +9,12 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
     district = District.create!(name: "Ahmednagar", state: state, cd: "S1326")
     loksabha = Loksabha.create!(name: "Ahmednagar", state: state, district: district, constituency_no: "37")
     assembly = loksabha.assemblies.create!(name: "Ahmednagar City", constituency_no: "255")
-    village = assembly.villages.create!(name: "Shindewadi")
-    other = assembly.villages.create!(name: "Nagathali")
-    first = village.booths.create!(number: "1")
-    second = other.booths.create!(number: "2")
-    Voter.create!(voter_id: "AAA1111111", first_name: "Asha", last_name: "Patil", booth: first, village: village)
-    Voter.create!(voter_id: "BBB2222222", first_name: "Ravi", last_name: "Kale", booth: second, village: other)
+    @village = assembly.villages.create!(name: "Shindewadi")
+    @other = assembly.villages.create!(name: "Nagathali")
+    first = @village.booths.create!(number: "1")
+    second = @other.booths.create!(number: "2")
+    Voter.create!(voter_id: "AAA1111111", first_name: "Asha", last_name: "Patil", booth: first, village: @village)
+    Voter.create!(voter_id: "BBB2222222", first_name: "Ravi", last_name: "Kale", booth: second, village: @other)
   end
 
   test "the voter list loads every booth in one query" do
@@ -41,7 +41,12 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
     assert_match "Asha", response.body
     assert_no_match "Ravi", response.body
 
-    get console_voters_path(village: "Nagathali", booth: "2", name: "kale")
+    get console_voters_path
+    assert_response :success
+    assert_select "select[name=village_id] option", text: "Nagathali"
+    assert_select "input[name=village]", count: 0
+
+    get console_voters_path(village_id: @other.id, booth: "2", name: "kale")
     assert_response :success
     assert_match "Ravi", response.body
     assert_no_match "Asha", response.body

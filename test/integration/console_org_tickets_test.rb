@@ -76,12 +76,71 @@ class ConsoleOrgTicketsTest < ActionDispatch::IntegrationTest
     assert_no_match(/Alice's ticket 1/, @response.body)
   end
 
-  test "cadre tab shows placeholder" do
+  test "cadre tab lists this organization's activities" do
     sign_in @admin
+    ActsAsTenant.with_tenant(@org_a) do
+      CadreProgram::CadreActivity.create!(
+        owner: @alice, category: :program_by_party, impact_notes: "Warm reaction",
+        program_attributes: { program_name: "Booth rally" }
+      )
+      CadreProgram::CadreActivity.create!(
+        owner: @bob, category: :leadership_meets, impact_notes: "Follow up",
+        leadership_meet_attributes: { whom_to_meet: "Sarpanch" }
+      )
+    end
+    ActsAsTenant.with_tenant(@org_b) do
+      CadreProgram::CadreActivity.create!(
+        owner: @root_b, category: :program_by_party, impact_notes: "Other org",
+        program_attributes: { program_name: "Org B rally" }
+      )
+    end
+
     get console_organization_path(@org_a, tab: "cadre")
     assert_response :success
-    # Just verify cadre page loads (content structure may vary)
-    assert_includes @response.body, "Cadre Program"
+    assert_select "table tbody tr", 2
+    assert_match "Booth rally", @response.body
+    assert_match "Sarpanch", @response.body
+    assert_no_match(/Org B rally/, @response.body)
+  end
+
+  test "cadre tab filters by category and search" do
+    sign_in @admin
+    ActsAsTenant.with_tenant(@org_a) do
+      CadreProgram::CadreActivity.create!(
+        owner: @alice, category: :program_by_party, impact_notes: "Warm reaction",
+        program_attributes: { program_name: "Booth rally" }
+      )
+      CadreProgram::CadreActivity.create!(
+        owner: @bob, category: :one_to_one, impact_notes: "Assignment given",
+        one_to_one_attributes: { karyakarta_name_text: "Sita" }
+      )
+    end
+
+    get console_organization_path(@org_a, tab: "cadre", category: "one_to_one")
+    assert_response :success
+    assert_select "table tbody tr", 1
+    assert_match "Sita", @response.body
+
+    get console_organization_path(@org_a, tab: "cadre", q: "Booth")
+    assert_response :success
+    assert_select "table tbody tr", 1
+    assert_match "Booth rally", @response.body
+  end
+
+  test "cadre tab hides discarded activities and shows an empty state" do
+    sign_in @admin
+    ActsAsTenant.with_tenant(@org_a) do
+      activity = CadreProgram::CadreActivity.create!(
+        owner: @alice, category: :personal_program, impact_notes: "Archived",
+        program_attributes: { program_name: "Old camp" }
+      )
+      activity.discard
+    end
+
+    get console_organization_path(@org_a, tab: "cadre")
+    assert_response :success
+    assert_match "No cadre activities yet.", @response.body
+    assert_no_match(/Old camp/, @response.body)
   end
 
   test "unauthenticated cannot access org details" do

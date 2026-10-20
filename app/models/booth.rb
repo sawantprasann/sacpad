@@ -4,6 +4,15 @@ class Booth < ApplicationRecord
   has_many :voters, dependent: :nullify
   validates :number, presence: true
 
+  # Roll-cover totals live on the booth. These are the voters actually stored for that booth.
+  def voter_gender_counts
+    totals = { male: 0, female: 0, others: 0, unspecified: 0 }
+    voters.group(:gender).count.each do |gender, count|
+      totals[gender_bucket(gender)] += count
+    end
+    totals
+  end
+
   # `number` is text. Numeric values sort as integers (2 before 10); anything else follows, by the text itself.
   scope :by_number, -> {
     order(
@@ -12,4 +21,15 @@ class Booth < ApplicationRecord
       :id
     )
   }
+
+  private
+
+  def gender_bucket(gender)
+    case gender.to_s.strip
+    when /\A(male|m)\z/i then :male
+    when /\A(female|f)\z/i then :female
+    when "" then :unspecified
+    else :others
+    end
+  end
 end

@@ -4,7 +4,12 @@
   <div class="campaign-sheet">
     <%= render "console/filters",
           url: console_voters_path,
-          fields: [ [ :voter_id, "Voter ID" ], [ :name, "Name" ], [ :village, "Village" ], [ :booth, "Booth number" ] ],
+          fields: [
+            [ :voter_id, "Voter ID" ],
+            [ :name, "Name" ],
+            [ :village_id, "Village", @villages.map { |village| [ village.name, village.id ] } ],
+            [ :booth, "Booth number" ]
+          ],
           hint: @search_hint %>
 
     <div class="overflow-x-auto">

@@ -7,11 +7,16 @@ module Api
       assembly = Assembly.find(params[:assembly_id])
       saved = Eci::ImportAssemblyRoll.new(assembly).store_payload(params[:part_number], roll_payload)
       booth = Booth.joins(:village).find_by!(villages: { assembly_id: assembly.id }, number: params[:part_number].to_s)
+      totals = elector_totals
+      booth.update!(totals) if totals.any?
       render json: {
         assembly_id: assembly.id,
         part: params[:part_number].to_s,
         village: booth.village.name,
-        saved: saved
+        saved: saved,
+        male: booth.male_electors,
+        female: booth.female_electors,
+        others: booth.other_electors
       }, status: :created
     rescue ActiveRecord::RecordNotFound
       render json: { error: "Assembly or booth was not found." }, status: :not_found
@@ -39,6 +44,24 @@ module Api
         "cover" => unsafe_hash(body[:cover]),
         "voters" => Array(body[:voters]).map { |row| unsafe_hash(row) }
       }
+    end
+
+    # Sent totals override the cover. A missing total leaves the booth's current value.
+    def elector_totals
+      sources = [ params[:roll].presence, params ].compact
+      totals = {}
+      male = first_integer(sources, :total_male, :male)
+      totals[:male_electors] = male unless male.nil?
+      female = first_integer(sources, :total_female, :female)
+      totals[:female_electors] = female unless female.nil?
+      other = first_integer(sources, :total_other, :total_others, :other, :others)
+      totals[:other_electors] = other unless other.nil?
+      totals
+    end
+
+    def first_integer(sources, *keys)
+      raw = sources.lazy.flat_map { |body| keys.map { |key| body[key] } }.find { |value| value.to_s.strip.present? }
+      Integer(raw, exception: false)
     end
 
     def unsafe_hash(value)

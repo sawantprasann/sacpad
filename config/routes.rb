@@ -83,7 +83,7 @@ Rails.application.routes.draw do
   # Cadre Program (Epic 2). Story 2.1 is the shared base capture; detail forms (2.2) and
   # the dashboard widget / Excel export (2.3) extend this resource.
   namespace :cadre_program do
-    resources :activities, only: %i[index new create show]
+    resources :activities, only: %i[index new create show edit update]
   end
 
   # Ground Reports (Epic 3). Story 3.1 is the village report and its testimonials.

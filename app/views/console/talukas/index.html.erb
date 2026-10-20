@@ -1,0 +1,42 @@
+<% content_for :title, "Talukas" %>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Talukas" } do %><% end %>
+<div class="mt-4 mb-6 flex justify-end">
+  <%= link_to "New Taluka", new_console_taluka_path, class: ta_btn_primary %>
+</div>
+
+<div class="campaign-sheet">
+  <%= render "console/filters",
+        url: console_talukas_path,
+        fields: [
+          [ :district_id, "District", @districts.map { |district| [ district.name, district.id ] } ],
+          [ :name, "Name" ]
+        ] %>
+  <div class="overflow-x-auto">
+    <table class="campaign-table w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">District</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @records.each do |taluka| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to taluka.name, console_taluka_path(taluka), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to taluka.district.name, console_district_path(taluka.district), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :view, console_taluka_path(taluka) %>
+                <%= icon_action_link :edit, edit_console_taluka_path(taluka) %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @records.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400"><%= taluka_filters.values.any?(&:present?) ? "No talukas match." : "No talukas yet." %></p>
+    <% end %>
+  </div>
+</div>

@@ -6,6 +6,8 @@ module CadreProgram
     def show?   = index? && record.owner_id.in?(user.subtree_user_ids)
     def create? = user.role.can_write?("cadre_program")
     def new?    = create?
+    def update? = create? && record.owner_id.in?(user.subtree_user_ids)
+    def edit?   = update?
 
     class Scope < ApplicationPolicy::Scope
       def resolve

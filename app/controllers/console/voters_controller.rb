@@ -6,11 +6,10 @@ module Console
     helper_method :voter_filters
 
     def index
+      @villages = Village.order(:name)
       relation = Voter.includes(:booth, :village).order(created_at: :desc)
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
-      if params[:village].present?
-        relation = relation.joins(:village).where("villages.name ILIKE ?", "%#{like(params[:village])}%")
-      end
+      relation = relation.where(village_id: params[:village_id]) if params[:village_id].present?
       if params[:booth].present?
         relation = relation.joins(:booth).where(booths: { number: params[:booth].strip })
       end
@@ -31,15 +30,11 @@ module Console
     end
 
     def voter_filters
-      params.permit(:voter_id, :name, :village, :booth).to_h
-    end
-
-    def like(value)
-      ActiveRecord::Base.sanitize_sql_like(value.strip)
+      params.permit(:voter_id, :name, :village_id, :booth).to_h
     end
 
     def filter_by_name(relation)
-      unless params[:village].present? || params[:booth].present? || params[:voter_id].present?
+      unless params[:village_id].present? || params[:booth].present? || params[:voter_id].present?
         @search_hint = "Add a village, booth, or voter ID to search by name."
         return relation
       end

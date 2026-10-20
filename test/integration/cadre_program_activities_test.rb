@@ -29,8 +29,6 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
         attrs[:leadership_meet_attributes] = { whom_to_meet: "Sarpanch" }
       when "party_programs_hosted"
         attrs[:party_program_hosted_attributes] = { program_name: "Andolan" }
-      when "personal_activities"
-        attrs[:personal_activity_attributes] = { activity_name: "Village visit" }
       when "one_to_one"
         attrs[:one_to_one_attributes] = { karyakarta_name_text: "Sita" }
       end
@@ -139,7 +137,6 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     assert_select "input[name=?]", "cadre_activity[program_attributes][program_name]"
     assert_select "input[name=?]", "cadre_activity[leadership_meet_attributes][whom_to_meet]"
     assert_select "input[name=?]", "cadre_activity[party_program_hosted_attributes][program_name]"
-    assert_select "input[name=?]", "cadre_activity[personal_activity_attributes][activity_name]"
     assert_select "input[name=?]", "cadre_activity[one_to_one_attributes][karyakarta_name_text]"
     assert_select "select[name=?]", "cadre_activity[one_to_one_attributes][karyakarta_user_id]"
     assert_match ">Alice<", @response.body
@@ -178,6 +175,90 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
       } }
     end
     assert_response :unprocessable_entity
+  end
+
+  test "the activity page shows when it was last updated and an edit link for a writer" do
+    activity = make_activity(owner: @alice, notes: "Warm reaction")
+    sign_in @alice
+
+    get cadre_program_activities_path
+    assert_response :success
+    assert_match "Last updated", @response.body
+    assert_match activity.updated_at.strftime("%d %b %Y, %H:%M"), @response.body
+    assert_select "a[href=?]", edit_cadre_program_activity_path(activity), text: "Edit"
+
+    get cadre_program_activity_path(activity)
+    assert_response :success
+    assert_match "Last updated #{activity.updated_at.strftime("%d %b %Y, %H:%M")}", @response.body
+    assert_select "a[href=?]", edit_cadre_program_activity_path(activity), text: "Edit"
+  end
+
+  test "a reader sees last updated and no edit link" do
+    activity = make_activity(owner: @reader, notes: "Reader note")
+    sign_in @reader
+
+    get cadre_program_activity_path(activity)
+    assert_response :success
+    assert_match "Last updated", @response.body
+    assert_select "a", text: "Edit", count: 0
+
+    get edit_cadre_program_activity_path(activity)
+    assert_response :not_found
+  end
+
+  test "a writer updates the activity, keeps existing photos, and can add another" do
+    activity = make_activity(owner: @alice, notes: "Warm reaction")
+    ActsAsTenant.with_tenant(@org) do
+      activity.photos.attach(io: File.open(file_fixture("photo.png")), filename: "first.png", content_type: "image/png")
+    end
+    sign_in @alice
+
+    get edit_cadre_program_activity_path(activity)
+    assert_response :success
+    assert_select "input[type=hidden][name=?][value=?]", "cadre_activity[category]", "program_by_party"
+    assert_select "input[name=?][value=?]", "cadre_activity[program_attributes][id]", activity.program.id.to_s
+    assert_select "button[type=submit]", text: "Save changes"
+
+    assert_difference -> { ActivityLog.where(action: "cadre_activity.updated").count }, 1 do
+      patch cadre_program_activity_path(activity), params: { cadre_activity: {
+        impact_notes: "Revised reaction",
+        photos: [ "" ],
+        program_attributes: { id: activity.program.id, program_name: "Evening booth", location: "Wadi" }
+      } }
+    end
+    assert_redirected_to cadre_program_activity_path(activity)
+    ActsAsTenant.with_tenant(@org) do
+      activity.reload
+      assert_equal "Revised reaction", activity.impact_notes
+      assert_equal "Evening booth", activity.program.program_name
+      assert_equal "Wadi", activity.program.location
+      assert_equal 1, activity.photos.count
+    end
+
+    photo = fixture_file_upload("photo.png", "image/png")
+    patch cadre_program_activity_path(activity), params: { cadre_activity: {
+      impact_notes: "Revised reaction",
+      photos: [ photo ],
+      program_attributes: { id: activity.program.id, program_name: "Evening booth" }
+    } }
+    assert_redirected_to cadre_program_activity_path(activity)
+    assert_equal 2, ActsAsTenant.with_tenant(@org) { activity.reload.photos.count }
+
+    follow_redirect!
+    assert_match "Evening booth", @response.body
+    assert_match "Revised reaction", @response.body
+  end
+
+  test "a peer activity cannot be edited" do
+    peer = make_activity(owner: @bob, notes: "Bob rally")
+    sign_in @alice
+    get cadre_program_activities_path
+    get edit_cadre_program_activity_path(peer)
+    assert_response :not_found
+    sign_in @alice
+    patch cadre_program_activity_path(peer), params: { cadre_activity: { impact_notes: "Stolen" } }
+    assert_response :not_found
+    assert_equal "Bob rally", ActsAsTenant.with_tenant(@org) { peer.reload.impact_notes }
   end
 
   test "personal program uses the shared program detail" do

@@ -21,7 +21,10 @@ class Api::RollsControllerTest < ActionDispatch::IntegrationTest
           "Main Town or Village" => "Padegaon",
           "Police Station" => "Lonnad",
           "Polling Station No. and Name" => "2 - Padegaon",
-          "Polling Station Address" => "Padegaon school"
+          "Polling Station Address" => "Padegaon school",
+          "Male Electors" => "10",
+          "Female" => "8",
+          "Others" => "1"
         },
         voters: [
           { epic: "SSE8212128", name: "Dhanesh Somnath Idate", age: "22", gender: "Male", serial: "1", house: "10" }
@@ -34,15 +37,71 @@ class Api::RollsControllerTest < ActionDispatch::IntegrationTest
     body = JSON.parse(response.body)
     assert_equal "Padegaon", body["village"]
     assert_equal 1, body["saved"]
+    assert_equal 10, body["male"]
+    assert_equal 8, body["female"]
+    assert_equal 1, body["others"]
 
     booth = Booth.joins(:village).find_by!(villages: { assembly_id: @assembly.id }, number: "2")
     assert_equal "Padegaon", booth.village.name
     assert_equal "Lonnad", booth.village.police_station
     assert_equal "2 - Padegaon", booth.name
+    assert_equal 10, booth.male_electors
+    assert_equal 8, booth.female_electors
+    assert_equal 1, booth.other_electors
     voter = Voter.find_by!(voter_id: "SSE8212128")
     assert_equal "Dhanesh", voter.first_name
     assert_equal booth.id, voter.booth_id
     assert_equal 22, voter.age
+  end
+
+  test "updates total male, female, and other when the booth already has them" do
+    post "/api/assemblies/#{@assembly.id}/parts/2",
+      params: {
+        cover: { "Main Town or Village" => "Padegaon" },
+        total_male: 10,
+        total_female: 8,
+        total_other: 1,
+        voters: []
+      },
+      as: :json,
+      headers: { "Authorization" => "Bearer test-token" }
+
+    assert_response :created
+    booth = Booth.joins(:village).find_by!(villages: { assembly_id: @assembly.id }, number: "2")
+    assert_equal 10, booth.male_electors
+    assert_equal 8, booth.female_electors
+    assert_equal 1, booth.other_electors
+
+    post "/api/assemblies/#{@assembly.id}/parts/2",
+      params: {
+        cover: { "Main Town or Village" => "Padegaon" },
+        total_male: 12,
+        total_female: 9,
+        total_other: 0,
+        voters: []
+      },
+      as: :json,
+      headers: { "Authorization" => "Bearer test-token" }
+
+    assert_response :created
+    body = JSON.parse(response.body)
+    assert_equal 12, body["male"]
+    assert_equal 9, body["female"]
+    assert_equal 0, body["others"]
+    booth.reload
+    assert_equal 12, booth.male_electors
+    assert_equal 9, booth.female_electors
+    assert_equal 0, booth.other_electors
+
+    post "/api/assemblies/#{@assembly.id}/parts/2",
+      params: { cover: { "Main Town or Village" => "Padegaon" }, voters: [] },
+      as: :json,
+      headers: { "Authorization" => "Bearer test-token" }
+
+    booth.reload
+    assert_equal 12, booth.male_electors
+    assert_equal 9, booth.female_electors
+    assert_equal 0, booth.other_electors
   end
 
   test "returns the import failure as json" do

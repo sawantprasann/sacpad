@@ -1,0 +1,63 @@
+<% editing = @activity.persisted? %>
+<div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
+  <%# scope: :cadre_activity — CadreProgram::CadreActivity would otherwise nest params under
+      cadre_program_cadre_activity, and require(:cadre_activity) would miss them. %>
+  <%= form_with model: @activity, scope: :cadre_activity, url: url, method: method, multipart: true do |f| %>
+    <% if @activity.errors.any? %>
+      <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @activity.errors.full_messages.to_sentence %></div>
+    <% end %>
+
+    <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div>
+        <%= f.label :category, class: ta_label_classes %>
+        <% if editing %>
+          <p class="<%= ta_field_classes %> flex min-h-11 items-center"><%= @activity.category_label %></p>
+          <%= f.hidden_field :category %>
+        <% else %>
+          <%= f.select :category,
+                CadreProgram::CadreActivity::CATEGORY_LABELS.map { |key, label| [ label, key ] },
+                { include_blank: "Select a category" },
+                class: "#{ta_field_classes} min-h-11 cursor-pointer", "x-model": "category" %>
+        <% end %>
+      </div>
+    </div>
+
+    <%= render "detail_fields", f: f %>
+
+    <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div>
+        <%= f.label :impact_notes, "Media Value", class: ta_label_classes %>
+        <%= f.text_area :impact_notes, rows: 6, class: "#{ta_field_classes} min-h-11",
+              placeholder: "Sentiment, local reaction, whether this is likely to move votes" %>
+      </div>
+      <div>
+        <%= f.label :photos, "Photos", class: ta_label_classes %>
+        <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
+          <% if @activity.photos.attached? %>
+            <div class="mb-3 grid grid-cols-3 gap-2">
+              <% @activity.photos.each do |photo| %>
+                <% if photo.image? %>
+                  <%= image_tag photo, class: "aspect-square w-full rounded-lg object-cover" %>
+                <% else %>
+                  <p class="text-sm text-gray-600"><%= photo.filename %></p>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+          <%= f.file_field :photos, multiple: true, accept: "image/*",
+                class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+          <p class="mt-2 text-xs text-gray-500">
+            <%= editing ? "Photos already attached stay. New files are added." : "Add one or more photos from the activity." %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"
+              <% unless editing %>x-text="labels[category] ? ('Create ' + labels[category]) : 'Create activity'"<% end %>><%= submit_label %></button>
+      <%= link_to "Cancel", cancel_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

@@ -39,12 +39,10 @@ module CadreProgram
           program_attributes: { program_name: "Should be dropped" }
         )
         hosted = CadreActivity.create!(owner: @user_a, category: :party_programs_hosted, party_program_hosted_attributes: { program_name: "Andolan", total_attendees: 40 })
-        personal = CadreActivity.create!(owner: @user_a, category: :personal_activities, personal_activity_attributes: { activity_name: "Camp" })
 
         assert_equal "MLA", meet.leadership_meet.whom_to_meet
         assert_nil meet.program
         assert_equal 40, hosted.party_program_hosted.total_attendees
-        assert_equal "Camp", personal.personal_activity.activity_name
       end
     end
 
@@ -86,10 +84,6 @@ module CadreProgram
           organization: @org_b, owner: @user_b, category: :party_programs_hosted,
           party_program_hosted_attributes: { program_name: "Their andolan" }
         ).party_program_hosted
-        foreign[:personal] = CadreActivity.create!(
-          organization: @org_b, owner: @user_b, category: :personal_activities,
-          personal_activity_attributes: { activity_name: "Their camp" }
-        ).personal_activity
         foreign[:one] = CadreActivity.create!(
           organization: @org_b, owner: @user_b, category: :one_to_one,
           one_to_one_attributes: { karyakarta_name_text: "Their Sita" }
@@ -100,7 +94,6 @@ module CadreProgram
         CadreActivityProgram => @foreign_program,
         CadreActivityLeadershipMeet => foreign[:meet],
         CadreActivityPartyProgramHosted => foreign[:hosted],
-        CadreActivityPersonalActivity => foreign[:personal],
         CadreActivityOneToOne => foreign[:one]
       }.each do |model, record|
         assert_raises_without_tenant(model)

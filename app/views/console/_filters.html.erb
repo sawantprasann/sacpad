@@ -3,16 +3,24 @@
      when 3..4 then "sm:grid-cols-2 xl:grid-cols-4"
      else "sm:grid-cols-2 lg:grid-cols-3"
      end %>
-<% active = fields.any? { |name, _label| params[name].present? } %>
+<% active = fields.any? { |name, _label, _choices| params[name].present? } %>
+<% field_class = "h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:bg-white focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500 dark:focus:bg-gray-900" %>
 <div class="border-b border-gray-200 px-5 py-3 dark:border-gray-800">
   <%= form_with url: url, method: :get, class: "flex flex-col gap-2 lg:flex-row lg:items-end" do %>
     <div class="grid min-w-0 flex-1 grid-cols-1 gap-2 <%= columns %>">
-      <% fields.each do |name, label| %>
-        <%= text_field_tag name, params[name],
-              placeholder: label,
-              aria: { label: label },
-              autocomplete: "off",
-              class: "h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:bg-white focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-gray-500 dark:focus:bg-gray-900" %>
+      <% fields.each do |name, label, choices| %>
+        <% if choices.is_a?(Array) %>
+          <%= select_tag name,
+                options_for_select([ [ label, "" ] ] + choices, params[name]),
+                aria: { label: label },
+                class: field_class %>
+        <% else %>
+          <%= text_field_tag name, params[name],
+                placeholder: label,
+                aria: { label: label },
+                autocomplete: "off",
+                class: field_class %>
+        <% end %>
       <% end %>
     </div>
     <div class="flex shrink-0 items-center gap-1">

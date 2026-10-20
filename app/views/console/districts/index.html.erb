@@ -1,0 +1,44 @@
+<% content_for :title, "Districts" %>
+<%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Districts" } do %><% end %>
+<div class="mt-4 mb-6 flex justify-end">
+  <%= link_to "New District", new_console_district_path, class: ta_btn_primary %>
+</div>
+
+<div class="campaign-sheet">
+  <%= render "console/filters",
+        url: console_districts_path,
+        fields: [
+          [ :state_id, "State", @states.map { |state| [ state.name, state.id ] } ],
+          [ :name, "Name" ]
+        ] %>
+  <div class="overflow-x-auto">
+    <table class="campaign-table w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Name</th>
+          <th class="px-5 py-3 font-medium">State</th>
+          <th class="px-5 py-3 font-medium">Code</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @records.each do |district| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to district.name, console_district_path(district), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= district.state.name %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= district.cd.presence || "—" %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :view, console_district_path(district) %>
+                <%= icon_action_link :edit, edit_console_district_path(district) %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @records.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400"><%= district_filters.values.any?(&:present?) ? "No districts match." : "No districts yet." %></p>
+    <% end %>
+  </div>
+</div>

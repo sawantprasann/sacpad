@@ -149,11 +149,16 @@ module Eci
     def apply_cover(cover, loksabha)
       return if cover.blank?
 
-      @booth.update!(
+      counts = {
+        male_electors: elector_count(cover, "Male Electors", "Male"),
+        female_electors: elector_count(cover, "Female Electors", "Female"),
+        other_electors: elector_count(cover, "Third Gender Electors", "Others", "Other Electors", "Other")
+      }.compact
+      @booth.update!({
         name: cover["Polling Station No. and Name"].presence,
         address: cover["Polling Station Address"].presence,
         station_type: cover["Type of Polling Station"].presence
-      )
+      }.merge(counts))
       assign_village(cover, loksabha)
     end
 
@@ -228,6 +233,11 @@ module Eci
         }
       end
       by_epic.values
+    end
+
+    def elector_count(cover, *keys)
+      raw = keys.lazy.map { |key| cover[key] }.find { |value| value.to_s.strip.present? }
+      integer_or_nil(raw)
     end
 
     def blank_to_nil(value)

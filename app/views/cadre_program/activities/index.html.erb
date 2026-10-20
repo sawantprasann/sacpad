@@ -30,7 +30,8 @@
           <th class="<%= th %>">Logged by</th>
           <th class="<%= th %> text-right">Photos</th>
           <th class="<%= th %> text-right">Date</th>
-          <th class="<%= th %> w-12"><span class="sr-only">Open</span></th>
+          <th class="<%= th %> text-right">Last updated</th>
+          <th class="<%= th %> w-28"><span class="sr-only">Actions</span></th>
         </tr>
       </thead>
       <tbody>
@@ -48,10 +49,16 @@
             <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
             <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.photos.size %></td>
             <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.updated_at.strftime("%d %b %Y, %H:%M") %></td>
             <td class="<%= td %> text-right">
-              <%= link_to cadre_program_activity_path(activity), class: "inline-flex text-gray-300 group-hover:text-gray-500", aria: { label: "Open #{headline}" } do %>
+              <div class="inline-flex items-center justify-end gap-3">
+                <% if policy(activity).edit? %>
+                  <%= link_to "Edit", edit_cadre_program_activity_path(activity), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+                <% end %>
+                <%= link_to cadre_program_activity_path(activity), class: "inline-flex text-gray-300 group-hover:text-gray-500", aria: { label: "Open #{headline}" } do %>
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
-              <% end %>
+                <% end %>
+              </div>
             </td>
           </tr>
         <% end %>
@@ -64,6 +71,7 @@
 
   <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
     <% @activities.each do |activity| %>
+      <div>
       <%= link_to cadre_program_activity_path(activity), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
@@ -74,7 +82,14 @@
         </div>
         <p class="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
         <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
+        <p class="mt-1 text-xs tabular-nums text-gray-400">Last updated <%= activity.updated_at.strftime("%d %b %Y, %H:%M") %></p>
       <% end %>
+      <% if policy(activity).edit? %>
+        <div class="px-6 pb-4">
+          <%= link_to "Edit", edit_cadre_program_activity_path(activity), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+        </div>
+      <% end %>
+      </div>
     <% end %>
     <% if @activities.empty? %>
       <p class="px-6 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>

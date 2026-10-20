@@ -7,7 +7,7 @@ module CadreProgram
 
     included do
       include OrganizationScoped
-      belongs_to :cadre_activity, class_name: "CadreProgram::CadreActivity"
+      belongs_to :cadre_activity, class_name: "CadreProgram::CadreActivity", touch: true
       before_validation :copy_organization_from_activity
     end
 

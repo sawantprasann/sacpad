@@ -1,0 +1,45 @@
+<% field = "h-10 w-full rounded-lg border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 focus:border-brand-300 focus:bg-white focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:bg-gray-900" %>
+<% active = booth_filters.values.any?(&:present?) %>
+<div class="border-b border-gray-200 px-5 py-3 dark:border-gray-800">
+  <%= form_with url: console_booths_path, method: :get, class: "flex flex-col gap-2 lg:flex-row lg:items-end", data: { controller: "booth-filters" } do %>
+    <div class="grid min-w-0 flex-1 grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <%= text_field_tag :booth_number, params[:booth_number],
+            placeholder: "Booth number",
+            aria: { label: "Booth number" },
+            autocomplete: "off",
+            class: field %>
+      <%= select_tag :district_id,
+            options_for_select([ [ "District", "" ] ] + @districts.map { |district| [ district.name, district.id ] }, params[:district_id]),
+            aria: { label: "District" },
+            class: field,
+            data: { booth_filters_target: "district", action: "change->booth-filters#districtChanged" } %>
+      <%= select_tag :taluka_id,
+            options_for_select(
+              [ [ "Taluka", "" ] ] + @talukas.map { |taluka| [ taluka.name, taluka.id, { data: { district_id: taluka.district_id } } ] },
+              params[:taluka_id]
+            ),
+            aria: { label: "Taluka" },
+            class: field,
+            data: { booth_filters_target: "taluka", action: "change->booth-filters#talukaChanged" } %>
+      <%= select_tag :village_id,
+            options_for_select(
+              [ [ "Village", "" ] ] + @villages.map { |village|
+                [ village.name, village.id, { data: { taluka_id: village.taluka_id, district_id: village.taluka&.district_id } } ]
+              },
+              params[:village_id]
+            ),
+            aria: { label: "Village" },
+            class: field,
+            data: { booth_filters_target: "village" } %>
+    </div>
+    <div class="flex shrink-0 items-center gap-1">
+      <%= submit_tag "Search", class: "campaign-btn inline-flex h-10 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-medium text-white transition" %>
+      <% if active %>
+        <%= link_to "Clear", console_booths_path, class: "inline-flex h-10 items-center rounded-lg px-3 text-sm font-medium text-gray-500 transition hover:bg-white hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white/90" %>
+      <% end %>
+    </div>
+  <% end %>
+  <% if @pagy.count == 0 %>
+    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400"><%= active ? "No booths match." : "No booths found. Create one to get started." %></p>
+  <% end %>
+</div>

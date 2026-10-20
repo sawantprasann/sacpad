@@ -34,7 +34,12 @@
     <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Villages</h2>
     <%= link_to "New Village", new_console_loksabha_assembly_village_path(@loksabha, @record), class: ta_btn_primary %>
   </div>
-  <%= render "console/filters", url: console_loksabha_assembly_path(@loksabha, @record), fields: [ [ :name, "Name" ], [ :taluka, "Taluka" ], [ :police_station, "Police station" ], [ :pin_code, "Pin code" ] ] %>
+  <%= render "console/filters", url: console_loksabha_assembly_path(@loksabha, @record), fields: [
+        [ :name, "Name" ],
+        [ :taluka_id, "Taluka", @talukas.map { |taluka| [ taluka.name, taluka.id ] } ],
+        [ :police_station, "Police station" ],
+        [ :pin_code, "Pin code" ]
+      ] %>
   <div class="overflow-x-auto">
     <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
