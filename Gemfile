@@ -57,7 +57,7 @@ gem "caxlsx", "~> 4.5"          # Excel export (axlsx)
 gem "caxlsx_rails", "~> 0.7"    # Rails view integration for caxlsx
 gem "roo", "~> 3.0"             # Excel import (Ground Reports, Voter roll)
 gem "pdf-reader", "~> 2.14"     # electoral-roll PDF pages for voter sync
-gem "faraday", "~> 2.14"        # HTTP client for Meta/WhatsApp/IVRS adapters
+gem "faraday", "~> 2.15"        # HTTP client for Meta/WhatsApp/IVRS adapters
 gem "aws-sdk-s3", "~> 1.233", require: false # Active Storage S3 backend (all file types)
 
 group :development, :test do
