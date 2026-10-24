@@ -27,10 +27,15 @@
         </div>
         <div>
           <%= f.label :village, "Village / ward", class: ta_label_classes %>
-          <%= f.select :village,
-                options_for_select(Village.order(:name).pluck(:name), @ticket.village),
-                { include_blank: "Select a village..." },
-                class: "#{ta_field_classes} min-h-11", autofocus: true %>
+          <%= render "ui/min_search_select",
+                name: "ticket[village]",
+                choices: Village.order(:name).pluck(:name),
+                selected: @ticket.village,
+                blank: "Select a village...",
+                placeholder: "Select a village...",
+                search_placeholder: "Search villages...",
+                empty_text: "No villages found",
+                autofocus: true %>
         </div>
         <div>
           <%= f.label :representative_name, "Representative name", class: ta_label_classes %>

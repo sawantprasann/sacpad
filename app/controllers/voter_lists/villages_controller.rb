@@ -5,8 +5,11 @@ module VoterLists
 
     def show
       @election = Election.ensure_current!(current_user.organization)
-      @voter_total = @village.voters.count
-      @booth_numbers = @village.booths.by_number.pluck(:number).uniq
+      roll = current_user.visible_voters(@village.voters)
+      @voter_total = roll.count
+      booths = @village.booths
+      booths = booths.where(id: current_user.booth_id) if current_user.booth_manager?
+      @booth_numbers = booths.by_number.pluck(:number).uniq
       voters = listed_voters
       respond_to do |format|
         format.html do
@@ -31,7 +34,7 @@ module VoterLists
     # Names are encrypted, so booth-then-name order is applied after the rows are loaded.
     # The village bounds the set. Export uses the same order as the list.
     def listed_voters
-      relation = @village.voters.includes(:booth, :village)
+      relation = current_user.visible_voters(@village.voters.includes(:booth, :village))
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
       relation = filter_sr_no(relation)
       if params[:booth].present?

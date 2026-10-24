@@ -1,0 +1,87 @@
+<%# Searchable select. Options stay hidden until the query reaches min_length.
+    The native select is the submitted field, so the form still works without JS.
+    locals: name, choices, selected, blank, placeholder, search_placeholder, empty_text,
+            min_length, id, field_class, aria_label, select_data, autofocus %>
+<% min_length = local_assigns.fetch(:min_length, 2) %>
+<% blank = local_assigns[:blank] %>
+<% placeholder = local_assigns.fetch(:placeholder, blank.presence || "Select...") %>
+<% search_placeholder = local_assigns.fetch(:search_placeholder, "Search...") %>
+<% empty_text = local_assigns.fetch(:empty_text, "No options found") %>
+<% field_class = local_assigns.fetch(:field_class, ta_field_classes) %>
+<% aria_label = local_assigns[:aria_label] %>
+<% choices = local_assigns.fetch(:choices, []) %>
+<% select_data = { min_search_select_target: "select" }.merge(local_assigns.fetch(:select_data, {})) %>
+<% select_options = { class: field_class, data: select_data } %>
+<% select_options[:id] = id if local_assigns[:id].present? %>
+<% select_options[:include_blank] = blank if blank.present? %>
+<% select_options[:aria] = { label: aria_label } if aria_label.present? %>
+
+<div class="relative w-full min-w-0"
+     data-controller="min-search-select"
+     data-min-search-select-min-length-value="<%= min_length %>"
+     data-min-search-select-placeholder-value="<%= placeholder %>"
+     data-min-search-select-empty-text-value="<%= empty_text %>"
+     data-action="focusout->min-search-select#focusOut">
+  <%= select_tag name, options_for_select(choices, selected), select_options %>
+
+  <div data-min-search-select-target="ui" class="relative hidden">
+    <button type="button"
+            class="<%= field_class %> flex cursor-pointer items-center text-left"
+            data-min-search-select-target="toggle"
+            data-action="click->min-search-select#toggle"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            <% if aria_label.present? %>aria-label="<%= aria_label %>"<% end %>
+            <% if local_assigns[:autofocus] %>autofocus<% end %>>
+      <span data-min-search-select-target="label" class="min-w-0 flex-1 truncate text-gray-400 dark:text-gray-500"></span>
+      <span class="inline-flex w-10 shrink-0 justify-end text-gray-500 dark:text-gray-400" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </button>
+    <button type="button"
+            data-min-search-select-target="clear"
+            data-action="click->min-search-select#clear"
+            class="absolute top-1/2 right-9 z-10 hidden -translate-y-1/2 rounded p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            aria-label="Clear">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <div data-min-search-select-target="dropdown"
+         hidden
+         class="z-50 flex max-h-72 w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900">
+      <div class="border-b border-gray-100 p-2 dark:border-gray-800">
+        <input type="search"
+               data-min-search-select-target="search"
+               data-action="input->min-search-select#filter keydown->min-search-select#searchKeydown"
+               placeholder="<%= search_placeholder %>"
+               autocomplete="off"
+               spellcheck="false"
+               aria-label="<%= search_placeholder %>"
+               class="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+      </div>
+      <div class="overflow-y-auto p-1">
+        <p data-min-search-select-target="hint" class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400"></p>
+        <div data-min-search-select-target="list"
+             data-action="mousedown->min-search-select#keepFocus click->min-search-select#choose"
+             role="listbox"
+             class="space-y-0.5"></div>
+        <p data-min-search-select-target="empty" class="hidden px-3 py-2 text-sm text-gray-500 dark:text-gray-400"></p>
+      </div>
+    </div>
+  </div>
+
+  <template data-min-search-select-target="optionTemplate">
+    <button type="button"
+            class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg bg-gray-100 px-3 py-2 text-left text-sm font-medium text-gray-800 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/5 dark:focus:bg-white/5"
+            role="option">
+      <span data-title class="min-w-0 truncate"></span>
+      <svg data-check class="hidden shrink-0 text-brand-500" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </template>
+</div>

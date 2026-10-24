@@ -1,0 +1,127 @@
+/* Standalone styles for public/404.html and public/500.html.
+   Kept out of the asset pipeline so these pages still render when the app cannot. */
+
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html, body { min-height: 100%; }
+
+body {
+  font-family: Outfit, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f9fafb;
+  color: #1d2939;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.grid {
+  position: absolute;
+  z-index: 0;
+  width: 100%;
+  max-width: 250px;
+  pointer-events: none;
+}
+
+.grid img { display: block; width: 100%; height: auto; }
+.grid-top { top: 0; right: 0; }
+.grid-bottom { bottom: 0; left: 0; transform: rotate(180deg); }
+
+@media (min-width: 1280px) {
+  .grid { max-width: 450px; }
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 242px;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  main.page-404 { max-width: 472px; }
+  main.page-500 { max-width: 562px; }
+  .message { font-size: 18px; line-height: 28px; }
+}
+
+h1 {
+  margin-bottom: 2rem;
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 700;
+  color: #1d2939;
+}
+
+@media (min-width: 1280px) {
+  h1 { font-size: 72px; line-height: 90px; }
+}
+
+.art { display: block; width: 100%; height: auto; }
+.art-dark { display: none; }
+
+.message {
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 16px;
+  line-height: 24px;
+  color: #344054;
+}
+
+.home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  padding: 14px 20px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #344054;
+  text-decoration: none;
+  box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+}
+
+.home:hover { background: #f9fafb; color: #1d2939; }
+
+.home:focus-visible {
+  outline: 2px solid #465fff;
+  outline-offset: 2px;
+}
+
+footer {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  z-index: 1;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+  color: #667085;
+  white-space: nowrap;
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #101828; }
+  h1 { color: rgba(255, 255, 255, 0.9); }
+  .message { color: #98a2b3; }
+  .art-light { display: none; }
+  .art-dark { display: block; }
+  .home { background: #1d2939; border-color: #344054; color: #98a2b3; }
+  .home:hover { background: rgba(255, 255, 255, 0.03); color: #e4e7ec; }
+  footer { color: #98a2b3; }
+}

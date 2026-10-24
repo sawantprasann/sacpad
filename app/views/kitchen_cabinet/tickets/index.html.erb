@@ -40,10 +40,14 @@
       </div>
       <div>
         <%= label_tag :village, "Village", class: ta_label_classes %>
-        <%= select_tag :village,
-              options_for_select(@villages.map(&:name), params[:village]),
-              include_blank: "Any village",
-              class: ta_field_classes %>
+        <%= render "ui/min_search_select",
+              name: :village,
+              choices: @villages.map { |village| [ village.name, village.name ] },
+              selected: params[:village],
+              blank: "Any village",
+              placeholder: "Any village",
+              search_placeholder: "Search villages...",
+              empty_text: "No villages found" %>
       </div>
       <div>
         <%= label_tag :reporter, "Reporter name", class: ta_label_classes %>

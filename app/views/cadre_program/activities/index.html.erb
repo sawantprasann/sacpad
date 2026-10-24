@@ -1,4 +1,8 @@
 <% content_for :title, @category_label ? "Cadre Program — #{@category_label}" : "Cadre Program" %>
+<% if @category_label %>
+  <% breadcrumb "Cadre Program", cadre_program_activities_path %>
+  <% breadcrumb @category_label %>
+<% end %>
 <% new_path = @category_key ? new_cadre_program_activity_path(category: @category_key) : new_cadre_program_activity_path %>
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>

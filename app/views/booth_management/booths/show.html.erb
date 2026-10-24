@@ -38,3 +38,51 @@
   </dl>
   <p class="mt-6 text-sm text-gray-500">Voted marks belong to <%= @election.name %>. A booth manager records them from the voter list.</p>
 </section>
+
+<section class="<%= ta_card_classes %> mt-6 p-6">
+  <h2 class="text-sm font-semibold text-gray-800 dark:text-white/90">Booth manager</h2>
+  <p class="mt-1 text-sm text-gray-500">A booth manager can sign in and open only this booth's voter list.</p>
+
+  <% if @managers.any? %>
+    <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+      <% @managers.each do |manager| %>
+        <li class="py-3">
+          <p class="text-sm font-medium text-gray-900 dark:text-white/90"><%= manager.name %></p>
+          <p class="mt-0.5 text-xs text-gray-500">
+            <%= manager.email %>
+            <% if manager.phone.present? %> · <span class="tabular-nums"><%= manager.phone %></span><% end %>
+            <%= " · Inactive" unless manager.active? %>
+          </p>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="mt-4 text-sm text-gray-500">No booth manager yet.</p>
+  <% end %>
+
+  <% if current_user.can_add_booth_manager? %>
+    <%= form_with scope: :user, url: booth_managers_path(@booth), class: "mt-6" do |f| %>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <%= f.label :name, class: ta_label_classes %>
+          <%= f.text_field :name, class: ta_field_classes, required: true %>
+        </div>
+        <div>
+          <%= f.label :email, class: ta_label_classes %>
+          <%= f.email_field :email, class: ta_field_classes, required: true %>
+        </div>
+        <div>
+          <%= f.label :phone, class: ta_label_classes %>
+          <%= f.telephone_field :phone, class: ta_field_classes %>
+        </div>
+        <div>
+          <%= f.label :password, "Initial password", class: ta_label_classes %>
+          <%= f.password_field :password, class: ta_field_classes, required: true, autocomplete: "new-password" %>
+        </div>
+      </div>
+      <div class="mt-4">
+        <%= f.submit "Add booth manager", class: "#{ta_btn_primary} min-h-11 cursor-pointer", style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
+      </div>
+    <% end %>
+  <% end %>
+</section>

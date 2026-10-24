@@ -9,7 +9,18 @@
   <%= form_with url: url, method: :get, class: "flex flex-col gap-2 lg:flex-row lg:items-end" do %>
     <div class="grid min-w-0 flex-1 grid-cols-1 gap-2 <%= columns %>">
       <% fields.each do |name, label, choices| %>
-        <% if choices.is_a?(Array) %>
+        <% if choices.is_a?(Array) && name.to_s == "village_id" %>
+          <%= render "ui/min_search_select",
+                name: name,
+                choices: choices,
+                selected: params[name],
+                blank: label,
+                placeholder: label,
+                search_placeholder: "Search villages...",
+                empty_text: "No villages found",
+                field_class: field_class,
+                aria_label: label %>
+        <% elsif choices.is_a?(Array) %>
           <%= select_tag name,
                 options_for_select([ [ label, "" ] ] + choices, params[name]),
                 aria: { label: label },

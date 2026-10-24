@@ -21,6 +21,9 @@ module BoothManagement
       @election = Election.ensure_current!(current_user.organization)
       @voter_count = @booth.voters.count
       @voted_count = @booth.voters.where(id: VoterTurnout.where(election: @election, voted: true).select(:voter_id)).count
+      @managers = User.joins(:role)
+                      .where(organization_id: current_user.organization_id, booth_id: @booth.id, roles: { slug: "booth_manager" })
+                      .order(:name)
     end
 
     private

@@ -57,25 +57,29 @@
       <%= label_tag :name, "Name", class: ta_label_classes %>
       <%= text_field_tag :name, params[:name], class: ta_field_classes %>
     </div>
-    <div>
-      <%= label_tag :booth, "Booth", class: ta_label_classes %>
-      <%= select_tag :booth, options_for_select(@booth_numbers, params[:booth]), include_blank: "Any booth", class: ta_field_classes %>
-    </div>
+    <% unless current_user.booth_manager? %>
+      <div>
+        <%= label_tag :booth, "Booth", class: ta_label_classes %>
+        <%= select_tag :booth, options_for_select(@booth_numbers, params[:booth]), include_blank: "Any booth", class: ta_field_classes %>
+      </div>
+    <% end %>
     <div>
       <%= label_tag :sr_no, "Sr no", class: ta_label_classes %>
       <%= number_field_tag :sr_no, params[:sr_no], class: ta_field_classes, min: 1 %>
     </div>
-    <div>
-      <%= label_tag :sentiment, "Sentiment", class: ta_label_classes %>
-      <%= select_tag :sentiment,
-            options_for_select([
-              [ "● Pleased", "pleased" ],
-              [ "● Transit", "transit" ],
-              [ "● Displeased", "displeased" ]
-            ], params[:sentiment]),
-            include_blank: "Any sentiment",
-            class: ta_field_classes %>
-    </div>
+    <% unless current_user.booth_manager? %>
+      <div>
+        <%= label_tag :sentiment, "Sentiment", class: ta_label_classes %>
+        <%= select_tag :sentiment,
+              options_for_select([
+                [ "● Pleased", "pleased" ],
+                [ "● Transit", "transit" ],
+                [ "● Displeased", "displeased" ]
+              ], params[:sentiment]),
+              include_blank: "Any sentiment",
+              class: ta_field_classes %>
+      </div>
+    <% end %>
     <div>
       <%= label_tag :voted, "Voted", class: ta_label_classes %>
       <%= select_tag :voted, options_for_select([ [ "Voted", "yes" ], [ "Not voted", "no" ] ], params[:voted]), include_blank: "Any", class: ta_field_classes %>

@@ -13,7 +13,16 @@
   <% end %>
 
   <div>
-    <%= searchable_collection_select(f, :village_id, Village.order(:name), :id, :name, label: "Village") %>
+    <%= f.label :village_id, "Village", class: "block text-sm font-medium text-gray-700 dark:text-gray-300" %>
+    <%= render "ui/min_search_select",
+          name: "booth[village_id]",
+          id: "booth_village_id",
+          choices: Village.order(:name).map { |village| [ village.name, village.id ] },
+          selected: @booth.village_id,
+          blank: "Select a village...",
+          placeholder: "Select a village...",
+          search_placeholder: "Search villages...",
+          empty_text: "No villages found" %>
     <% if @booth.errors[:village_id].any? %>
       <p class="mt-1 text-sm text-red-600 dark:text-red-400"><%= @booth.errors[:village_id].first %></p>
     <% end %>

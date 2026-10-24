@@ -18,12 +18,14 @@ class KitchenCabinetVoterMatchTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
-  test "one exact name match links the voter and sets transit sentiment" do
+  test "one exact name match links the voter, sets transit sentiment, and copies the mobile" do
+    @other.update!(mobile: "1111111111")
     assert_difference -> { KitchenCabinet::Ticket.unscoped.count }, 1 do
-      post kitchen_cabinet_tickets_path, params: { ticket: ticket_attrs("Asha R Patil") }
+      post kitchen_cabinet_tickets_path, params: { ticket: ticket_attrs("Asha R Patil").merge(mobile: "9990001111") }
     end
     ticket = KitchenCabinet::Ticket.unscoped.order(:id).last
     assert_equal "BBB2222222", ticket.voter_id
+    assert_equal "9990001111", @other.reload.mobile
     ActsAsTenant.with_tenant(@org) do
       assert VoterSentiment.find_by!(voter: @other).sentiment_transit?
     end
@@ -32,7 +34,7 @@ class KitchenCabinetVoterMatchTest < ActionDispatch::IntegrationTest
 
   test "several exact matches are listed so the representative can choose one" do
     Voter.create!(voter_id: "CCC3333333", first_name: "Asha", last_name: "Patil", booth: @asha.booth, village: @village, sr_no: 9)
-    post kitchen_cabinet_tickets_path, params: { ticket: ticket_attrs("Asha Patil") }
+    post kitchen_cabinet_tickets_path, params: { ticket: ticket_attrs("Asha Patil").merge(mobile: "8880002222") }
     ticket = KitchenCabinet::Ticket.unscoped.order(:id).last
     assert_nil ticket.voter_id
     assert_redirected_to kitchen_cabinet_ticket_path(ticket)
@@ -44,6 +46,7 @@ class KitchenCabinetVoterMatchTest < ActionDispatch::IntegrationTest
 
     post match_voter_kitchen_cabinet_ticket_path(ticket), params: { matched_voter_id: @asha.id }
     assert_equal "AAA1111111", ticket.reload.voter_id
+    assert_equal "8880002222", @asha.reload.mobile
     ActsAsTenant.with_tenant(@org) do
       assert VoterSentiment.find_by!(voter: @asha).sentiment_transit?
     end

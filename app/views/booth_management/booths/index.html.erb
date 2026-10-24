@@ -21,7 +21,14 @@
     </div>
     <div>
       <%= label_tag :village_id, "Village", class: ta_label_classes %>
-      <%= select_tag :village_id, options_from_collection_for_select(@villages, :id, :name, params[:village_id]), include_blank: "Any village", class: ta_field_classes %>
+      <%= render "ui/min_search_select",
+            name: :village_id,
+            choices: @villages.map { |village| [ village.name, village.id ] },
+            selected: params[:village_id],
+            blank: "Any village",
+            placeholder: "Any village",
+            search_placeholder: "Search villages...",
+            empty_text: "No villages found" %>
     </div>
     <div>
       <%= label_tag :address, "Address", class: ta_label_classes %>

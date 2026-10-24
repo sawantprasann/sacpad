@@ -13,7 +13,7 @@ module VoterLists
     end
 
     def organization_villages
-      current_user.organization.villages
+      current_user.visible_villages(current_user.organization.villages)
     end
 
     def organization_talukas

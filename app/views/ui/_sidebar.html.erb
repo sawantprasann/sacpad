@@ -47,10 +47,12 @@
           <%# Cadre Program: expandable submenu of the five fixed categories, each driving the
               ?category= filter. Same pattern as Kitchen Cabinet. Shown only with module access. %>
           <% if user_signed_in? && current_user.role.can_access?("cadre_program") %>
-            <li x-data="{ open: <%= params[:controller] == 'cadre_program/activities' %> }">
+            <% on_cadre_program = params[:controller] == "cadre_program/activities" %>
+            <% cadre_category = cadre_nav_category %>
+            <li x-data="{ open: <%= on_cadre_program %> }">
               <button type="button" @click="open = !open"
-                class="menu-item group menu-item-inactive w-full"
-                :class="{ 'menu-item-active': open }">
+                class="menu-item group w-full <%= on_cadre_program ? "menu-item-active" : "menu-item-inactive" %>"
+                :class="open ? 'menu-item-active' : 'menu-item-inactive'">
                 <span class="menu-item-text">Cadre Program</span>
                 <svg class="ml-auto h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
                      viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -60,9 +62,11 @@
               <ul x-show="open" x-cloak class="mt-1 ml-5 flex flex-col gap-1 border-l border-gray-100 pl-3 dark:border-gray-800">
                 <% CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label| %>
                   <% cat_path = cadre_program_activities_path(category: key) %>
+                  <% active_category = cadre_category == key %>
                   <li>
                     <%= link_to label, cat_path,
-                          class: "menu-dropdown-item #{current_page?(cat_path) ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}" %>
+                          class: "menu-dropdown-item #{active_category ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}",
+                          aria: (active_category ? { current: "page" } : {}) %>
                   </li>
                 <% end %>
               </ul>

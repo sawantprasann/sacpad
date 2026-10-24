@@ -11,10 +11,12 @@ class User < ApplicationRecord
   # acts_as_tenant: Devise authenticates by email with no tenant context. Email is globally unique.
   belongs_to :organization
   belongs_to :role
+  belongs_to :booth, optional: true
   has_many :support_tickets, dependent: :restrict_with_error
   has_one_attached :photo
 
   validates :name, presence: true
+  validates :booth, presence: true, if: :booth_manager?
 
   after_commit :clear_subtree_cache
 
@@ -23,6 +25,28 @@ class User < ApplicationRecord
   # NullStore in test (recomputes). Invalidated when the hierarchy under the user changes.
   def subtree_user_ids
     Rails.cache.fetch([ cache_key_with_version, "subtree_ids" ]) { [ id, *descendant_ids ] }
+  end
+
+  def booth_manager?
+    role&.slug == "booth_manager"
+  end
+
+  # Org Admin and Manager add a booth manager from that booth's page.
+  def can_add_booth_manager?
+    role&.slug.in?(%w[org_admin manager])
+  end
+
+  # Booth managers only see the roll for the booth they were given.
+  def visible_voters(relation = Voter.all)
+    return relation unless booth_manager?
+
+    relation.where(booth_id: booth_id || -1)
+  end
+
+  def visible_villages(relation)
+    return relation unless booth_manager?
+
+    relation.where(id: booth&.village_id)
   end
 
   # Blocked if the user is inactive OR their organization is deactivated (cascade, §3.1a).

@@ -53,6 +53,35 @@ class CadreProgramNavTest < ActionDispatch::IntegrationTest
     assert_select "button[type=submit]", text: "Create Leadership Meets"
   end
 
+  test "a category stays in the breadcrumb and stays highlighted on create and show" do
+    user = user_with_access
+    sign_in user
+
+    get cadre_program_activities_path(category: "leadership_meets")
+    assert_response :success
+    assert_select "nav[aria-label=Breadcrumb] a", text: "Cadre Program"
+    assert_select "nav[aria-label=Breadcrumb] [aria-current=page]", text: "Leadership Meets"
+    assert_select "a.menu-dropdown-item-active", text: "Leadership Meets", count: 1
+    assert_select "button.menu-item-active", text: /Cadre Program/
+    assert_select "a.menu-dropdown-item-inactive", text: "Program By Party"
+
+    get new_cadre_program_activity_path(category: "leadership_meets")
+    assert_select "a.menu-dropdown-item-active", text: "Leadership Meets", count: 1
+    assert_select "button.menu-item-active", text: /Cadre Program/
+
+    activity = ActsAsTenant.with_tenant(@org) do
+      CadreProgram::CadreActivity.create!(
+        owner: user, category: :leadership_meets,
+        leadership_meet_attributes: { whom_to_meet: "Sarpanch" }
+      )
+    end
+    get cadre_program_activity_path(activity)
+    assert_response :success
+    assert_select "a.menu-dropdown-item-active", text: "Leadership Meets", count: 1
+    assert_select "button.menu-item-active", text: /Cadre Program/
+    assert_select "nav[aria-label=Breadcrumb] a", text: "Leadership Meets"
+  end
+
   test "a user without access sees no Cadre Program entry and cannot open the module" do
     sign_in user_without_access
     get root_path

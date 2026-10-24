@@ -14,7 +14,7 @@
       <div><label class="<%= ta_label_classes %>">Name</label><%= f.text_field :name, class: ta_field_classes %></div>
       <div><label class="<%= ta_label_classes %>">Email</label><%= f.email_field :email, class: ta_field_classes %></div>
       <div><label class="<%= ta_label_classes %>">Phone</label><%= f.text_field :phone, class: ta_field_classes %></div>
-      <div><label class="<%= ta_label_classes %>">Role</label><%= f.collection_select :role_id, Role.order(:name), :id, :name, {}, class: ta_field_classes %></div>
+      <div><label class="<%= ta_label_classes %>">Role</label><%= f.collection_select :role_id, Role.where.not(slug: "booth_manager").order(:name), :id, :name, {}, class: ta_field_classes %></div>
       <div><label class="<%= ta_label_classes %>">Initial password</label><%= f.password_field :password, class: ta_field_classes %></div>
     </div>
     <div class="mt-6">

@@ -30,11 +30,18 @@ class VotersListTest < ActionDispatch::IntegrationTest
     assert_match "ABC1234567", @response.body
     assert_match "XYZ7654321", @response.body
     assert_match "bg-green-50", @response.body
+    assert_select "[data-controller=min-search-select][data-min-search-select-min-length-value='2']"
+    assert_select "select[name=village_id]" do
+      assert_select "option", text: "Any village"
+      assert_select "option", text: "Nimgaon"
+      assert_select "option", text: "Kalas"
+    end
 
     get voters_path(voter_id: "ABC1234567", booth: "14", village_id: @village.id, sr_no: 12, name: "asha", sentiment: "pleased")
     assert_response :success
     assert_match "Asha", @response.body
     assert_no_match(/Ravi/, @response.body)
+    assert_select "select[name=village_id] option[selected]", text: "Nimgaon"
   end
 
   test "voted is stored for this organization only" do
@@ -72,6 +79,51 @@ class VotersListTest < ActionDispatch::IntegrationTest
       assert previous.voter_turnouts.find_by!(voter: @asha).voted?
       assert_nil current.voter_turnouts.find_by(voter: @asha)
     end
+  end
+
+  test "a writer can add a mobile number on the voter" do
+    get voter_path(@asha)
+    assert_response :success
+    assert_select "h2", text: "Sentiment", count: 0
+    assert_select "h2", text: "Voted"
+    assert_select "form[action=?]", update_mobile_voter_path(@asha)
+    assert_select "input[name=mobile][maxlength=10][pattern=?]", "[0-9]{10}"
+
+    patch update_mobile_voter_path(@asha), params: { mobile: "98765 43210" }
+    assert_redirected_to voter_path(@asha)
+    assert_equal "9876543210", @asha.reload.mobile
+
+    patch update_mobile_voter_path(@asha), params: { mobile: "123" }
+    assert_redirected_to voter_path(@asha)
+    assert_equal "Enter a 10-digit mobile number.", flash[:alert]
+    assert_equal "9876543210", @asha.reload.mobile
+  end
+
+  test "a booth manager only sees voters from their booth" do
+    role = Role.create!(name: "Booth Manager", slug: "booth_manager")
+    role.role_permissions.create!(module_name: "voter_lists", access_level: "write")
+    manager = User.create!(
+      organization: @org, role: role, booth: @booth, name: "Agent",
+      email: "booth-agent@example.com", password: "password123"
+    )
+    sign_in manager
+
+    get voters_path
+    assert_response :success
+    assert_match "ABC1234567", @response.body
+    assert_no_match(/XYZ7654321/, @response.body)
+    assert_select "select[name=booth]", count: 0
+    assert_select "select[name=village_id]", count: 0
+    assert_select "select[name=sentiment]", count: 0
+    assert_select "input[name=voter_id]"
+    assert_select "input[name=name]"
+    assert_select "input[name=sr_no]"
+    assert_select "select[name=voted]"
+
+    get voter_path(@asha)
+    assert_response :success
+    get voter_path(@ravi)
+    assert_response :not_found
   end
 
   test "export follows the filters" do

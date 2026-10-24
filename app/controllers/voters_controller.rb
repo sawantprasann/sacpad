@@ -2,8 +2,8 @@
 class VotersController < ApplicationController
   before_action :authenticate_user!
   before_action :require_voter_access
-  before_action :require_voter_write, only: %i[update_sentiment update_voted]
-  before_action :set_voter, only: %i[show update_sentiment update_voted]
+  before_action :require_voter_write, only: %i[update_voted update_mobile]
+  before_action :set_voter, only: %i[show update_voted update_mobile]
   helper_method :voter_filters
 
   def index
@@ -20,27 +20,15 @@ class VotersController < ApplicationController
         response.headers["Content-Disposition"] = "attachment; filename=voters.xlsx"
       end
     end
-    @villages = current_organization.villages.order(:name)
-    @booth_numbers = Booth.where(village_id: @villages.select(:id)).by_number.pluck(:number).uniq
+    @villages = current_user.visible_villages(current_organization.villages).order(:name)
+    booths = Booth.where(village_id: @villages.select(:id))
+    booths = booths.where(id: current_user.booth_id) if current_user.booth_manager?
+    @booth_numbers = booths.by_number.pluck(:number).uniq
   end
 
   def show
     @election = Election.ensure_current!(current_organization)
-    @voter_sentiment = sentiment_for(@voter)
     @turnout = VoterTurnout.find_by(election: @election, voter: @voter)
-  end
-
-  def update_sentiment
-    sentiment = sentiment_for(@voter)
-    if sentiment.update(
-      sentiment_status: params[:sentiment_status],
-      sentiment_updated_by_id: current_user.id,
-      sentiment_updated_at: Time.current
-    )
-      redirect_to voter_path(@voter), notice: "Sentiment updated."
-    else
-      redirect_to voter_path(@voter), alert: "Failed to update sentiment."
-    end
   end
 
   def update_voted
@@ -51,14 +39,28 @@ class VotersController < ApplicationController
                   notice: voted ? "Marked as voted for #{election.name}." : "Marked as not voted for #{election.name}."
   end
 
+  def update_mobile
+    digits = params[:mobile].to_s.gsub(/\D/, "")
+    unless digits.match?(/\A\d{10}\z/)
+      redirect_to voter_path(@voter), alert: "Enter a 10-digit mobile number."
+      return
+    end
+
+    if @voter.update(mobile: digits)
+      redirect_to voter_path(@voter), notice: "Mobile number saved."
+    else
+      redirect_to voter_path(@voter), alert: @voter.errors.full_messages.to_sentence.presence || "Couldn't save the mobile number."
+    end
+  end
+
   private
 
   def set_voter
-    @voter = Voter.find(params[:id])
+    @voter = current_user.visible_voters.find(params[:id])
   end
 
   def filtered_voters
-    relation = Voter.all
+    relation = current_user.visible_voters
     relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
     relation = relation.where(sr_no: params[:sr_no]) if params[:sr_no].present?
     relation = relation.where(village_id: params[:village_id]) if params[:village_id].present?
@@ -95,10 +97,6 @@ class VotersController < ApplicationController
     ids = voters.map(&:id)
     @sentiments = VoterSentiment.where(voter_id: ids).index_by(&:voter_id)
     @turnouts = VoterTurnout.where(election: @election, voter_id: ids).index_by(&:voter_id)
-  end
-
-  def sentiment_for(voter)
-    VoterSentiment.find_or_create_by!(voter_id: voter.id)
   end
 
   def voter_filters

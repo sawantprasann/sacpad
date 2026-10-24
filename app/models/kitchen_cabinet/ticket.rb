@@ -78,6 +78,7 @@ module KitchenCabinet
       self.linking_matched_voter = true
       update!(voter_id: voter.voter_id)
       VoterSentiment.find_or_create_by!(voter: voter).record_sentiment!("transit", by: by)
+      copy_mobile_to_voter!(voter)
     end
 
     private
@@ -94,6 +95,14 @@ module KitchenCabinet
 
     def set_defaults
       self.reported_at ||= Date.current
+    end
+
+    # The number captured on the ticket is the one the roll should keep for this voter.
+    def copy_mobile_to_voter!(voter)
+      return if mobile.blank?
+      return if voter.mobile == mobile
+
+      voter.update!(mobile: mobile)
     end
 
     def normalize_mobile

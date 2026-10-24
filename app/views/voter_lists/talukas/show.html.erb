@@ -26,13 +26,19 @@
 
 <%= form_with url: voter_lists_taluka_path(@taluka), method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <div>
-      <%= label_tag :village_id, "Village", class: ta_label_classes %>
-      <%= select_tag :village_id,
-            options_from_collection_for_select(@village_choices, :id, :name, params[:village_id]),
-            include_blank: "All villages",
-            class: ta_field_classes %>
-    </div>
+    <% unless current_user.booth_manager? %>
+      <div>
+        <%= label_tag :village_id, "Village", class: ta_label_classes %>
+        <%= render "ui/min_search_select",
+              name: :village_id,
+              choices: @village_choices.map { |village| [ village.name, village.id ] },
+              selected: params[:village_id],
+              blank: "All villages",
+              placeholder: "All villages",
+              search_placeholder: "Search villages...",
+              empty_text: "No villages found" %>
+      </div>
+    <% end %>
     <div>
       <%= label_tag :police_station, "Police station", class: ta_label_classes %>
       <%= text_field_tag :police_station, params[:police_station], class: ta_field_classes %>

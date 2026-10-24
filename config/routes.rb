@@ -84,13 +84,14 @@ Rails.application.routes.draw do
   # Voter management — Org-scoped sentiment tracking (Epic 6, org-side)
   resources :voters, only: %i[index show] do
     member do
-      patch :update_sentiment
       patch :update_voted
+      patch :update_mobile
     end
   end
 
   resources :booths, only: %i[index show], module: :booth_management do
     resources :checklist_items, only: %i[create update]
+    resources :managers, only: :create
   end
 
   # Cadre Program (Epic 2). Story 2.1 is the shared base capture; detail forms (2.2) and

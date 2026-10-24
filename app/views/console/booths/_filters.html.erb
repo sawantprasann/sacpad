@@ -21,16 +21,19 @@
             aria: { label: "Taluka" },
             class: field,
             data: { booth_filters_target: "taluka", action: "change->booth-filters#talukaChanged" } %>
-      <%= select_tag :village_id,
-            options_for_select(
-              [ [ "Village", "" ] ] + @villages.map { |village|
-                [ village.name, village.id, { data: { taluka_id: village.taluka_id, district_id: village.taluka&.district_id } } ]
-              },
-              params[:village_id]
-            ),
-            aria: { label: "Village" },
-            class: field,
-            data: { booth_filters_target: "village" } %>
+      <%= render "ui/min_search_select",
+            name: :village_id,
+            choices: @villages.map { |village|
+              [ village.name, village.id, { data: { taluka_id: village.taluka_id, district_id: village.taluka&.district_id } } ]
+            },
+            selected: params[:village_id],
+            blank: "Village",
+            placeholder: "Village",
+            search_placeholder: "Search villages...",
+            empty_text: "No villages found",
+            field_class: field,
+            aria_label: "Village",
+            select_data: { booth_filters_target: "village" } %>
     </div>
     <div class="flex shrink-0 items-center gap-1">
       <%= submit_tag "Search", class: "campaign-btn inline-flex h-10 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-medium text-white transition" %>

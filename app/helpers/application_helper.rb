@@ -53,6 +53,14 @@ module ApplicationHelper
     "rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-white/[0.03]"
   end
 
+  # Category submenu item that should stay highlighted on the list, create, and show pages.
+  def cadre_nav_category
+    return unless controller_path == "cadre_program/activities"
+
+    key = params[:category].presence || @activity.try(:category)
+    key.to_s if CadreProgram::CadreActivity.categories.key?(key.to_s)
+  end
+
   def ta_page_title
     "text-xl font-semibold tracking-tight text-gray-900 dark:text-white/90"
   end
