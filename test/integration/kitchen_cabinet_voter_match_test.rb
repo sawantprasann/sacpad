@@ -47,6 +47,10 @@ class KitchenCabinetVoterMatchTest < ActionDispatch::IntegrationTest
     ActsAsTenant.with_tenant(@org) do
       assert VoterSentiment.find_by!(voter: @asha).sentiment_transit?
     end
+
+    patch status_kitchen_cabinet_ticket_path(ticket), params: { to_status: "in_progress" }
+    assert_redirected_to kitchen_cabinet_ticket_path(ticket)
+    assert ticket.reload.in_progress?
   end
 
   test "no match leaves the close flow unchanged and a closed ticket cannot be edited" do

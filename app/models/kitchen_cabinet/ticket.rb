@@ -80,10 +80,14 @@ module KitchenCabinet
 
     private
 
+    # A new voter id is rejected until close, except the early name-match link.
+    # An id already stored must survive later saves, including the move to In progress.
     def voter_id_locked_until_closed
       return if linking_matched_voter
+      return unless will_save_change_to_voter_id?
+      return if closed?
 
-      errors.add(:voter_id, "unlocks once this issue is closed") if voter_id.present? && !closed?
+      errors.add(:voter_id, "unlocks once this issue is closed") if voter_id.present?
     end
 
     def set_defaults

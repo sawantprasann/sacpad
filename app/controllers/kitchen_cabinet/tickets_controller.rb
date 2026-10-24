@@ -14,6 +14,7 @@ module KitchenCabinet
       @categories = TicketCategory.active.order(:display_order, :name)
       @category = @categories.find_by(slug: params[:category])
       @villages = Village.order(:name)
+      assign_reported_on_bounds
       relation = filtered_tickets
 
       respond_to do |format|
@@ -119,7 +120,7 @@ module KitchenCabinet
     private
 
     def ticket_params
-      params.require(:ticket).permit(:person_name, :village, :mobile, :description,
+      params.require(:ticket).permit(:person_name, :representative_name, :village, :mobile, :description,
         :reported_at, :nature_of_issue, :reported_value, :ticket_category_id, attachments: [])
     end
 
@@ -142,7 +143,44 @@ module KitchenCabinet
         term = like_term(params[:q])
         relation = relation.where("tickets.person_name ILIKE :t OR tickets.village ILIKE :t", t: term)
       end
+      relation = relation.where(reported_at: @from_date..) if @from_date
+      relation = relation.where(reported_at: ..@to_date) if @to_date
       relation.order(reported_at: :desc, id: :desc)
+    end
+
+    # First visit (no date params) selects the last 30 days. A submitted blank date drops that bound.
+    def assign_reported_on_bounds
+      if params.key?(:from_date) || params.key?(:to_date)
+        @from_date = parse_filter_date(params[:from_date])
+        @to_date = parse_filter_date(params[:to_date])
+      else
+        @from_date = Date.current - 30
+        @to_date = Date.current
+      end
+    end
+
+    def parse_filter_date(value)
+      return if value.blank?
+
+      Date.iso8601(value.to_s)
+    rescue ArgumentError
+      nil
+    end
+
+    def beneficiaries_by_date_and_category(relation)
+      grouped = relation.joins(:ticket_category)
+                        .group("tickets.reported_at", "ticket_categories.name")
+                        .count
+      return [] if grouped.empty?
+
+      dates = grouped.keys.map(&:first).uniq.sort_by(&:to_date)
+      categories = grouped.keys.map(&:last).uniq.sort
+      categories.map do |category|
+        data = dates.to_h do |date|
+          [ date.to_date.strftime("%d %b %Y"), grouped.fetch([ date, category ], 0) ]
+        end
+        { name: category, data: data }
+      end
     end
 
     def chart_series(relation)
@@ -155,7 +193,7 @@ module KitchenCabinet
 
       {
         line: base.group("tickets.reported_at").order("tickets.reported_at").count,
-        bar: base.joins(:ticket_category).group("ticket_categories.name").order("ticket_categories.name").count,
+        bar: beneficiaries_by_date_and_category(base),
         pie: pie,
         pie_by_category: base.joins(:ticket_category).group("ticket_categories.name").order("ticket_categories.name").count
       }

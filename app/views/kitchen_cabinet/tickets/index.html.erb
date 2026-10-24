@@ -1,5 +1,5 @@
 <% content_for :title, "Beneficiaries" %>
-<% list_params = request.query_parameters.slice("category", "name", "village", "reporter", "status", "q") %>
+<% list_params = request.query_parameters.slice("category", "name", "village", "reporter", "status", "q", "from_date", "to_date") %>
 <% th = "border-b border-amber-100 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-amber-800 dark:border-gray-800 dark:text-amber-200" %>
 <% td = "border-b border-amber-50 px-6 py-4 align-middle dark:border-gray-800" %>
 <% tab_btn = "border-b-2 px-4 py-2 text-sm font-semibold" %>
@@ -21,7 +21,7 @@
   </div>
 
   <%= form_with url: kitchen_cabinet_tickets_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div>
         <%= label_tag :category, "Category", class: ta_label_classes %>
         <%= select_tag :category,
@@ -30,8 +30,8 @@
               class: ta_field_classes %>
       </div>
       <div>
-        <%= label_tag :name, "Name", class: ta_label_classes %>
-        <%= text_field_tag :name, params[:name], class: ta_field_classes, placeholder: "Person name" %>
+        <%= label_tag :name, "Beneficiary name", class: ta_label_classes %>
+        <%= text_field_tag :name, params[:name], class: ta_field_classes, placeholder: "Beneficiary name" %>
       </div>
       <div>
         <%= label_tag :village, "Village", class: ta_label_classes %>
@@ -50,6 +50,14 @@
               options_for_select(KitchenCabinet::Ticket.statuses.keys.map { |s| [ s.humanize, s ] }, params[:status]),
               include_blank: "Any status",
               class: ta_field_classes %>
+      </div>
+      <div>
+        <%= label_tag :from_date, "From date", class: ta_label_classes %>
+        <%= date_field_tag :from_date, @from_date, class: ta_field_classes %>
+      </div>
+      <div>
+        <%= label_tag :to_date, "To date", class: ta_label_classes %>
+        <%= date_field_tag :to_date, @to_date, class: ta_field_classes %>
       </div>
       <div class="flex items-end gap-2">
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
@@ -78,8 +86,8 @@
               empty: "No beneficiaries match these filters." %>
       </div>
       <div x-show="tab === 'bar'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-bar">
-        <%= bar_chart @charts[:bar], id: "beneficiaries-bar", height: "280px",
-              colors: [ "#0e7490" ], xtitle: "Category", ytitle: "Beneficiaries",
+        <%= column_chart @charts[:bar], id: "beneficiaries-bar", height: "280px", stacked: true,
+              xtitle: "Date", ytitle: "Beneficiaries",
               empty: "No beneficiaries match these filters." %>
       </div>
       <div x-show="tab === 'pie'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-pie">
@@ -106,7 +114,8 @@
         <table class="w-full text-sm">
           <thead class="bg-amber-50/80 dark:bg-white/[0.03]">
             <tr>
-              <th class="<%= th %>">Name</th>
+              <th class="<%= th %>">Beneficiary name</th>
+              <th class="<%= th %>">Representative</th>
               <th class="<%= th %>">Ticket</th>
               <th class="<%= th %>">Category</th>
               <th class="<%= th %>">Village</th>
@@ -124,6 +133,7 @@
                     <span class="font-medium text-gray-900 dark:text-white/90"><%= ticket.person_name %></span>
                   <% end %>
                 </td>
+                <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= ticket.representative_name.presence || "—" %></td>
                 <td class="<%= td %> tabular-nums text-gray-500"><%= ticket.ticket_number %></td>
                 <td class="<%= td %>">
                   <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold text-white <%= dashboard_jewel(ticket.ticket_category.display_order.to_i)[:chip] %>"><%= ticket.ticket_category.name %></span>

@@ -53,7 +53,7 @@ module Console
     end
 
     def ticket_params
-      params.require(:ticket).permit(:person_name, :village, :mobile, :description,
+      params.require(:ticket).permit(:person_name, :representative_name, :village, :mobile, :description,
                                       :reported_at, :nature_of_issue, :reported_value,
                                       :ticket_category_id, :status)
     end

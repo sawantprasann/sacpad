@@ -51,6 +51,17 @@ module KitchenCabinet
       end
     end
 
+    test "a linked voter id does not block the move to in progress" do
+      ActsAsTenant.with_tenant(@org) do
+        t = new_open_ticket
+        voter = Voter.create!(voter_id: "VTR456", first_name: "Asha", last_name: "Patil")
+        t.link_matched_voter!(voter, by: @user)
+        assert t.change_status!(to: "in_progress", actor: @user)
+        assert t.in_progress?
+        assert_equal "VTR456", t.reload.voter_id
+      end
+    end
+
     test "matched_voter is a loose lookup — nil when none, the Voter when present" do
       ActsAsTenant.with_tenant(@org) do
         t = new_open_ticket

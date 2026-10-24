@@ -63,6 +63,34 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     assert_no_match(/Asha Patil/, @response.body)
   end
 
+  test "from date and to date default to the last 30 days and filter reported date" do
+    make_ticket(owner: @alice, person: "Recent Asha")
+    ActsAsTenant.with_tenant(@org) do
+      KitchenCabinet::Ticket.create!(owner: @alice, ticket_category: @water, person_name: "Edge Day",
+                                     reported_at: Date.current - 30)
+      KitchenCabinet::Ticket.create!(owner: @alice, ticket_category: @water, person_name: "Old Bimal",
+                                     reported_at: Date.current - 31)
+    end
+
+    sign_in @alice
+    get kitchen_cabinet_tickets_path
+    assert_response :success
+    assert_select "input[name=from_date][value=?]", (Date.current - 30).iso8601
+    assert_select "input[name=to_date][value=?]", Date.current.iso8601
+    assert_match "Recent Asha", @response.body
+    assert_match "Edge Day", @response.body
+    assert_no_match(/Old Bimal/, @response.body)
+
+    get kitchen_cabinet_tickets_path(from_date: (Date.current - 40).iso8601, to_date: (Date.current - 31).iso8601)
+    assert_match "Old Bimal", @response.body
+    assert_no_match(/Recent Asha/, @response.body)
+    assert_no_match(/Edge Day/, @response.body)
+
+    get kitchen_cabinet_tickets_path(from_date: "", to_date: "")
+    assert_match "Recent Asha", @response.body
+    assert_match "Old Bimal", @response.body
+  end
+
   test "category and status filters narrow the list" do
     make_ticket(owner: @alice, category: @water, person: "Water One")
     make_ticket(owner: @alice, category: @road,  person: "Road One")
@@ -96,12 +124,30 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     assert_no_match(/Discarded Dinesh/, @response.body)
   end
 
+  test "the list labels the beneficiary and shows a vertical stacked bar chart" do
+    make_ticket(owner: @alice, person: "Chart Asha", category: @water)
+    make_ticket(owner: @alice, person: "Chart Bimal", category: @road)
+    sign_in @alice
+    get kitchen_cabinet_tickets_path
+    assert_select "label", text: "Beneficiary name"
+    assert_select "th", text: "Beneficiary name"
+    assert_select "th", text: "Representative"
+    assert_match "ColumnChart", @response.body
+    assert_match '"stacked":true', @response.body
+    assert_match %(["#{Date.current.strftime("%d %b %Y")}",1]), @response.body
+    assert_match '"name":"Water"', @response.body
+  end
+
   test "opening an in-subtree ticket renders its detail" do
     t = make_ticket(owner: @alice, person: "Asha", category: @water)
+    ActsAsTenant.with_tenant(@org) { t.update!(representative_name: "Karyakarta Ramesh") }
     sign_in @alice
     get kitchen_cabinet_ticket_path(t)
     assert_response :success
     assert_match "Asha", @response.body
+    assert_match "Beneficiary name", @response.body
+    assert_match "Representative name", @response.body
+    assert_match "Karyakarta Ramesh", @response.body
     assert_match t.ticket_number, @response.body
     assert_select "nav[aria-label=Breadcrumb] a", text: "Beneficiaries"
     assert_select "nav[aria-label=Breadcrumb] a", text: "Water"

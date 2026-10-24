@@ -7,7 +7,7 @@
   <%= render layout: "ui/campaign_hero", locals: {
         kicker: "Beneficiaries",
         title: "Create ticket",
-        subtitle: "Choose a category, then record the person, the issue, and any photos."
+        subtitle: "Choose a category, then record the beneficiary, the issue, and any photos."
       } do %><% end %>
 
   <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
@@ -26,8 +26,12 @@
                 class: "#{ta_field_classes} min-h-11", required: true %>
         </div>
         <div>
-          <%= f.label :person_name, "Person / represents", class: ta_label_classes %>
+          <%= f.label :person_name, "Beneficiary name", class: ta_label_classes %>
           <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
+        </div>
+        <div>
+          <%= f.label :representative_name, "Representative name", class: ta_label_classes %>
+          <%= f.text_field :representative_name, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
           <%= f.label :village, "Village / ward", class: ta_label_classes %>

@@ -5,6 +5,9 @@
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0">
       <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= ticket.person_name %></p>
+      <% if ticket.representative_name.present? %>
+        <p class="truncate text-xs text-gray-500"><%= ticket.representative_name %></p>
+      <% end %>
       <p class="truncate text-xs text-gray-500"><%= ticket.village.presence || "—" %></p>
     </div>
     <%= render "ui/status_pill", status: ticket.status %>

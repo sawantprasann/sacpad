@@ -28,8 +28,12 @@
       <%= render layout: "ui/jewel_card", locals: { accent_index: 0, title: "Ticket" } do %>
         <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div class="<%= field %>">
-            <dt class="<%= label %>">Person / represents</dt>
+            <dt class="<%= label %>">Beneficiary name</dt>
             <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.person_name %></dd>
+          </div>
+          <div class="<%= field %>">
+            <dt class="<%= label %>">Representative name</dt>
+            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.representative_name.presence || "—" %></dd>
           </div>
           <div class="<%= field %>">
             <dt class="<%= label %>">Village / ward</dt>

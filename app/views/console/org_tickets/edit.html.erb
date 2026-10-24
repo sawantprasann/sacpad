@@ -21,8 +21,13 @@
       <% end %>
 
       <div>
-        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Person Name</label>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Beneficiary name</label>
         <%= f.text_field :person_name, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Representative name</label>
+        <%= f.text_field :representative_name, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
