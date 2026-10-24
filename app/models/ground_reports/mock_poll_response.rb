@@ -43,7 +43,7 @@ module GroundReports
     end
 
     def self.tally_for(village)
-      counts = where(village_id: village.id).group(:politician_id, :vote_intent).count
+      counts = kept.where(village_id: village.id).group(:politician_id, :vote_intent).count
       ids = counts.keys.map(&:first).uniq
       Politician.where(id: ids).order(:name).map do |politician|
         {

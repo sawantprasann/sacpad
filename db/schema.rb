@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_20_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_24_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -271,6 +271,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_20_170000) do
     t.bigint "discarded_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.decimal "estimated_cost", precision: 12, scale: 2
     t.index ["discarded_at"], name: "index_ground_reports_on_discarded_at"
     t.index ["organization_id", "owner_id"], name: "index_ground_reports_on_organization_id_and_owner_id"
     t.index ["organization_id", "village_id"], name: "index_ground_reports_on_organization_id_and_village_id"

@@ -16,7 +16,7 @@
 
 <div class="mt-4 mb-4 flex flex-wrap items-center justify-end gap-2">
   <% if policy(@record).edit? %>
-    <%= link_to "Edit", edit_pr_record_path(@record), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    <%= icon_action_link :edit, edit_pr_record_path(@record) %>
   <% end %>
   <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
 </div>

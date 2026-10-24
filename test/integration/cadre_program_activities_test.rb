@@ -36,6 +36,24 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "a link in media value opens in a new tab on the list, the activity, and the dashboard" do
+    notes = "Coverage at https://news.example/story. and www.paper.example/clip"
+    activity = make_activity(owner: @alice, notes: notes)
+    sign_in @alice
+
+    get cadre_program_activity_path(activity)
+    assert_response :success
+    assert_select "a[href=?][target=_blank][rel=?]", "https://news.example/story", "noopener noreferrer", text: "https://news.example/story"
+    assert_select "a[href=?][target=_blank]", "https://www.paper.example/clip", text: "www.paper.example/clip"
+    assert_no_match(%r{href="https://news.example/story\."}, @response.body)
+
+    get cadre_program_activities_path
+    assert_select "a[href=?][target=_blank]", "https://news.example/story"
+
+    get root_path
+    assert_select "a[href=?][target=_blank]", "https://news.example/story"
+  end
+
   test "the new form posts cadre_activity and labels Media Value" do
     sign_in @alice
     get new_cadre_program_activity_path
@@ -213,13 +231,14 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     assert_match "Occurred on", @response.body
     assert_match "12 Oct 2026", @response.body
     assert_no_match(/Last updated/, @response.body)
-    assert_select "a[href=?]", edit_cadre_program_activity_path(activity), text: "Edit"
+    assert_select "a[href=?][aria-label=Edit]", edit_cadre_program_activity_path(activity)
+    assert_select "a[href=?][aria-label=View]", cadre_program_activity_path(activity)
 
     get cadre_program_activity_path(activity)
     assert_response :success
     assert_match "Last updated #{activity.updated_at.strftime("%d %b %Y, %H:%M")}", @response.body
     assert_match "Occurred on", @response.body
-    assert_select "a[href=?]", edit_cadre_program_activity_path(activity), text: "Edit"
+    assert_select "a[href=?][aria-label=Edit]", edit_cadre_program_activity_path(activity)
   end
 
   test "a reader sees last updated and no edit link" do
@@ -229,7 +248,7 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     get cadre_program_activity_path(activity)
     assert_response :success
     assert_match "Last updated", @response.body
-    assert_select "a", text: "Edit", count: 0
+    assert_select "a[aria-label=Edit]", count: 0
 
     get edit_cadre_program_activity_path(activity)
     assert_response :not_found

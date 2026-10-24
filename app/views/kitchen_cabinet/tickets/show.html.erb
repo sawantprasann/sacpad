@@ -18,7 +18,7 @@
       <%= render "ui/status_pill", status: @ticket.status %>
     </div>
     <% if policy(@ticket).edit? %>
-      <%= link_to "Edit", edit_kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+      <%= icon_action_link :edit, edit_kitchen_cabinet_ticket_path(@ticket) %>
     <% end %>
     <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
   </div>

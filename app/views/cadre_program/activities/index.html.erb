@@ -52,17 +52,15 @@
               </td>
             <% end %>
             <td class="<%= td %> max-w-sm text-gray-600 dark:text-gray-300">
-              <span class="line-clamp-2"><%= activity.impact_notes.presence || "—" %></span>
+              <span class="line-clamp-2"><%= linkify_text(activity.impact_notes) || "—" %></span>
             </td>
             <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
             <td class="<%= td %> text-right tabular-nums text-gray-500"><%= activity.photos.size %></td>
             <td class="<%= td %> text-right">
-              <div class="inline-flex items-center justify-end gap-3">
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :view, cadre_program_activity_path(activity) %>
                 <% if policy(activity).edit? %>
-                  <%= link_to "Edit", edit_cadre_program_activity_path(activity), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
-                <% end %>
-                <%= link_to cadre_program_activity_path(activity), class: "inline-flex text-gray-300 group-hover:text-gray-500", aria: { label: "Open #{headline}" } do %>
-                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
+                  <%= icon_action_link :edit, edit_cadre_program_activity_path(activity) %>
                 <% end %>
               </div>
             </td>
@@ -77,28 +75,29 @@
 
   <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
     <% @activities.each do |activity| %>
-      <div>
-      <%= link_to cadre_program_activity_path(activity), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
-        <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= list_text.call(columns.first.last.call(activity)) %></p>
-        <% unless @category_key %>
-          <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "gray" %></p>
-        <% end %>
-        <dl class="mt-2 space-y-1">
-          <% columns.drop(1).each do |label, reader| %>
-            <div class="flex justify-between gap-3 text-xs">
-              <dt class="text-gray-400"><%= label %></dt>
-              <dd class="truncate text-right text-gray-600 dark:text-gray-300"><%= list_text.call(reader.call(activity)) %></dd>
-            </div>
+      <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]">
+        <%= link_to cadre_program_activity_path(activity), class: "block" do %>
+          <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= list_text.call(columns.first.last.call(activity)) %></p>
+          <% unless @category_key %>
+            <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "gray" %></p>
           <% end %>
-        </dl>
-        <p class="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
-        <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
-      <% end %>
-      <% if policy(activity).edit? %>
-        <div class="px-6 pb-4">
-          <%= link_to "Edit", edit_cadre_program_activity_path(activity), class: "text-sm font-medium text-brand-500 hover:text-brand-600" %>
+          <dl class="mt-2 space-y-1">
+            <% columns.drop(1).each do |label, reader| %>
+              <div class="flex justify-between gap-3 text-xs">
+                <dt class="text-gray-400"><%= label %></dt>
+                <dd class="truncate text-right text-gray-600 dark:text-gray-300"><%= list_text.call(reader.call(activity)) %></dd>
+              </div>
+            <% end %>
+          </dl>
+          <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
+        <% end %>
+        <p class="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= linkify_text(activity.impact_notes) || "—" %></p>
+        <div class="mt-2 flex items-center gap-1">
+          <%= icon_action_link :view, cadre_program_activity_path(activity) %>
+          <% if policy(activity).edit? %>
+            <%= icon_action_link :edit, edit_cadre_program_activity_path(activity) %>
+          <% end %>
         </div>
-      <% end %>
       </div>
     <% end %>
     <% if @activities.empty? %>

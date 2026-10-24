@@ -1,11 +1,11 @@
-<% content_for :title, "Create report — #{@village.name}" %>
+<% content_for :title, "Create issue — #{@village.name}" %>
 <% breadcrumb "Ground Reports", ground_reports_villages_path %>
 <% breadcrumb @village.name, ground_reports_village_path(@village) %>
-<% breadcrumb "Create report" %>
+<% breadcrumb "Create issue" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Ground Reports",
-      title: "Create report",
+      title: "Create issue",
       subtitle: "Record the issue, any resolution, and what villagers said.",
       meta: @village.name
     } do %><% end %>
@@ -31,6 +31,10 @@
         <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
         <%= f.date_field :reported_at, class: "#{ta_field_classes} min-h-11" %>
       </div>
+      <div>
+        <%= f.label :estimated_cost, "Estimated cost", class: ta_label_classes %>
+        <%= f.number_field :estimated_cost, min: 0, step: "0.01", class: ta_field_classes %>
+      </div>
     </div>
 
     <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Testimonial</h2>
@@ -40,7 +44,7 @@
 
     <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-              style="background: var(--org-party-color); color: var(--org-party-contrast)">Create report</button>
+              style="background: var(--org-party-color); color: var(--org-party-contrast)">Create issue</button>
       <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
     </div>
   <% end %>

@@ -133,9 +133,7 @@
                 <td class="<%= td %>"><%= render "ui/status_pill", status: ticket.status %></td>
                 <td class="<%= td %> text-right tabular-nums text-gray-500"><%= ticket.reported_at&.strftime("%d %b %Y") %></td>
                 <td class="<%= td %> text-right">
-                  <%= link_to kitchen_cabinet_ticket_path(ticket), class: "inline-flex text-amber-300 group-hover:text-amber-600", aria: { label: "Open #{ticket.person_name}" } do %>
-                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/></svg>
-                  <% end %>
+                  <%= icon_action_link :view, kitchen_cabinet_ticket_path(ticket) %>
                 </td>
               </tr>
             <% end %>

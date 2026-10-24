@@ -26,6 +26,9 @@ class GroundReports::GroundReportTest < ActiveSupport::TestCase
         ]
       )
       assert report.save, report.errors.full_messages.to_sentence
+      report.estimated_cost = -1
+      assert_not report.valid?
+      assert report.errors[:estimated_cost].any?
       assert_equal 1, report.testimonials.count
       assert_equal @org, report.testimonials.first.organization
 

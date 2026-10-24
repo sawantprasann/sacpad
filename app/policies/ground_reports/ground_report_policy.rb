@@ -4,8 +4,10 @@ module GroundReports
   class GroundReportPolicy < ApplicationPolicy
     def index?  = user.role.can_access?("ground_reports")
     def show?   = index? && record.owner_id.in?(user.subtree_user_ids)
-    def create? = user.role.can_write?("ground_reports")
-    def new?    = create?
+    def create?  = user.role.can_write?("ground_reports")
+    def new?     = create?
+    def update?  = create? && record.owner_id.in?(user.subtree_user_ids)
+    def destroy? = update?
 
     class Scope < ApplicationPolicy::Scope
       def resolve

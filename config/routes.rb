@@ -89,15 +89,15 @@ Rails.application.routes.draw do
   # Ground Reports (Epic 3). Story 3.1 is the village report and its testimonials.
   namespace :ground_reports do
     resources :villages, only: %i[index show] do
-      resources :reports, only: %i[new create show] do
+      resources :reports, only: %i[new create show edit update destroy] do
         resources :testimonials, only: :create
       end
-      resources :worship_places, only: :create
-      resources :village_works, only: :create
-      resources :political_positions, only: :create
-      resources :local_karyakartas, only: :create
-      resources :local_admin_contacts, only: :create
-      resources :mock_poll_responses, only: :create
+      resources :worship_places, only: %i[create edit update destroy]
+      resources :village_works, only: %i[create edit update destroy]
+      resources :political_positions, only: %i[create edit update destroy]
+      resources :local_karyakartas, only: %i[create edit update destroy]
+      resources :local_admin_contacts, only: %i[create edit update destroy]
+      resources :mock_poll_responses, only: %i[create edit update destroy]
     end
     resources :imports, only: %i[new create show]
   end

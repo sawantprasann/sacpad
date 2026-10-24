@@ -1,7 +1,7 @@
 <div class="space-y-6">
   <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "#{@voter.first_name} #{@voter.last_name}" } do %><% end %>
   <div class="flex justify-end gap-2">
-    <%= link_to "Edit", edit_console_voter_path(@voter), class: ta_btn_secondary %>
+    <%= icon_action_link :edit, edit_console_voter_path(@voter) %>
     <%= link_to "Back to list", console_voters_path, class: ta_btn_secondary %>
   </div>
 

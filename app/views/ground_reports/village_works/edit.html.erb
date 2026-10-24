@@ -1,0 +1,61 @@
+<%= render layout: "ground_reports/edit_page", locals: { title: "Edit work inline" } do %>
+  <div x-data="<%= { category: @work.nidhi_category.to_s }.to_json %>">
+    <%= form_with model: @work, scope: :village_work,
+          url: ground_reports_village_village_work_path(@village, @work), method: :patch, multipart: true do |f| %>
+      <% if @work.errors.any? %>
+        <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @work.errors.full_messages.to_sentence %></div>
+      <% end %>
+
+      <div class="grid gap-3 md:grid-cols-2">
+        <div>
+          <%= f.label :title, class: ta_label_classes %>
+          <%= f.text_field :title, required: true, class: ta_field_classes %>
+        </div>
+        <div>
+          <%= f.label :concern_person, "Concern person", class: ta_label_classes %>
+          <%= f.text_field :concern_person, required: true, class: ta_field_classes %>
+        </div>
+        <div>
+          <%= f.label :nidhi_asked, "Nidhi asked", class: ta_label_classes %>
+          <%= f.number_field :nidhi_asked, required: true, min: 0, step: "0.01", class: ta_field_classes %>
+        </div>
+        <div>
+          <%= f.label :nidhi_category, "Nidhi category", class: ta_label_classes %>
+          <%= f.select :nidhi_category,
+                GroundReports::VillageWork::NIDHI_CATEGORY_LABELS.map { |key, label| [ label, key ] },
+                { prompt: "Select a category" },
+                required: true, class: ta_field_classes,
+                "@change": "category = $event.target.value" %>
+        </div>
+        <div x-show="category === 'other'" x-cloak>
+          <%= f.label :nidhi_category_name, "Other category name", class: ta_label_classes %>
+          <%= f.text_field :nidhi_category_name, class: ta_field_classes %>
+        </div>
+        <div>
+          <%= f.label :work_order_created_at, "Work order created at", class: ta_label_classes %>
+          <%= f.datetime_field :work_order_created_at, class: ta_field_classes %>
+        </div>
+        <div>
+          <%= f.label :status, class: ta_label_classes %>
+          <%= f.select :status,
+                GroundReports::VillageWork.statuses.keys.map { |key| [ key.humanize, key ] },
+                {}, class: ta_field_classes %>
+        </div>
+        <div class="md:col-span-2">
+          <%= f.label :attachments, "Add attachments", class: ta_label_classes %>
+          <% if @work.attachments.attached? %>
+            <p class="mb-2 text-xs text-gray-500"><%= pluralize(@work.attachments.size, "file") %> already attached.</p>
+          <% end %>
+          <%= f.file_field :attachments, multiple: true,
+                class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)">Save changes</button>
+        <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -354,7 +354,7 @@
               <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white"><%= activity.detail_headline.presence || activity.category_label %></td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= activity.category_label %></td>
-                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= linkify_text(activity.impact_notes) || "—" %></td>
                 <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= activity.owner.name %></td>
                 <td class="px-6 py-4 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= activity.photos.size %></td>
                 <td class="px-6 py-4 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= activity.created_at.strftime("%d %b %Y") %></td>
@@ -380,7 +380,7 @@
               <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b %Y") %></p>
             </div>
             <p class="text-xs text-gray-600 dark:text-gray-400 mb-2"><%= activity.category_label %></p>
-            <p class="text-sm text-gray-700 dark:text-gray-300"><%= activity.impact_notes.presence || "—" %></p>
+            <p class="text-sm text-gray-700 dark:text-gray-300"><%= linkify_text(activity.impact_notes) || "—" %></p>
             <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
           </div>
         <% end %>

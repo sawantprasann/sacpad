@@ -1,0 +1,41 @@
+<%= render layout: "ground_reports/edit_page", locals: { title: "Edit survey response" } do %>
+  <%= form_with model: @survey, scope: :mock_poll_response,
+        url: ground_reports_village_mock_poll_response_path(@village, @survey), method: :patch do |f| %>
+    <% if @survey.errors.any? %>
+      <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @survey.errors.full_messages.to_sentence %></div>
+    <% end %>
+
+    <div class="grid gap-3 md:grid-cols-2">
+      <div>
+        <%= f.label :politician_id, "Politician", class: ta_label_classes %>
+        <%= f.collection_select :politician_id, @politicians, :id, :name, { prompt: "Select a politician" }, { required: true, class: ta_field_classes } %>
+      </div>
+      <div>
+        <%= f.label :respondent_name, "Respondent", class: ta_label_classes %>
+        <%= f.text_field :respondent_name, required: true, class: ta_field_classes %>
+      </div>
+      <div>
+        <%= f.label :respondent_mobile, "Mobile", class: ta_label_classes %>
+        <%= f.telephone_field :respondent_mobile, class: ta_field_classes %>
+      </div>
+      <div>
+        <%= f.label :preference_basis, "Leaning because of", class: ta_label_classes %>
+        <%= f.select :preference_basis, GroundReports::MockPollResponse.preference_bases.keys.map { |key| [ key.humanize, key ] }, { prompt: "Select" }, { required: true, class: ta_field_classes } %>
+      </div>
+      <div>
+        <%= f.label :vote_choice, "Vote", class: ta_label_classes %>
+        <%= f.select :vote_choice, [ [ "Yes", "yes" ], [ "No", "no" ], [ "Undecided", "undecided" ] ], { prompt: "Select" }, { required: true, class: ta_field_classes } %>
+      </div>
+      <div>
+        <%= f.label :note, class: ta_label_classes %>
+        <%= f.text_area :note, rows: 2, class: "#{ta_field_classes} h-auto" %>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)">Save changes</button>
+      <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+    </div>
+  <% end %>
+<% end %>

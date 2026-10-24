@@ -2,6 +2,9 @@ module GroundReports
   class MockPollResponsesController < ApplicationController
     include LoadsVillage
 
+    before_action :set_survey, only: %i[edit update destroy]
+    before_action :load_politicians, only: %i[edit update]
+
     def create
       survey = @village.mock_poll_responses.new(response_params)
       survey.organization = current_user.organization
@@ -14,7 +17,31 @@ module GroundReports
       end
     end
 
+    def edit; end
+
+    def update
+      if @survey.update(response_params)
+        redirect_to ground_reports_village_path(@village), notice: "Survey response updated."
+      else
+        render :edit, status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      @survey.discard_by(current_user)
+      redirect_to ground_reports_village_path(@village), notice: "Survey response deleted."
+    end
+
     private
+
+    def set_survey
+      @survey = @village.mock_poll_responses.kept.find(params[:id])
+      authorize @survey
+    end
+
+    def load_politicians
+      @politicians = Politician.order(:name)
+    end
 
     def response_params
       params.require(:mock_poll_response).permit(

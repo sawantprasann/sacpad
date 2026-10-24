@@ -1,0 +1,14 @@
+<% content_for :title, title %>
+<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb @village.name, ground_reports_village_path(@village) %>
+<% breadcrumb title %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Ground Reports",
+      title: title,
+      subtitle: @village.name
+    } do %><% end %>
+
+<div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
+  <%= yield %>
+</div>

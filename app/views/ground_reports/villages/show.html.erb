@@ -1,12 +1,11 @@
 <% content_for :title, @village.name %>
 <% breadcrumb "Ground Reports", ground_reports_villages_path %>
 <% breadcrumb @village.name %>
-<% current_position = @positions.find { |position| position.ended_at.nil? } %>
 <% can_write = current_user.role.can_write?("ground_reports") %>
 <% snapshot = [
   [ "Worship places", @worship_places.size ],
   [ "Work inline", @works.size ],
-  [ "Current post", current_position&.representative_name || "None" ],
+  [ "Total nidhi", format_nidhi(@total_nidhi) ],
   [ "Karyakartas", @karyakartas.size ],
   [ "Admin contacts", @admin_contacts.size ],
   [ "Likely winner", @likely_winners.map(&:name).to_sentence.presence || "None" ]
@@ -16,21 +15,17 @@
       kicker: "Ground Reports",
       title: @village.name,
       subtitle: @village.assembly.name,
-      meta: pluralize(@pagy.count, "report")
+      meta: pluralize(@pagy.count, "issue")
     } do %><% end %>
 
-<% if can_write %>
-  <div class="mt-4 mb-4 flex justify-end">
-    <%= link_to new_ground_reports_village_report_path(@village),
-          class: "inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full shadow-sm transition hover:opacity-90",
-          style: "background: #c2410c; color: #ffffff",
-          aria: { label: "Create report" } do %>
-      <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-        <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
-      </svg>
-    <% end %>
-  </div>
-<% end %>
+<div class="mt-4 mb-4 flex justify-end">
+  <%= render "ui/module_toolbar",
+        export_url: ground_reports_village_path(@village, format: :xlsx),
+        new_url: (new_ground_reports_village_report_path(@village) if can_write),
+        new_label: "Create issue",
+        accent: "#c2410c",
+        accent_ink: "#ffffff" %>
+</div>
 
 <div class="mt-6 mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
   <% snapshot.each do |label, value| %>
@@ -43,7 +38,7 @@
 
 <section class="<%= ta_card_classes %> overflow-hidden">
   <div class="border-b border-gray-100 px-6 py-4 dark:border-gray-800">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Reports</h2>
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Issues</h2>
     <p class="mt-0.5 text-xs text-gray-500"><%= pluralize(@pagy.count, "issue") %> logged in this village</p>
   </div>
 
@@ -51,9 +46,13 @@
     <thead class="bg-gray-50 dark:bg-white/[0.03]">
       <tr>
         <th class="border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500">Issue</th>
+        <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500">Estimated cost</th>
         <th class="border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500">Logged by</th>
         <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500">Testimonials</th>
         <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500">Reported</th>
+        <% if can_write %>
+          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500"><span class="sr-only">Actions</span></th>
+        <% end %>
       </tr>
     </thead>
     <tbody>
@@ -63,9 +62,19 @@
             <%= link_to truncate(report.issue_text, length: 80), ground_reports_village_report_path(@village, report),
                   class: "font-medium text-gray-900 hover:text-brand-600 dark:text-white/90" %>
           </td>
+          <td class="border-b border-gray-100 px-6 py-4 text-right tabular-nums text-gray-700 dark:border-gray-800"><%= format_estimated_cost(report.estimated_cost) %></td>
           <td class="border-b border-gray-100 px-6 py-4 text-gray-700 dark:border-gray-800"><%= report.owner.name %></td>
           <td class="border-b border-gray-100 px-6 py-4 text-right tabular-nums text-gray-500"><%= report.testimonials.size %></td>
           <td class="border-b border-gray-100 px-6 py-4 text-right tabular-nums text-gray-500"><%= report.reported_at.strftime("%d %b %Y") %></td>
+          <% if can_write %>
+            <td class="border-b border-gray-100 px-6 py-4 text-right dark:border-gray-800">
+              <%= render "ground_reports/row_actions",
+                    can_write: can_write,
+                    edit_path: edit_ground_reports_village_report_path(@village, report),
+                    delete_path: ground_reports_village_report_path(@village, report),
+                    label: "issue" %>
+            </td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>
@@ -73,15 +82,22 @@
 
   <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
     <% @reports.each do |report| %>
-      <%= link_to ground_reports_village_report_path(@village, report), class: "block px-6 py-4 hover:bg-gray-50" do %>
-        <p class="font-medium text-gray-900"><%= truncate(report.issue_text, length: 90) %></p>
-        <p class="mt-1 text-xs text-gray-500"><%= report.owner.name %> · <%= pluralize(report.testimonials.size, "testimonial") %> · <%= report.reported_at.strftime("%d %b %Y") %></p>
-      <% end %>
+      <div class="flex items-start justify-between gap-3 px-6 py-4 hover:bg-gray-50">
+        <%= link_to ground_reports_village_report_path(@village, report), class: "min-w-0" do %>
+          <p class="font-medium text-gray-900"><%= truncate(report.issue_text, length: 90) %></p>
+          <p class="mt-1 text-xs text-gray-500"><%= report.owner.name %> · <%= format_estimated_cost(report.estimated_cost) %> · <%= pluralize(report.testimonials.size, "testimonial") %> · <%= report.reported_at.strftime("%d %b %Y") %></p>
+        <% end %>
+        <%= render "ground_reports/row_actions",
+              can_write: can_write,
+              edit_path: edit_ground_reports_village_report_path(@village, report),
+              delete_path: ground_reports_village_report_path(@village, report),
+              label: "issue" %>
+      </div>
     <% end %>
   </div>
 
   <% if @reports.empty? %>
-    <p class="px-6 py-10 text-center text-sm text-gray-400">No reports yet.</p>
+    <p class="px-6 py-10 text-center text-sm text-gray-400">No issues yet.</p>
   <% end %>
 
   <%= render "ui/pagination", pagy: @pagy %>
@@ -97,12 +113,19 @@
     <% if @worship_places.any? %>
       <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @worship_places.each do |place| %>
-          <li class="px-5 py-3">
-            <p class="font-medium text-gray-900 dark:text-white/90"><%= place.name %></p>
-            <p class="mt-0.5 text-xs text-gray-500"><%= place.place_type %></p>
-            <% if place.notes.present? %>
-              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= place.notes %></p>
-            <% end %>
+          <li class="flex items-start justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
+              <p class="font-medium text-gray-900 dark:text-white/90"><%= place.name %></p>
+              <p class="mt-0.5 text-xs text-gray-500"><%= place.place_type %></p>
+              <% if place.notes.present? %>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= place.notes %></p>
+              <% end %>
+            </div>
+            <%= render "ground_reports/row_actions",
+                  can_write: can_write,
+                  edit_path: edit_ground_reports_village_worship_place_path(@village, place),
+                  delete_path: ground_reports_village_worship_place_path(@village, place),
+                  label: "worship place" %>
           </li>
         <% end %>
       </ul>
@@ -143,7 +166,8 @@
     <% if @positions.any? %>
       <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @positions.each do |position| %>
-          <li class="px-5 py-3">
+          <li class="flex items-start justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
             <div class="flex items-center justify-between gap-2">
               <p class="font-medium text-gray-900 dark:text-white/90"><%= position.representative_name %></p>
               <% if position.ended_at.nil? %>
@@ -155,6 +179,12 @@
               <%= position.started_at.strftime("%d %b %Y") %>
               <% if position.ended_at %>– <%= position.ended_at.strftime("%d %b %Y") %><% end %>
             </p>
+            </div>
+            <%= render "ground_reports/row_actions",
+                  can_write: can_write,
+                  edit_path: edit_ground_reports_village_political_position_path(@village, position),
+                  delete_path: ground_reports_village_political_position_path(@village, position),
+                  label: "political position" %>
           </li>
         <% end %>
       </ul>
@@ -201,17 +231,24 @@
     <% if @karyakartas.any? %>
       <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @karyakartas.each do |contact| %>
-          <li class="px-5 py-3">
-            <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
-            <% if contact.address.present? %>
-              <p class="mt-0.5 text-xs text-gray-500"><%= contact.address %></p>
-            <% end %>
-            <% if contact.phone.present? %>
-              <p class="mt-0.5 text-xs tabular-nums text-gray-500"><%= contact.phone %></p>
-            <% end %>
-            <% if contact.notes.present? %>
-              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= contact.notes %></p>
-            <% end %>
+          <li class="flex items-start justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
+              <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
+              <% if contact.address.present? %>
+                <p class="mt-0.5 text-xs text-gray-500"><%= contact.address %></p>
+              <% end %>
+              <% if contact.phone.present? %>
+                <p class="mt-0.5 text-xs tabular-nums text-gray-500"><%= contact.phone %></p>
+              <% end %>
+              <% if contact.notes.present? %>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= contact.notes %></p>
+              <% end %>
+            </div>
+            <%= render "ground_reports/row_actions",
+                  can_write: can_write,
+                  edit_path: edit_ground_reports_village_local_karyakarta_path(@village, contact),
+                  delete_path: ground_reports_village_local_karyakarta_path(@village, contact),
+                  label: "karyakarta" %>
           </li>
         <% end %>
       </ul>
@@ -253,12 +290,19 @@
     <% if @admin_contacts.any? %>
       <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
         <% @admin_contacts.each do |contact| %>
-          <li class="px-5 py-3">
-            <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
-            <p class="mt-0.5 text-xs text-gray-500"><%= contact.admin_contact_role&.name || contact.role_title %><% if contact.phone.present? %> · <span class="tabular-nums"><%= contact.phone %></span><% end %></p>
-            <% if contact.notes.present? %>
-              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= contact.notes %></p>
-            <% end %>
+          <li class="flex items-start justify-between gap-3 px-5 py-3">
+            <div class="min-w-0">
+              <p class="font-medium text-gray-900 dark:text-white/90"><%= contact.name %></p>
+              <p class="mt-0.5 text-xs text-gray-500"><%= contact.admin_contact_role&.name || contact.role_title %><% if contact.phone.present? %> · <span class="tabular-nums"><%= contact.phone %></span><% end %></p>
+              <% if contact.notes.present? %>
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= contact.notes %></p>
+              <% end %>
+            </div>
+            <%= render "ground_reports/row_actions",
+                  can_write: can_write,
+                  edit_path: edit_ground_reports_village_local_admin_contact_path(@village, contact),
+                  delete_path: ground_reports_village_local_admin_contact_path(@village, contact),
+                  label: "administrative contact" %>
           </li>
         <% end %>
       </ul>
@@ -345,15 +389,22 @@
   <% if @poll_responses.any? %>
     <ul class="divide-y divide-gray-100 border-t border-gray-100 dark:divide-gray-800 dark:border-gray-800">
       <% @poll_responses.each do |survey| %>
-        <li class="px-6 py-3">
-          <p class="font-medium text-gray-900 dark:text-white/90"><%= survey.respondent_name %></p>
-          <p class="mt-0.5 text-xs text-gray-500">
-            <%= survey.politician.name %> · <%= survey.preference_basis.humanize %> · <%= survey.vote_label %>
-            <% if survey.respondent_mobile.present? %> · <span class="tabular-nums"><%= survey.respondent_mobile %></span><% end %>
-          </p>
-          <% if survey.note.present? %>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= survey.note %></p>
-          <% end %>
+        <li class="flex items-start justify-between gap-3 px-6 py-3">
+          <div class="min-w-0">
+            <p class="font-medium text-gray-900 dark:text-white/90"><%= survey.respondent_name %></p>
+            <p class="mt-0.5 text-xs text-gray-500">
+              <%= survey.politician.name %> · <%= survey.preference_basis.humanize %> · <%= survey.vote_label %>
+              <% if survey.respondent_mobile.present? %> · <span class="tabular-nums"><%= survey.respondent_mobile %></span><% end %>
+            </p>
+            <% if survey.note.present? %>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400"><%= survey.note %></p>
+            <% end %>
+          </div>
+          <%= render "ground_reports/row_actions",
+                can_write: can_write,
+                edit_path: edit_ground_reports_village_mock_poll_response_path(@village, survey),
+                delete_path: ground_reports_village_mock_poll_response_path(@village, survey),
+                label: "survey response" %>
         </li>
       <% end %>
     </ul>

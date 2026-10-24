@@ -55,6 +55,27 @@ module ApplicationHelper
     "#{raw} · SAC-PAD"
   end
 
+  # URLs typed into a note (Media Value and the same text elsewhere) become links
+  # that open in a new tab. Surrounding text stays escaped.
+  LINK_IN_TEXT = %r{(https?://[^\s<]+|www\.[^\s<]+)}i
+
+  def linkify_text(text)
+    source = text.to_s
+    return if source.blank?
+
+    safe_join(source.split(LINK_IN_TEXT).map { |piece| link_piece(piece) })
+  end
+
+  def format_nidhi(amount)
+    number_with_precision(amount.to_d, precision: 2, delimiter: ",", strip_insignificant_zeros: true)
+  end
+
+  def format_estimated_cost(amount)
+    return "—" if amount.nil?
+
+    format_nidhi(amount)
+  end
+
   # --- Organization Dashboard widget composition (FR50/FR51) ---
   # Module widgets render only if the viewer's role can access that module; org-admin-only
   # widgets render for roles with the can_create_users (org_admin) capability.
@@ -182,5 +203,34 @@ module ApplicationHelper
     else
       "pagination-page flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium text-gray-700 dark:text-gray-400"
     end
+  end
+
+  private
+
+  def link_piece(piece)
+    return piece unless piece.match?(/\A(?:https?:\/\/|www\.)/i)
+
+    url, trailing = strip_link_punctuation(piece)
+    return piece if url.blank?
+
+    href = url.match?(/\Ahttps?:\/\//i) ? url : "https://#{url}"
+    safe_join([
+      link_to(url, href, target: "_blank", rel: "noopener noreferrer",
+              class: "break-all text-brand-500 underline hover:text-brand-600"),
+      trailing.presence
+    ].compact)
+  end
+
+  def strip_link_punctuation(url)
+    trailing = +""
+    while (match = url.match(/([.,;:!?])\z/))
+      trailing.prepend(match[1])
+      url = url.delete_suffix(match[1])
+    end
+    while url.end_with?(")") && url.count("(") < url.count(")")
+      trailing.prepend(")")
+      url = url.delete_suffix(")")
+    end
+    [ url, trailing ]
   end
 end

@@ -15,8 +15,8 @@
             <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= activity.category_label %></p>
             <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b") %></p>
           </div>
-          <p class="mt-0.5 line-clamp-2 text-xs text-gray-500"><%= activity.impact_notes.presence || "—" %></p>
         <% end %>
+        <p class="mt-0.5 line-clamp-2 text-xs text-gray-500"><%= linkify_text(activity.impact_notes) || "—" %></p>
       </li>
     <% end %>
   </ul>

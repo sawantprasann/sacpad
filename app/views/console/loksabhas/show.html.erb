@@ -4,7 +4,7 @@
 
 <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: @loksabha.name, subtitle: "Loksabha" } do %><% end %>
 <div class="mt-4 mb-6 flex justify-end">
-  <%= link_to "Edit", edit_console_loksabha_path(@loksabha), class: ta_btn_secondary %>
+  <%= icon_action_link :edit, edit_console_loksabha_path(@loksabha) %>
 </div>
 
 <div class="<%= ta_card_classes %> mb-6 p-6">

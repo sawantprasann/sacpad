@@ -13,7 +13,7 @@ module GroundReports
 
     validates :representative_name, :position_title, :started_at, presence: true
 
-    before_create :close_previous_current, if: -> { ended_at.nil? }
+    before_save :close_previous_current, if: -> { ended_at.nil? }
 
     scope :current, -> { where(ended_at: nil) }
 
@@ -21,6 +21,7 @@ module GroundReports
 
     def close_previous_current
       self.class.where(village_id: village_id, organization_id: organization_id, ended_at: nil)
+                .where.not(id: id)
                 .update_all(ended_at: started_at, updated_at: Time.current)
     end
   end

@@ -1,0 +1,94 @@
+# One sheet per section on the village page. Issues are the full viewer-scoped set.
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Issues") do |sheet|
+  sheet.add_row [ "Issue", "Estimated cost", "Resolution", "Logged by", "Testimonials", "Reported" ]
+  @reports.each do |report|
+    sheet.add_row [
+      report.issue_text,
+      report.estimated_cost,
+      report.resolution_text,
+      report.owner.name,
+      report.testimonials.size,
+      report.reported_at.strftime("%d %b %Y")
+    ]
+  end
+end
+
+wb.add_worksheet(name: "Worship places") do |sheet|
+  sheet.add_row [ "Name", "Type", "Notes" ]
+  @worship_places.each do |place|
+    sheet.add_row [ place.name, place.place_type, place.notes ]
+  end
+end
+
+wb.add_worksheet(name: "Political position") do |sheet|
+  sheet.add_row [ "Representative", "Title", "Party", "Started", "Ended", "Current" ]
+  @positions.each do |position|
+    sheet.add_row [
+      position.representative_name,
+      position.position_title,
+      position.party.name,
+      position.started_at.strftime("%d %b %Y"),
+      position.ended_at&.strftime("%d %b %Y"),
+      ("Current" if position.ended_at.nil?)
+    ]
+  end
+end
+
+wb.add_worksheet(name: "Work inline") do |sheet|
+  sheet.add_row [ "Title", "Concern person", "Nidhi asked", "Category", "Work order", "Status", "Attachments" ]
+  @works.each do |work|
+    sheet.add_row [
+      work.title,
+      work.concern_person,
+      work.nidhi_asked,
+      work.nidhi_label,
+      work.work_order_created_at&.strftime("%d %b %Y"),
+      work.status.humanize,
+      work.attachments.size
+    ]
+  end
+end
+
+wb.add_worksheet(name: "People") do |sheet|
+  sheet.add_row [ "Kind", "Name", "Role", "Phone", "Address", "Notes" ]
+  @karyakartas.each do |contact|
+    sheet.add_row [ "Karyakarta", contact.name, nil, contact.phone, contact.address, contact.notes ]
+  end
+  @admin_contacts.each do |contact|
+    sheet.add_row [
+      "Administrative contact",
+      contact.name,
+      contact.admin_contact_role&.name || contact.role_title,
+      contact.phone,
+      nil,
+      contact.notes
+    ]
+  end
+end
+
+wb.add_worksheet(name: "Mock poll") do |sheet|
+  sheet.add_row [ "Politician", "Yes", "No", "Undecided", "Likely" ]
+  @poll_tally.each do |row|
+    sheet.add_row [
+      row[:politician].name,
+      row[:yes],
+      row[:no],
+      row[:undecided],
+      ("Likely" if @likely_winners.include?(row[:politician]))
+    ]
+  end
+  sheet.add_row []
+  sheet.add_row [ "Respondent", "Mobile", "Politician", "Leaning because of", "Vote", "Note" ]
+  @poll_responses.each do |survey|
+    sheet.add_row [
+      survey.respondent_name,
+      survey.respondent_mobile,
+      survey.politician.name,
+      survey.preference_basis.humanize,
+      survey.vote_label,
+      survey.note
+    ]
+  end
+end

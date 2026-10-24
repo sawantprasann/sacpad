@@ -1,0 +1,32 @@
+<%= render layout: "ground_reports/edit_page", locals: { title: "Edit worship place" } do %>
+  <%= form_with model: @place, scope: :worship_place,
+        url: ground_reports_village_worship_place_path(@village, @place), method: :patch do |f| %>
+    <% if @place.errors.any? %>
+      <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @place.errors.full_messages.to_sentence %></div>
+    <% end %>
+
+    <div class="space-y-3">
+      <div>
+        <%= f.label :name, class: ta_label_classes %>
+        <%= f.text_field :name, required: true, class: ta_field_classes %>
+      </div>
+      <div>
+        <%= f.label :place_type, "Type", class: ta_label_classes %>
+        <%= f.select :place_type,
+              [ "Temple", "Mosque", "Church", "Gurudwara", "Yatra", "Other" ],
+              { prompt: "Select a type" },
+              required: true, class: ta_field_classes %>
+      </div>
+      <div>
+        <%= f.label :notes, class: ta_label_classes %>
+        <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)">Save changes</button>
+      <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+    </div>
+  <% end %>
+<% end %>

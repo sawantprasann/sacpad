@@ -15,6 +15,7 @@ module GroundReports
     accepts_nested_attributes_for :testimonials, reject_if: :blank_testimonial?
 
     validates :issue_text, :reported_at, presence: true
+    validates :estimated_cost, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
     validate :village_in_constituency
 
     after_initialize :set_reported_at, if: :new_record?

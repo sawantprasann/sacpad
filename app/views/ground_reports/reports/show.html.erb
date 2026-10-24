@@ -1,4 +1,4 @@
-<% content_for :title, "#{@village.name} — report" %>
+<% content_for :title, "#{@village.name} — issue" %>
 <% breadcrumb "Ground Reports", ground_reports_villages_path %>
 <% breadcrumb @village.name, ground_reports_village_path(@village) %>
 <% breadcrumb truncate(@report.issue_text, length: 48) %>
@@ -10,12 +10,20 @@
       meta: "Logged by #{@report.owner.name} · #{@report.reported_at.strftime("%d %b %Y")}"
     } do %><% end %>
 
-<div class="mt-4 mb-4 flex justify-end">
+<div class="mt-4 mb-4 flex items-center justify-end gap-2">
+  <%= render "ground_reports/row_actions",
+        can_write: policy(@report).update?,
+        edit_path: edit_ground_reports_village_report_path(@village, @report),
+        delete_path: ground_reports_village_report_path(@village, @report),
+        label: "issue" %>
   <%= link_to "Back to village", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
 </div>
 
 <div class="grid gap-4 xl:grid-cols-3">
   <div class="<%= ta_card_classes %> p-6 xl:col-span-2">
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Estimated cost</h2>
+    <p class="mb-6 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= format_estimated_cost(@report.estimated_cost) %></p>
+
     <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Resolution</h2>
     <p class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300"><%= @report.resolution_text.presence || "—" %></p>
   </div>

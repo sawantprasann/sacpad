@@ -18,7 +18,7 @@
   </p>
   <div class="flex flex-wrap items-center justify-end gap-2">
     <% if policy(@activity).edit? %>
-      <%= link_to "Edit", edit_cadre_program_activity_path(@activity), class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+      <%= icon_action_link :edit, edit_cadre_program_activity_path(@activity) %>
     <% end %>
     <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
   </div>
@@ -32,7 +32,7 @@
   <div class="flex flex-col gap-4">
     <section class="<%= ta_card_classes %> p-6">
       <h2 class="border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90">Media Value</h2>
-      <p class="mt-4 whitespace-pre-line text-sm leading-6 text-gray-800 dark:text-white/90"><%= @activity.impact_notes.presence || "—" %></p>
+      <p class="mt-4 whitespace-pre-line text-sm leading-6 text-gray-800 dark:text-white/90"><%= linkify_text(@activity.impact_notes) || "—" %></p>
     </section>
 
     <section class="<%= ta_card_classes %> p-6">
