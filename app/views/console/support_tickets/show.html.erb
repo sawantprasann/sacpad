@@ -1,0 +1,16 @@
+<% content_for :title, @ticket.ticket_number %>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Platform Console",
+      title: "Ticket reply",
+      subtitle: @ticket.ticket_number,
+      meta: @ticket.organization.name
+    } do %><% end %>
+
+<%= link_to "← All tickets", console_support_tickets_path, class: "mt-4 inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300" %>
+
+<div class="mt-4 grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+  <div class="xl:col-span-2">
+    <%= render "support_tickets/conversation", console: true %>
+  </div>
+  <%= render "support_tickets/details", console: true %>
+</div>

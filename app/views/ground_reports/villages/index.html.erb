@@ -55,7 +55,7 @@
           <tr class="hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
             <td class="border-b border-gray-100 px-6 py-4 dark:border-gray-800">
               <%= link_to village.name, ground_reports_village_path(village),
-                    class: "font-medium text-gray-900 hover:text-brand-600 dark:text-white/90" %>
+                    class: ta_text_link %>
             </td>
             <td class="border-b border-gray-100 px-6 py-4 text-gray-600 dark:border-gray-800 dark:text-gray-300"><%= village.taluka&.name || "—" %></td>
             <td class="border-b border-gray-100 px-6 py-4 text-right tabular-nums text-gray-700 dark:border-gray-800 dark:text-gray-300"><%= format_nidhi(@nidhi_totals[village.id]) %></td>

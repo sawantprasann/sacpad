@@ -85,7 +85,7 @@
             <td class="<%= td %> tabular-nums text-gray-700"><%= voter.sr_no || "—" %></td>
             <td class="<%= td %> font-medium">
               <% begin %>
-                <%= link_to voter.voter_id, voter_path(voter), class: "text-gray-900 hover:text-brand-600 dark:text-white/90" %>
+                <%= link_to voter.voter_id, voter_path(voter), class: ta_text_link %>
               <% rescue ActiveRecord::Encryption::Errors::Decryption %>
                 <span class="text-gray-400">—</span>
               <% end %>

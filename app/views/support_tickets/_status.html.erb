@@ -1,0 +1,5 @@
+<span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
+      style="background: color-mix(in srgb, <%= ticket.status_color %> 14%, transparent); color: <%= ticket.status_color %>">
+  <span class="h-1.5 w-1.5 rounded-full" style="background: <%= ticket.status_color %>"></span>
+  <%= ticket.status_label %>
+</span>

@@ -16,7 +16,7 @@
       </div>
       <div>
         <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
-        <%= f.date_field :reported_at, class: "#{ta_field_classes} min-h-11" %>
+        <%= ta_date_picker(form: f, method: :reported_at) %>
       </div>
       <div>
         <%= f.label :estimated_cost, "Estimated cost", class: ta_label_classes %>

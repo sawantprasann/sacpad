@@ -55,7 +55,7 @@
       <tbody>
         <% @villages.each do |village| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.name, console_loksabha_assembly_village_path(@loksabha, @record, village), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.name, console_loksabha_assembly_village_path(@loksabha, @record, village), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.taluka_name.presence || "—" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.voters_count %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.police_station.presence || "—" %></td>

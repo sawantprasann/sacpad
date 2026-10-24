@@ -1,0 +1,88 @@
+<% console = local_assigns.fetch(:console, false) %>
+<% reply_url = console ? reply_console_support_ticket_path(@ticket) : reply_support_ticket_path(@ticket) %>
+<section class="<%= ta_card_classes %> overflow-hidden">
+  <header class="flex flex-wrap items-start justify-between gap-3 border-b border-gray-200 px-5 py-5 md:px-6 dark:border-gray-800">
+    <div class="min-w-0">
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gray-500"><%= @ticket.ticket_number %></p>
+      <h2 class="mt-1 text-lg font-semibold text-gray-900 dark:text-white/90"><%= @ticket.subject %></h2>
+      <p class="mt-1 text-sm text-gray-500"><%= support_timestamp(@ticket.created_at) %></p>
+    </div>
+    <%= render "support_tickets/status", ticket: @ticket %>
+  </header>
+
+  <ol class="divide-y divide-gray-100 dark:divide-gray-800">
+    <% @ticket.messages.select(&:persisted?).each do |message| %>
+      <li class="px-5 py-5 md:px-6 <%= "bg-gray-50 dark:bg-white/[0.03]" if message.from_support? %>">
+        <div class="flex gap-3">
+          <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                style="background: <%= message.from_support? ? "#0b1f44" : support_accent %>">
+            <%= support_initials(message.author_name) %>
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <p class="font-medium text-gray-900 dark:text-white/90">
+                <%= message.author_name %>
+                <% if message.from_support? %>
+                  <span class="ml-1 text-xs font-normal text-gray-500">SAC-PAD support</span>
+                <% end %>
+              </p>
+              <time class="text-xs text-gray-500" datetime="<%= message.created_at.iso8601 %>"><%= support_timestamp(message.created_at) %></time>
+            </div>
+            <% if message.author_detail.present? && !message.from_support? %>
+              <p class="text-xs text-gray-500"><%= message.author_detail %></p>
+            <% end %>
+            <% if message.body.present? %>
+              <div class="mt-3 whitespace-pre-wrap break-words text-sm leading-6 text-gray-700 dark:text-gray-300"><%= message.body %></div>
+            <% end %>
+            <% if message.images.attached? %>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <% message.images.each do |image| %>
+                  <%= link_to rails_blob_path(image), target: "_blank", rel: "noopener", class: "block" do %>
+                    <%= image_tag image, class: "h-24 w-24 rounded-xl object-cover ring-1 ring-gray-200 dark:ring-gray-700", alt: image.filename.to_s %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+
+  <%= form_with url: reply_url, method: :post, html: { multipart: true }, class: "border-t border-gray-200 px-5 py-5 md:px-6 dark:border-gray-800" do %>
+    <% if @message.errors.any? %>
+      <p class="mb-3 text-sm text-error-500"><%= @message.errors.full_messages.to_sentence %></p>
+    <% end %>
+    <label for="support-reply" class="sr-only">Reply</label>
+    <%= text_area_tag "support_message[body]", @message.body, id: "support-reply", rows: 5,
+          placeholder: "Type your reply here...", class: ta_area_classes %>
+    <div class="mt-3">
+      <label for="support-images" class="<%= ta_label_classes %>">Images</label>
+      <%= file_field_tag "support_message[images][]", multiple: true, accept: "image/jpeg,image/png,image/gif,image/webp", id: "support-images",
+            class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+      <p class="mt-2 text-xs text-gray-500">Optional. JPEG, PNG, GIF, or WebP. Up to 5 images, 8 MB each.</p>
+    </div>
+
+    <% if console %>
+      <fieldset class="mt-4">
+        <legend class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Status</legend>
+        <div class="flex flex-wrap gap-x-5 gap-y-2">
+          <% SupportTicket::STATUS_LABELS.each do |key, label| %>
+            <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <%= radio_button_tag "support_ticket[status]", key, @ticket.status == key, class: "h-4 w-4" %>
+              <%= label %>
+            </label>
+          <% end %>
+        </div>
+        <p class="mt-2 text-xs text-gray-500">Leave the reply blank to only change the status.</p>
+      </fieldset>
+    <% end %>
+
+    <div class="mt-4 flex justify-end">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+              style="background: <%= support_accent %>; color: <%= support_accent_ink %>">
+        <%= console ? "Reply" : "Send reply" %>
+      </button>
+    </div>
+  <% end %>
+</section>

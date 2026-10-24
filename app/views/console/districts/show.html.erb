@@ -48,7 +48,7 @@
       <tbody>
         <% @talukas.each do |taluka| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to taluka.name, console_taluka_path(taluka), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to taluka.name, console_taluka_path(taluka), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= taluka.villages_count %></td>
             <td class="px-5 py-3 text-right whitespace-nowrap">
               <%= icon_action_link :edit, edit_console_taluka_path(taluka) %>
@@ -79,7 +79,7 @@
       <tbody>
         <% @loksabhas.each do |loksabha| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to loksabha.name, console_loksabha_path(loksabha), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to loksabha.name, console_loksabha_path(loksabha), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.constituency_no %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= loksabha.assemblies_count %></td>
           </tr>

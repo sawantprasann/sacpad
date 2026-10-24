@@ -26,23 +26,26 @@
                 class: "#{ta_field_classes} min-h-11", required: true %>
         </div>
         <div>
-          <%= f.label :person_name, "Beneficiary name", class: ta_label_classes %>
-          <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11", autofocus: true %>
+          <%= f.label :village, "Village / ward", class: ta_label_classes %>
+          <%= f.select :village,
+                options_for_select(Village.order(:name).pluck(:name), @ticket.village),
+                { include_blank: "Select a village..." },
+                class: "#{ta_field_classes} min-h-11", autofocus: true %>
         </div>
         <div>
           <%= f.label :representative_name, "Representative name", class: ta_label_classes %>
           <%= f.text_field :representative_name, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
-          <%= f.label :village, "Village / ward", class: ta_label_classes %>
-          <%= f.select :village,
-                options_for_select(Village.order(:name).pluck(:name), @ticket.village),
-                { include_blank: "Select a village..." },
-                class: "#{ta_field_classes} min-h-11" %>
+          <%= f.label :person_name, "Beneficiary name", class: ta_label_classes %>
+          <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
           <%= f.label :mobile, "Mobile number", class: ta_label_classes %>
-          <%= f.telephone_field :mobile, class: "#{ta_field_classes} min-h-11" %>
+          <%= f.telephone_field :mobile, class: "#{ta_field_classes} min-h-11",
+                inputmode: "numeric", pattern: "[0-9]{10}", maxlength: 10, autocomplete: "tel",
+                placeholder: "10-digit mobile number", title: "Enter a 10-digit mobile number",
+                oninput: "this.value = this.value.replace(/\\D/g, '').slice(0, 10)" %>
         </div>
         <div>
           <%= f.label :nature_of_issue, class: ta_label_classes %>
@@ -54,7 +57,7 @@
         </div>
         <div>
           <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
-          <%= f.date_field :reported_at, class: "#{ta_field_classes} min-h-11" %>
+          <%= ta_date_picker(form: f, method: :reported_at) %>
         </div>
         <div class="md:col-span-2">
           <%= f.label :description, class: ta_label_classes %>

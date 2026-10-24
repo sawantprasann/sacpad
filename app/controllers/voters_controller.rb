@@ -47,7 +47,7 @@ class VotersController < ApplicationController
     election = Election.ensure_current!(current_organization)
     voted = ActiveModel::Type::Boolean.new.cast(params[:voted])
     VoterTurnout.mark!(election: election, voter: @voter, voted: voted, by: current_user)
-    redirect_back fallback_location: voters_path(voter_filters),
+    redirect_back fallback_location: voted_return_path,
                   notice: voted ? "Marked as voted for #{election.name}." : "Marked as not voted for #{election.name}."
   end
 
@@ -105,6 +105,13 @@ class VotersController < ApplicationController
     filters = params.permit(:voter_id, :name, :booth, :village_id, :sr_no, :sentiment, :voted).to_h
     filters.delete("voted") unless %w[yes no].include?(filters["voted"])
     filters
+  end
+
+  def voted_return_path
+    candidate = params[:return_to].to_s
+    return candidate if candidate.match?(%r{\A/[^\s\\]*\z}) && !candidate.start_with?("//")
+
+    voters_path(voter_filters)
   end
 
   def require_voter_access

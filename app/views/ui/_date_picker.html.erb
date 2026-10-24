@@ -1,0 +1,19 @@
+<%# TailAdmin date picker. `name` submits YYYY-MM-DD; flatpickr shows a readable date. %>
+<% iso = value.respond_to?(:strftime) ? value.strftime("%Y-%m-%d") : value.to_s %>
+<div class="relative" data-controller="datepicker">
+  <input type="text"
+         name="<%= name %>"
+         <% if id.present? %>id="<%= id %>"<% end %>
+         value="<%= iso %>"
+         placeholder="Select date"
+         autocomplete="off"
+         <%= "required" if local_assigns[:required] %>
+         class="<%= ta_field_classes %> pr-11"
+         data-datepicker-target="input">
+  <span class="pointer-events-none absolute top-0 right-3 z-10 flex h-11 items-center text-gray-500 dark:text-gray-400" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6.66667 1.66669V4.16669M13.3333 1.66669V4.16669M2.91667 7.57502H17.0833M17.5 7.08335V14.1667C17.5 16.6667 16.25 18.3334 13.3333 18.3334H6.66667C3.75 18.3334 2.5 16.6667 2.5 14.1667V7.08335C2.5 4.58335 3.75 2.91669 6.66667 2.91669H13.3333C16.25 2.91669 17.5 4.58335 17.5 7.08335Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M9.99609 11.4167H10.0036M6.91211 11.4167H6.91959M6.91211 13.9167H6.91959" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+</div>

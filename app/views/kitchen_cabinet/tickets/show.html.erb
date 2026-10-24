@@ -69,7 +69,7 @@
               <% if att.image? %>
                 <%= image_tag att, class: "aspect-square w-full rounded-xl object-cover" %>
               <% else %>
-                <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm font-medium text-cyan-700 hover:text-cyan-800" %>
+                <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm #{ta_text_link}" %>
               <% end %>
             <% end %>
           </div>
@@ -106,7 +106,7 @@
                     <% if fu.attachment.image? %>
                       <%= image_tag fu.attachment, class: "h-20 w-20 rounded-lg object-cover" %>
                     <% else %>
-                      <%= link_to fu.attachment.filename, rails_blob_path(fu.attachment, disposition: "attachment"), class: "text-xs font-medium text-indigo-700 hover:text-indigo-800" %>
+                      <%= link_to fu.attachment.filename, rails_blob_path(fu.attachment, disposition: "attachment"), class: "text-xs #{ta_text_link}" %>
                     <% end %>
                   </div>
                 <% end %>

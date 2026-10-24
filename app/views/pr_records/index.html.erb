@@ -57,7 +57,7 @@
         <% @records.each do |record| %>
           <tr class="group hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
             <td class="<%= td %> max-w-xs">
-              <%= link_to record.title, pr_record_path(record), class: "font-medium text-gray-900 dark:text-white/90" %>
+              <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
             </td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.pr_category.name %></td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.media_platform&.name || record.media_platform_name || "—" %></td>
@@ -76,7 +76,7 @@
   <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
     <% @records.each do |record| %>
       <%= link_to pr_record_path(record), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
-        <p class="font-medium text-gray-900 dark:text-white/90"><%= record.title %></p>
+        <p class="#{ta_text_link}"><%= record.title %></p>
         <p class="mt-1 text-sm text-gray-600"><%= record.pr_category.name %> · <%= record.media_platform&.name || record.media_platform_name || "No platform" %></p>
         <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %> · <%= record.published_on.strftime("%d %b %Y") %></p>
       <% end %>

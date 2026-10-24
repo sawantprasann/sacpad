@@ -11,13 +11,13 @@
   <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">State</dt>
-      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @loksabha.state.name, console_state_path(@loksabha.state), class: "text-brand-500 hover:text-brand-600" %></dd>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @loksabha.state.name, console_state_path(@loksabha.state), class: ta_text_link %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90">
         <% if @loksabha.district %>
-          <%= link_to @loksabha.district.name, console_district_path(@loksabha.district), class: "text-brand-500 hover:text-brand-600" %>
+          <%= link_to @loksabha.district.name, console_district_path(@loksabha.district), class: ta_text_link %>
         <% else %>
           —
         <% end %>
@@ -54,7 +54,7 @@
       <tbody>
         <% @assemblies.each do |assembly| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to assembly.name, console_loksabha_assembly_path(@loksabha, assembly), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to assembly.name, console_loksabha_assembly_path(@loksabha, assembly), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= assembly.constituency_no %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= assembly.first_part && assembly.last_part ? "#{assembly.first_part}–#{assembly.last_part}" : "—" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= assembly.villages_count %></td>

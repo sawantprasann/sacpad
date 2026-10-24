@@ -1,0 +1,150 @@
+<% console = local_assigns.fetch(:console, false) %>
+<% tab = support_status_tab %>
+<% query = params[:q].to_s.strip %>
+<% list_path = console ? console_support_tickets_path : support_tickets_path %>
+<% th = "border-b border-gray-200 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
+<% td = "border-b border-gray-100 px-5 py-4 align-middle dark:border-gray-800" %>
+<% stats = [
+  ["Total tickets", @counts[:total], "all", "#0b1f44"],
+  ["Pending tickets", @counts[:pending], "pending", "#b45309"],
+  ["Solved tickets", @counts[:solved], "solved", "#039855"]
+] %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: console ? "Platform Console" : "Support",
+      title: "Support tickets",
+      subtitle: console ? "Complaints raised by people using the app." : "Raise a complaint about the app and follow the reply.",
+      meta: (current_user.organization.name if !console && user_signed_in?)
+    } do %><% end %>
+
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <% stats.each do |label, value, status_key, color| %>
+    <%= link_to support_filter_path(console: console, status: status_key, query: query.presence),
+          class: "#{ta_card_classes} flex items-center gap-4 p-5 transition hover:-translate-y-0.5" do %>
+      <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white" style="background: <%= color %>" aria-hidden="true">
+        <% if status_key == "solved" %>
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
+        <% elsif status_key == "pending" %>
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><path stroke-linecap="round" d="M12 8v4l2.5 2.5"/></svg>
+        <% else %>
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h10"/></svg>
+        <% end %>
+      </span>
+      <span>
+        <span class="block text-sm text-gray-500 dark:text-gray-400"><%= label %></span>
+        <span class="mt-1 block text-2xl font-semibold tabular-nums text-gray-900 dark:text-white/90"><%= number_with_delimiter(value) %></span>
+      </span>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="mt-6 <%= ta_card_classes %> overflow-hidden">
+  <div class="flex flex-col gap-4 border-b border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5 dark:border-gray-800">
+    <div class="flex shrink-0 flex-wrap gap-2" role="tablist" aria-label="Ticket status">
+      <% [["all", "All"], ["pending", "Pending"], ["solved", "Solved"]].each do |key, label| %>
+        <% active = tab == key %>
+        <%= link_to label, support_filter_path(console: console, status: key, query: query.presence),
+              role: "tab",
+              "aria-selected": active.to_s,
+              class: "inline-flex min-h-10 items-center rounded-lg px-4 text-sm font-medium #{active ? "" : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"}",
+              style: (active ? "background: #{support_accent}; color: #{support_accent_ink}" : nil) %>
+      <% end %>
+    </div>
+    <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+      <% unless console %>
+        <%= link_to "Raise a ticket", new_support_ticket_path,
+              class: "#{ta_btn_primary} min-h-11 shrink-0",
+              style: "background: #{support_accent}; color: #{support_accent_ink}" %>
+      <% end %>
+    <%= form_with url: list_path, method: :get, class: "flex w-full gap-2 sm:max-w-sm" do %>
+      <% if tab != "all" %>
+        <%= hidden_field_tag :status, tab %>
+      <% end %>
+      <label for="support-search" class="sr-only">Search tickets</label>
+      <%= text_field_tag :q, query, id: "support-search", placeholder: "Search tickets", class: ta_field_classes, autocomplete: "off" %>
+      <button type="submit" class="<%= ta_btn_secondary %> shrink-0 cursor-pointer">Search</button>
+    <% end %>
+    </div>
+  </div>
+
+  <% if @tickets.any? %>
+  <div class="hidden xl:block">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-white/[0.03]">
+        <tr>
+          <th class="<%= th %>">Ticket</th>
+          <% if console %>
+            <th class="<%= th %>">Requested by</th>
+            <th class="<%= th %>">Organization</th>
+          <% end %>
+          <th class="<%= th %>">Subject</th>
+          <th class="<%= th %>">Category</th>
+          <th class="<%= th %>">Status</th>
+          <th class="<%= th %> text-right">Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @tickets.each do |ticket| %>
+          <% ticket_path = console ? console_support_ticket_path(ticket) : support_ticket_path(ticket) %>
+          <%= clickable_row ticket_path, class: "group hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]" do %>
+            <td class="<%= td %>">
+              <%= link_to ticket.ticket_number, ticket_path, class: "font-medium text-brand-500 hover:text-brand-600 hover:underline dark:text-brand-400" %>
+            </td>
+            <% if console %>
+              <td class="<%= td %>">
+                <p class="font-medium text-gray-800 dark:text-white/90"><%= ticket.user.name %></p>
+                <p class="text-xs text-gray-500"><%= ticket.user.email %></p>
+              </td>
+              <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= ticket.organization.name %></td>
+            <% end %>
+            <td class="<%= td %> max-w-xs">
+              <p class="truncate font-medium text-gray-800 dark:text-white/90" title="<%= ticket.subject %>"><%= ticket.subject %></p>
+            </td>
+            <td class="<%= td %>">
+              <span class="inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-white/10 dark:text-gray-300"><%= ticket.category_label %></span>
+            </td>
+            <td class="<%= td %>"><%= render "support_tickets/status", ticket: ticket %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= support_date(ticket.created_at) %></td>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="space-y-3 p-4 xl:hidden">
+    <% @tickets.each do |ticket| %>
+      <% ticket_path = console ? console_support_ticket_path(ticket) : support_ticket_path(ticket) %>
+      <%= link_to ticket_path, class: "block rounded-xl border border-gray-200 p-4 dark:border-gray-800" do %>
+        <span class="flex items-start justify-between gap-3">
+          <span class="font-medium text-brand-500"><%= ticket.ticket_number %></span>
+          <%= render "support_tickets/status", ticket: ticket %>
+        </span>
+        <span class="mt-2 block font-medium text-gray-800 dark:text-white/90"><%= ticket.subject %></span>
+        <span class="mt-1 block text-xs text-gray-500">
+          <%= ticket.category_label %>
+          <% if console %> · <%= ticket.user.name %> · <%= ticket.organization.name %><% end %>
+          · <%= support_date(ticket.created_at) %>
+        </span>
+      <% end %>
+    <% end %>
+  </div>
+  <% end %>
+
+  <% if @tickets.empty? %>
+    <div class="px-6 py-16 text-center">
+      <p class="text-sm font-medium text-gray-800 dark:text-white/90">No tickets match.</p>
+      <p class="mt-1 text-sm text-gray-500">
+        <% if console %>
+          Complaints raised from the app will show up here.
+        <% else %>
+          Tell the SAC-PAD team what is getting in the way.
+        <% end %>
+      </p>
+      <% unless console %>
+        <%= link_to "Raise a ticket", new_support_ticket_path, class: "#{ta_btn_primary} mt-4 min-h-11", style: "background: #{support_accent}; color: #{support_accent_ink}" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= render "ui/pagination", pagy: @pagy %>
+</div>

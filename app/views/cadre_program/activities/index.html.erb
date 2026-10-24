@@ -45,7 +45,7 @@
               <td class="<%= td %> <%= "text-right tabular-nums" if value.respond_to?(:strftime) %> max-w-xs text-gray-700 dark:text-gray-300">
                 <% if index.zero? %>
                   <%= link_to text, cadre_program_activity_path(activity),
-                        class: "font-medium text-gray-900 dark:text-white/90" %>
+                        class: ta_text_link %>
                 <% else %>
                   <span class="line-clamp-2"><%= text %></span>
                 <% end %>
@@ -77,7 +77,7 @@
     <% @activities.each do |activity| %>
       <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]">
         <%= link_to cadre_program_activity_path(activity), class: "block" do %>
-          <p class="truncate font-medium text-gray-900 dark:text-white/90"><%= list_text.call(columns.first.last.call(activity)) %></p>
+          <p class="truncate #{ta_text_link}"><%= list_text.call(columns.first.last.call(activity)) %></p>
           <% unless @category_key %>
             <p class="mt-1"><%= render "ui/badge", label: activity.category_label, tone: "gray" %></p>
           <% end %>

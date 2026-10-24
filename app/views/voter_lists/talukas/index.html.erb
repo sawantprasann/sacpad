@@ -1,0 +1,59 @@
+<% content_for :title, "Talukas" %>
+<% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800" %>
+<% td = "border-b border-gray-100 px-6 py-4 align-middle text-sm dark:border-gray-800" %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Talukas",
+      title: "Talukas",
+      subtitle: pluralize(@talukas.size, "taluka"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<%= form_with url: voter_lists_talukas_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,16rem)_auto] lg:items-end">
+    <div>
+      <%= label_tag :taluka_id, "Taluka", class: ta_label_classes %>
+      <%= select_tag :taluka_id,
+            options_from_collection_for_select(@taluka_choices, :id, :name, params[:taluka_id]),
+            include_blank: "All talukas",
+            class: ta_field_classes %>
+    </div>
+    <div class="flex items-end gap-2">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
+      <%= link_to "Clear", voter_lists_talukas_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+    </div>
+  </div>
+<% end %>
+
+<div class="mt-6 <%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-white/[0.03]">
+        <tr>
+          <th class="<%= th %>">Taluka</th>
+          <th class="<%= th %>">District</th>
+          <th class="<%= th %>">Villages</th>
+          <th class="<%= th %> w-12"><span class="sr-only">Open</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @talukas.each do |taluka| %>
+          <% taluka_url = voter_lists_taluka_path(taluka) %>
+          <%= clickable_row taluka_url, class: "hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]" do %>
+            <td class="<%= td %>">
+              <%= link_to taluka.name, taluka_url, class: ta_text_link %>
+            </td>
+            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= taluka.district.name %></td>
+            <td class="<%= td %> tabular-nums text-gray-700 dark:text-gray-300"><%= taluka.villages_count %></td>
+            <td class="<%= td %> text-right"><%= icon_action_link :view, taluka_url %></td>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @talukas.empty? %>
+      <p class="px-6 py-16 text-center text-sm text-gray-400">
+        <%= taluka_filters.values.any?(&:present?) ? "No talukas match." : "No talukas in this constituency." %>
+      </p>
+    <% end %>
+  </div>
+</div>

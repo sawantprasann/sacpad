@@ -20,11 +20,11 @@
       </div>
       <div>
         <%= f.label :started_at, "Started", class: ta_label_classes %>
-        <%= f.date_field :started_at, required: true, class: ta_field_classes %>
+        <%= ta_date_picker(form: f, method: :started_at, required: true) %>
       </div>
       <div>
         <%= f.label :ended_at, "Ended", class: ta_label_classes %>
-        <%= f.date_field :ended_at, class: ta_field_classes %>
+        <%= ta_date_picker(form: f, method: :ended_at) %>
       </div>
     </div>
 

@@ -55,7 +55,11 @@ module BreadcrumbHelper
       "ground_reports/reports" => [ "Ground Reports", ground_reports_villages_path ],
       "ground_reports/imports" => [ "Ground Reports", ground_reports_villages_path ],
       "users" => [ "Team", users_path ],
-      "pr_records" => [ "PR Records", pr_records_path ]
+      "support_tickets" => [ "Support", support_tickets_path ],
+      "pr_records" => [ "PR Records", pr_records_path ],
+      "voter_lists/talukas" => [ "Talukas", voter_lists_talukas_path ],
+      "voter_lists/villages" => [ "Talukas", voter_lists_talukas_path ],
+      "voters" => [ "Voter Lists", voters_path ]
     }[controller_path]
   end
 

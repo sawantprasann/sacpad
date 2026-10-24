@@ -44,7 +44,7 @@
       <tbody>
         <% @organizations.each do |org| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
-            <td class="px-5 py-3"><%= link_to org.name, console_organization_path(org), class: "font-medium text-gray-800 hover:text-brand-600 dark:text-white/90" %></td>
+            <td class="px-5 py-3"><%= link_to org.name, console_organization_path(org), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= org.current_party&.name || "Independent" %></td>
             <td class="px-5 py-3"><%= render "ui/badge", label: (org.active? ? "active" : "inactive"), tone: (org.active? ? "green" : "gray") %></td>
             <td class="px-5 py-3 tabular-nums text-gray-700 dark:text-gray-300"><%= org.users.count %></td>

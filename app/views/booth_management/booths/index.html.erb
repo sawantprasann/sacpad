@@ -51,7 +51,7 @@
       <% @booths.each do |booth| %>
         <tr class="hover:bg-gray-50 last:[&>td]:border-b-0">
           <td class="<%= td %> font-medium">
-            <%= link_to booth.number, booth_path(booth), class: "text-gray-900 hover:text-brand-600 dark:text-white/90" %>
+            <%= link_to booth.number, booth_path(booth), class: ta_text_link %>
           </td>
           <td class="<%= td %> text-gray-700"><%= booth.name.presence || "—" %></td>
           <td class="<%= td %> text-gray-700"><%= booth.village.name %></td>

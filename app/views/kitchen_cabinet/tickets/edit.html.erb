@@ -43,7 +43,10 @@
       </div>
       <div>
         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Mobile</label>
-        <%= f.text_field :mobile, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+        <%= f.telephone_field :mobile, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500",
+              inputmode: "numeric", pattern: "[0-9]{10}", maxlength: 10, autocomplete: "tel",
+              placeholder: "10-digit mobile number", title: "Enter a 10-digit mobile number",
+              oninput: "this.value = this.value.replace(/\\D/g, '').slice(0, 10)" %>
       </div>
     </div>
 
@@ -68,7 +71,7 @@
 
     <div>
       <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Reported Date</label>
-      <%= f.date_field :reported_at, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      <%= ta_date_picker(form: f, method: :reported_at) %>
     </div>
 
     <div class="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">

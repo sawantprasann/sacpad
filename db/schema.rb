@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_24_193000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_24_210000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -471,6 +471,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_24_193000) do
     t.string "cd"
   end
 
+  create_table "support_messages", force: :cascade do |t|
+    t.bigint "support_ticket_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "author_type", null: false
+    t.bigint "author_id", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["author_type", "author_id"], name: "index_support_messages_on_author"
+    t.index ["organization_id"], name: "index_support_messages_on_organization_id"
+    t.index ["support_ticket_id"], name: "index_support_messages_on_support_ticket_id"
+  end
+
+  create_table "support_tickets", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.string "ticket_number", null: false
+    t.string "subject", null: false
+    t.integer "category", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "ticket_number"], name: "index_support_tickets_on_organization_id_and_ticket_number", unique: true
+    t.index ["organization_id"], name: "index_support_tickets_on_organization_id"
+    t.index ["user_id", "updated_at"], name: "index_support_tickets_on_user_id_and_updated_at"
+    t.index ["user_id"], name: "index_support_tickets_on_user_id"
+  end
+
   create_table "talukas", force: :cascade do |t|
     t.bigint "district_id", null: false
     t.string "name", null: false
@@ -839,6 +867,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_24_193000) do
   add_foreign_key "pr_records", "users", column: "owner_id"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
+  add_foreign_key "support_messages", "organizations"
+  add_foreign_key "support_messages", "support_tickets"
+  add_foreign_key "support_tickets", "organizations"
+  add_foreign_key "support_tickets", "users"
   add_foreign_key "talukas", "districts"
   add_foreign_key "ticket_follow_ups", "organizations"
   add_foreign_key "ticket_follow_ups", "tickets"

@@ -14,7 +14,7 @@
       </div>
       <div>
         <%= f.label :published_on, "Published date", class: ta_label_classes %>
-        <%= f.date_field :published_on, class: "#{ta_field_classes} min-h-11" %>
+        <%= ta_date_picker(form: f, method: :published_on) %>
       </div>
       <div>
         <%= f.label :sentiment, class: ta_label_classes %>

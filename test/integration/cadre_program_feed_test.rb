@@ -41,8 +41,12 @@ class CadreProgramFeedTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_match "Recent cadre activity", @response.body
-    assert_match "Alice rally", @response.body
+    assert_match "dashboard-cadre-categories", @response.body
+    assert_match '[["Program By Party",1]]', @response.body
+    assert_match 'Chartkick["PieChart"]', @response.body
+    assert_no_match(/Alice rally/, @response.body)
     assert_no_match(/Bob lane/, @response.body)
+    assert_no_match(/Share of activity by category/, @response.body)
   end
 
   test "a user without cadre access does not see the widget" do

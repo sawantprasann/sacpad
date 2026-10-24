@@ -66,7 +66,7 @@
           <% @voters.each do |voter| %>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
               <td class="px-6 py-4 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= voter.sr_no || "—" %></td>
-              <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-blue-600 hover:underline dark:text-blue-400" %></td>
+              <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white"><%= link_to voter.voter_id, console_voter_path(voter), class: ta_text_link %></td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <%= "#{voter.first_name} #{voter.last_name}" %>
                 <% if voter.middle_name.present? %>
@@ -77,7 +77,7 @@
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><%= voter.village&.name || "—" %></td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <% if voter.booth %>
-                  <%= link_to "Booth #{voter.booth.number}", console_booth_path(voter.booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                  <%= link_to "Booth #{voter.booth.number}", console_booth_path(voter.booth), class: ta_text_link %>
                 <% else %>
                   <span class="text-gray-400">—</span>
                 <% end %>

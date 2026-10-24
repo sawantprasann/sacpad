@@ -1,0 +1,15 @@
+<%# Color key for a dashboard donut. The arrow points at the ring and is filled with that slice's color. %>
+<% total = local_assigns[:total].to_i %>
+<ul class="flex w-full min-w-0 flex-col gap-1.5">
+  <% slices.each do |label, count, color| %>
+    <% share = total.positive? ? (count.to_f / total * 100).round : 0 %>
+    <li class="flex items-center gap-2.5 rounded-xl px-2.5 py-2" style="background-color: <%= color %>14">
+      <svg viewBox="0 0 16 16" class="h-4 w-4 shrink-0 sm:-rotate-90" style="color: <%= color %>" aria-hidden="true">
+        <path fill="currentColor" d="M8 1.6 13.6 13.2c.3.58-.12 1.26-.78 1.26H3.18c-.66 0-1.08-.68-.78-1.26L8 1.6Z"/>
+      </svg>
+      <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= label %></span>
+      <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-white"><%= count %></span>
+      <span class="w-10 text-right text-xs tabular-nums text-gray-400"><%= share %>%</span>
+    </li>
+  <% end %>
+</ul>

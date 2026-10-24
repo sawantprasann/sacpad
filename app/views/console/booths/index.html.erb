@@ -23,28 +23,28 @@
           <% @booths.each do |booth| %>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
               <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                <%= link_to booth.number, console_booth_path(booth), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                <%= link_to booth.number, console_booth_path(booth), class: ta_text_link %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <%= booth.village&.name || "—" %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <% if booth.village&.taluka %>
-                  <%= link_to booth.village.taluka.name, console_taluka_path(booth.village.taluka), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                  <%= link_to booth.village.taluka.name, console_taluka_path(booth.village.taluka), class: ta_text_link %>
                 <% else %>
                   —
                 <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <% if booth.village&.taluka&.district %>
-                  <%= link_to booth.village.taluka.district.name, console_district_path(booth.village.taluka.district), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                  <%= link_to booth.village.taluka.district.name, console_district_path(booth.village.taluka.district), class: ta_text_link %>
                 <% else %>
                   —
                 <% end %>
               </td>
               <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
                 <% if booth.village&.taluka&.district&.state %>
-                  <%= link_to booth.village.taluka.district.state.name, console_state_path(booth.village.taluka.district.state), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+                  <%= link_to booth.village.taluka.district.state.name, console_state_path(booth.village.taluka.district.state), class: ta_text_link %>
                 <% else %>
                   —
                 <% end %>

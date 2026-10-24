@@ -21,7 +21,7 @@
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Taluka</label>
           <% if @booth.village&.taluka %>
             <p class="mt-1 text-sm">
-              <%= link_to @booth.village.taluka.name, console_taluka_path(@booth.village.taluka), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              <%= link_to @booth.village.taluka.name, console_taluka_path(@booth.village.taluka), class: ta_text_link %>
             </p>
           <% else %>
             <p class="mt-1 text-sm text-gray-400">—</p>
@@ -31,7 +31,7 @@
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</label>
           <% if @booth.village&.taluka&.district %>
             <p class="mt-1 text-sm">
-              <%= link_to @booth.village.taluka.district.name, console_district_path(@booth.village.taluka.district), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              <%= link_to @booth.village.taluka.district.name, console_district_path(@booth.village.taluka.district), class: ta_text_link %>
             </p>
           <% else %>
             <p class="mt-1 text-sm text-gray-400">—</p>
@@ -41,7 +41,7 @@
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">State</label>
           <% if @booth.village&.taluka&.district&.state %>
             <p class="mt-1 text-sm">
-              <%= link_to @booth.village.taluka.district.state.name, console_state_path(@booth.village.taluka.district.state), class: "text-blue-600 hover:underline dark:text-blue-400" %>
+              <%= link_to @booth.village.taluka.district.state.name, console_state_path(@booth.village.taluka.district.state), class: ta_text_link %>
             </p>
           <% else %>
             <p class="mt-1 text-sm text-gray-400">—</p>
@@ -115,7 +115,7 @@
           <% @voters.each do |voter| %>
             <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
               <td class="px-5 py-3 tabular-nums text-gray-700 dark:text-gray-300"><%= voter.sr_no || "—" %></td>
-              <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-brand-500 hover:text-brand-600" %></td>
+              <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: ta_text_link %></td>
               <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.name %></td>
               <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.age || "—" %></td>
               <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.gender.presence || "—" %></td>

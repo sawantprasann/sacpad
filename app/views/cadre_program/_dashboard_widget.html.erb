@@ -1,50 +1,25 @@
-<%# Recent cadre activity (Story 2.3, FR26/FR50). One policy_scope over cadre_activities —
-    not a union of the detail tables. Counts carry a text label (UX-DR6). %>
+<%# Cadre activity by category, scoped to the viewer's subtree. Names sit under the ring, each with an arrow in that category color. %>
 <% scope = policy_scope(CadreProgram::CadreActivity) %>
-<% recent = scope.includes(:owner).order(created_at: :desc, id: :desc).limit(5) %>
 <% counts = scope.counts_by_category %>
+<% palette = [ "#4f46e5", "#0891b2", "#d97706", "#e11d48", "#9333ea", "#ea580c" ] %>
+<% slices = counts.each_with_index.filter_map do |(label, count), index|
+     next if count.zero?
 
-<% if recent.empty? %>
+     [ label, count, palette[index % palette.length] ]
+   end %>
+<% pie = slices.to_h { |label, count, _color| [ label, count ] } %>
+
+<% if pie.empty? %>
   <p class="text-xs text-gray-400">No cadre activity yet.</p>
 <% else %>
-  <ul class="space-y-3">
-    <% recent.each do |activity| %>
-      <li>
-        <%= link_to cadre_program_activity_path(activity), class: "block" do %>
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= activity.category_label %></p>
-            <p class="shrink-0 text-xs tabular-nums text-gray-500"><%= activity.created_at.strftime("%d %b") %></p>
-          </div>
-        <% end %>
-        <p class="mt-0.5 line-clamp-2 text-xs text-gray-500"><%= linkify_text(activity.impact_notes) || "—" %></p>
-      </li>
-    <% end %>
-  </ul>
-<% end %>
-
-<% if counts.any? %>
-  <% total = counts.values.sum %>
-  <% palette = ["#4338ca", "#0e7490", "#b45309", "#be185d", "#7e22ce", "#c2410c"] %>
-  <% if total.positive? %>
-    <div class="mt-4 flex h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10" role="img" aria-label="Share of activity by category">
-      <% counts.each_with_index do |(_label, count), index| %>
-        <% next if count.zero? %>
-        <span class="h-full" style="width: <%= (count.to_f / total * 100).round(1) %>%; background: <%= palette[index % palette.length] %>"></span>
-      <% end %>
+  <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-2">
+    <div class="w-full max-w-[13.5rem] shrink-0">
+      <%= pie_chart pie, id: "dashboard-cadre-categories", height: "200px", donut: true,
+            colors: slices.map(&:last),
+            library: dashboard_pie_library %>
     </div>
-  <% end %>
-  <ul class="mt-4 space-y-1">
-    <% counts.each_with_index do |(label, count), index| %>
-      <li class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
-        <span class="inline-flex items-center gap-1.5">
-          <span class="h-1.5 w-1.5 rounded-full" style="background: <%= palette[index % palette.length] %>"></span>
-          <%= label %>
-        </span>
-        <span class="tabular-nums font-semibold"><%= count %></span>
-      </li>
-    <% end %>
-  </ul>
+    <%= render "ui/slice_legend", slices: slices, total: counts.values.sum %>
+  </div>
 <% end %>
-
 <%= link_to "View activity", cadre_program_activities_path,
-      class: "mt-3 inline-block text-xs font-medium text-brand-500 hover:text-brand-600" %>
+      class: "mt-3 inline-block text-xs #{ta_text_link}" %>

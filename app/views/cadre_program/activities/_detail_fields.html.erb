@@ -23,7 +23,7 @@
       </div>
       <div>
         <%= p.label :occurred_on, "Occurred on", class: ta_label_classes %>
-        <%= p.date_field :occurred_on, class: field %>
+        <%= ta_date_picker(form: p, method: :occurred_on) %>
       </div>
       <div>
         <%= p.label :host, class: ta_label_classes %>
@@ -47,11 +47,11 @@
       </div>
       <div>
         <%= p.label :submitted_on, "Submitted on", class: ta_label_classes %>
-        <%= p.date_field :submitted_on, class: field %>
+        <%= ta_date_picker(form: p, method: :submitted_on) %>
       </div>
       <div>
         <%= p.label :followup_on, "Follow up on", class: ta_label_classes %>
-        <%= p.date_field :followup_on, class: field %>
+        <%= ta_date_picker(form: p, method: :followup_on) %>
       </div>
       <div class="<%= wide %>">
         <%= p.label :point_of_discussion, "Point of discussion", class: ta_label_classes %>
@@ -79,7 +79,7 @@
       </div>
       <div>
         <%= p.label :hosted_on, "Hosted on", class: ta_label_classes %>
-        <%= p.date_field :hosted_on, class: field %>
+        <%= ta_date_picker(form: p, method: :hosted_on) %>
       </div>
       <div>
         <%= p.label :location, class: ta_label_classes %>
@@ -124,11 +124,11 @@
       </div>
       <div>
         <%= p.label :from_date, "From", class: ta_label_classes %>
-        <%= p.date_field :from_date, class: field %>
+        <%= ta_date_picker(form: p, method: :from_date) %>
       </div>
       <div>
         <%= p.label :to_date, "To", class: ta_label_classes %>
-        <%= p.date_field :to_date, class: field %>
+        <%= ta_date_picker(form: p, method: :to_date) %>
       </div>
       <div class="<%= wide %>">
         <%= p.label :notes, class: ta_label_classes %>

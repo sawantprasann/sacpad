@@ -555,7 +555,7 @@ input[type="week"] {
 }
 
 .flatpickr-wrapper {
-  @apply w-full;
+  @apply relative block w-full;
 }
 .flatpickr-calendar {
   @apply dark:!bg-gray-dark dark:!shadow-theme-xl 2xsm:!w-auto mt-2 !rounded-xl border-0 bg-white !p-5 !text-gray-500 dark:border dark:!border-gray-800 dark:!text-gray-400;
@@ -933,7 +933,10 @@ pre[class*="language-"] {
   border-bottom: 1px solid #e4e7ec;
 }
 .campaign-header nav a {
-  color: #667085;
+  color: #465fff;
+}
+.campaign-header nav a:hover {
+  color: #3641f5;
 }
 .campaign-header nav [aria-current="page"] {
   color: #101828;
@@ -946,7 +949,10 @@ pre[class*="language-"] {
   border-bottom-color: #1d2939;
 }
 .dark .campaign-header nav a {
-  color: #d0d5dd;
+  color: #7592ff;
+}
+.dark .campaign-header nav a:hover {
+  color: #9cb9ff;
 }
 .dark .campaign-header nav [aria-current="page"],
 .dark .campaign-header .campaign-user-name {

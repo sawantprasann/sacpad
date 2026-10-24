@@ -22,7 +22,10 @@ class DashboardTest < ActionDispatch::IntegrationTest
     sign_in user_with(@org_admin_role, "admin@example.com")
     get "/"
     assert_match "Open tickets by status", @response.body
-    assert_match "Hierarchy &amp; user count", @response.body
+    assert_match "Recent deletions", @response.body
+    assert_no_match(/Reach trend/, @response.body)
+    assert_no_match(/Pending items needing attention/, @response.body)
+    assert_no_match(/Hierarchy &amp; user count/, @response.body)
   end
 
   test "a limited role sees only its permitted module widgets and no org-admin widgets" do
@@ -30,6 +33,8 @@ class DashboardTest < ActionDispatch::IntegrationTest
     get "/"
     assert_match "Recent ground reports", @response.body
     assert_no_match(/Open tickets by status/, @response.body)
+    assert_no_match(/Reach trend/, @response.body)
+    assert_no_match(/Pending items needing attention/, @response.body)
     assert_no_match(/Hierarchy &amp; user count/, @response.body)
   end
 

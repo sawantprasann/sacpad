@@ -1,8 +1,13 @@
 <% content_for :title, "Beneficiaries" %>
 <% list_params = request.query_parameters.slice("category", "name", "village", "reporter", "status", "q", "from_date", "to_date") %>
-<% th = "border-b border-amber-100 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-amber-800 dark:border-gray-800 dark:text-amber-200" %>
-<% td = "border-b border-amber-50 px-6 py-4 align-middle dark:border-gray-800" %>
-<% tab_btn = "border-b-2 px-4 py-2 text-sm font-semibold" %>
+<% accent = @category ? dashboard_jewel(@category.display_order.to_i)[:hex] : org_accent_color %>
+<% accent_ink = @category ? "#ffffff" : org_accent_foreground %>
+<% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
+<% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
+<% line_colors = category_series_colors(@charts[:line], @categories, fallback: accent) %>
+<% bar_colors = category_series_colors(@charts[:bar], @categories, fallback: accent) %>
+<% pie_status_colors = status_series_colors(@charts[:pie].keys, fallback: accent) %>
+<% pie_category_colors = named_series_colors(@charts[:pie_by_category].keys, @categories, fallback: accent) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
         kicker: "Beneficiaries",
@@ -16,8 +21,8 @@
           export_url: kitchen_cabinet_tickets_path(list_params.merge(format: :xlsx)),
           new_url: (new_kitchen_cabinet_ticket_path(category: params[:category]) if current_user.role.can_write?("kitchen_cabinet")),
           new_label: "Create ticket",
-          accent: "#c2410c",
-          accent_ink: "#ffffff" %>
+          accent: accent,
+          accent_ink: accent_ink %>
   </div>
 
   <%= form_with url: kitchen_cabinet_tickets_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
@@ -53,41 +58,44 @@
       </div>
       <div>
         <%= label_tag :from_date, "From date", class: ta_label_classes %>
-        <%= date_field_tag :from_date, @from_date, class: ta_field_classes %>
+        <%= ta_date_picker(name: "from_date", id: "from_date", value: @from_date) %>
       </div>
       <div>
         <%= label_tag :to_date, "To date", class: ta_label_classes %>
-        <%= date_field_tag :to_date, @to_date, class: ta_field_classes %>
+        <%= ta_date_picker(name: "to_date", id: "to_date", value: @to_date) %>
       </div>
       <div class="flex items-end gap-2">
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
+                style="background: <%= accent %>; color: <%= accent_ink %>">Filter</button>
         <%= link_to "Clear", kitchen_cabinet_tickets_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
       </div>
     </div>
   <% end %>
 
-  <div class="mt-6" x-data="{ tab: 'line' }">
-    <div class="flex gap-1 border-b border-amber-100 dark:border-gray-800" role="tablist" aria-label="Beneficiary charts">
-      <% { "line" => "Line", "bar" => "Bar", "pie" => "Pie" }.each do |key, label| %>
-        <button type="button" role="tab" id="beneficiaries-tab-<%= key %>"
-                @click="tab = '<%= key %>'; $nextTick(() => window.Chartkick && Object.values(Chartkick.charts).forEach((chart) => chart.redraw()))"
-                :aria-selected="(tab === '<%= key %>').toString()"
-                :class="tab === '<%= key %>' ? 'border-amber-600 text-amber-900 dark:text-amber-200' : 'border-transparent text-gray-500 hover:text-gray-800'"
-                class="<%= tab_btn %> cursor-pointer">
-          <%= label %>
-        </button>
-      <% end %>
+  <div class="mt-6 <%= ta_card_classes %>" x-data="{ tab: 'line' }">
+    <div class="border-b border-gray-200 px-4 dark:border-gray-800" role="tablist" aria-label="Beneficiary charts">
+      <div class="flex gap-6">
+        <% { "line" => "Line", "bar" => "Bar", "pie" => "Pie" }.each do |key, label| %>
+          <button type="button" role="tab" id="beneficiaries-tab-<%= key %>"
+                  @click="tab = '<%= key %>'; $nextTick(() => window.Chartkick && Object.values(Chartkick.charts).forEach((chart) => chart.redraw()))"
+                  :aria-selected="(tab === '<%= key %>').toString()"
+                  :class="tab === '<%= key %>' ? '' : 'border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-white/90'"
+                  :style="tab === '<%= key %>' ? 'color: <%= accent %>; border-color: <%= accent %>' : ''"
+                  class="-mb-px cursor-pointer border-b-2 px-1 py-4 text-sm font-semibold">
+            <%= label %>
+          </button>
+        <% end %>
+      </div>
     </div>
-    <div class="mt-4 <%= ta_card_classes %> p-4 md:p-6">
+    <div class="p-4 md:p-6">
       <div x-show="tab === 'line'" role="tabpanel" aria-labelledby="beneficiaries-tab-line">
         <%= line_chart @charts[:line], id: "beneficiaries-line", height: "280px",
-              colors: [ "#c2410c" ], xtitle: "Reported date", ytitle: "Beneficiaries",
+              colors: line_colors, xtitle: "Reported date", ytitle: "Beneficiaries",
               empty: "No beneficiaries match these filters." %>
       </div>
       <div x-show="tab === 'bar'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-bar">
         <%= column_chart @charts[:bar], id: "beneficiaries-bar", height: "280px", stacked: true,
-              xtitle: "Date", ytitle: "Beneficiaries",
+              colors: bar_colors, xtitle: "Date", ytitle: "Beneficiaries",
               empty: "No beneficiaries match these filters." %>
       </div>
       <div x-show="tab === 'pie'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-pie">
@@ -95,11 +103,13 @@
           <div>
             <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90">By status</h3>
             <%= pie_chart @charts[:pie], id: "beneficiaries-pie", height: "280px", donut: true,
+                  colors: pie_status_colors,
                   empty: "No beneficiaries match these filters." %>
           </div>
           <div>
             <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90">By category</h3>
             <%= pie_chart @charts[:pie_by_category], id: "beneficiaries-pie-category", height: "280px", donut: true,
+                  colors: pie_category_colors,
                   empty: "No beneficiaries match these filters." %>
           </div>
         </div>
@@ -107,12 +117,11 @@
     </div>
   </div>
 
-  <div class="mt-6">
-    <%= render layout: "ui/jewel_card", locals: { accent_index: 0, flush: true } do %>
+  <% list = capture do %>
       <h2 class="px-6 pt-4 text-sm font-semibold text-gray-800 dark:text-white/90">List</h2>
       <div class="hidden xl:block">
         <table class="w-full text-sm">
-          <thead class="bg-amber-50/80 dark:bg-white/[0.03]">
+          <thead class="bg-gray-50 dark:bg-white/[0.03]"<% if @category %> style="background: color-mix(in srgb, <%= accent %> 10%, white)"<% end %>>
             <tr>
               <th class="<%= th %>">Beneficiary name</th>
               <th class="<%= th %>">Representative</th>
@@ -127,10 +136,11 @@
           </thead>
           <tbody>
             <% @tickets.each do |ticket| %>
-              <tr class="group hover:bg-amber-50/60 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
+              <tr class="group hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
                 <td class="<%= td %>">
-                  <%= link_to kitchen_cabinet_ticket_path(ticket), class: "block" do %>
-                    <span class="font-medium text-gray-900 dark:text-white/90"><%= ticket.person_name %></span>
+                  <%= link_to kitchen_cabinet_ticket_path(ticket),
+                        class: "block #{ta_text_link}" do %>
+                    <%= ticket.person_name %>
                   <% end %>
                 </td>
                 <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= ticket.representative_name.presence || "—" %></td>
@@ -150,7 +160,7 @@
           </tbody>
         </table>
         <% if @tickets.empty? %>
-          <p class="px-6 py-16 text-center text-sm text-amber-800/70">No beneficiaries match.</p>
+          <p class="px-6 py-16 text-center text-sm text-gray-500">No beneficiaries match.</p>
         <% end %>
       </div>
 
@@ -159,10 +169,18 @@
           <%= render "ticket_card", ticket: ticket %>
         <% end %>
         <% if @tickets.empty? %>
-          <p class="px-2 py-12 text-center text-sm text-amber-800/70">No beneficiaries match.</p>
+          <p class="px-2 py-12 text-center text-sm text-gray-500">No beneficiaries match.</p>
         <% end %>
       </div>
 
       <%= render "ui/pagination", pagy: @pagy %>
+  <% end %>
+  <div class="mt-6">
+    <% if @category %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: @category.display_order.to_i, flush: true } do %>
+        <%= list %>
+      <% end %>
+    <% else %>
+      <div class="<%= ta_card_classes %> overflow-hidden"><%= list %></div>
     <% end %>
   </div>

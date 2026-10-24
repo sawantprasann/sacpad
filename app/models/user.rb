@@ -11,6 +11,7 @@ class User < ApplicationRecord
   # acts_as_tenant: Devise authenticates by email with no tenant context. Email is globally unique.
   belongs_to :organization
   belongs_to :role
+  has_many :support_tickets, dependent: :restrict_with_error
   has_one_attached :photo
 
   validates :name, presence: true

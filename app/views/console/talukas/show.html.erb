@@ -12,7 +12,7 @@
   <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</dt>
-      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @record.district.name, console_district_path(@record.district), class: "text-brand-500 hover:text-brand-600" %></dd>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @record.district.name, console_district_path(@record.district), class: ta_text_link %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Villages</dt>
@@ -47,8 +47,8 @@
       <tbody>
         <% @villages.each do |village| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.name, console_loksabha_assembly_village_path(village.assembly.loksabha, village.assembly, village), class: "text-brand-500 hover:text-brand-600" %></td>
-            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.assembly.name, console_loksabha_assembly_path(village.assembly.loksabha, village.assembly), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.name, console_loksabha_assembly_village_path(village.assembly.loksabha, village.assembly, village), class: ta_text_link %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to village.assembly.name, console_loksabha_assembly_path(village.assembly.loksabha, village.assembly), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.voters_count %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.police_station.presence || "—" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= village.pin_code.presence || "—" %></td>

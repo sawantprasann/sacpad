@@ -1,0 +1,50 @@
+<% content_for :title, "Raise a ticket" %>
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Support",
+      title: "Raise a ticket",
+      subtitle: "Tell us what went wrong in the app. This is separate from beneficiary tickets."
+    } do %><% end %>
+
+<%= link_to "← All tickets", support_tickets_path, class: "mt-4 inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300" %>
+
+<div class="mt-4 <%= ta_card_classes %> p-6 md:p-8">
+  <%= form_with model: @ticket, html: { multipart: true } do |f| %>
+    <% if @ticket.errors.any? %>
+      <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500">
+        <%= @ticket.errors.full_messages.to_sentence %>
+      </div>
+    <% end %>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="md:col-span-2">
+        <%= f.label :subject, "Subject", class: ta_label_classes %>
+        <%= f.text_field :subject, class: ta_field_classes, required: true, maxlength: 160, autofocus: true,
+              placeholder: "Short summary of the problem" %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :category, "Category", class: ta_label_classes %>
+        <%= f.select :category, SupportTicket::CATEGORY_LABELS.map { |key, label| [ label, key ] },
+              {}, class: "#{ta_field_classes} min-h-11", required: true %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :opening_body, "What went wrong?", class: ta_label_classes %>
+        <%= f.text_area :opening_body, rows: 6, class: ta_area_classes, required: true,
+              placeholder: "What were you trying to do, and what happened instead?" %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :images, "Images", class: ta_label_classes %>
+        <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
+          <%= f.file_field :images, multiple: true, accept: "image/jpeg,image/png,image/gif,image/webp",
+                class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+          <p class="mt-2 text-xs text-gray-500">Add screenshots of the problem. JPEG, PNG, GIF, or WebP. Up to 5 images, 8 MB each.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)">Raise ticket</button>
+      <%= link_to "Cancel", support_tickets_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+    </div>
+  <% end %>
+</div>

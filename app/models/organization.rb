@@ -4,6 +4,7 @@ class Organization < ApplicationRecord
   belongs_to :current_party, class_name: "Party", optional: true
 
   has_many :users, dependent: :restrict_with_error
+  has_many :support_tickets, dependent: :restrict_with_error
   has_many :party_memberships, dependent: :destroy
   has_many :admin_organizations, dependent: :destroy
   has_many :politicians, dependent: :destroy

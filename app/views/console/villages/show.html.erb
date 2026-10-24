@@ -52,14 +52,14 @@
         <% @voters.each do |voter| %>
           <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
             <td class="px-5 py-3 tabular-nums text-gray-700 dark:text-gray-300"><%= voter.sr_no || "—" %></td>
-            <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: "text-brand-500 hover:text-brand-600" %></td>
+            <td class="px-5 py-3"><%= link_to voter.voter_id, console_voter_path(voter), class: ta_text_link %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= [ voter.first_name, voter.middle_name, voter.last_name ].compact_blank.join(" ") %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.age || "—" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.gender.presence || "—" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= voter.house_no.presence || "—" %></td>
             <td class="px-5 py-3 text-gray-700 dark:text-gray-300">
               <% if voter.booth %>
-                <%= link_to voter.booth.number, console_booth_path(voter.booth), class: "text-brand-500 hover:text-brand-600" %>
+                <%= link_to voter.booth.number, console_booth_path(voter.booth), class: ta_text_link %>
               <% else %>
                 —
               <% end %>

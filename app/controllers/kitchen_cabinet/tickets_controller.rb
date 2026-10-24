@@ -169,15 +169,16 @@ module KitchenCabinet
 
     def beneficiaries_by_date_and_category(relation)
       grouped = relation.joins(:ticket_category)
-                        .group("tickets.reported_at", "ticket_categories.name")
+                        .group("tickets.reported_at", "ticket_categories.name", "ticket_categories.display_order")
                         .count
       return [] if grouped.empty?
 
+      lookup = grouped.to_h { |(reported_on, name, _order), total| [ [ reported_on, name ], total ] }
       dates = grouped.keys.map(&:first).uniq.sort_by(&:to_date)
-      categories = grouped.keys.map(&:last).uniq.sort
-      categories.map do |category|
+      categories = grouped.keys.map { |_date, name, order| [ order.to_i, name ] }.uniq.sort
+      categories.map do |_order, category|
         data = dates.to_h do |date|
-          [ date.to_date.strftime("%d %b %Y"), grouped.fetch([ date, category ], 0) ]
+          [ date.to_date.strftime("%d %b %Y"), lookup.fetch([ date, category ], 0) ]
         end
         { name: category, data: data }
       end
@@ -191,9 +192,10 @@ module KitchenCabinet
         series[name.humanize] = count if count.positive?
       end
 
+      by_category = beneficiaries_by_date_and_category(base)
       {
-        line: base.group("tickets.reported_at").order("tickets.reported_at").count,
-        bar: beneficiaries_by_date_and_category(base),
+        line: by_category,
+        bar: by_category,
         pie: pie,
         pie_by_category: base.joins(:ticket_category).group("ticket_categories.name").order("ticket_categories.name").count
       }

@@ -22,6 +22,9 @@ class KitchenCabinetDashboardTest < ActionDispatch::IntegrationTest
     get root_path
     assert_response :success
     assert_match "Open tickets by status", @response.body
+    assert_match "dashboard-tickets-status", @response.body
+    assert_match 'Chartkick["PieChart"]', @response.body
+    assert_no_match(/Share of tickets by status/, @response.body)
   end
 
   test "a user without KC access does not see the widget" do

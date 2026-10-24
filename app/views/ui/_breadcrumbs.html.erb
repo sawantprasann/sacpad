@@ -8,7 +8,7 @@
       <% end %>
       <li class="<%= last ? "min-w-0 truncate font-medium text-gray-900 dark:text-white/90" : "shrink-0" %>">
         <% if item[:path].present? && !last %>
-          <%= link_to item[:label], item[:path], class: "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90" %>
+          <%= link_to item[:label], item[:path], class: ta_text_link %>
         <% else %>
           <span<% if last %> aria-current="page"<% end %>><%= item[:label] %></span>
         <% end %>

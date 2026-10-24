@@ -13,7 +13,7 @@
       <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Step 1 — Confirm resolution</h2>
       <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Confirm this grievance was resolved. Closing records it as help delivered.</p>
       <label class="<%= ta_label_classes %>">Closure date</label>
-      <%= date_field_tag :closure_date, Date.current, class: "#{ta_field_classes} min-h-11" %>
+      <%= ta_date_picker(name: "closure_date", id: "closure_date", value: Date.current) %>
     </div>
 
     <div class="<%= ta_card_classes %> p-6">

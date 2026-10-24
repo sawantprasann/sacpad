@@ -50,6 +50,12 @@ Rails.application.routes.draw do
     resources :audit_logs, only: :index
     # Platform operational health (Story 0.13)
     resource :platform_health, only: :show, controller: :platform_health
+    # App complaints raised by organization users
+    resources :support_tickets, only: %i[index show] do
+      member do
+        post :reply
+      end
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -67,6 +73,13 @@ Rails.application.routes.draw do
 
   # Org-facing hierarchical user management (Story 0.9)
   resources :users, only: %i[index new create show]
+
+  # Voter lists — taluka, then village, then that village's roll.
+  namespace :voter_lists do
+    resources :talukas, only: %i[index show] do
+      resources :villages, only: :show
+    end
+  end
 
   # Voter management — Org-scoped sentiment tracking (Epic 6, org-side)
   resources :voters, only: %i[index show] do
@@ -113,6 +126,13 @@ Rails.application.routes.draw do
       end
       resources :follow_ups, only: :create
       resource :closure, only: %i[new create]  # two-step closure + voter-sentiment (Story 1.7)
+    end
+  end
+
+  # App support. Anyone signed in can raise a complaint; the console answers it.
+  resources :support_tickets, path: "support", only: %i[index new create show] do
+    member do
+      post :reply
     end
   end
 

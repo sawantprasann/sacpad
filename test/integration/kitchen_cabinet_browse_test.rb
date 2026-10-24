@@ -136,6 +136,10 @@ class KitchenCabinetBrowseTest < ActionDispatch::IntegrationTest
     assert_match '"stacked":true', @response.body
     assert_match %(["#{Date.current.strftime("%d %b %Y")}",1]), @response.body
     assert_match '"name":"Water"', @response.body
+    assert_match '"colors":["#0e7490","#4338ca"]', @response.body
+    assert_match '"colors":["#4338ca","#0e7490"]', @response.body
+    assert_match '"colors":["#64748b"]', @response.body
+    assert_select "[data-controller=datepicker] input[name=from_date][value=?]", (Date.current - 30).iso8601
   end
 
   test "opening an in-subtree ticket renders its detail" do

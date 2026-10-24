@@ -21,6 +21,7 @@
         <li><%= link_to "Dashboard", console_root_path, class: "menu-item group #{current_page?(console_root_path) ? "menu-item-active" : "menu-item-inactive"}" %></li>
         <li><%= link_to "Organizations", console_organizations_path, class: "menu-item group #{controller_name == "organizations" ? "menu-item-active" : "menu-item-inactive"}" %></li>
         <li><%= link_to "Roles", console_roles_path, class: "menu-item group #{controller_name == "roles" ? "menu-item-active" : "menu-item-inactive"}" %></li>
+        <li><%= link_to "Support tickets", console_support_tickets_path, class: "menu-item group #{controller_name == "support_tickets" ? "menu-item-active" : "menu-item-inactive"}" %></li>
       </ul>
 
       <h3 class="campaign-nav-label mb-4 text-xs leading-5 uppercase">Reference data</h3>

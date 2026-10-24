@@ -26,6 +26,10 @@ module ApplicationHelper
       "dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
   end
 
+  def ta_area_classes
+    "#{ta_field_classes.sub("h-11 ", "")} min-h-32 py-3"
+  end
+
   def ta_label_classes
     "mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
   end
@@ -38,6 +42,11 @@ module ApplicationHelper
   def ta_btn_secondary
     "inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 " \
       "text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-white/5 dark:text-white/80"
+  end
+
+  # Text links. Brand blue, darker on hover, with an underline when hovered.
+  def ta_text_link
+    "font-medium text-brand-500 hover:text-brand-600 hover:underline dark:text-brand-400 dark:hover:text-brand-300"
   end
 
   def ta_card_classes
@@ -85,15 +94,12 @@ module ApplicationHelper
     module_widgets = [
       { title: "Open tickets by status", mod: "kitchen_cabinet" },
       { title: "Recent cadre activity",  mod: "cadre_program" },
-      { title: "Recent ground reports",  mod: "ground_reports" },
-      { title: "Reach trend",            mod: "social_media" }
+      { title: "Recent ground reports",  mod: "ground_reports" }
     ].select { |w| user.role.can_access?(w[:mod]) }
 
     admin_widgets =
       if user.role.can_create_users?
         [
-          { title: "Pending items needing attention", admin_only: true },
-          { title: "Hierarchy & user count", admin_only: true },
           { title: "Recent deletions", admin_only: true }
         ]
       else
@@ -106,16 +112,110 @@ module ApplicationHelper
   # Festive jewel tones for the organization dashboard. These are chrome only —
   # they are not the reserved RAG / sentiment palette.
   DASHBOARD_JEWELS = [
-    { bar: "from-[#ff7a18] to-[#ffd60a]", chip: "bg-[#ff7a18]", ring: "ring-orange-100", wash: "bg-orange-50/80" },
-    { bar: "from-[#0e7490] to-[#67e8f9]", chip: "bg-[#0e7490]", ring: "ring-cyan-100", wash: "bg-cyan-50/80" },
-    { bar: "from-[#4338ca] to-[#c4b5fd]", chip: "bg-[#4338ca]", ring: "ring-indigo-100", wash: "bg-indigo-50/80" },
-    { bar: "from-[#be185d] to-[#fda4af]", chip: "bg-[#be185d]", ring: "ring-rose-100", wash: "bg-rose-50/80" },
-    { bar: "from-[#b45309] to-[#fcd34d]", chip: "bg-[#b45309]", ring: "ring-amber-100", wash: "bg-amber-50/80" },
-    { bar: "from-[#7e22ce] to-[#f0abfc]", chip: "bg-[#7e22ce]", ring: "ring-fuchsia-100", wash: "bg-fuchsia-50/80" }
+    { hex: "#ff7a18", bar: "from-[#ff7a18] to-[#ffd60a]", chip: "bg-[#ff7a18]", ring: "ring-orange-100", wash: "bg-orange-50/80" },
+    { hex: "#0e7490", bar: "from-[#0e7490] to-[#67e8f9]", chip: "bg-[#0e7490]", ring: "ring-cyan-100", wash: "bg-cyan-50/80" },
+    { hex: "#4338ca", bar: "from-[#4338ca] to-[#c4b5fd]", chip: "bg-[#4338ca]", ring: "ring-indigo-100", wash: "bg-indigo-50/80" },
+    { hex: "#be185d", bar: "from-[#be185d] to-[#fda4af]", chip: "bg-[#be185d]", ring: "ring-rose-100", wash: "bg-rose-50/80" },
+    { hex: "#b45309", bar: "from-[#b45309] to-[#fcd34d]", chip: "bg-[#b45309]", ring: "ring-amber-100", wash: "bg-amber-50/80" },
+    { hex: "#7e22ce", bar: "from-[#7e22ce] to-[#f0abfc]", chip: "bg-[#7e22ce]", ring: "ring-fuchsia-100", wash: "bg-fuchsia-50/80" }
   ].freeze
+
+  # Workflow status ink. The status pill and the status chart both read this.
+  TICKET_STATUS_COLORS = {
+    "open" => "#64748b",
+    "in_progress" => "#2970ff",
+    "closed" => "#039855",
+    "blocked" => "#b42318"
+  }.freeze
 
   def dashboard_jewel(index)
     DASHBOARD_JEWELS[index.to_i % DASHBOARD_JEWELS.length]
+  end
+
+  def status_color(status)
+    TICKET_STATUS_COLORS[status.to_s]
+  end
+
+  # Donut charts on the organization dashboard. The ring stays unlabeled — the
+  # total sits in the hole, and each slice name is an arrow under the chart.
+  def dashboard_pie_library
+    {
+      cutout: "62%",
+      layout: { padding: 6 },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#101828",
+          padding: 10,
+          cornerRadius: 10,
+          boxPadding: 4
+        },
+        pieSliceLabels: true
+      }
+    }
+  end
+
+  def category_series_colors(series, categories, fallback:)
+    named_series_colors(Array(series).map { |row| row[:name] }, categories, fallback: fallback)
+  end
+
+  def named_series_colors(names, categories, fallback:)
+    by_name = Array(categories).index_by(&:name)
+    Array(names).map do |name|
+      category = by_name[name]
+      category ? dashboard_jewel(category.display_order.to_i)[:hex] : fallback
+    end
+  end
+
+  def status_series_colors(labels, fallback:)
+    Array(labels).map { |label| status_color(label.to_s.parameterize(separator: "_")) || fallback }
+  end
+
+  def ta_date_picker(name: nil, id: nil, value: nil, required: false, form: nil, method: nil)
+    if form && method
+      name = form.field_name(method)
+      id = form.field_id(method)
+      value = form.object&.public_send(method) if value.nil?
+    end
+    render "ui/date_picker", name: name, id: id, value: value, required: required
+  end
+
+  def support_accent
+    user_signed_in? ? org_accent_color : "#0b1f44"
+  end
+
+  def support_accent_ink
+    user_signed_in? ? org_accent_foreground : "#FFFFFF"
+  end
+
+  def support_status_tab
+    %w[pending solved].include?(params[:status].to_s) ? params[:status].to_s : "all"
+  end
+
+  def support_filter_path(console:, status: nil, query: nil)
+    path = console ? console_support_tickets_path : support_tickets_path
+    query_params = {}
+    query_params[:status] = status if status.present? && status != "all"
+    query_params[:q] = query if query.present?
+    query_params.empty? ? path : "#{path}?#{query_params.to_query}"
+  end
+
+  def support_timestamp(time)
+    return "" if time.blank?
+
+    local = time.in_time_zone("Asia/Kolkata")
+    "#{local.strftime("%a, %-l:%M %p")} · #{time_ago_in_words(time)} ago"
+  end
+
+  def support_date(time)
+    return "—" if time.blank?
+
+    time.in_time_zone("Asia/Kolkata").strftime("%d %b %Y")
+  end
+
+  def support_initials(name)
+    letters = name.to_s.split.first(2).filter_map { |part| part[0] }
+    letters.join.upcase.presence || "S"
   end
 
   # Campaign desk clock. Users are in India; the app time zone is still UTC.
@@ -154,6 +254,17 @@ module ApplicationHelper
   def icon_action_link(action, url, label: nil, **html)
     label ||= action.to_s.capitalize
     link_to action_icon(action), url, icon_action_attrs(action, label).merge(html)
+  end
+
+  # The whole row opens the record. Links and buttons inside it keep their own click.
+  def clickable_row(url, **options, &block)
+    options[:class] = [ "cursor-pointer", options[:class] ].compact.join(" ")
+    data = (options.delete(:data) || {}).merge(
+      controller: "row-link",
+      action: "click->row-link#visit",
+      row_link_url_value: url
+    )
+    tag.tr(**options, data: data, &block)
   end
 
   def icon_action_button(action, url, label: nil, method: nil, confirm: nil, **html)
@@ -216,7 +327,7 @@ module ApplicationHelper
     href = url.match?(/\Ahttps?:\/\//i) ? url : "https://#{url}"
     safe_join([
       link_to(url, href, target: "_blank", rel: "noopener noreferrer",
-              class: "break-all text-brand-500 underline hover:text-brand-600"),
+              class: "break-all underline #{ta_text_link}"),
       trailing.presence
     ].compact)
   end

@@ -95,6 +95,12 @@
                 <span class="menu-item-text">Voter Lists</span>
               <% end %>
             </li>
+            <li>
+              <%= link_to voter_lists_talukas_path,
+                    class: "menu-item group #{params[:controller].to_s.start_with?("voter_lists/") ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <span class="menu-item-text">Taluka</span>
+              <% end %>
+            </li>
           <% end %>
 
           <% if user_signed_in? && current_user.role.can_access?("booth_management") %>
@@ -113,6 +119,18 @@
             </span>
           </li>
         </ul>
+
+        <% if user_signed_in? %>
+          <h3 class="campaign-nav-label mt-6 mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]">Help</h3>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <%= link_to support_tickets_path,
+                    class: "menu-item group #{params[:controller] == "support_tickets" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <span class="menu-item-text">Support</span>
+              <% end %>
+            </li>
+          </ul>
+        <% end %>
       </div>
     </nav>
   </div>

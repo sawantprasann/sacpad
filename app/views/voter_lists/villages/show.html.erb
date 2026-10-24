@@ -1,0 +1,157 @@
+<% content_for :title, @village.name %>
+<% breadcrumb "Talukas", voter_lists_talukas_path %>
+<% breadcrumb @taluka.name, voter_lists_taluka_path(@taluka) %>
+<% breadcrumb @village.name %>
+<% th = "border-b border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800" %>
+<% td = "border-b border-gray-100 px-4 py-3 align-middle text-sm dark:border-gray-800" %>
+<% row_colors = { "pleased" => "bg-green-50 dark:bg-green-950/30", "transit" => "bg-amber-50 dark:bg-amber-950/30", "displeased" => "bg-red-50 dark:bg-red-950/30" } %>
+<% dot_colors = { "pleased" => "#16a34a", "transit" => "#d97706", "displeased" => "#dc2626" } %>
+<% can_mark = current_user.role.can_write?("voter_lists") %>
+<% list_path = voter_lists_taluka_village_path(@taluka, @village) %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Talukas",
+      title: @village.name,
+      subtitle: "#{pluralize(@pagy.count, "voter")} · #{@election.name}",
+      meta: @taluka.name
+    } do %><% end %>
+
+<p class="mt-4 text-sm text-gray-500">Voters are sorted by booth, then name. Voted marks are for <%= @election.name %>.</p>
+
+<div class="<%= ta_card_classes %> mt-6 p-6">
+  <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Taluka</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @taluka.name, voter_lists_taluka_path(@taluka), class: ta_text_link %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Assembly</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.assembly.name %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Police station</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.police_station.presence || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Pin code</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.pin_code.presence || "—" %></dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voters</dt>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @voter_total %></dd>
+    </div>
+  </dl>
+</div>
+
+<div class="mt-4 flex justify-end">
+  <%= render "ui/module_toolbar", export_url: voter_lists_taluka_village_path(@taluka, @village, voter_filters.merge(format: :xlsx)) %>
+</div>
+
+<%= form_with url: list_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <%= label_tag :voter_id, "Voter ID", class: ta_label_classes %>
+      <%= text_field_tag :voter_id, params[:voter_id], class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :name, "Name", class: ta_label_classes %>
+      <%= text_field_tag :name, params[:name], class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :booth, "Booth", class: ta_label_classes %>
+      <%= select_tag :booth, options_for_select(@booth_numbers, params[:booth]), include_blank: "Any booth", class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :sr_no, "Sr no", class: ta_label_classes %>
+      <%= number_field_tag :sr_no, params[:sr_no], class: ta_field_classes, min: 1 %>
+    </div>
+    <div>
+      <%= label_tag :sentiment, "Sentiment", class: ta_label_classes %>
+      <%= select_tag :sentiment,
+            options_for_select([
+              [ "● Pleased", "pleased" ],
+              [ "● Transit", "transit" ],
+              [ "● Displeased", "displeased" ]
+            ], params[:sentiment]),
+            include_blank: "Any sentiment",
+            class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :voted, "Voted", class: ta_label_classes %>
+      <%= select_tag :voted, options_for_select([ [ "Voted", "yes" ], [ "Not voted", "no" ] ], params[:voted]), include_blank: "Any", class: ta_field_classes %>
+    </div>
+    <div class="flex items-end gap-2">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
+      <%= link_to "Clear", list_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+    </div>
+  </div>
+  <p class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+    <% dot_colors.each do |status, color| %>
+      <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full" style="background: <%= color %>"></span><%= status.humanize %></span>
+    <% end %>
+  </p>
+<% end %>
+
+<div class="mt-6 <%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <thead class="bg-gray-50 dark:bg-white/[0.03]">
+        <tr>
+          <% [ "Sr no", "Voter ID", "Name", "Booth", "Sentiment", "Voted" ].each do |heading| %>
+            <th class="<%= th %>"><%= heading %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @voters.each do |voter| %>
+          <% sentiment = @sentiments[voter.id] %>
+          <% status = sentiment&.sentiment_status %>
+          <tr class="<%= row_colors[status] %>">
+            <td class="<%= td %> tabular-nums text-gray-700"><%= voter.sr_no || "—" %></td>
+            <td class="<%= td %> font-medium">
+              <% begin %>
+                <%= link_to voter.voter_id, voter_path(voter), class: ta_text_link %>
+              <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+                <span class="text-gray-400">—</span>
+              <% end %>
+            </td>
+            <td class="<%= td %> text-gray-800 dark:text-white/90">
+              <% begin %>
+                <%= [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ") %>
+              <% rescue ActiveRecord::Encryption::Errors::Decryption %>
+                <span class="text-gray-400">—</span>
+              <% end %>
+            </td>
+            <td class="<%= td %> tabular-nums text-gray-700"><%= voter.booth&.number || "—" %></td>
+            <td class="<%= td %>">
+              <% if status %>
+                <span class="inline-flex items-center gap-2 text-gray-800">
+                  <span class="h-2.5 w-2.5 rounded-full" style="background: <%= dot_colors[status] %>"></span>
+                  <%= status.humanize %>
+                </span>
+              <% else %>
+                <span class="text-gray-400">—</span>
+              <% end %>
+            </td>
+            <td class="<%= td %>">
+              <% turnout = @turnouts[voter.id] %>
+              <% if can_mark %>
+                <%= button_to (turnout&.voted? ? "Voted" : "Not voted"),
+                      update_voted_voter_path(voter),
+                      method: :patch,
+                      params: { voted: turnout&.voted? ? "0" : "1", return_to: request.fullpath },
+                      class: "min-h-9 cursor-pointer rounded-full px-3 text-xs font-medium #{turnout&.voted? ? "bg-green-600 text-white" : "bg-white text-gray-700 ring-1 ring-gray-300"}" %>
+              <% else %>
+                <%= turnout&.voted? ? "Voted" : "Not voted" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if @voters.empty? %>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= voter_filters.values.any?(&:present?) ? "No voters match these filters." : "No voters in this village yet." %></p>
+    <% end %>
+  </div>
+  <%= render "ui/pagination", pagy: @pagy %>
+</div>

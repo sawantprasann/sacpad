@@ -43,7 +43,7 @@
             <% if photo.image? %>
               <%= image_tag photo, class: "aspect-square w-full rounded-xl object-cover" %>
             <% else %>
-              <%= link_to photo.filename, rails_blob_path(photo, disposition: "attachment"), class: "text-sm text-brand-500 hover:text-brand-600" %>
+              <%= link_to photo.filename, rails_blob_path(photo, disposition: "attachment"), class: "text-sm #{ta_text_link}" %>
             <% end %>
           <% end %>
         </div>

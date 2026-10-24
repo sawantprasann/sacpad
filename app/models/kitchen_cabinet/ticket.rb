@@ -26,6 +26,7 @@ module KitchenCabinet
     }.freeze
 
     validates :person_name, presence: true
+    validates :mobile, format: { with: /\A\d{10}\z/, message: "must be a 10-digit number" }, allow_blank: true
     # Voter-ID gate (Story 1.6, FR21): a voter_id can only be attached once the ticket is closed,
     # so a voter_id on file always means help was actually delivered. Model-level invariant, not UI.
     # The one exception is an exact name match at create time, which links the voter id early.
@@ -33,6 +34,7 @@ module KitchenCabinet
 
     attr_accessor :linking_matched_voter
 
+    before_validation :normalize_mobile
     after_initialize :set_defaults, if: :new_record?
     before_create :assign_ticket_number
 
@@ -92,6 +94,13 @@ module KitchenCabinet
 
     def set_defaults
       self.reported_at ||= Date.current
+    end
+
+    def normalize_mobile
+      return if mobile.nil?
+
+      digits = mobile.to_s.gsub(/\D/, "")
+      self.mobile = digits.presence
     end
 
     # Human-readable per-org reference. unscoped avoids the acts_as_tenant filter during create;

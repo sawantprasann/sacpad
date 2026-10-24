@@ -27,6 +27,24 @@ module KitchenCabinet
       ActsAsTenant.with_tenant(@org_a) { assert Ticket.new.open? }
     end
 
+    test "mobile must be a 10-digit number when present" do
+      ActsAsTenant.with_tenant(@org_a) do
+        short = Ticket.new(owner: @user_a, ticket_category: @category, person_name: "Asha", mobile: "999")
+        assert_not short.valid?
+        assert short.errors[:mobile].any?
+
+        letters = Ticket.new(owner: @user_a, ticket_category: @category, person_name: "Asha", mobile: "999000111a")
+        assert_not letters.valid?
+
+        blank = Ticket.new(owner: @user_a, ticket_category: @category, person_name: "Asha", mobile: "")
+        assert blank.valid?
+
+        spaced = Ticket.new(owner: @user_a, ticket_category: @category, person_name: "Asha", mobile: "99900 01111")
+        assert spaced.valid?
+        assert_equal "9990001111", spaced.mobile
+      end
+    end
+
     test "person_name is required" do
       ActsAsTenant.with_tenant(@org_a) do
         t = Ticket.new(owner: @user_a, ticket_category: @category)
