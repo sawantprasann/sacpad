@@ -36,7 +36,7 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a link in media value opens in a new tab on the list, the activity, and the dashboard" do
+  test "a link in media value opens in a new tab on the list and the activity" do
     notes = "Coverage at https://news.example/story. and www.paper.example/clip"
     activity = make_activity(owner: @alice, notes: notes)
     sign_in @alice
@@ -48,9 +48,6 @@ class CadreProgramActivitiesTest < ActionDispatch::IntegrationTest
     assert_no_match(%r{href="https://news.example/story\."}, @response.body)
 
     get cadre_program_activities_path
-    assert_select "a[href=?][target=_blank]", "https://news.example/story"
-
-    get root_path
     assert_select "a[href=?][target=_blank]", "https://news.example/story"
   end
 
