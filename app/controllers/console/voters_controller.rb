@@ -100,13 +100,8 @@ module Console
         return relation
       end
 
-      term = params[:name].strip.downcase
-      ids = relation.filter_map { |voter| voter.id if voter_name(voter).include?(term) }
+      ids = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
       Voter.includes(:booth, :village).where(id: ids).order(created_at: :desc)
-    end
-
-    def voter_name(voter)
-      [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ").downcase
     end
   end
 end

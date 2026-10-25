@@ -78,19 +78,10 @@ class VotersController < ApplicationController
       relation = relation.where.not(id: voted_ids)
     end
     if params[:name].present?
-      term = params[:name].strip.downcase
-      matched = relation.filter_map do |voter|
-        voter.id if voter_name(voter).downcase.include?(term)
-      end
+      matched = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
       relation = Voter.where(id: matched)
     end
     relation.includes(:booth, :village).order(Arel.sql("sr_no ASC NULLS LAST"), :id)
-  end
-
-  def voter_name(voter)
-    [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ")
-  rescue ActiveRecord::Encryption::Errors::Decryption
-    ""
   end
 
   def load_roll_state(voters)

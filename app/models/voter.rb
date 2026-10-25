@@ -29,6 +29,18 @@ class Voter < ApplicationRecord
     [ first_name, middle_name, last_name ].compact_blank.join(" ")
   end
 
+  # Each word must appear somewhere in the full name. "tanaji savant" matches
+  # "Tanaji Jayvant Savant" because the middle name does not have to be typed.
+  def matches_name?(query)
+    words = query.to_s.squish.downcase.split
+    return false if words.empty?
+
+    full = name.downcase
+    words.all? { |word| full.include?(word) }
+  rescue ActiveRecord::Encryption::Errors::Decryption
+    false
+  end
+
   # Male, female, other, and blank genders for a voter set. Defaults to every voter.
   def self.gender_counts(relation = all)
     totals = { male: 0, female: 0, others: 0, unspecified: 0 }

@@ -51,10 +51,7 @@ module VoterLists
         relation = relation.where.not(id: voted_ids)
       end
       voters = relation.to_a
-      if params[:name].present?
-        term = params[:name].strip.downcase
-        voters.select! { |voter| voter_name(voter).downcase.include?(term) }
-      end
+      voters.select! { |voter| voter.matches_name?(params[:name]) } if params[:name].present?
       voters.sort_by { |voter| [ booth_sort_key(voter.booth&.number), voter_name(voter).downcase, voter.id ] }
     end
 

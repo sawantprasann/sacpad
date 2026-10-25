@@ -15,8 +15,8 @@
         export_url: pr_records_path(list_params.merge(format: :xlsx)),
         new_url: (new_pr_record_path(category: @category&.slug) if current_user.role.can_write?("pr")),
         new_label: "Log record",
-        accent: "#c2410c",
-        accent_ink: "#ffffff" %>
+        accent: org_accent_color,
+        accent_ink: org_accent_foreground %>
 </div>
 
 <%= form_with url: pr_records_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>

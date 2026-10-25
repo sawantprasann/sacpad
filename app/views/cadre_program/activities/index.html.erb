@@ -19,8 +19,8 @@
         export_url: cadre_program_activities_path(format: :xlsx, category: @category_key),
         new_url: (new_path if current_user.role.can_write?("cadre_program")),
         new_label: (@category_label ? "Create #{@category_label}" : "Create activity"),
-        accent: "#c2410c",
-        accent_ink: "#ffffff" %>
+        accent: org_accent_color,
+        accent_ink: org_accent_foreground %>
 </div>
 
 <% columns = CadreProgram::CadreActivity.list_columns(@category_key) %>

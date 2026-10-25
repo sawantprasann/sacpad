@@ -60,6 +60,8 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
   test "authenticated user can view index" do
     get pr_records_path
     assert_response :success
+    assert_select "a[aria-label='Log record'][style*=?]", "#465FFF"
+    assert_no_match(/#c2410c/, response.body)
   end
 
   test "unauthenticated user redirected" do

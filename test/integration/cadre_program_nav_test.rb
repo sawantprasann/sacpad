@@ -43,7 +43,8 @@ class CadreProgramNavTest < ActionDispatch::IntegrationTest
     assert_match "Leadership Meets", @response.body
     assert_select "table"
     assert_select "a.menu-dropdown-item-active", text: "Leadership Meets"
-    assert_select "a[href=?]", new_cadre_program_activity_path(category: "leadership_meets")
+    assert_select "a[href=?][style*=?]", new_cadre_program_activity_path(category: "leadership_meets"), "#465FFF"
+    assert_no_match(/#c2410c/, response.body)
 
     get new_cadre_program_activity_path(category: "leadership_meets")
     assert_response :success

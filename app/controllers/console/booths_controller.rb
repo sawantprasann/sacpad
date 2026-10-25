@@ -110,13 +110,8 @@ module Console
     end
 
     def filter_voters_by_name(relation)
-      term = params[:name].strip.downcase
-      ids = relation.filter_map { |voter| voter.id if voter_name(voter).include?(term) }
+      ids = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
       Voter.where(id: ids).order(:id)
-    end
-
-    def voter_name(voter)
-      [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ").downcase
     end
 
     def like(value)

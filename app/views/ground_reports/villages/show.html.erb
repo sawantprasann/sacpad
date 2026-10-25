@@ -23,8 +23,8 @@
         export_url: ground_reports_village_path(@village, format: :xlsx),
         new_url: (new_ground_reports_village_report_path(@village) if can_write),
         new_label: "Create issue",
-        accent: "#c2410c",
-        accent_ink: "#ffffff" %>
+        accent: org_accent_color,
+        accent_ink: org_accent_foreground %>
 </div>
 
 <div class="mt-6 mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">

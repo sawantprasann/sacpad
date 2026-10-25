@@ -15,6 +15,16 @@ class VoterTest < ActiveSupport::TestCase
     assert Voter.find_by(voter_id: "VID123"), "deterministic encryption allows lookup by voter_id"
   end
 
+  test "name search matches each word and can skip the middle name" do
+    voter = Voter.new(first_name: "Tanaji", middle_name: "Jayvant", last_name: "Savant")
+
+    assert voter.matches_name?("tanaji savant")
+    assert voter.matches_name?("Savant Tanaji")
+    assert voter.matches_name?("tanaji jayvant savant")
+    assert_not voter.matches_name?("tanaji patil")
+    assert_not voter.matches_name?("   ")
+  end
+
   test "name joins the stored name parts and skips a blank middle name" do
     with_middle = Voter.new(first_name: "Asha", middle_name: "Ramesh", last_name: "Patil")
     assert_equal "Asha Ramesh Patil", with_middle.name

@@ -422,7 +422,8 @@ class GroundReportsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a", text: "Export Excel"
     assert_select "a[href=?]", ground_reports_village_path(@village, format: :xlsx)
-    assert_select "a[aria-label='Create issue']"
+    assert_select "a[aria-label='Create issue'][style*=?]", "#465FFF"
+    assert_no_match(/#c2410c/, @response.body)
     assert_no_match(/Water shortage/, @response.body)
 
     get ground_reports_village_path(@village, format: :xlsx)

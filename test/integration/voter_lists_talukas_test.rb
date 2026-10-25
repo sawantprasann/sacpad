@@ -108,6 +108,16 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     assert_equal [ "Amit Kale" ], voter_names
   end
 
+  test "a village name search matches first and last name without the middle name" do
+    Voter.create!(
+      voter_id: "TJS0000001", first_name: "Tanaji", middle_name: "Jayvant", last_name: "Savant",
+      sr_no: 3, booth: @village.booths.first, village: @village
+    )
+
+    get voter_lists_taluka_village_path(@taluka, @village, name: "tanaji savant")
+    assert_equal [ "Tanaji Jayvant Savant" ], voter_names
+  end
+
   test "export is limited to the village and keeps booth then name order" do
     get voter_lists_taluka_village_path(@taluka, @village, format: :xlsx)
 

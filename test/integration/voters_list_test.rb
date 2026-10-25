@@ -99,6 +99,18 @@ class VotersListTest < ActionDispatch::IntegrationTest
     assert_equal "9876543210", @asha.reload.mobile
   end
 
+  test "a name search matches first and last name without the middle name" do
+    Voter.create!(
+      voter_id: "TJS0000001", first_name: "Tanaji", middle_name: "Jayvant", last_name: "Savant",
+      sr_no: 1, booth: @booth, village: @village
+    )
+
+    get voters_path(name: "tanaji savant")
+    assert_response :success
+    assert_match "Tanaji", response.body
+    assert_no_match(/Ravi/, response.body)
+  end
+
   test "a booth manager only sees voters from their booth" do
     role = Role.create!(name: "Booth Manager", slug: "booth_manager")
     role.role_permissions.create!(module_name: "voter_lists", access_level: "write")
