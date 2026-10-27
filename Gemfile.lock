@@ -137,7 +137,7 @@ GEM
     caxlsx_rails (0.7.2)
       actionpack (>= 6.1)
       caxlsx (>= 4.0)
-    chartkick (5.2.1)
+    chartkick (5.3.0)
     closure_tree (9.8.0)
       activerecord (>= 7.2.0)
       with_advisory_lock (>= 7.6.0)
@@ -511,7 +511,7 @@ DEPENDENCIES
   capybara
   caxlsx (~> 4.5)
   caxlsx_rails (~> 0.7)
-  chartkick (~> 5.2)
+  chartkick (~> 5.3)
   closure_tree (~> 9.8)
   debug
   devise (~> 5.0)
