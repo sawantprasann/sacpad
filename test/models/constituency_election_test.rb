@@ -63,7 +63,7 @@ class ConstituencyElectionTest < ActiveSupport::TestCase
     mote = election.candidates.find_by!(candidate_name: "Rahul Maharudra Mote")
     assert mote.new_contestant?
     assert_nil mote.vote_change
-    assert_equal [ "Dr. Tanaji Jayawant Sawant", "Rahul Maharudra Mote" ], election.candidates.map(&:candidate_name)
+    assert_equal [ "Dr. Tanaji Jayawant Sawant", "Rahul Maharudra Mote" ], election.candidates.reload.map(&:candidate_name)
   end
 
   test "deleting an assembly that still has a result is blocked" do
