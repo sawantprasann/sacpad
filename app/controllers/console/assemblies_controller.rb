@@ -14,6 +14,7 @@ module Console
       @village_total = @record.villages.count
       @talukas = Taluka.order(:name)
       @villages = filtered_villages.load
+      @election_results = @record.election_results.includes(:gained_from_party, candidates: :party).order(year: :desc)
     end
 
     def new

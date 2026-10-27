@@ -54,6 +54,36 @@ document.addEventListener("turbo:load", () => {
   if (!window.__alpineStarted) { Alpine.start(); window.__alpineStarted = true }
 })
 
+// The election year swap replaces one frame. Keep the address bar in step
+// without a page visit, then draw the donut if its script did not.
+document.addEventListener("turbo:frame-load", (event) => {
+  const frame = event.target
+  if (!(frame instanceof HTMLElement) || frame.id !== "election-result") return
+
+  const src = frame.getAttribute("src")
+  if (src) {
+    const next = new URL(src, window.location.href)
+    const current = new URL(window.location.href)
+    const sameAddress = next.pathname === current.pathname && next.search === current.search
+    const history = window.Turbo?.session?.history
+    if (!sameAddress && history?.replace) {
+      history.replace(next)
+      if (window.Turbo.session.view) window.Turbo.session.view.lastRenderedLocation = next
+    }
+  }
+
+  frame.querySelectorAll("[id^='election-share-']").forEach((element) => {
+    if (element.querySelector("canvas")) return
+    const script = element.nextElementSibling
+    if (!(script instanceof HTMLScriptElement)) return
+    if (!script.textContent.includes("Chartkick")) return
+
+    const fresh = document.createElement("script")
+    fresh.textContent = script.textContent
+    script.replaceWith(fresh)
+  })
+})
+
 // A click on the field itself only focuses the date segments. Open the calendar
 // from that same click. Already-open pickers throw; leave them open.
 document.addEventListener("click", (event) => {

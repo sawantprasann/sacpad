@@ -1,0 +1,35 @@
+<% content_for :title, "Change password" %>
+<% breadcrumb "Change password" %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: "Account",
+      title: "Change password",
+      subtitle: "Use your current password, then choose a new one.",
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<div class="mt-6 max-w-lg rounded-2xl bg-white p-5 shadow-theme-md ring-1 ring-amber-100 dark:bg-gray-900 dark:ring-white/10">
+  <span class="mb-5 block h-1.5 w-16 rounded-full bg-gradient-to-r from-[#ff7a18] to-[#ffd60a]"></span>
+  <% if current_user.errors.any? %>
+    <div class="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"><%= current_user.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <%= form_with model: current_user, url: account_password_path, method: :patch, class: "space-y-4" do |f| %>
+    <div>
+      <%= f.label :current_password, "Current password", class: ta_label_classes %>
+      <%= f.password_field :current_password, autocomplete: "current-password", required: true, class: ta_field_classes %>
+    </div>
+    <div>
+      <%= f.label :password, "New password", class: ta_label_classes %>
+      <%= f.password_field :password, autocomplete: "new-password", required: true, class: ta_field_classes %>
+    </div>
+    <div>
+      <%= f.label :password_confirmation, "Confirm new password", class: ta_label_classes %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true, class: ta_field_classes %>
+    </div>
+    <div class="flex items-center gap-3 pt-1">
+      <%= f.submit "Update password", class: "#{ta_btn_primary} cursor-pointer" %>
+      <%= link_to "Cancel", root_path, class: ta_btn_secondary %>
+    </div>
+  <% end %>
+</div>

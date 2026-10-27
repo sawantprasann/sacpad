@@ -15,13 +15,12 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <%# TailAdmin shell. Alpine drives sidebarToggle + darkMode (body x-data). Party accent (UX-DR3)
+  <%# TailAdmin shell. Alpine drives the mobile sidebar. Party accent (UX-DR3)
       resolved per org as a CSS var — accent-only, AA-safe; reserved RAG palette is never overridden. %>
   <body
-    class="font-outfit text-sm text-gray-800 dark:text-white/90"
+    class="font-outfit text-sm text-gray-800"
     style="--org-party-color:<%= org_accent_color %>; --org-party-contrast:<%= org_accent_foreground %>"
-    x-data="{ sidebarToggle: false, darkMode: false }"
-    :class="{ 'dark bg-gray-900': darkMode }"
+    x-data="{ sidebarToggle: false }"
   >
     <div class="flex h-screen overflow-hidden">
       <%= render "ui/sidebar" %>

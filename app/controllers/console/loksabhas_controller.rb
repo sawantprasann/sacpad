@@ -23,6 +23,7 @@ module Console
       @loksabha = managed_model.includes(:state, :district).find(params[:id])
       @assembly_total = @loksabha.assemblies.count
       @assemblies = filtered_assemblies.load
+      @election_results = @loksabha.election_results.includes(:gained_from_party, candidates: :party).order(year: :desc)
     end
 
     def create

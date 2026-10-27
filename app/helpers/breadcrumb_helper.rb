@@ -47,6 +47,8 @@ module BreadcrumbHelper
 
   def org_section
     {
+      "election_results" => [ "Election result", election_result_path ],
+      "account/passwords" => [ "Change password", edit_account_password_path ],
       "kitchen_cabinet/tickets" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
       "kitchen_cabinet/closures" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
       "kitchen_cabinet/follow_ups" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
