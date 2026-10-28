@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_28_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -206,6 +206,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_010000) do
     t.datetime "updated_at", null: false
     t.index ["cadre_activity_id"], name: "index_cadre_activity_programs_on_cadre_activity_id", unique: true
     t.index ["organization_id"], name: "index_cadre_activity_programs_on_organization_id"
+  end
+
+  create_table "constituency_election_candidates", force: :cascade do |t|
+    t.bigint "constituency_election_id", null: false
+    t.bigint "party_id", null: false
+    t.string "candidate_name", null: false
+    t.integer "votes", null: false
+    t.decimal "vote_percent", precision: 5, scale: 2, null: false
+    t.decimal "vote_change", precision: 6, scale: 2
+    t.boolean "new_contestant", default: false, null: false
+    t.boolean "winner", default: false, null: false
+    t.integer "position", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["constituency_election_id"], name: "index_election_candidates_on_election_id"
+    t.index ["party_id"], name: "index_election_candidates_on_party_id"
+  end
+
+  create_table "constituency_elections", force: :cascade do |t|
+    t.string "constituency_type", null: false
+    t.bigint "constituency_id", null: false
+    t.integer "year", null: false
+    t.string "title"
+    t.integer "outcome", null: false
+    t.bigint "gained_from_party_id"
+    t.decimal "swing", precision: 6, scale: 2
+    t.integer "margin_votes"
+    t.decimal "margin_percent", precision: 5, scale: 2
+    t.decimal "margin_change", precision: 6, scale: 2
+    t.integer "turnout_votes"
+    t.decimal "turnout_percent", precision: 5, scale: 2
+    t.decimal "turnout_change", precision: 6, scale: 2
+    t.integer "valid_votes"
+    t.integer "registered_electors"
+    t.decimal "electors_change", precision: 6, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["constituency_type", "constituency_id", "year"], name: "index_constituency_elections_on_constituency_and_year", unique: true
+    t.index ["gained_from_party_id"], name: "index_constituency_elections_on_gained_from_party_id"
   end
 
   create_table "districts", force: :cascade do |t|
@@ -837,6 +876,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_010000) do
   add_foreign_key "cadre_activity_party_program_hosteds", "organizations"
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
+  add_foreign_key "constituency_election_candidates", "constituency_elections"
+  add_foreign_key "constituency_election_candidates", "parties"
+  add_foreign_key "constituency_elections", "parties", column: "gained_from_party_id"
   add_foreign_key "districts", "states"
   add_foreign_key "elections", "organizations"
   add_foreign_key "ground_report_imports", "organizations"

@@ -1,0 +1,36 @@
+<div class="campaign-sheet mb-6">
+  <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Election results</h2>
+    <%= link_to "New election result", new_console_election_result_path(constituency), class: ta_btn_primary %>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="campaign-table w-full text-sm">
+      <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <tr>
+          <th class="px-5 py-3 font-medium">Year</th>
+          <th class="px-5 py-3 font-medium">Title</th>
+          <th class="px-5 py-3 font-medium">Result</th>
+          <th class="px-5 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% elections.each do |election| %>
+          <tr class="border-b border-gray-100 last:border-0 dark:border-gray-800">
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= link_to election.year, console_election_result_path(election), class: ta_text_link %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= election.heading %></td>
+            <td class="px-5 py-3 text-gray-700 dark:text-gray-300"><%= election.result_label || "—" %></td>
+            <td class="px-5 py-3 text-right whitespace-nowrap">
+              <div class="inline-flex items-center justify-end gap-1">
+                <%= icon_action_link :edit, edit_console_election_result_path(election) %>
+                <%= icon_action_button :delete, console_election_result_path(election) %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <% if elections.empty? %>
+      <p class="px-5 py-10 text-center text-sm text-gray-400">No election results yet.</p>
+    <% end %>
+  </div>
+</div>

@@ -2,6 +2,11 @@
 <% mark = local_assigns[:name].to_s %>
 <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm <%= local_assigns[:chip_class] %>">
   <% case mark %>
+  <% when "constituency_elections" %>
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5M4 19h16"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 16v-5M12 16V8M16 16v-3"/>
+    </svg>
   <% when "kitchen_cabinet" %>
     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h5"/>

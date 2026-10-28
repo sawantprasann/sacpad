@@ -21,10 +21,29 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     assert_not_nil @user.current_sign_in_at
   end
 
-  test "the top bar shows the signed-in user and their login count" do
+  test "the top bar shows the signed-in user and a way to change the password" do
     post user_session_path, params: { user: { email: "rohan@example.com", password: "password123" } }
     follow_redirect!
     assert_match "Rohan", @response.body
-    assert_match "logins:", @response.body
+    assert_match "Sign-ins", @response.body
+    assert_select "a[href='#{edit_account_password_path}']", text: "Change password"
+  end
+
+  test "a signed-in user can replace their password" do
+    post user_session_path, params: { user: { email: "rohan@example.com", password: "password123" } }
+
+    patch account_password_path, params: {
+      user: { current_password: "wrong", password: "newpassword", password_confirmation: "newpassword" }
+    }
+    assert_response :unprocessable_entity
+    assert @user.reload.valid_password?("password123")
+
+    patch account_password_path, params: {
+      user: { current_password: "password123", password: "newpassword", password_confirmation: "newpassword" }
+    }
+    assert_redirected_to root_path
+    assert @user.reload.valid_password?("newpassword")
+    follow_redirect!
+    assert_match "Password updated.", response.body
   end
 end

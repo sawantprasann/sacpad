@@ -15,40 +15,56 @@
     <%= render "ui/breadcrumbs" %>
 
     <div class="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
-      <button
-        type="button"
-        @click="darkMode = !darkMode"
-        aria-label="Toggle dark mode"
-        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
-      >
-        <svg x-show="!darkMode" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-        </svg>
-        <svg x-show="darkMode" x-cloak class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.22a1 1 0 011.42 0l.7.7a1 1 0 01-1.41 1.42l-.71-.71a1 1 0 010-1.41zM18 9a1 1 0 100 2h-1a1 1 0 100-2h1zM5.64 4.64a1 1 0 010 1.41l-.7.71a1 1 0 11-1.42-1.41l.71-.71a1 1 0 011.41 0zM4 9a1 1 0 100 2H3a1 1 0 100-2h1zm1.34 6.66a1 1 0 011.41 0l.71.7a1 1 0 11-1.42 1.42l-.7-.71a1 1 0 010-1.41zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm6.36-1.64a1 1 0 010 1.41l-.7.71a1 1 0 01-1.42-1.41l.71-.71a1 1 0 011.41 0zM10 6a4 4 0 100 8 4 4 0 000-8z" clip-rule="evenodd"/>
-        </svg>
-      </button>
-
       <% if user_signed_in? %>
-        <div class="ml-1 flex items-center gap-3 border-l border-gray-200 pl-3 dark:border-gray-700">
-          <% if current_user.photo.attached? %>
-            <%= image_tag current_user.photo, class: "h-9 w-9 rounded-full object-cover", alt: "" %>
-          <% else %>
-            <span class="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white" style="background: #000080"><%= current_user.name.to_s.first&.upcase %></span>
-          <% end %>
-          <div class="hidden min-w-0 leading-tight sm:block">
-            <p class="campaign-user-name truncate text-sm font-semibold"><%= current_user.name %></p>
-            <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-              <%= current_user.role.name %>
-              · logins: <span class="tabular-nums"><%= current_user.sign_in_count %></span>
-              <% if current_user.current_sign_in_at %>
-                · <%= current_user.current_sign_in_at.strftime("%d %b %H:%M") %>
+        <div class="relative ml-1 border-l border-amber-100 pl-3 dark:border-white/10" x-data="{ open: false }">
+          <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="true" aria-label="Account menu"
+                  class="flex cursor-pointer items-center gap-2.5 rounded-2xl py-1 pr-2 pl-1 hover:bg-amber-50 dark:hover:bg-white/5">
+            <% if current_user.photo.attached? %>
+              <%= image_tag current_user.photo, class: "h-9 w-9 rounded-full object-cover ring-2 ring-amber-200", alt: "" %>
+            <% else %>
+              <span class="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white ring-2 ring-amber-200" style="background: #0b1f44"><%= current_user.name.to_s.first&.upcase %></span>
+            <% end %>
+            <span class="hidden min-w-0 text-left leading-tight sm:block">
+              <span class="campaign-user-name block max-w-40 truncate text-sm font-semibold"><%= current_user.name %></span>
+              <span class="block max-w-40 truncate text-xs font-medium text-amber-800 dark:text-amber-200"><%= current_user.role.name %></span>
+            </span>
+            <svg class="hidden h-4 w-4 text-amber-800 sm:block dark:text-amber-200" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          <div x-show="open" @click.outside="open = false" x-cloak x-transition
+               class="absolute right-0 z-50 mt-2 overflow-hidden rounded-2xl bg-white shadow-theme-lg ring-1 ring-amber-100 dark:bg-gray-900 dark:ring-white/10"
+               style="width: 17rem">
+            <div class="h-1.5 bg-gradient-to-r from-[#ff7a18] to-[#ffd60a]"></div>
+            <div class="px-4 py-3">
+              <p class="truncate text-sm font-semibold text-gray-900 dark:text-white"><%= current_user.name %></p>
+              <p class="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400"><%= current_user.role.name %> · <%= current_user.organization.name %></p>
+            </div>
+            <dl class="space-y-2 border-t border-amber-100 px-4 py-3 text-sm dark:border-white/10">
+              <div class="flex items-baseline justify-between gap-3">
+                <dt class="font-medium text-amber-800 dark:text-amber-200">Sign-ins</dt>
+                <dd class="tabular-nums text-gray-800 dark:text-white/90"><%= current_user.sign_in_count %></dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-3">
+                <dt class="whitespace-nowrap font-medium text-amber-800 dark:text-amber-200">This sign-in</dt>
+                <dd class="whitespace-nowrap text-gray-800 dark:text-white/90"><%= current_user.current_sign_in_at ? current_user.current_sign_in_at.strftime("%-d %b, %H:%M") : "—" %></dd>
+              </div>
+            </dl>
+            <div class="border-t border-amber-100 p-2 dark:border-white/10">
+              <%= link_to "Change password", edit_account_password_path,
+                    class: "block whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-50 dark:text-amber-100 dark:hover:bg-white/5" %>
+              <%= button_to destroy_user_session_path, method: :delete, form: { class: "w-full" },
+                    class: "flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5" do %>
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H4m0 0l3-3m-3 3l3 3"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 7V6a2 2 0 012-2h7a2 2 0 012 2v12a2 2 0 01-2 2h-7a2 2 0 01-2-2v-1"/>
+                </svg>
+                Sign out
               <% end %>
-            </p>
+            </div>
           </div>
         </div>
-        <%= button_to "Sign out", destroy_user_session_path, method: :delete,
-              class: "inline-flex h-10 cursor-pointer items-center rounded-lg px-3 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white" %>
       <% end %>
     </div>
   </div>

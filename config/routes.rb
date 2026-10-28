@@ -28,7 +28,9 @@ Rails.application.routes.draw do
     resources :states
     resources :districts
     resources :loksabhas do
+      resources :constituency_elections, except: :index
       resources :assemblies, except: :index do
+        resources :constituency_elections, except: :index
         resources :villages, except: :index
       end
     end
@@ -142,6 +144,15 @@ Rails.application.routes.draw do
     collection do
       post :thumbnail
     end
+  end
+
+  # Constituency result for the signed-in organization. The dashboard shows the
+  # latest year; this page holds the full result and the other years.
+  resource :election_result, only: :show, controller: "election_results"
+
+  # Signed-in password change. Devise's /password/edit is the emailed reset link.
+  namespace :account do
+    resource :password, only: %i[edit update]
   end
 
   # Defines the root path route ("/")

@@ -24,6 +24,9 @@ MediaPlatform.seed_defaults!
 # Administrative contact roles used by the Ground Reports dropdown.
 AdminContactRole.seed_defaults!
 
+# Paranda assembly results for 2024 and 2019. Safe to re-run.
+ParandaElectionSeed.load!
+
 # Bootstrap platform Admin (Story 0.3) — the only way into the Console (no self-service sign-up).
 # Configurable via env; in production a password MUST be provided (no insecure default).
 admin_email = ENV.fetch("SACPAD_ADMIN_EMAIL", "admin@sacpad.com")
