@@ -1,13 +1,13 @@
 <% headline = @activity.detail_headline.presence || @activity.category_label %>
 <% content_for :title, "Edit #{headline}" %>
-<% breadcrumb "Cadre Program", cadre_program_activities_path %>
+<% breadcrumb t("nav.cadre_program"), cadre_program_activities_path %>
 <% breadcrumb @activity.category_label, cadre_program_activities_path(category: @activity.category) %>
 <% breadcrumb headline, cadre_program_activity_path(@activity) %>
-<% breadcrumb "Edit" %>
+<% breadcrumb t("nav.edit") %>
 
-<div x-data='<%= { category: @activity.category.to_s, labels: CadreProgram::CadreActivity::CATEGORY_LABELS }.to_json %>'>
+<div x-data='<%= { category: @activity.category.to_s, labels: CadreProgram::CadreActivity.localized_category_labels }.to_json %>'>
   <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Cadre Program",
+        kicker: t("nav.cadre_program"),
         title: "Edit #{headline}",
         subtitle: @activity.category_label
       } do %><% end %>

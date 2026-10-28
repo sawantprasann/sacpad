@@ -1,5 +1,5 @@
 <% content_for :title, @import.mock_poll? ? "Upload mock poll" : "Import" %>
-<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
 <% breadcrumb @village.name, ground_reports_village_path(@village) if @village %>
 <% breadcrumb @import.mock_poll? ? "Upload mock poll" : "Import" %>
 

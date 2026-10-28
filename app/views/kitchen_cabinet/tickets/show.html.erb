@@ -1,6 +1,6 @@
 <% content_for :title, "#{@ticket.person_name} · #{@ticket.ticket_number}" %>
 <% list_path = kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) %>
-<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
+<% breadcrumb t("nav.beneficiaries"), kitchen_cabinet_tickets_path %>
 <% breadcrumb @ticket.ticket_category.name, list_path %>
 <% breadcrumb @ticket.person_name %>
 <% field = "rounded-xl bg-amber-50/70 px-4 py-3 ring-1 ring-amber-100 dark:bg-white/[0.03] dark:ring-white/10" %>

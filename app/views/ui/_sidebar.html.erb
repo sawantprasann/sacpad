@@ -15,29 +15,29 @@
   <div class="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
     <nav>
       <div>
-        <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]">Menu</h3>
+        <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.menu") %></h3>
         <ul class="mb-6 flex flex-col gap-1">
           <li>
             <%= link_to root_path, class: "menu-item group #{current_page?(root_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
-              <span class="menu-item-text">Dashboard</span>
+              <span class="menu-item-text"><%= t("nav.dashboard") %></span>
             <% end %>
           </li>
           <% if user_signed_in? && current_user.role.can_create_users? %>
             <li>
               <%= link_to users_path, class: "menu-item group #{current_page?(users_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Team</span>
+                <span class="menu-item-text"><%= t("nav.team") %></span>
               <% end %>
             </li>
           <% end %>
         </ul>
 
-        <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]">Modules</h3>
+        <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.modules") %></h3>
         <ul class="flex flex-col gap-1">
           <% if user_signed_in? && election_result_nav? %>
             <li>
               <%= link_to election_result_path,
                     class: "menu-item group #{params[:controller] == "election_results" ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Election result</span>
+                <span class="menu-item-text"><%= t("nav.election_result") %></span>
               <% end %>
             </li>
           <% end %>
@@ -47,7 +47,7 @@
             <li>
               <%= link_to kitchen_cabinet_tickets_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("kitchen_cabinet/") ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Beneficiaries</span>
+                <span class="menu-item-text"><%= t("nav.beneficiaries") %></span>
               <% end %>
             </li>
           <% end %>
@@ -61,14 +61,15 @@
               <button type="button" @click="open = !open"
                 class="menu-item group w-full <%= on_cadre_program ? "menu-item-active" : "menu-item-inactive" %>"
                 :class="open ? 'menu-item-active' : 'menu-item-inactive'">
-                <span class="menu-item-text">Cadre Program</span>
+                <span class="menu-item-text"><%= t("nav.cadre_program") %></span>
                 <svg class="ml-auto h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
                      viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
                 </svg>
               </button>
               <ul x-show="open" x-cloak class="mt-1 ml-5 flex flex-col gap-1 border-l border-gray-100 pl-3 dark:border-gray-800">
-                <% CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label| %>
+                <% CadreProgram::CadreActivity::CATEGORY_LABELS.each_key do |key| %>
+                  <% label = CadreProgram::CadreActivity.localized_category(key) %>
                   <% cat_path = cadre_program_activities_path(category: key) %>
                   <% active_category = cadre_category == key %>
                   <li>
@@ -85,7 +86,7 @@
             <li>
               <%= link_to ground_reports_villages_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("ground_reports/") ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Ground Reports</span>
+                <span class="menu-item-text"><%= t("nav.ground_reports") %></span>
               <% end %>
             </li>
           <% end %>
@@ -95,7 +96,7 @@
             <li>
               <%= link_to pr_records_path,
                     class: "menu-item group #{params[:controller] == "pr_records" ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">PR Records</span>
+                <span class="menu-item-text"><%= t("nav.pr_records") %></span>
               <% end %>
             </li>
           <% end %>
@@ -104,13 +105,13 @@
             <li>
               <%= link_to voters_path,
                     class: "menu-item group #{params[:controller] == "voters" ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Voter Lists</span>
+                <span class="menu-item-text"><%= t("nav.voter_lists") %></span>
               <% end %>
             </li>
             <li>
               <%= link_to voter_lists_talukas_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("voter_lists/") ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Taluka</span>
+                <span class="menu-item-text"><%= t("nav.taluka") %></span>
               <% end %>
             </li>
           <% end %>
@@ -119,26 +120,26 @@
             <li>
               <%= link_to booths_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("booth_management/") ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Booth Management</span>
+                <span class="menu-item-text"><%= t("nav.booth_management") %></span>
               <% end %>
             </li>
           <% end %>
 
           <li>
             <span class="menu-item group menu-item-inactive cursor-default">
-              <span class="menu-item-text">Social Media</span>
-              <span class="menu-dropdown-badge menu-dropdown-badge-inactive ml-auto">soon</span>
+              <span class="menu-item-text"><%= t("nav.social_media") %></span>
+              <span class="menu-dropdown-badge menu-dropdown-badge-inactive ml-auto"><%= t("nav.soon") %></span>
             </span>
           </li>
         </ul>
 
         <% if user_signed_in? %>
-          <h3 class="campaign-nav-label mt-6 mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]">Help</h3>
+          <h3 class="campaign-nav-label mt-6 mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.help") %></h3>
           <ul class="flex flex-col gap-1">
             <li>
               <%= link_to support_tickets_path,
                     class: "menu-item group #{params[:controller] == "support_tickets" ? "menu-item-active" : "menu-item-inactive"}" do %>
-                <span class="menu-item-text">Support</span>
+                <span class="menu-item-text"><%= t("nav.support") %></span>
               <% end %>
             </li>
           </ul>

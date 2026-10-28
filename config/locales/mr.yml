@@ -1,0 +1,189 @@
+mr:
+  locale:
+    changed: "भाषा बदलली."
+    invalid: "ही भाषा उपलब्ध नाही."
+  locales:
+    en: "English"
+    mr: "मराठी"
+  date:
+    day_names:
+      - रविवार
+      - सोमवार
+      - मंगळवार
+      - बुधवार
+      - गुरुवार
+      - शुक्रवार
+      - शनिवार
+    abbr_day_names:
+      - रवि
+      - सोम
+      - मंगळ
+      - बुध
+      - गुरु
+      - शुक्र
+      - शनि
+    month_names:
+      -
+      - जानेवारी
+      - फेब्रुवारी
+      - मार्च
+      - एप्रिल
+      - मे
+      - जून
+      - जुलै
+      - ऑगस्ट
+      - सप्टेंबर
+      - ऑक्टोबर
+      - नोव्हेंबर
+      - डिसेंबर
+    abbr_month_names:
+      -
+      - जाने
+      - फेब्रु
+      - मार्च
+      - एप्रि
+      - मे
+      - जून
+      - जुलै
+      - ऑग
+      - सप्टें
+      - ऑक्टो
+      - नोव्हें
+      - डिसें
+  nav:
+    menu: "मेनू"
+    dashboard: "डॅशबोर्ड"
+    team: "टीम"
+    modules: "विभाग"
+    election_result: "निवडणूक निकाल"
+    beneficiaries: "लाभार्थी"
+    cadre_program: "कार्यकर्ता कार्यक्रम"
+    ground_reports: "मैदानी अहवाल"
+    pr_records: "प्रसिद्धी नोंदी"
+    voter_lists: "मतदार यादी"
+    taluka: "तालुका"
+    talukas: "तालुके"
+    booth_management: "बुथ व्यवस्थापन"
+    booth: "बुथ"
+    social_media: "सोशल मीडिया"
+    soon: "लवकरच"
+    help: "मदत"
+    support: "मदत कक्ष"
+    language: "भाषा"
+    toggle_sidebar: "साइडबार उघडा"
+    account_menu: "खाते मेनू"
+    sign_ins: "साइन-इन"
+    this_sign_in: "हे साइन-इन"
+    change_password: "पासवर्ड बदला"
+    sign_out: "साइन आउट"
+    breadcrumb: "मार्ग"
+    console: "कन्सोल"
+    edit: "संपादन"
+    create_ticket: "तिकीट तयार करा"
+    create_issue: "मुद्दा तयार करा"
+    edit_ticket: "तिकीट संपादन"
+  auth:
+    sign_in: "साइन इन"
+    campaign_desk: "प्रचार डेस्क"
+    platform_console: "प्लॅटफॉर्म कन्सोल"
+    console_prompt: "कन्सोल ईमेल आणि पासवर्ड टाका."
+    user_prompt: "साइन इन करण्यासाठी ईमेल आणि पासवर्ड टाका."
+    email: "ईमेल"
+    password: "पासवर्ड"
+    password_placeholder: "पासवर्ड टाका"
+    show: "दाखवा"
+    hide: "लपवा"
+    remember_me: "मला लॉग इन ठेवा"
+    forgot_password: "पासवर्ड विसरलात?"
+  dashboard:
+    namaste: "नमस्ते"
+    open_a_desk: "डेस्क उघडा"
+    at_a_glance: "एक नजर"
+    glance_subtitle: "आज तुमच्या प्रचार डेस्कवरील काम."
+    no_modules: "तुमच्या भूमिकेसाठी अजून कोणताही विभाग उपलब्ध नाही."
+    good_morning: "शुभ सकाळ"
+    good_afternoon: "शुभ दुपार"
+    good_evening: "शुभ संध्याकाळ"
+    open_tickets: "स्थितीनुसार खुली तिकिटे"
+    recent_cadre: "अलीकडील कार्यकर्ता काम"
+    recent_ground_reports: "अलीकडील मैदानी अहवाल"
+    recent_deletions: "अलीकडील हटवलेल्या नोंदी"
+    election_result: "निवडणूक निकाल"
+    beneficiaries_blurb: "मदतीच्या प्रतीक्षेत असलेले लोक"
+    cadre_blurb: "मैदानावर सुरू असलेले काम"
+    ground_reports_blurb: "मैदानावर काय ऐकू येत आहे"
+    pr_blurb: "प्रसिद्धी, पोस्ट आणि कव्हरेज"
+    voter_lists_blurb: "तुमच्या मतदारसंघाची यादी"
+    taluka_blurb: "प्रत्येक तालुक्यातील गावे आणि मतदार"
+    booth_blurb: "बुथ, याद्या आणि मतदान"
+    election_blurb: "या मतदारसंघाचा मतांचा वाटा"
+  kitchen_cabinet:
+    category: "प्रकार"
+    any_category: "कोणताही प्रकार"
+    beneficiary_name: "लाभार्थ्याचे नाव"
+    village: "गाव"
+    any_village: "कोणतेही गाव"
+    search_villages: "गाव शोधा..."
+    no_villages: "गाव सापडले नाही"
+    reporter_name: "नोंदवणारा"
+    reporter_placeholder: "कोणी नोंदवले"
+    status: "स्थिती"
+    any_status: "कोणतीही स्थिती"
+    from_date: "पासून तारीख"
+    to_date: "पर्यंत तारीख"
+    filter: "शोध"
+    clear: "साफ करा"
+    line: "रेषा"
+    bar: "स्तंभ"
+    pie: "वर्तुळ"
+    reported_date: "नोंद तारीख"
+    chart_count: "लाभार्थी"
+    no_match_filters: "या फिल्टरशी लाभार्थी जुळत नाहीत."
+    date: "तारीख"
+    by_status: "स्थितीनुसार"
+    by_category: "प्रकारानुसार"
+    list: "यादी"
+    representative: "प्रतिनिधी"
+    ticket: "तिकीट"
+    reporter: "नोंदवणारा"
+    reported: "नोंदवले"
+    open_ticket: "उघडा"
+    no_match: "लाभार्थी सापडले नाहीत."
+    charts: "लाभार्थी आलेख"
+    export_excel: "एक्सेल निर्यात"
+    beneficiary_count:
+      one: "१ लाभार्थी"
+      other: "%{count} लाभार्थी"
+    statuses:
+      open: "खुले"
+      in_progress: "प्रगतीपथावर"
+      closed: "बंद"
+      blocked: "अडथळा"
+  cadre_program:
+    create_prefix: "तयार करा "
+    create_activity: "कार्यक्रम तयार करा"
+    select_category: "प्रकार निवडा"
+    categories:
+      program_by_party: "पक्षाचा कार्यक्रम"
+      leadership_meets: "नेतृत्व भेटी"
+      party_programs_hosted: "आयोजित पक्ष कार्यक्रम"
+      personal_program: "वैयक्तिक कार्यक्रम"
+      one_to_one: "समोरासमोर"
+  devise:
+    failure:
+      already_authenticated: "तुम्ही आधीच साइन इन आहात."
+      inactive: "तुमचे खाते अजून सक्रिय नाही."
+      invalid: "चुकीचा %{authentication_keys} किंवा पासवर्ड."
+      locked: "तुमचे खाते लॉक झाले आहे."
+      last_attempt: "खाते लॉक होण्यापूर्वी आणखी एक प्रयत्न शिल्लक आहे."
+      not_found_in_database: "चुकीचा %{authentication_keys} किंवा पासवर्ड."
+      timeout: "सत्र संपले. पुढे जाण्यासाठी पुन्हा साइन इन करा."
+      unauthenticated: "पुढे जाण्यासाठी साइन इन करा."
+    sessions:
+      signed_in: "साइन इन यशस्वी."
+      signed_out: "साइन आउट यशस्वी."
+      already_signed_out: "साइन आउट यशस्वी."
+    passwords:
+      send_instructions: "पासवर्ड रीसेट करण्याच्या सूचना काही मिनिटांत ईमेलवर येतील."
+      updated: "पासवर्ड बदलला. तुम्ही आता साइन इन आहात."
+      updated_not_active: "पासवर्ड यशस्वीरीत्या बदलला."

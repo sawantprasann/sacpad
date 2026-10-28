@@ -1,12 +1,12 @@
 <% headline = @activity.detail_headline.presence || @activity.category_label %>
 <% content_for :title, "#{headline} · #{@activity.category_label}" %>
 <% list_path = cadre_program_activities_path(category: @activity.category) %>
-<% breadcrumb "Cadre Program", cadre_program_activities_path %>
+<% breadcrumb t("nav.cadre_program"), cadre_program_activities_path %>
 <% breadcrumb @activity.category_label, list_path %>
 <% breadcrumb headline %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Cadre Program",
+      kicker: t("nav.cadre_program"),
       title: headline,
       subtitle: @activity.category_label,
       meta: "Logged by #{@activity.owner.name} · #{@activity.created_at.strftime("%d %b %Y")} · #{pluralize(@activity.photos.size, "photo")}"

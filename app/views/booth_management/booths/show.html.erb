@@ -1,6 +1,6 @@
 <% content_for :title, "Booth #{@booth.number}" %>
-<% breadcrumb "Booth Management", booths_path %>
-<% breadcrumb "Booth #{@booth.number}" %>
+<% breadcrumb t("nav.booth_management"), booths_path %>
+<% breadcrumb "#{t("nav.booth")} #{@booth.number}" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Booth Management",

@@ -1,7 +1,7 @@
 <% content_for :title, "Create ticket" %>
 <% back_path = kitchen_cabinet_tickets_path %>
-<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
-<% breadcrumb "Create ticket" %>
+<% breadcrumb t("nav.beneficiaries"), kitchen_cabinet_tickets_path %>
+<% breadcrumb t("nav.create_ticket") %>
 
 <div>
   <%= render layout: "ui/campaign_hero", locals: {

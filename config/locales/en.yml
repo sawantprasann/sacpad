@@ -1,34 +1,130 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
   hello: "Hello world"
+  locale:
+    changed: "Language updated."
+    invalid: "That language is not available."
+  locales:
+    en: "English"
+    mr: "मराठी"
+  nav:
+    menu: "Menu"
+    dashboard: "Dashboard"
+    team: "Team"
+    modules: "Modules"
+    election_result: "Election result"
+    beneficiaries: "Beneficiaries"
+    cadre_program: "Cadre Program"
+    ground_reports: "Ground Reports"
+    pr_records: "PR Records"
+    voter_lists: "Voter Lists"
+    taluka: "Taluka"
+    talukas: "Talukas"
+    booth_management: "Booth Management"
+    booth: "Booth"
+    social_media: "Social Media"
+    soon: "soon"
+    help: "Help"
+    support: "Support"
+    language: "Language"
+    toggle_sidebar: "Toggle sidebar"
+    account_menu: "Account menu"
+    sign_ins: "Sign-ins"
+    this_sign_in: "This sign-in"
+    change_password: "Change password"
+    sign_out: "Sign out"
+    breadcrumb: "Breadcrumb"
+    console: "Console"
+    edit: "Edit"
+    create_ticket: "Create ticket"
+    create_issue: "Create issue"
+    edit_ticket: "Edit ticket"
+  auth:
+    sign_in: "Sign In"
+    campaign_desk: "Campaign desk"
+    platform_console: "Platform Console"
+    console_prompt: "Enter your console email and password."
+    user_prompt: "Enter your email and password to sign in."
+    email: "Email"
+    password: "Password"
+    password_placeholder: "Enter your password"
+    show: "Show"
+    hide: "Hide"
+    remember_me: "Keep me logged in"
+    forgot_password: "Forgot password?"
+  dashboard:
+    namaste: "Namaste"
+    open_a_desk: "Open a desk"
+    at_a_glance: "At a glance"
+    glance_subtitle: "The work sitting on your campaign desk today."
+    no_modules: "No modules are available to your role yet."
+    good_morning: "Good morning"
+    good_afternoon: "Good afternoon"
+    good_evening: "Good evening"
+    open_tickets: "Open tickets by status"
+    recent_cadre: "Recent cadre activity"
+    recent_ground_reports: "Recent ground reports"
+    recent_deletions: "Recent deletions"
+    election_result: "Election Result"
+    beneficiaries_blurb: "People waiting on help"
+    cadre_blurb: "Work happening on the ground"
+    ground_reports_blurb: "What the field is hearing"
+    pr_blurb: "Press, posts, and coverage"
+    voter_lists_blurb: "Your constituency roll"
+    taluka_blurb: "Villages and voters in each taluka"
+    booth_blurb: "Booths, checklists, and turnout"
+    election_blurb: "Vote share for this constituency"
+  kitchen_cabinet:
+    category: "Category"
+    any_category: "Any category"
+    beneficiary_name: "Beneficiary name"
+    village: "Village"
+    any_village: "Any village"
+    search_villages: "Search villages..."
+    no_villages: "No villages found"
+    reporter_name: "Reporter name"
+    reporter_placeholder: "Who reported it"
+    status: "Status"
+    any_status: "Any status"
+    from_date: "From date"
+    to_date: "To date"
+    filter: "Filter"
+    clear: "Clear"
+    line: "Line"
+    bar: "Bar"
+    pie: "Pie"
+    reported_date: "Reported date"
+    chart_count: "Beneficiaries"
+    no_match_filters: "No beneficiaries match these filters."
+    date: "Date"
+    by_status: "By status"
+    by_category: "By category"
+    list: "List"
+    representative: "Representative"
+    ticket: "Ticket"
+    reporter: "Reporter"
+    reported: "Reported"
+    open_ticket: "Open"
+    no_match: "No beneficiaries match."
+    charts: "Beneficiary charts"
+    export_excel: "Export Excel"
+    beneficiary_count:
+      one: "1 beneficiary"
+      other: "%{count} beneficiaries"
+    statuses:
+      open: "Open"
+      in_progress: "In progress"
+      closed: "Closed"
+      blocked: "Blocked"
+  cadre_program:
+    create_prefix: "Create "
+    create_activity: "Create activity"
+    select_category: "Select a category"
+    categories:
+      program_by_party: "Program By Party"
+      leadership_meets: "Leadership Meets"
+      party_programs_hosted: "Party Programs Hosted"
+      personal_program: "Personal Program"
+      one_to_one: "One To One"
   activerecord:
     errors:
       messages:

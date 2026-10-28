@@ -16,6 +16,7 @@ class ApplicationController < ActionController::Base
   # Tenant isolation, layer 1: set the current organization explicitly per request.
   set_current_tenant_through_filter
   before_action :set_current_organization
+  before_action :set_locale
 
   # A cross-tenant / not-permitted access surfaces as 404, never 403 (never confirm existence).
   rescue_from Pundit::NotAuthorizedError, with: :not_found
@@ -48,6 +49,40 @@ class ApplicationController < ActionController::Base
   # scoped query with no tenant RAISES (require_tenant = true) by design.
   def set_current_organization
     set_current_tenant(current_user&.organization)
+  end
+
+  # The platform console stays English. Org pages follow the signed-in user's
+  # saved language, then the locale cookie, then English.
+  def set_locale
+    if request.path.start_with?("/console")
+      I18n.locale = I18n.default_locale
+      return
+    end
+
+    locale = preferred_user_locale || cookie_locale || I18n.default_locale
+    I18n.locale = locale
+    sync_locale_cookie(locale) if user_signed_in?
+  end
+
+  def preferred_user_locale
+    return unless user_signed_in?
+
+    normalize_locale(current_user.preferred_locale)
+  end
+
+  def cookie_locale
+    normalize_locale(cookies[:locale])
+  end
+
+  def normalize_locale(value)
+    value = value.to_s
+    I18n.available_locales.map(&:to_s).include?(value) ? value.to_sym : nil
+  end
+
+  def sync_locale_cookie(locale)
+    return if cookies[:locale] == locale.to_s
+
+    cookies.permanent[:locale] = { value: locale.to_s, httponly: true, same_site: :lax }
   end
 
   def not_found

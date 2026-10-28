@@ -96,8 +96,19 @@ module CadreProgram
     before_validation :keep_only_matching_detail
     validate :matching_detail_required
 
+    def self.localized_category(key)
+      label = CATEGORY_LABELS[key.to_s]
+      return if label.blank?
+
+      I18n.t("cadre_program.categories.#{key}", default: label)
+    end
+
+    def self.localized_category_labels
+      CATEGORY_LABELS.keys.index_with { |key| localized_category(key) }
+    end
+
     def category_label
-      CATEGORY_LABELS[category]
+      self.class.localized_category(category)
     end
 
     # Feed and export rollups. One GROUP BY on this table — not a union of the detail tables.
@@ -105,7 +116,7 @@ module CadreProgram
     def self.counts_by_category
       reorder(nil).group(:category).count.each_with_object({}) do |(key, count), labeled|
         slug = key.is_a?(Integer) ? categories.key(key) : key.to_s
-        labeled[CATEGORY_LABELS.fetch(slug, slug)] = count
+        labeled[localized_category(slug) || slug] = count
       end
     end
 

@@ -72,7 +72,7 @@ module CadreProgram
       relation = policy_scope(CadreActivity)
       if params[:category].present? && CadreActivity.categories.key?(params[:category])
         @category_key = params[:category]
-        @category_label = CadreActivity::CATEGORY_LABELS[@category_key]
+        @category_label = CadreActivity.localized_category(@category_key)
         relation = relation.where(category: @category_key)
       end
       relation.order(created_at: :desc, id: :desc)

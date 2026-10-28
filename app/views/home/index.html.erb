@@ -1,39 +1,39 @@
-<% content_for :title, "Dashboard" %>
+<% content_for :title, t("nav.dashboard") %>
 <% party = current_user.organization.current_party %>
 <% desks = [] %>
 <% if current_user.role.can_access?("kitchen_cabinet") %>
-  <% desks << { title: "Beneficiaries", blurb: "People waiting on help", path: kitchen_cabinet_tickets_path, mark: "kitchen_cabinet", jewel: 0 } %>
+  <% desks << { title: t("nav.beneficiaries"), blurb: t("dashboard.beneficiaries_blurb"), path: kitchen_cabinet_tickets_path, mark: "kitchen_cabinet", jewel: 0 } %>
 <% end %>
 <% if current_user.role.can_access?("cadre_program") %>
-  <% desks << { title: "Cadre Program", blurb: "Work happening on the ground", path: cadre_program_activities_path, mark: "cadre_program", jewel: 1 } %>
+  <% desks << { title: t("nav.cadre_program"), blurb: t("dashboard.cadre_blurb"), path: cadre_program_activities_path, mark: "cadre_program", jewel: 1 } %>
 <% end %>
 <% if current_user.role.can_access?("ground_reports") %>
-  <% desks << { title: "Ground Reports", blurb: "What the field is hearing", path: ground_reports_villages_path, mark: "ground_reports", jewel: 2 } %>
+  <% desks << { title: t("nav.ground_reports"), blurb: t("dashboard.ground_reports_blurb"), path: ground_reports_villages_path, mark: "ground_reports", jewel: 2 } %>
 <% end %>
 <% if current_user.role.can_access?("pr") %>
-  <% desks << { title: "PR Records", blurb: "Press, posts, and coverage", path: pr_records_path, mark: "pr", jewel: 3 } %>
+  <% desks << { title: t("nav.pr_records"), blurb: t("dashboard.pr_blurb"), path: pr_records_path, mark: "pr", jewel: 3 } %>
 <% end %>
 <% if current_user.role.can_access?("voter_lists") %>
-  <% desks << { title: "Voter Lists", blurb: "Your constituency roll", path: voters_path, mark: "voters", jewel: 4 } %>
-  <% desks << { title: "Taluka", blurb: "Villages and voters in each taluka", path: voter_lists_talukas_path, mark: "taluka", jewel: 6 } %>
+  <% desks << { title: t("nav.voter_lists"), blurb: t("dashboard.voter_lists_blurb"), path: voters_path, mark: "voters", jewel: 4 } %>
+  <% desks << { title: t("nav.taluka"), blurb: t("dashboard.taluka_blurb"), path: voter_lists_talukas_path, mark: "taluka", jewel: 6 } %>
 <% end %>
 <% if current_user.role.can_access?("booth_management") %>
-  <% desks << { title: "Booth Management", blurb: "Booths, checklists, and turnout", path: booths_path, mark: "booths", jewel: 5 } %>
+  <% desks << { title: t("nav.booth_management"), blurb: t("dashboard.booth_blurb"), path: booths_path, mark: "booths", jewel: 5 } %>
 <% end %>
 <% if @constituency_election %>
-  <% desks << { title: "Election Result", blurb: "Vote share for this constituency", path: election_result_path, mark: "constituency_elections", jewel: 4 } %>
+  <% desks << { title: t("dashboard.election_result"), blurb: t("dashboard.election_blurb"), path: election_result_path, mark: "constituency_elections", jewel: 4 } %>
 <% end %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Namaste",
+        kicker: t("dashboard.namaste"),
         title: "#{dashboard_greeting}, #{current_user.name}",
         subtitle: [ current_user.organization.name, current_user.role.name, party&.name ].compact.join(" · "),
-        meta: dashboard_now.strftime("%A, %-d %B %Y")
+        meta: l(dashboard_now, format: "%A, %-d %B %Y")
       } do %><% end %>
 
   <% if desks.any? %>
     <div class="mt-6">
-      <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Open a desk</h2>
+      <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("dashboard.open_a_desk") %></h2>
       <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         <% desks.each do |desk| %>
           <% jewel = dashboard_jewel(desk[:jewel]) %>
@@ -55,8 +55,8 @@
 
   <div class="mt-8 mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
     <div>
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90">At a glance</h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400">The work sitting on your campaign desk today.</p>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("dashboard.at_a_glance") %></h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400"><%= t("dashboard.glance_subtitle") %></p>
     </div>
   </div>
 
@@ -69,7 +69,7 @@
         <%= render "ui/dashboard_widget", widget: widget, accent_index: index %>
       <% end %>
       <% if @constituency_election %>
-        <%= render "ui/dashboard_widget", widget: { title: "Election result", mod: "constituency_elections" }, accent_index: 4 %>
+        <%= render "ui/dashboard_widget", widget: { title: t("nav.election_result"), mod: "constituency_elections" }, accent_index: 4 %>
       <% end %>
     </div>
   <% end %>
@@ -82,7 +82,7 @@
   <% end %>
   <% if @widgets.empty? && @constituency_election.blank? %>
     <div class="rounded-2xl border border-dashed border-amber-300 bg-white/80 px-5 py-8 text-center text-sm text-amber-900 dark:border-amber-700/40 dark:bg-gray-900 dark:text-amber-100">
-      No modules are available to your role yet.
+      <%= t("dashboard.no_modules") %>
     </div>
   <% end %>
 

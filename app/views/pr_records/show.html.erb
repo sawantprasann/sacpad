@@ -1,6 +1,6 @@
 <% content_for :title, "#{@record.title} · #{@record.record_number}" %>
 <% list_path = pr_records_path(category: @record.pr_category.slug) %>
-<% breadcrumb "PR Records", pr_records_path %>
+<% breadcrumb t("nav.pr_records"), pr_records_path %>
 <% breadcrumb @record.pr_category.name, list_path %>
 <% breadcrumb @record.title %>
 <% field = "rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]" %>

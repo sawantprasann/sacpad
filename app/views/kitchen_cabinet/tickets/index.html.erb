@@ -1,4 +1,4 @@
-<% content_for :title, "Beneficiaries" %>
+<% content_for :title, t("nav.beneficiaries") %>
 <% list_params = request.query_parameters.slice("category", "name", "village", "reporter", "status", "q", "from_date", "to_date") %>
 <% accent = @category ? dashboard_jewel(@category.display_order.to_i)[:hex] : org_accent_color %>
 <% accent_ink = @category ? "#ffffff" : org_accent_foreground %>
@@ -10,9 +10,9 @@
 <% pie_category_colors = named_series_colors(@charts[:pie_by_category].keys, @categories, fallback: accent) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Beneficiaries",
-        title: "Beneficiaries",
-        subtitle: [ @category&.name, pluralize(@pagy.count, "beneficiary") ].compact.join(" · "),
+        kicker: t("nav.beneficiaries"),
+        title: t("nav.beneficiaries"),
+        subtitle: [ @category&.name, t("kitchen_cabinet.beneficiary_count", count: @pagy.count) ].compact.join(" · "),
         meta: current_user.organization.name
       } do %><% end %>
 
@@ -20,7 +20,7 @@
     <%= render "ui/module_toolbar",
           export_url: kitchen_cabinet_tickets_path(list_params.merge(format: :xlsx)),
           new_url: (new_kitchen_cabinet_ticket_path(category: params[:category]) if current_user.role.can_write?("kitchen_cabinet")),
-          new_label: "Create ticket",
+          new_label: t("nav.create_ticket"),
           accent: accent,
           accent_ink: accent_ink %>
   </div>
@@ -28,58 +28,58 @@
   <%= form_with url: kitchen_cabinet_tickets_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div>
-        <%= label_tag :category, "Category", class: ta_label_classes %>
+        <%= label_tag :category, t("kitchen_cabinet.category"), class: ta_label_classes %>
         <%= select_tag :category,
               options_from_collection_for_select(@categories, :slug, :name, params[:category]),
-              include_blank: "Any category",
+              include_blank: t("kitchen_cabinet.any_category"),
               class: ta_field_classes %>
       </div>
       <div>
-        <%= label_tag :name, "Beneficiary name", class: ta_label_classes %>
-        <%= text_field_tag :name, params[:name], class: ta_field_classes, placeholder: "Beneficiary name" %>
+        <%= label_tag :name, t("kitchen_cabinet.beneficiary_name"), class: ta_label_classes %>
+        <%= text_field_tag :name, params[:name], class: ta_field_classes, placeholder: t("kitchen_cabinet.beneficiary_name") %>
       </div>
       <div>
-        <%= label_tag :village, "Village", class: ta_label_classes %>
+        <%= label_tag :village, t("kitchen_cabinet.village"), class: ta_label_classes %>
         <%= render "ui/min_search_select",
               name: :village,
               choices: @villages.map { |village| [ village.name, village.name ] },
               selected: params[:village],
-              blank: "Any village",
-              placeholder: "Any village",
-              search_placeholder: "Search villages...",
-              empty_text: "No villages found" %>
+              blank: t("kitchen_cabinet.any_village"),
+              placeholder: t("kitchen_cabinet.any_village"),
+              search_placeholder: t("kitchen_cabinet.search_villages"),
+              empty_text: t("kitchen_cabinet.no_villages") %>
       </div>
       <div>
-        <%= label_tag :reporter, "Reporter name", class: ta_label_classes %>
-        <%= text_field_tag :reporter, params[:reporter], class: ta_field_classes, placeholder: "Who reported it" %>
+        <%= label_tag :reporter, t("kitchen_cabinet.reporter_name"), class: ta_label_classes %>
+        <%= text_field_tag :reporter, params[:reporter], class: ta_field_classes, placeholder: t("kitchen_cabinet.reporter_placeholder") %>
       </div>
       <div>
-        <%= label_tag :status, "Status", class: ta_label_classes %>
+        <%= label_tag :status, t("kitchen_cabinet.status"), class: ta_label_classes %>
         <%= select_tag :status,
-              options_for_select(KitchenCabinet::Ticket.statuses.keys.map { |s| [ s.humanize, s ] }, params[:status]),
-              include_blank: "Any status",
+              options_for_select(KitchenCabinet::Ticket.statuses.keys.map { |s| [ t("kitchen_cabinet.statuses.#{s}"), s ] }, params[:status]),
+              include_blank: t("kitchen_cabinet.any_status"),
               class: ta_field_classes %>
       </div>
       <div>
-        <%= label_tag :from_date, "From date", class: ta_label_classes %>
+        <%= label_tag :from_date, t("kitchen_cabinet.from_date"), class: ta_label_classes %>
         <%= ta_date_picker(name: "from_date", id: "from_date", value: @from_date) %>
       </div>
       <div>
-        <%= label_tag :to_date, "To date", class: ta_label_classes %>
+        <%= label_tag :to_date, t("kitchen_cabinet.to_date"), class: ta_label_classes %>
         <%= ta_date_picker(name: "to_date", id: "to_date", value: @to_date) %>
       </div>
       <div class="flex items-end gap-2">
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: <%= accent %>; color: <%= accent_ink %>">Filter</button>
-        <%= link_to "Clear", kitchen_cabinet_tickets_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+                style="background: <%= accent %>; color: <%= accent_ink %>"><%= t("kitchen_cabinet.filter") %></button>
+        <%= link_to t("kitchen_cabinet.clear"), kitchen_cabinet_tickets_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
       </div>
     </div>
   <% end %>
 
   <div class="mt-6 <%= ta_card_classes %>" x-data="{ tab: 'line' }">
-    <div class="border-b border-gray-200 px-4 dark:border-gray-800" role="tablist" aria-label="Beneficiary charts">
+    <div class="border-b border-gray-200 px-4 dark:border-gray-800" role="tablist" aria-label="<%= t("kitchen_cabinet.charts") %>">
       <div class="flex gap-6">
-        <% { "line" => "Line", "bar" => "Bar", "pie" => "Pie" }.each do |key, label| %>
+        <% { "line" => t("kitchen_cabinet.line"), "bar" => t("kitchen_cabinet.bar"), "pie" => t("kitchen_cabinet.pie") }.each do |key, label| %>
           <button type="button" role="tab" id="beneficiaries-tab-<%= key %>"
                   @click="tab = '<%= key %>'; $nextTick(() => window.Chartkick && Object.values(Chartkick.charts).forEach((chart) => chart.redraw()))"
                   :aria-selected="(tab === '<%= key %>').toString()"
@@ -94,27 +94,27 @@
     <div class="p-4 md:p-6">
       <div x-show="tab === 'line'" role="tabpanel" aria-labelledby="beneficiaries-tab-line">
         <%= line_chart @charts[:line], id: "beneficiaries-line", height: "280px",
-              colors: line_colors, xtitle: "Reported date", ytitle: "Beneficiaries",
-              empty: "No beneficiaries match these filters." %>
+              colors: line_colors, xtitle: t("kitchen_cabinet.reported_date"), ytitle: t("kitchen_cabinet.chart_count"),
+              empty: t("kitchen_cabinet.no_match_filters") %>
       </div>
       <div x-show="tab === 'bar'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-bar">
         <%= column_chart @charts[:bar], id: "beneficiaries-bar", height: "280px", stacked: true,
-              colors: bar_colors, xtitle: "Date", ytitle: "Beneficiaries",
-              empty: "No beneficiaries match these filters." %>
+              colors: bar_colors, xtitle: t("kitchen_cabinet.date"), ytitle: t("kitchen_cabinet.chart_count"),
+              empty: t("kitchen_cabinet.no_match_filters") %>
       </div>
       <div x-show="tab === 'pie'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-pie">
         <div class="grid gap-6 lg:grid-cols-2">
           <div>
-            <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90">By status</h3>
+            <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("kitchen_cabinet.by_status") %></h3>
             <%= pie_chart @charts[:pie], id: "beneficiaries-pie", height: "280px", donut: true,
                   colors: pie_status_colors,
-                  empty: "No beneficiaries match these filters." %>
+                  empty: t("kitchen_cabinet.no_match_filters") %>
           </div>
           <div>
-            <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90">By category</h3>
+            <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("kitchen_cabinet.by_category") %></h3>
             <%= pie_chart @charts[:pie_by_category], id: "beneficiaries-pie-category", height: "280px", donut: true,
                   colors: pie_category_colors,
-                  empty: "No beneficiaries match these filters." %>
+                  empty: t("kitchen_cabinet.no_match_filters") %>
           </div>
         </div>
       </div>
@@ -122,20 +122,20 @@
   </div>
 
   <% list = capture do %>
-      <h2 class="px-6 pt-4 text-sm font-semibold text-gray-800 dark:text-white/90">List</h2>
+      <h2 class="px-6 pt-4 text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("kitchen_cabinet.list") %></h2>
       <div class="hidden xl:block">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 dark:bg-white/[0.03]"<% if @category %> style="background: color-mix(in srgb, <%= accent %> 10%, white)"<% end %>>
             <tr>
-              <th class="<%= th %>">Beneficiary name</th>
-              <th class="<%= th %>">Representative</th>
-              <th class="<%= th %>">Ticket</th>
-              <th class="<%= th %>">Category</th>
-              <th class="<%= th %>">Village</th>
-              <th class="<%= th %>">Reporter</th>
-              <th class="<%= th %>">Status</th>
-              <th class="<%= th %> text-right">Reported</th>
-              <th class="<%= th %> w-12"><span class="sr-only">Open</span></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.beneficiary_name") %></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.representative") %></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.ticket") %></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.category") %></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.village") %></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.reporter") %></th>
+              <th class="<%= th %>"><%= t("kitchen_cabinet.status") %></th>
+              <th class="<%= th %> text-right"><%= t("kitchen_cabinet.reported") %></th>
+              <th class="<%= th %> w-12"><span class="sr-only"><%= t("kitchen_cabinet.open_ticket") %></span></th>
             </tr>
           </thead>
           <tbody>
@@ -164,7 +164,7 @@
           </tbody>
         </table>
         <% if @tickets.empty? %>
-          <p class="px-6 py-16 text-center text-sm text-gray-500">No beneficiaries match.</p>
+          <p class="px-6 py-16 text-center text-sm text-gray-500"><%= t("kitchen_cabinet.no_match") %></p>
         <% end %>
       </div>
 
@@ -173,7 +173,7 @@
           <%= render "ticket_card", ticket: ticket %>
         <% end %>
         <% if @tickets.empty? %>
-          <p class="px-2 py-12 text-center text-sm text-gray-500">No beneficiaries match.</p>
+          <p class="px-2 py-12 text-center text-sm text-gray-500"><%= t("kitchen_cabinet.no_match") %></p>
         <% end %>
       </div>
 

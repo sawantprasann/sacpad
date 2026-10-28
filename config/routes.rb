@@ -155,6 +155,10 @@ Rails.application.routes.draw do
     resource :password, only: %i[edit update]
   end
 
+  # English or Marathi. Saved on the user when signed in, and in a cookie so
+  # the sign-in page keeps the choice.
+  resource :locale, only: :update
+
   # Defines the root path route ("/")
   root "home#index"
 end

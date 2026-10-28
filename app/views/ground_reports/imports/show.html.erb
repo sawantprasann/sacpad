@@ -1,5 +1,5 @@
 <% content_for :title, @import.report? ? "Report import" : "Mock poll import" %>
-<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
 <% breadcrumb @import.report? ? "Report import" : "Mock poll import" %>
 
 <%= render layout: "ui/campaign_hero", locals: {

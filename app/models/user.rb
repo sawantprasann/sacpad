@@ -16,6 +16,7 @@ class User < ApplicationRecord
   has_one_attached :photo
 
   validates :name, presence: true
+  validates :preferred_locale, inclusion: { in: ->(_) { I18n.available_locales.map(&:to_s) } }
   validates :booth, presence: true, if: :booth_manager?
 
   after_commit :clear_subtree_cache

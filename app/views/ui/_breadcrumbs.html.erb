@@ -1,5 +1,5 @@
 <% items = breadcrumb_items %>
-<nav aria-label="Breadcrumb" class="min-w-0 flex-1">
+<nav aria-label="<%= t("nav.breadcrumb") %>" class="min-w-0 flex-1">
   <ol class="flex min-w-0 items-center gap-1.5 overflow-hidden text-sm">
     <% items.each_with_index do |item, index| %>
       <% last = index == items.length - 1 %>

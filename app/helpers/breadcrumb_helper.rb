@@ -14,7 +14,7 @@ module BreadcrumbHelper
   private
 
   def prefix_root(items)
-    root_label = console_page? ? "Console" : "Dashboard"
+    root_label = console_page? ? t("nav.console") : t("nav.dashboard")
     return items if items.first && items.first[:label] == root_label
 
     path = console_page? ? console_root_path : root_path
@@ -30,7 +30,7 @@ module BreadcrumbHelper
   end
 
   def org_breadcrumb_items
-    return [ { label: "Dashboard", path: nil } ] if controller_path == "home"
+    return [ { label: t("nav.dashboard"), path: nil } ] if controller_path == "home"
 
     label, path = org_section
     return [ { label: page_title, path: nil } ] if label.blank?
@@ -47,21 +47,21 @@ module BreadcrumbHelper
 
   def org_section
     {
-      "election_results" => [ "Election result", election_result_path ],
-      "account/passwords" => [ "Change password", edit_account_password_path ],
-      "kitchen_cabinet/tickets" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
-      "kitchen_cabinet/closures" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
-      "kitchen_cabinet/follow_ups" => [ "Beneficiaries", kitchen_cabinet_tickets_path ],
-      "cadre_program/activities" => [ "Cadre Program", cadre_program_activities_path ],
-      "ground_reports/villages" => [ "Ground Reports", ground_reports_villages_path ],
-      "ground_reports/reports" => [ "Ground Reports", ground_reports_villages_path ],
-      "ground_reports/imports" => [ "Ground Reports", ground_reports_villages_path ],
-      "users" => [ "Team", users_path ],
-      "support_tickets" => [ "Support", support_tickets_path ],
-      "pr_records" => [ "PR Records", pr_records_path ],
-      "voter_lists/talukas" => [ "Talukas", voter_lists_talukas_path ],
-      "voter_lists/villages" => [ "Talukas", voter_lists_talukas_path ],
-      "voters" => [ "Voter Lists", voters_path ]
+      "election_results" => [ t("nav.election_result"), election_result_path ],
+      "account/passwords" => [ t("nav.change_password"), edit_account_password_path ],
+      "kitchen_cabinet/tickets" => [ t("nav.beneficiaries"), kitchen_cabinet_tickets_path ],
+      "kitchen_cabinet/closures" => [ t("nav.beneficiaries"), kitchen_cabinet_tickets_path ],
+      "kitchen_cabinet/follow_ups" => [ t("nav.beneficiaries"), kitchen_cabinet_tickets_path ],
+      "cadre_program/activities" => [ t("nav.cadre_program"), cadre_program_activities_path ],
+      "ground_reports/villages" => [ t("nav.ground_reports"), ground_reports_villages_path ],
+      "ground_reports/reports" => [ t("nav.ground_reports"), ground_reports_villages_path ],
+      "ground_reports/imports" => [ t("nav.ground_reports"), ground_reports_villages_path ],
+      "users" => [ t("nav.team"), users_path ],
+      "support_tickets" => [ t("nav.support"), support_tickets_path ],
+      "pr_records" => [ t("nav.pr_records"), pr_records_path ],
+      "voter_lists/talukas" => [ t("nav.talukas"), voter_lists_talukas_path ],
+      "voter_lists/villages" => [ t("nav.talukas"), voter_lists_talukas_path ],
+      "voters" => [ t("nav.voter_lists"), voters_path ]
     }[controller_path]
   end
 

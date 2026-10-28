@@ -4,9 +4,9 @@
 <% quiet = "#{tool} border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-white/5" %>
 <div class="flex flex-wrap items-center gap-2">
   <% if local_assigns[:export_url] %>
-    <%= link_to "Export Excel", export_url, class: quiet %>
+    <%= link_to t("kitchen_cabinet.export_excel"), export_url, class: quiet %>
   <% else %>
-    <button type="button" class="<%= quiet %>">Export Excel</button>
+    <button type="button" class="<%= quiet %>"><%= t("kitchen_cabinet.export_excel") %></button>
   <% end %>
   <% if local_assigns[:new_url] %>
     <%= link_to new_url,

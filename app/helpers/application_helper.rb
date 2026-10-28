@@ -100,15 +100,15 @@ module ApplicationHelper
     return [] unless user
 
     module_widgets = [
-      { title: "Open tickets by status", mod: "kitchen_cabinet" },
-      { title: "Recent cadre activity",  mod: "cadre_program" },
-      { title: "Recent ground reports",  mod: "ground_reports" }
+      { title: t("dashboard.open_tickets"), mod: "kitchen_cabinet" },
+      { title: t("dashboard.recent_cadre"),  mod: "cadre_program" },
+      { title: t("dashboard.recent_ground_reports"),  mod: "ground_reports" }
     ].select { |w| user.role.can_access?(w[:mod]) }
 
     admin_widgets =
       if user.role.can_create_users?
         [
-          { title: "Recent deletions", admin_only: true }
+          { title: t("dashboard.recent_deletions"), admin_only: true }
         ]
       else
         []
@@ -234,11 +234,11 @@ module ApplicationHelper
   def dashboard_greeting
     hour = dashboard_now.hour
     if hour < 12
-      "Good morning"
+      t("dashboard.good_morning")
     elsif hour < 17
-      "Good afternoon"
+      t("dashboard.good_afternoon")
     else
-      "Good evening"
+      t("dashboard.good_evening")
     end
   end
 

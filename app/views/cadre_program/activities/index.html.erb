@@ -1,6 +1,6 @@
-<% content_for :title, @category_label ? "Cadre Program — #{@category_label}" : "Cadre Program" %>
+<% content_for :title, @category_label ? "#{t("nav.cadre_program")} — #{@category_label}" : t("nav.cadre_program") %>
 <% if @category_label %>
-  <% breadcrumb "Cadre Program", cadre_program_activities_path %>
+  <% breadcrumb t("nav.cadre_program"), cadre_program_activities_path %>
   <% breadcrumb @category_label %>
 <% end %>
 <% new_path = @category_key ? new_cadre_program_activity_path(category: @category_key) : new_cadre_program_activity_path %>
@@ -8,8 +8,8 @@
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Cadre Program",
-      title: @category_label || "Cadre Program",
+      kicker: t("nav.cadre_program"),
+      title: @category_label || t("nav.cadre_program"),
       subtitle: pluralize(@pagy.count, "activity"),
       meta: current_user.organization.name
     } do %><% end %>
@@ -18,7 +18,7 @@
   <%= render "ui/module_toolbar",
         export_url: cadre_program_activities_path(format: :xlsx, category: @category_key),
         new_url: (new_path if current_user.role.can_write?("cadre_program")),
-        new_label: (@category_label ? "Create #{@category_label}" : "Create activity"),
+        new_label: (@category_label ? "#{t("cadre_program.create_prefix")}#{@category_label}" : t("cadre_program.create_activity")),
         accent: org_accent_color,
         accent_ink: org_accent_foreground %>
 </div>

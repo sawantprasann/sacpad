@@ -1,7 +1,7 @@
 <% content_for :title, "Edit Ticket #{@ticket.ticket_number}" %>
-<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
+<% breadcrumb t("nav.beneficiaries"), kitchen_cabinet_tickets_path %>
 <% breadcrumb @ticket.person_name, kitchen_cabinet_ticket_path(@ticket) %>
-<% breadcrumb "Edit" %>
+<% breadcrumb t("nav.edit") %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Beneficiaries",

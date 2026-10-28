@@ -1,5 +1,5 @@
 <% content_for :title, "Election result" %>
-<% breadcrumb "Election result" %>
+<% breadcrumb t("nav.election_result") %>
 
 <% if @constituency_election %>
   <%= render "constituency_elections/dashboard", election: @constituency_election, elections: @constituency_elections %>

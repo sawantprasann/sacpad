@@ -1,5 +1,5 @@
 <% content_for :title, @village.name %>
-<% breadcrumb "Ground Reports", ground_reports_villages_path %>
+<% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
 <% breadcrumb @village.name %>
 <% can_write = current_user.role.can_write?("ground_reports") %>
 <% snapshot = [
