@@ -1,5 +1,5 @@
 <% voter_name = begin
-     "#{@voter.first_name} #{@voter.last_name}"
+     @voter.display_name
    rescue ActiveRecord::Encryption::Errors::Decryption
      "Voter (unable to decrypt)"
    end %>
@@ -34,7 +34,7 @@
           <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Full Name</label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white">
             <% begin %>
-              <%= [@voter.first_name, @voter.middle_name, @voter.last_name].compact.join(" ") %>
+              <%= @voter.display_name %>
             <% rescue ActiveRecord::Encryption::Errors::Decryption %>
               <span class="text-gray-400">—</span>
             <% end %>

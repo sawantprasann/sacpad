@@ -1,7 +1,7 @@
 module Console
   class DistrictsController < ReferenceController
     self.managed_model = District
-    self.managed_fields = %i[name state_id cd]
+    self.managed_fields = %i[name native_name state_id cd]
     self.managed_title = "District"
 
     helper_method :district_filters, :taluka_filters

@@ -28,7 +28,7 @@
       <%= label_tag :village_id, "Village", class: ta_label_classes %>
       <%= render "ui/min_search_select",
             name: :village_id,
-            choices: @filter_villages.map { |village| [ village.name, village.id ] },
+            choices: @filter_villages.map { |village| [ village.display_name, village.id ] },
             selected: params[:village_id],
             blank: "All villages",
             placeholder: "All villages",
@@ -58,7 +58,7 @@
         <% @villages.each do |village| %>
           <tr class="hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
             <td class="border-b border-gray-100 px-6 py-4 dark:border-gray-800">
-              <%= link_to village.name, ground_reports_village_path(village),
+              <%= link_to village.display_name, ground_reports_village_path(village),
                     class: ta_text_link %>
             </td>
             <td class="border-b border-gray-100 px-6 py-4 text-gray-600 dark:border-gray-800 dark:text-gray-300"><%= village.taluka&.name || "—" %></td>

@@ -5,6 +5,8 @@ mr:
   locales:
     en: "English"
     mr: "मराठी"
+    ta: "தமிழ்"
+    kn: "ಕನ್ನಡ"
   date:
     day_names:
       - रविवार

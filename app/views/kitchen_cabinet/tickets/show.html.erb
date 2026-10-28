@@ -163,7 +163,7 @@
             <% @voter_matches.each do |voter| %>
               <li class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50/70 px-3 py-2 ring-1 ring-amber-100">
                 <span class="text-sm text-gray-800">
-                  <span class="font-medium"><%= voter.name %></span>
+                  <span class="font-medium"><%= voter.display_name %></span>
                   · <%= voter.voter_id %>
                   · Booth <%= voter.booth&.number || "—" %>
                   <% if voter.sr_no %>· Sr <%= voter.sr_no %><% end %>

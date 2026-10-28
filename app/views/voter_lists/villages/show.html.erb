@@ -1,7 +1,7 @@
-<% content_for :title, @village.name %>
+<% content_for :title, @village.display_name %>
 <% breadcrumb t("nav.talukas"), voter_lists_talukas_path %>
 <% breadcrumb @taluka.name, voter_lists_taluka_path(@taluka) %>
-<% breadcrumb @village.name %>
+<% breadcrumb @village.display_name %>
 <% th = "border-b border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800" %>
 <% td = "border-b border-gray-100 px-4 py-3 align-middle text-sm dark:border-gray-800" %>
 <% row_colors = { "pleased" => "bg-green-50 dark:bg-green-950/30", "transit" => "bg-amber-50 dark:bg-amber-950/30", "displeased" => "bg-red-50 dark:bg-red-950/30" } %>
@@ -11,7 +11,7 @@
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Talukas",
-      title: @village.name,
+      title: @village.display_name,
       subtitle: "#{pluralize(@pagy.count, "voter")} · #{@election.name}",
       meta: @taluka.name
     } do %><% end %>
@@ -121,7 +121,7 @@
             </td>
             <td class="<%= td %> text-gray-800 dark:text-white/90">
               <% begin %>
-                <%= [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ") %>
+                <%= voter.display_name %>
               <% rescue ActiveRecord::Encryption::Errors::Decryption %>
                 <span class="text-gray-400">—</span>
               <% end %>

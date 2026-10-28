@@ -1,8 +1,9 @@
-<div class="flex items-center gap-1" role="group" aria-label="<%= t("nav.language") %>">
-  <% I18n.available_locales.each do |code| %>
+<div class="inline-flex items-center gap-1 rounded-lg p-1" role="group" aria-label="<%= t("nav.language") %>" style="background:#f2f4f7">
+  <% locale_choices.each do |code| %>
     <% active = I18n.locale == code %>
     <%= button_to t("locales.#{code}"), locale_path, method: :patch, params: { locale: code },
           form: { class: "inline", data: { turbo: false } },
-          class: "cursor-pointer rounded-lg px-2.5 py-1 text-xs font-semibold #{active ? "bg-[#0b1f44] text-white" : "text-gray-600 hover:bg-amber-50 dark:text-gray-300 dark:hover:bg-white/5"}" %>
+          class: "cursor-pointer rounded-md px-2.5 py-1 text-xs font-semibold",
+          style: active ? "background:#0b1f44;color:#ffffff" : "background:#ffffff;color:#344054;box-shadow:inset 0 0 0 1px #e4e7ec" %>
   <% end %>
 </div>

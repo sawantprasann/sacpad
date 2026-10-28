@@ -1,12 +1,12 @@
-<% content_for :title, "#{@village.name} — issue" %>
+<% content_for :title, "#{@village.display_name} — issue" %>
 <% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
-<% breadcrumb @village.name, ground_reports_village_path(@village) %>
+<% breadcrumb @village.display_name, ground_reports_village_path(@village) %>
 <% breadcrumb truncate(@report.issue_text, length: 48) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Ground Reports",
       title: @report.issue_text,
-      subtitle: @village.name,
+      subtitle: @village.display_name,
       meta: "Logged by #{@report.owner.name} · #{@report.reported_at.strftime("%d %b %Y")}"
     } do %><% end %>
 

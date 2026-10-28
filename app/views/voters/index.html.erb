@@ -37,7 +37,7 @@
         <%= label_tag :village_id, "Village", class: ta_label_classes %>
         <%= render "ui/min_search_select",
               name: :village_id,
-              choices: @villages.map { |village| [ village.name, village.id ] },
+              choices: @villages.map { |village| [ village.display_name, village.id ] },
               selected: params[:village_id],
               blank: "Any village",
               placeholder: "Any village",
@@ -104,13 +104,13 @@
             </td>
             <td class="<%= td %> text-gray-800 dark:text-white/90">
               <% begin %>
-                <%= [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ") %>
+                <%= voter.display_name %>
               <% rescue ActiveRecord::Encryption::Errors::Decryption %>
                 <span class="text-gray-400">—</span>
               <% end %>
             </td>
             <td class="<%= td %> tabular-nums text-gray-700"><%= voter.booth&.number || "—" %></td>
-            <td class="<%= td %> text-gray-700"><%= voter.village&.name || "—" %></td>
+            <td class="<%= td %> text-gray-700"><%= voter.village&.display_name || "—" %></td>
             <td class="<%= td %>">
               <% if status %>
                 <span class="inline-flex items-center gap-2 text-gray-800">

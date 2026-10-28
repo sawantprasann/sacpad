@@ -1,6 +1,6 @@
-<% content_for :title, @village.name %>
+<% content_for :title, @village.display_name %>
 <% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
-<% breadcrumb @village.name %>
+<% breadcrumb @village.display_name %>
 <% can_write = current_user.role.can_write?("ground_reports") %>
 <% snapshot = [
   [ "Worship places", @worship_places.size ],
@@ -13,7 +13,7 @@
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Ground Reports",
-      title: @village.name,
+      title: @village.display_name,
       subtitle: @village.assembly.name,
       meta: pluralize(@pagy.count, "issue")
     } do %><% end %>

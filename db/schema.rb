@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -101,6 +101,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.string "constituency_no"
     t.integer "first_part"
     t.integer "last_part"
+    t.string "native_name"
     t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
   end
 
@@ -127,6 +128,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.integer "male_electors"
     t.integer "female_electors"
     t.integer "other_electors"
+    t.string "native_name"
     t.index ["village_id"], name: "index_booths_on_village_id"
   end
 
@@ -253,6 +255,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "cd"
+    t.string "native_name"
     t.index ["state_id"], name: "index_districts_on_state_id"
   end
 
@@ -326,6 +329,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.datetime "updated_at", null: false
     t.bigint "district_id"
     t.string "constituency_no"
+    t.string "native_locale"
+    t.string "native_name"
     t.index ["district_id"], name: "index_loksabhas_on_district_id"
     t.index ["state_id"], name: "index_loksabhas_on_state_id"
   end
@@ -543,6 +548,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "native_name"
     t.index ["district_id", "name"], name: "index_talukas_on_district_id_and_name", unique: true
     t.index ["district_id"], name: "index_talukas_on_district_id"
   end
@@ -757,6 +763,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.bigint "taluka_id"
     t.string "police_station"
     t.string "pin_code"
+    t.string "native_name"
     t.index ["assembly_id", "name"], name: "index_villages_on_assembly_id_and_name", unique: true
     t.index ["assembly_id"], name: "index_villages_on_assembly_id"
     t.index ["taluka_id"], name: "index_villages_on_taluka_id"
@@ -832,6 +839,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_150000) do
     t.text "house_no"
     t.text "gender"
     t.integer "sr_no"
+    t.text "native_first_name"
+    t.text "native_middle_name"
+    t.text "native_last_name"
     t.index ["assembly_id"], name: "index_voters_on_assembly_id"
     t.index ["booth_id", "sr_no"], name: "index_voters_on_booth_id_and_sr_no"
     t.index ["booth_id"], name: "index_voters_on_booth_id"

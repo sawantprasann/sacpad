@@ -1,7 +1,7 @@
 module Console
   class VillagesController < ReferenceController
     self.managed_model = Village
-    self.managed_fields = %i[taluka_id name police_station pin_code]
+    self.managed_fields = %i[taluka_id name native_name police_station pin_code]
     self.managed_title = "Village"
 
     prepend_before_action :set_parents

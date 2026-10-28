@@ -22,7 +22,8 @@ class LocalesController < ApplicationController
   private
 
   def available_locale?(locale)
-    I18n.available_locales.map(&:to_s).include?(locale)
+    choices = user_signed_in? ? allowed_locales : I18n.available_locales
+    choices.map(&:to_s).include?(locale)
   end
 
   def locale_fallback_path

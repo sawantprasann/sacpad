@@ -30,6 +30,14 @@ class Organization < ApplicationRecord
     Village.where(assembly_id: assemblies.select(:id))
   end
 
+  # English plus this seat's language. An Assembly seat uses its Lok Sabha's language.
+  def native_locale
+    case constituency
+    when Loksabha then constituency.native_locale
+    when Assembly then constituency.loksabha&.native_locale
+    end
+  end
+
   # Deactivation cascade (§3.1a): one toggle cuts off every user under the org (enforced in
   # User#active_for_authentication? and in Pundit scopes).
   def deactivate! = update!(active: false)

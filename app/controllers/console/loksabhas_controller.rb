@@ -1,7 +1,7 @@
 module Console
   class LoksabhasController < ReferenceController
     self.managed_model = Loksabha
-    self.managed_fields = %i[state_id district_id name constituency_no]
+    self.managed_fields = %i[state_id district_id name native_name constituency_no native_locale]
     self.managed_title = "Loksabha"
 
     helper_method :loksabha_filters, :assembly_filters

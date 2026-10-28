@@ -16,9 +16,9 @@ module Sacpad
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # English is the source language. Marathi falls back to English when a key
-    # has not been translated yet, so a partial locale file still renders.
-    config.i18n.available_locales = %i[en mr]
+    # English is the default. mr, ta, and kn are the Lok Sabha native languages.
+    # A missing Tamil or Kannada label falls back to English.
+    config.i18n.available_locales = %i[en mr ta kn]
     config.i18n.default_locale = :en
     config.i18n.fallbacks = true
 

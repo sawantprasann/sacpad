@@ -1,4 +1,6 @@
 class Village < ApplicationRecord
+  include NativeNamed
+
   belongs_to :assembly
   belongs_to :taluka, optional: true
   has_many :booths, -> { by_number }, dependent: :restrict_with_error
@@ -12,4 +14,8 @@ class Village < ApplicationRecord
   has_many :local_admin_contacts, class_name: "GroundReports::VillageLocalAdminContact", dependent: :restrict_with_error
   has_many :mock_poll_responses, class_name: "GroundReports::MockPollResponse", dependent: :restrict_with_error
   validates :name, presence: true
+
+  def resolved_native_locale
+    assembly&.loksabha&.native_locale
+  end
 end

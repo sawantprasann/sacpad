@@ -31,7 +31,7 @@
         <%= label_tag :village_id, "Village", class: ta_label_classes %>
         <%= render "ui/min_search_select",
               name: :village_id,
-              choices: @village_choices.map { |village| [ village.name, village.id ] },
+              choices: @village_choices.map { |village| [ village.display_name, village.id ] },
               selected: params[:village_id],
               blank: "All villages",
               placeholder: "All villages",
@@ -75,7 +75,7 @@
           <% village_url = voter_lists_taluka_village_path(@taluka, village) %>
           <%= clickable_row village_url, class: "hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]" do %>
             <td class="<%= td %>">
-              <%= link_to village.name, village_url, class: ta_text_link %>
+              <%= link_to village.display_name, village_url, class: ta_text_link %>
             </td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= village.assembly.name %></td>
             <td class="<%= td %> tabular-nums text-gray-700 dark:text-gray-300"><%= village.voters_count %></td>

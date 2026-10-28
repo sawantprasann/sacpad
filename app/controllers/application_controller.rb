@@ -59,10 +59,34 @@ class ApplicationController < ActionController::Base
       return
     end
 
-    locale = preferred_user_locale || cookie_locale || I18n.default_locale
+    if user_signed_in?
+      allowed = allowed_locales
+      locale = preferred_user_locale || cookie_locale || I18n.default_locale
+      locale = I18n.default_locale unless allowed.include?(locale)
+      if preferred_user_locale && allowed.exclude?(preferred_user_locale)
+        User.reset_column_information
+        User.find(current_user.id).update_columns(preferred_locale: "en", updated_at: Time.current)
+      end
+    else
+      locale = cookie_locale || I18n.default_locale
+    end
     I18n.locale = locale
     sync_locale_cookie(locale) if user_signed_in?
   end
+
+  # English, plus the signed-in organization's Lok Sabha language.
+  def allowed_locales
+    codes = [ I18n.default_locale ]
+    native = current_user&.organization&.native_locale.to_s
+    codes << native.to_sym if I18n.available_locales.map(&:to_s).include?(native)
+    codes.uniq
+  end
+  helper_method :allowed_locales
+
+  def locale_choices
+    user_signed_in? ? allowed_locales : I18n.available_locales
+  end
+  helper_method :locale_choices
 
   def preferred_user_locale
     return unless user_signed_in?

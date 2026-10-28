@@ -42,7 +42,7 @@
         <%= label_tag :village, t("kitchen_cabinet.village"), class: ta_label_classes %>
         <%= render "ui/min_search_select",
               name: :village,
-              choices: @villages.map { |village| [ village.name, village.name ] },
+              choices: @villages.map { |village| [ village.display_name, village.name ] },
               selected: params[:village],
               blank: t("kitchen_cabinet.any_village"),
               placeholder: t("kitchen_cabinet.any_village"),

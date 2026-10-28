@@ -21,21 +21,36 @@ class Voter < ApplicationRecord
   encrypts :first_name, deterministic: true
   encrypts :last_name, deterministic: true
   encrypts :middle_name, deterministic: true
+  encrypts :native_first_name, deterministic: true
+  encrypts :native_last_name, deterministic: true
+  encrypts :native_middle_name, deterministic: true
   encrypts :mobile
 
   validates :first_name, :last_name, presence: true
+
+  before_validation :fill_native_person_names
 
   def name
     [ first_name, middle_name, last_name ].compact_blank.join(" ")
   end
 
+  # English parts stay on first/middle/last. The Lok Sabha language is stored
+  # on the native_* parts and shown when that language is selected.
+  def display_name
+    native = native_full_name
+    return native if I18n.locale != I18n.default_locale && native.present?
+
+    name
+  end
+
   # Each word must appear somewhere in the full name. "tanaji savant" matches
   # "Tanaji Jayvant Savant" because the middle name does not have to be typed.
+  # A Marathi spelling matches the native parts saved beside the English name.
   def matches_name?(query)
     words = query.to_s.squish.downcase.split
     return false if words.empty?
 
-    full = name.downcase
+    full = [ name, native_full_name ].compact_blank.join(" ").downcase
     words.all? { |word| full.include?(word) }
   rescue ActiveRecord::Encryption::Errors::Decryption
     false
@@ -58,6 +73,32 @@ class Voter < ApplicationRecord
       fetched: fetched.merge(total: fetched.values.sum),
       pdf: pdf&.merge(total: pdf.values.sum)
     }
+  end
+
+  def native_full_name
+    [ native_first_name, native_middle_name, native_last_name ].compact_blank.join(" ")
+  end
+
+  def resolved_native_locale
+    loksabha&.native_locale.presence ||
+      assembly&.loksabha&.native_locale.presence ||
+      village&.assembly&.loksabha&.native_locale
+  end
+
+  def fill_native_person_names
+    locale = resolved_native_locale.to_s
+    return if locale.blank?
+
+    %i[first_name middle_name last_name].each do |attr|
+      native_attr = :"native_#{attr}"
+      source = public_send(attr)
+      native = public_send(native_attr)
+      next if source.blank?
+      next if native.present? && !public_send(:"#{attr}_changed?")
+      next if will_save_change_to_attribute?(native_attr) && native.present?
+
+      public_send(:"#{native_attr}=", NativeScript.transliterate(source, locale))
+    end
   end
 
   def self.gender_bucket(gender)

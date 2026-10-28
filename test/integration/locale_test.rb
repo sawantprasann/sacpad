@@ -5,6 +5,9 @@ class LocaleTest < ActionDispatch::IntegrationTest
 
   setup do
     @org = ActsAsTenant.without_tenant { Organization.create!(name: "Locale Org #{SecureRandom.hex(4)}") }
+    state = State.create!(name: "Locale State #{SecureRandom.hex(2)}")
+    loksabha = Loksabha.create!(name: "Locale Seat", state: state, native_locale: "mr")
+    @org.update!(constituency: loksabha)
     role = Role.create!(name: "Locale Role", slug: "locale-role-#{SecureRandom.hex(4)}")
     @user = User.create!(
       organization: @org,
@@ -33,6 +36,14 @@ class LocaleTest < ActionDispatch::IntegrationTest
     assert_select "html[lang=mr]"
     assert_select "span.menu-item-text", text: "डॅशबोर्ड"
     assert_match "भाषा बदलली.", response.body
+  end
+
+  test "a signed-in user only gets English and the Lok Sabha language" do
+    sign_in @user
+
+    patch locale_path, params: { locale: "ta" }, headers: { "Referer" => root_url }
+    assert_redirected_to root_url
+    assert_equal "en", @user.reload.preferred_locale
   end
 
   test "an unknown locale is rejected" do
