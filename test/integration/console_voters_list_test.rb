@@ -77,6 +77,7 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
   test "the list offers edit and an admin can correct the voter" do
     voter = Voter.find_by!(voter_id: "AAA1111111")
     sign_in @admin
+    I18n.locale = :mr
 
     get console_voters_path
     assert_response :success
@@ -91,6 +92,8 @@ class ConsoleVotersListTest < ActionDispatch::IntegrationTest
     voter.reload
     assert_equal "More", voter.last_name
     assert_equal "9999999999", voter.mobile
+  ensure
+    I18n.locale = I18n.default_locale
   end
 
   test "the index compares fetched voters with the counts stored from booth PDFs" do

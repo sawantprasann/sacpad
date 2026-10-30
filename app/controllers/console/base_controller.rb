@@ -10,6 +10,7 @@ module Console
 
     allow_browser versions: :modern
     before_action :authenticate_admin!
+    before_action :set_english_locale
     layout "console"
 
     rescue_from Pundit::NotAuthorizedError, with: :not_found
@@ -18,6 +19,12 @@ module Console
 
     def not_found
       raise ActionController::RoutingError, "Not Found"
+    end
+
+    # Console controllers do not inherit ApplicationController, so they never hit its
+    # locale filter. Keep the console in English even when an earlier request left Marathi set.
+    def set_english_locale
+      I18n.locale = I18n.default_locale
     end
 
     def deletion_failure_message(record)
