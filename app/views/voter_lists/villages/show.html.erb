@@ -1,6 +1,6 @@
 <% content_for :title, @village.display_name %>
 <% breadcrumb t("nav.talukas"), voter_lists_talukas_path %>
-<% breadcrumb @taluka.name, voter_lists_taluka_path(@taluka) %>
+<% breadcrumb @taluka.display_name, voter_lists_taluka_path(@taluka) %>
 <% breadcrumb @village.display_name %>
 <% th = "border-b border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800" %>
 <% td = "border-b border-gray-100 px-4 py-3 align-middle text-sm dark:border-gray-800" %>
@@ -13,7 +13,7 @@
       kicker: t("common.talukas"),
       title: @village.display_name,
       subtitle: "#{t("voters.count", count: @pagy.count)} · #{@election.name}",
-      meta: @taluka.name
+      meta: @taluka.display_name
     } do %><% end %>
 
 <p class="mt-4 text-sm text-gray-500"><%= t("voters.village_intro", election: @election.name) %></p>
@@ -22,15 +22,15 @@
   <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.taluka") %></dt>
-      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @taluka.name, voter_lists_taluka_path(@taluka), class: ta_text_link %></dd>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @taluka.display_name, voter_lists_taluka_path(@taluka), class: ta_text_link %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.assembly") %></dt>
-      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.assembly.name %></dd>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.assembly.display_name %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.police_station") %></dt>
-      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.police_station.presence || "—" %></dd>
+      <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.police_station_display_name.presence || "—" %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.pin_code") %></dt>

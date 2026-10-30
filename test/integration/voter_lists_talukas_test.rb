@@ -59,6 +59,43 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{voter_lists_taluka_path(@taluka)}']", count: 0
   end
 
+  test "marathi shows native names for taluka, district, village, and police station" do
+    @village.assembly.loksabha.update!(native_locale: "mr")
+    @taluka.update!(native_name: "इंदापूर")
+    @other_taluka.update!(native_name: "बारामती")
+    @taluka.district.update!(native_name: "पुणे")
+    @village.update!(native_name: "निमगाव")
+    @village.assembly.update!(native_name: "इंदापूर विधानसभा")
+    @village.police_station_record.update!(native_name: "इंदापूर पोलीस")
+    @user.update_columns(preferred_locale: "mr", updated_at: Time.current)
+
+    get voter_lists_talukas_path
+    assert_response :success
+    assert_select "a", text: "इंदापूर"
+    assert_select "td", text: "पुणे"
+    assert_select "option", text: "बारामती"
+    assert_select "a", text: "Indapur", count: 0
+
+    get voter_lists_taluka_path(@taluka)
+    assert_response :success
+    assert_select "a", text: "निमगाव"
+    assert_select "td", text: "इंदापूर विधानसभा"
+    assert_select "td", text: "इंदापूर पोलीस"
+    assert_select "td", text: "Indapur PS", count: 0
+
+    get voter_lists_taluka_path(@taluka, police_station: "पोलीस")
+    assert_select "tbody a", text: "निमगाव"
+    assert_select "tbody a", text: "Kalas", count: 0
+
+    get voter_lists_taluka_village_path(@taluka, @village)
+    assert_response :success
+    assert_select "a", text: "इंदापूर"
+    assert_select "dd", text: "इंदापूर विधानसभा"
+    assert_select "dd", text: "इंदापूर पोलीस"
+  ensure
+    I18n.locale = I18n.default_locale
+  end
+
   test "a taluka opens its villages the way the console does" do
     get voter_lists_taluka_path(@taluka)
 

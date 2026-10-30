@@ -27,6 +27,11 @@ class Village < ApplicationRecord
     assembly&.loksabha&.native_locale
   end
 
+  # The string column stays English. The linked station carries the native spelling.
+  def police_station_display_name
+    police_station_record&.display_name.presence || self[:police_station].presence
+  end
+
   private
 
   def sync_police_station_record

@@ -5,11 +5,12 @@
 <% breadcrumb @ticket.person_name %>
 <% field = "rounded-xl bg-amber-50/70 px-4 py-3 ring-1 ring-amber-100 dark:bg-white/[0.03] dark:ring-white/10" %>
 <% label = "text-xs font-medium tracking-wide text-amber-700/80 uppercase dark:text-amber-200" %>
+<% village_label = stored_village_label(@ticket.village) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
         kicker: t("nav.beneficiaries"),
         title: @ticket.person_name,
-        subtitle: [ @ticket.ticket_number, @ticket.ticket_category.name, @ticket.village.presence ].compact.join(" · "),
+        subtitle: [ @ticket.ticket_number, @ticket.ticket_category.name, (@ticket.village.present? ? village_label : nil) ].compact.join(" · "),
         meta: t("kitchen_cabinet.reported_meta", date: l_day(@ticket.reported_at), owner: @ticket.owner.name)
       } do %><% end %>
 
@@ -37,7 +38,7 @@
           </div>
           <div class="<%= field %>">
             <dt class="<%= label %>"><%= t("kitchen_cabinet.village_ward") %></dt>
-            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.village.presence || "—" %></dd>
+            <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= village_label %></dd>
           </div>
           <div class="<%= field %>">
             <dt class="<%= label %>"><%= t("common.mobile") %></dt>

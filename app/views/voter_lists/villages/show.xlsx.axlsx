@@ -20,7 +20,7 @@ wb.add_worksheet(name: "Voters") do |sheet|
       voter_id,
       name,
       voter.booth&.number,
-      voter.village&.name,
+      voter.village&.display_name,
       sentiment&.sentiment_status&.humanize,
       turnout&.voted? ? "Voted" : "Not voted"
     ]

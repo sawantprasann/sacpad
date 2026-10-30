@@ -23,7 +23,7 @@
       <%= label_tag :village_id, t("common.village"), class: ta_label_classes %>
       <%= render "ui/min_search_select",
             name: :village_id,
-            choices: @villages.map { |village| [ village.name, village.id ] },
+            choices: @villages.map { |village| [ village.display_name, village.id ] },
             selected: params[:village_id],
             blank: t("kitchen_cabinet.any_village"),
             placeholder: t("kitchen_cabinet.any_village"),
@@ -60,8 +60,8 @@
           <td class="<%= td %> font-medium">
             <%= link_to booth.number, booth_path(booth), class: ta_text_link %>
           </td>
-          <td class="<%= td %> text-gray-700"><%= booth.name.presence || "—" %></td>
-          <td class="<%= td %> text-gray-700"><%= booth.village.name %></td>
+          <td class="<%= td %> text-gray-700"><%= booth.display_name.presence || "—" %></td>
+          <td class="<%= td %> text-gray-700"><%= booth.village.display_name %></td>
           <td class="<%= td %> tabular-nums text-gray-700"><%= @voter_counts[booth.id] || 0 %></td>
           <td class="<%= td %> tabular-nums text-gray-700"><%= @voted_counts[booth.id] || 0 %></td>
         </tr>

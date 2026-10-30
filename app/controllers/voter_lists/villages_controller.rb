@@ -28,7 +28,7 @@ module VoterLists
 
     def set_village
       @taluka = organization_talukas.find(params[:taluka_id])
-      @village = organization_villages.where(taluka_id: @taluka.id).includes(:assembly, :taluka).find(params[:id])
+      @village = organization_villages.where(taluka_id: @taluka.id).includes(:assembly, :taluka, :police_station_record).find(params[:id])
     end
 
     # The village bounds the set. Export uses the same booth-then-serial order as the list.

@@ -41,6 +41,14 @@ class PoliceStationTest < ActiveSupport::TestCase
     assert station.reload.persisted?
   end
 
+  test "marathi shows the police station native name" do
+    village = @assembly.villages.create!(name: "Nimgaon", police_station: "Paranda")
+    village.police_station_record.update!(native_name: "परंडा")
+
+    assert_equal "Paranda", village.police_station_display_name
+    I18n.with_locale(:mr) { assert_equal "परंडा", village.reload.police_station_display_name }
+  end
+
   test "a hand-corrected native name is kept" do
     village = @assembly.villages.create!(name: "Nimgaon", police_station: "Paranda")
     station = village.police_station_record

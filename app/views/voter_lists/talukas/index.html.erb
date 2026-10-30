@@ -14,7 +14,7 @@
     <div>
       <%= label_tag :taluka_id, t("common.taluka"), class: ta_label_classes %>
       <%= select_tag :taluka_id,
-            options_from_collection_for_select(@taluka_choices, :id, :name, params[:taluka_id]),
+            options_from_collection_for_select(@taluka_choices, :id, :display_name, params[:taluka_id]),
             include_blank: t("common.all_talukas"),
             class: ta_field_classes %>
     </div>
@@ -41,9 +41,9 @@
           <% taluka_url = voter_lists_taluka_path(taluka) %>
           <%= clickable_row taluka_url, class: "hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]" do %>
             <td class="<%= td %>">
-              <%= link_to taluka.name, taluka_url, class: ta_text_link %>
+              <%= link_to taluka.display_name, taluka_url, class: ta_text_link %>
             </td>
-            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= taluka.district.name %></td>
+            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= taluka.district.display_name %></td>
             <td class="<%= td %> tabular-nums text-gray-700 dark:text-gray-300"><%= taluka.villages_count %></td>
             <td class="<%= td %> text-right"><%= icon_action_link :view, taluka_url %></td>
           <% end %>

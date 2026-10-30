@@ -4,6 +4,15 @@ module ApplicationHelper
   # Matches TailAdmin's brand-500 so the default (Independent org) accent is consistent with the theme.
   DEFAULT_ACCENT = "#465FFF".freeze
 
+  # Tickets store the English village name. Show the native spelling when the language is not English.
+  def stored_village_label(english_name)
+    cleaned = english_name.to_s.strip
+    return "—" if cleaned.blank?
+
+    @villages_by_english_name ||= Village.select(:name, :native_name).index_by(&:name)
+    @villages_by_english_name[cleaned]&.display_name.presence || cleaned
+  end
+
   def org_accent_color
     color = current_user&.organization&.current_party&.color.presence
     return DEFAULT_ACCENT unless color =~ /\A#?[0-9a-fA-F]{6}\z/

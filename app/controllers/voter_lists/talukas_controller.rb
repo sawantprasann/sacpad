@@ -33,14 +33,18 @@ module VoterLists
       relation = scope
       relation = relation.where(id: params[:village_id]) if params[:village_id].present?
       if params[:police_station].present?
-        relation = relation.where("villages.police_station ILIKE ?", like(params[:police_station]))
+        term = like(params[:police_station])
+        relation = relation.left_joins(:police_station_record).where(
+          "villages.police_station ILIKE :term OR police_stations.native_name ILIKE :term",
+          term: term
+        )
       end
       relation = relation.where("villages.pin_code ILIKE ?", like(params[:pin_code])) if params[:pin_code].present?
       relation
         .select("villages.*, COUNT(voters.id) AS voters_count")
         .left_joins(:voters)
         .group("villages.id")
-        .preload(assembly: :loksabha)
+        .preload(:police_station_record, assembly: :loksabha)
         .order("villages.name", "villages.id")
     end
 

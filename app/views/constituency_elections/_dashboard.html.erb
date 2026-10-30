@@ -4,7 +4,7 @@
         kicker: t("election.kicker"),
         title: election.heading,
         subtitle: election_outcome_sentence(election),
-        meta: election.constituency&.name
+        meta: election.constituency&.display_name
       } do %><% end %>
 
   <% if elections.any? %>

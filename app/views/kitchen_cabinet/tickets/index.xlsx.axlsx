@@ -3,11 +3,12 @@ wb = xlsx_package.workbook
 wb.add_worksheet(name: "Tickets") do |sheet|
   sheet.add_row [ t("kitchen_cabinet.ticket"), t("kitchen_cabinet.beneficiary_name"), t("kitchen_cabinet.representative_name"), t("common.village"), t("kitchen_cabinet.category"), t("common.status"), t("common.reported_date") ]
   @tickets.each do |ticket|
+    village_label = ticket.village.present? ? stored_village_label(ticket.village) : nil
     sheet.add_row [
       ticket.ticket_number,
       ticket.person_name,
       ticket.representative_name,
-      ticket.village,
+      village_label,
       ticket.ticket_category.name,
       t("kitchen_cabinet.statuses.#{ticket.status}"),
       ticket.reported_at

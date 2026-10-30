@@ -20,7 +20,7 @@
     <div>
       <%= label_tag :taluka_id, t("common.taluka"), class: ta_label_classes %>
       <%= select_tag :taluka_id,
-            options_from_collection_for_select(@talukas, :id, :name, params[:taluka_id]),
+            options_from_collection_for_select(@talukas, :id, :display_name, params[:taluka_id]),
             include_blank: t("common.all_talukas"),
             class: ta_field_classes %>
     </div>
@@ -61,7 +61,7 @@
               <%= link_to village.display_name, ground_reports_village_path(village),
                     class: ta_text_link %>
             </td>
-            <td class="border-b border-gray-100 px-6 py-4 text-gray-600 dark:border-gray-800 dark:text-gray-300"><%= village.taluka&.name || "—" %></td>
+            <td class="border-b border-gray-100 px-6 py-4 text-gray-600 dark:border-gray-800 dark:text-gray-300"><%= village.taluka&.display_name || "—" %></td>
             <td class="border-b border-gray-100 px-6 py-4 text-right tabular-nums text-gray-700 dark:border-gray-800 dark:text-gray-300"><%= format_nidhi(@nidhi_totals[village.id]) %></td>
             <td class="border-b border-gray-100 px-6 py-4 text-right dark:border-gray-800">
               <%= icon_action_link :view, ground_reports_village_path(village) %>

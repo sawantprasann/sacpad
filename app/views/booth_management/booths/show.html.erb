@@ -5,7 +5,7 @@
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("booths.title"),
       title: t("booths.booth_title", number: @booth.number),
-      subtitle: [ @booth.name, @booth.village.name ].compact.join(" · "),
+      subtitle: [ @booth.display_name, @booth.village.display_name ].compact_blank.join(" · "),
       meta: t("booths.voted_meta", voted: @voted_count, total: @voter_count, election: @election.name)
     } do %><% end %>
 
@@ -21,11 +21,11 @@
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500"><%= t("common.name") %></dt>
-      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.name.presence || "—" %></dd>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.display_name.presence || "—" %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500"><%= t("common.village") %></dt>
-      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.village.name %></dd>
+      <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.village.display_name %></dd>
     </div>
     <div>
       <dt class="text-xs font-medium uppercase text-gray-500"><%= t("booths.station_type") %></dt>

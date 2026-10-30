@@ -8,7 +8,7 @@
       <% if ticket.representative_name.present? %>
         <p class="truncate text-xs text-gray-500"><%= ticket.representative_name %></p>
       <% end %>
-      <p class="truncate text-xs text-gray-500"><%= ticket.village.presence || "—" %></p>
+      <p class="truncate text-xs text-gray-500"><%= stored_village_label(ticket.village) %></p>
     </div>
     <%= render "ui/status_pill", status: ticket.status %>
   </div>

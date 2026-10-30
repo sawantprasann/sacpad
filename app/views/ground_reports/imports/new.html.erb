@@ -7,7 +7,7 @@
       kicker: "Ground Reports",
       title: @import.mock_poll? ? "Upload mock poll" : "Import",
       subtitle: "Excel workbook. One sheet. The first row is the column names.",
-      meta: @village&.name
+      meta: @village&.display_name
     } do %><% end %>
 
 <div class="mt-6 <%= ta_card_classes %> p-6">

@@ -7,7 +7,7 @@
   <%= render layout: "ui/campaign_hero", locals: {
         kicker: t("election.kicker"),
         title: t("election.kicker"),
-        subtitle: current_user.organization.constituency&.name,
+        subtitle: current_user.organization.constituency&.display_name,
         meta: current_user.organization.name
       } do %><% end %>
   <div class="mt-8 rounded-2xl border border-dashed border-amber-300 bg-white/80 px-5 py-8 text-center text-sm text-amber-900 dark:border-amber-700/40 dark:bg-gray-900 dark:text-amber-100">

@@ -14,7 +14,7 @@
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Ground Reports",
       title: @village.display_name,
-      subtitle: @village.assembly.name,
+      subtitle: @village.assembly.display_name,
       meta: pluralize(@pagy.count, "issue")
     } do %><% end %>
 
