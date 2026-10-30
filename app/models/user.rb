@@ -13,6 +13,7 @@ class User < ApplicationRecord
   belongs_to :role
   belongs_to :booth, optional: true
   has_many :support_tickets, dependent: :restrict_with_error
+  has_many :calendar_events, dependent: :destroy
   has_one_attached :photo
 
   validates :name, presence: true
@@ -35,6 +36,11 @@ class User < ApplicationRecord
   # Org Admin and Manager add a booth manager from that booth's page.
   def can_add_booth_manager?
     role&.slug.in?(%w[org_admin manager])
+  end
+
+  # The calendar is for the people who run the leader's day: Org Admin and PA.
+  def can_use_calendar?
+    role&.slug.in?(%w[org_admin pa])
   end
 
   # Booth managers only see the roll for the booth they were given.

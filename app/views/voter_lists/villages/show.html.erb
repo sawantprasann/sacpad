@@ -10,34 +10,34 @@
 <% list_path = voter_lists_taluka_village_path(@taluka, @village) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Talukas",
+      kicker: t("common.talukas"),
       title: @village.display_name,
-      subtitle: "#{pluralize(@pagy.count, "voter")} · #{@election.name}",
+      subtitle: "#{t("voters.count", count: @pagy.count)} · #{@election.name}",
       meta: @taluka.name
     } do %><% end %>
 
-<p class="mt-4 text-sm text-gray-500">Voters are sorted by booth, then name. Voted marks are for <%= @election.name %>.</p>
+<p class="mt-4 text-sm text-gray-500"><%= t("voters.village_intro", election: @election.name) %></p>
 
 <div class="<%= ta_card_classes %> mt-6 p-6">
   <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Taluka</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.taluka") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= link_to @taluka.name, voter_lists_taluka_path(@taluka), class: ta_text_link %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Assembly</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.assembly") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.assembly.name %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Police station</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.police_station") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.police_station.presence || "—" %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Pin code</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.pin_code") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village.pin_code.presence || "—" %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voters</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.voters") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @voter_total %></dd>
     </div>
   </dl>
@@ -50,48 +50,48 @@
 <%= form_with url: list_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
     <div>
-      <%= label_tag :voter_id, "Voter ID", class: ta_label_classes %>
+      <%= label_tag :voter_id, t("common.voter_id"), class: ta_label_classes %>
       <%= text_field_tag :voter_id, params[:voter_id], class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :name, "Name", class: ta_label_classes %>
+      <%= label_tag :name, t("common.name"), class: ta_label_classes %>
       <%= text_field_tag :name, params[:name], class: ta_field_classes %>
     </div>
     <% unless current_user.booth_manager? %>
       <div>
-        <%= label_tag :booth, "Booth", class: ta_label_classes %>
-        <%= select_tag :booth, options_for_select(@booth_numbers, params[:booth]), include_blank: "Any booth", class: ta_field_classes %>
+        <%= label_tag :booth, t("common.booth"), class: ta_label_classes %>
+        <%= select_tag :booth, options_for_select(@booth_numbers, params[:booth]), include_blank: t("common.any_booth"), class: ta_field_classes %>
       </div>
     <% end %>
     <div>
-      <%= label_tag :sr_no, "Sr no", class: ta_label_classes %>
+      <%= label_tag :sr_no, t("common.sr_no"), class: ta_label_classes %>
       <%= number_field_tag :sr_no, params[:sr_no], class: ta_field_classes, min: 1 %>
     </div>
     <% unless current_user.booth_manager? %>
       <div>
-        <%= label_tag :sentiment, "Sentiment", class: ta_label_classes %>
+        <%= label_tag :sentiment, t("common.sentiment"), class: ta_label_classes %>
         <%= select_tag :sentiment,
               options_for_select([
-                [ "● Pleased", "pleased" ],
-                [ "● Transit", "transit" ],
-                [ "● Displeased", "displeased" ]
+                [ "● #{sentiment_label("pleased")}", "pleased" ],
+                [ "● #{sentiment_label("transit")}", "transit" ],
+                [ "● #{sentiment_label("displeased")}", "displeased" ]
               ], params[:sentiment]),
-              include_blank: "Any sentiment",
+              include_blank: t("common.any_sentiment"),
               class: ta_field_classes %>
       </div>
     <% end %>
     <div>
-      <%= label_tag :voted, "Voted", class: ta_label_classes %>
-      <%= select_tag :voted, options_for_select([ [ "Voted", "yes" ], [ "Not voted", "no" ] ], params[:voted]), include_blank: "Any", class: ta_field_classes %>
+      <%= label_tag :voted, t("common.voted"), class: ta_label_classes %>
+      <%= select_tag :voted, options_for_select([ [ t("common.voted"), "yes" ], [ t("common.not_voted"), "no" ] ], params[:voted]), include_blank: t("common.any"), class: ta_field_classes %>
     </div>
     <div class="flex items-end gap-2">
-      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
-      <%= link_to "Clear", list_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.filter") %></button>
+      <%= link_to t("common.clear"), list_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
     </div>
   </div>
   <p class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
     <% dot_colors.each do |status, color| %>
-      <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full" style="background: <%= color %>"></span><%= status.humanize %></span>
+      <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full" style="background: <%= color %>"></span><%= sentiment_label(status) %></span>
     <% end %>
   </p>
 <% end %>
@@ -101,7 +101,7 @@
     <table class="w-full">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <% [ "Sr no", "Voter ID", "Name", "Booth", "Sentiment", "Voted" ].each do |heading| %>
+          <% [ t("common.sr_no"), t("common.voter_id"), t("common.name"), t("common.booth"), t("common.sentiment"), t("common.voted") ].each do |heading| %>
             <th class="<%= th %>"><%= heading %></th>
           <% end %>
         </tr>
@@ -131,7 +131,7 @@
               <% if status %>
                 <span class="inline-flex items-center gap-2 text-gray-800">
                   <span class="h-2.5 w-2.5 rounded-full" style="background: <%= dot_colors[status] %>"></span>
-                  <%= status.humanize %>
+                  <%= sentiment_label(status) %>
                 </span>
               <% else %>
                 <span class="text-gray-400">—</span>
@@ -140,13 +140,13 @@
             <td class="<%= td %>">
               <% turnout = @turnouts[voter.id] %>
               <% if can_mark %>
-                <%= button_to (turnout&.voted? ? "Voted" : "Not voted"),
+                <%= button_to voted_label(turnout&.voted?),
                       update_voted_voter_path(voter),
                       method: :patch,
                       params: { voted: turnout&.voted? ? "0" : "1", return_to: request.fullpath },
                       class: "min-h-9 cursor-pointer rounded-full px-3 text-xs font-medium #{turnout&.voted? ? "bg-green-600 text-white" : "bg-white text-gray-700 ring-1 ring-gray-300"}" %>
               <% else %>
-                <%= turnout&.voted? ? "Voted" : "Not voted" %>
+                <%= voted_label(turnout&.voted?) %>
               <% end %>
             </td>
           </tr>
@@ -154,7 +154,7 @@
       </tbody>
     </table>
     <% if @voters.empty? %>
-      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= voter_filters.values.any?(&:present?) ? "No voters match these filters." : "No voters in this village yet." %></p>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= voter_filters.values.any?(&:present?) ? t("voters.no_match") : t("voters.none_in_village") %></p>
     <% end %>
   </div>
   <%= render "ui/pagination", pagy: @pagy %>

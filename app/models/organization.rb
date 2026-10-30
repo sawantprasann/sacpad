@@ -5,6 +5,7 @@ class Organization < ApplicationRecord
 
   has_many :users, dependent: :restrict_with_error
   has_many :support_tickets, dependent: :restrict_with_error
+  has_many :calendar_events, dependent: :destroy
   has_many :party_memberships, dependent: :destroy
   has_many :admin_organizations, dependent: :destroy
   has_many :politicians, dependent: :destroy

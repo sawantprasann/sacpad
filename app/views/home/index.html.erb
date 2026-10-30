@@ -31,50 +31,78 @@
         meta: l(dashboard_now, format: "%A, %-d %B %Y")
       } do %><% end %>
 
+  <% show_calendar = current_user.can_use_calendar? %>
+  <% if show_calendar || desks.any? %>
+  <div class="mt-6 grid grid-cols-1 items-start gap-6 <%= "xl:grid-cols-2" if show_calendar && desks.any? %>">
   <% if desks.any? %>
-    <div class="mt-6">
-      <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("dashboard.open_a_desk") %></h2>
-      <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
+    <details class="group min-w-0 overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10" <%= "open" if show_calendar %> data-controller="disclosure" data-disclosure-key-value="open-a-desk" data-action="toggle->disclosure#toggle">
+      <summary class="relative flex cursor-pointer list-none items-center justify-between gap-4 px-4 pb-3.5 pt-5 marker:content-none hover:bg-gray-50 sm:px-5 dark:hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
+        <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#FF9933] via-[#ea580c] to-[#465FFF]" aria-hidden="true"></span>
+        <div class="min-w-0">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90"><%= t("dashboard.open_a_desk") %></h2>
+          <div class="mt-2.5 flex flex-wrap items-center group-open:hidden">
+            <% desks.each do |desk| %>
+              <% jewel = dashboard_jewel(desk[:jewel]) %>
+              <span class="-ml-2 inline-flex rounded-2xl ring-2 ring-white first:ml-0 dark:ring-gray-900" title="<%= desk[:title] %>">
+                <%= render "ui/desk_mark", name: desk[:mark], chip_class: jewel[:chip], box_class: "h-8 w-8 [&_svg]:h-4 [&_svg]:w-4" %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+        <span class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 text-xs font-semibold text-gray-700 dark:bg-white/10 dark:text-gray-200">
+          <span class="group-open:hidden"><%= t("dashboard.show_desks") %></span>
+          <span class="hidden group-open:inline"><%= t("dashboard.hide_desks") %></span>
+          <span class="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-gray-600 shadow-sm dark:bg-gray-800 dark:text-gray-200"><%= desks.size %></span>
+          <svg class="h-3.5 w-3.5 transition group-open:rotate-180" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </summary>
+      <div class="grid gap-3 border-t border-gray-100 bg-gray-50/80 px-4 py-4 sm:px-5 dark:border-white/10 dark:bg-white/[0.02] <%= show_calendar ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" %>">
         <% desks.each do |desk| %>
           <% jewel = dashboard_jewel(desk[:jewel]) %>
           <%= link_to desk[:path],
-                class: "group relative overflow-hidden rounded-2xl bg-white p-4 shadow-theme-md ring-1 #{jewel[:ring]} transition hover:-translate-y-0.5 hover:shadow-theme-lg dark:bg-gray-900 dark:ring-white/10" do %>
-            <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= jewel[:bar] %>"></span>
-            <div class="mt-1 flex items-center gap-3">
-              <%= render "ui/desk_mark", name: desk[:mark], chip_class: jewel[:chip] %>
-              <div>
-                <p class="text-sm font-semibold text-gray-900 group-hover:text-gray-950 dark:text-white/90"><%= desk[:title] %></p>
-                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"><%= desk[:blurb] %></p>
-              </div>
-            </div>
+                class: "group/desk relative flex items-center gap-3 overflow-hidden rounded-2xl bg-white p-3.5 shadow-sm ring-1 #{jewel[:ring]} transition hover:-translate-y-0.5 hover:shadow-theme-md dark:bg-gray-900 dark:ring-white/10" do %>
+            <span class="absolute inset-y-0 left-0 w-1 bg-gradient-to-b <%= jewel[:bar] %>" aria-hidden="true"></span>
+            <%= render "ui/desk_mark", name: desk[:mark], chip_class: jewel[:chip] %>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-semibold text-gray-900 group-hover/desk:text-gray-950 dark:text-white/90"><%= desk[:title] %></span>
+              <span class="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400"><%= desk[:blurb] %></span>
+            </span>
+            <svg class="h-4 w-4 shrink-0 text-gray-300 transition group-hover/desk:translate-x-0.5 group-hover/desk:text-gray-500 dark:text-gray-600" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M8 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           <% end %>
         <% end %>
       </div>
-    </div>
+    </details>
+  <% end %>
+  <% if show_calendar %>
+    <%= render "home/schedule" %>
+  <% end %>
+  </div>
   <% end %>
 
+  <% if @widgets.any? || @constituency_election.blank? %>
   <div class="mt-8 mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("dashboard.at_a_glance") %></h2>
       <p class="text-sm text-gray-500 dark:text-gray-400"><%= t("dashboard.glance_subtitle") %></p>
     </div>
   </div>
+  <% end %>
 
   <% indexed = @widgets.each_with_index.to_a %>
   <% charts, rest = indexed.partition { |widget, _index| %w[kitchen_cabinet cadre_program].include?(widget[:mod]) } %>
-  <% glance = charts.size + (@constituency_election ? 1 : 0) %>
-  <% if glance.positive? %>
-    <div class="grid grid-cols-1 gap-6 <%= "lg:grid-cols-2" if glance > 1 %>">
+  <% if charts.any? %>
+    <div class="grid grid-cols-1 gap-6 <%= "lg:grid-cols-2" if charts.size > 1 %>">
       <% charts.each do |widget, index| %>
         <%= render "ui/dashboard_widget", widget: widget, accent_index: index %>
-      <% end %>
-      <% if @constituency_election %>
-        <%= render "ui/dashboard_widget", widget: { title: t("nav.election_result"), mod: "constituency_elections" }, accent_index: 4 %>
       <% end %>
     </div>
   <% end %>
   <% if rest.any? %>
-    <div class="<%= "mt-6" if glance.positive? %> grid grid-cols-1 gap-6">
+    <div class="<%= "mt-6" if charts.any? %> grid grid-cols-1 gap-6">
       <% rest.each do |widget, index| %>
         <%= render "ui/dashboard_widget", widget: widget, accent_index: index %>
       <% end %>

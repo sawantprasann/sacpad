@@ -1,13 +1,13 @@
-<% content_for :title, "Team" %>
+<% content_for :title, t("nav.team") %>
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Team",
-      title: "Team",
-      subtitle: pluralize(@users.size, "member"),
+      kicker: t("team.kicker"),
+      title: t("nav.team"),
+      subtitle: t("team.count", count: @users.size),
       meta: current_user.organization.name
     } do %><% end %>
 <% if policy(User).create? %>
   <div class="mt-4 flex justify-end">
-    <%= link_to "New user", new_user_path, class: "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition", style: "background: #c2410c" %>
+    <%= link_to t("team.new_user"), new_user_path, class: "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition", style: "background: #c2410c" %>
   </div>
 <% end %>
 
@@ -16,10 +16,10 @@
     <table class="w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
-          <th class="px-5 py-3 font-medium">Name</th>
-          <th class="px-5 py-3 font-medium">Email</th>
-          <th class="px-5 py-3 font-medium">Role</th>
-          <th class="px-5 py-3 font-medium">Parent</th>
+          <th class="px-5 py-3 font-medium"><%= t("common.name") %></th>
+          <th class="px-5 py-3 font-medium"><%= t("common.email") %></th>
+          <th class="px-5 py-3 font-medium"><%= t("common.role") %></th>
+          <th class="px-5 py-3 font-medium"><%= t("common.parent") %></th>
         </tr>
       </thead>
       <tbody>

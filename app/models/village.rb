@@ -3,6 +3,12 @@ class Village < ApplicationRecord
 
   belongs_to :assembly
   belongs_to :taluka, optional: true
+  # police_station stays a string until a later migration drops it.
+  belongs_to :police_station_record,
+    class_name: "PoliceStation",
+    foreign_key: :police_station_id,
+    optional: true,
+    inverse_of: :villages
   has_many :booths, -> { by_number }, dependent: :restrict_with_error
   has_many :voters, dependent: :restrict_with_error
   has_many :ground_reports, class_name: "GroundReports::GroundReport", dependent: :restrict_with_error
@@ -15,7 +21,29 @@ class Village < ApplicationRecord
   has_many :mock_poll_responses, class_name: "GroundReports::MockPollResponse", dependent: :restrict_with_error
   validates :name, presence: true
 
+  before_validation :sync_police_station_record
+
   def resolved_native_locale
     assembly&.loksabha&.native_locale
+  end
+
+  private
+
+  def sync_police_station_record
+    return unless will_save_change_to_police_station? || (self[:police_station].present? && police_station_id.nil?)
+
+    cleaned = self[:police_station].to_s.strip
+    if cleaned.blank?
+      self[:police_station] = nil
+      self.police_station_id = nil
+      return
+    end
+
+    state = assembly&.loksabha&.state
+    return if state.blank?
+
+    station = PoliceStation.fetch_or_create!(state: state, name: cleaned)
+    self.police_station_record = station
+    self[:police_station] = station.name
   end
 end

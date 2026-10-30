@@ -8,6 +8,7 @@ const NEXT_ARROW = `<svg class="stroke-current" width="20" height="20" viewBox="
 // The named input keeps YYYY-MM-DD so forms still submit an ISO date.
 export default class extends Controller {
   static targets = ["input"]
+  static values = { locale: Object }
 
   connect() {
     this.picker = flatpickr(this.inputTarget, {
@@ -17,6 +18,7 @@ export default class extends Controller {
       dateFormat: "Y-m-d",
       altInput: true,
       altFormat: "F j, Y",
+      locale: this.hasLocaleValue ? this.localeValue : undefined,
       altInputClass: this.inputTarget.className,
       allowInput: false,
       disableMobile: true,

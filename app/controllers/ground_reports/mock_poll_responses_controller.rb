@@ -11,7 +11,7 @@ module GroundReports
       survey.created_by = current_user
       authorize survey
       if survey.save
-        redirect_to ground_reports_village_path(@village), notice: "Survey response recorded."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.survey_recorded")
       else
         redirect_to ground_reports_village_path(@village), alert: survey.errors.full_messages.to_sentence
       end
@@ -21,7 +21,7 @@ module GroundReports
 
     def update
       if @survey.update(response_params)
-        redirect_to ground_reports_village_path(@village), notice: "Survey response updated."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.survey_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -29,7 +29,7 @@ module GroundReports
 
     def destroy
       @survey.discard_by(current_user)
-      redirect_to ground_reports_village_path(@village), notice: "Survey response deleted."
+      redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.survey_deleted")
     end
 
     private

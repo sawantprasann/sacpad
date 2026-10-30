@@ -1,7 +1,7 @@
 <%= turbo_frame_tag "election-result" do %>
 <div>
   <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Election result",
+        kicker: t("election.kicker"),
         title: election.heading,
         subtitle: election_outcome_sentence(election),
         meta: election.constituency&.name
@@ -30,7 +30,7 @@
     <article class="relative overflow-hidden rounded-2xl bg-white p-5 shadow-theme-md ring-1 <%= result_jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10">
       <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= result_jewel[:bar] %>"></span>
       <span class="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-70 <%= result_jewel[:wash] %>"></span>
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Result</p>
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("election.result") %></p>
       <p class="mt-3 text-lg font-semibold text-gray-900 dark:text-white/90"><%= winner&.candidate_name || "—" %></p>
       <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><%= election_result_line(election) %></p>
       <p class="mt-3 inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold text-gray-800 <%= result_jewel[:wash] %>">
@@ -41,20 +41,20 @@
     <article class="relative overflow-hidden rounded-2xl bg-white p-5 shadow-theme-md ring-1 <%= margin_jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10">
       <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= margin_jewel[:bar] %>"></span>
       <span class="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-70 <%= margin_jewel[:wash] %>"></span>
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Margin of victory</p>
-      <p class="mt-3 text-2xl font-semibold tabular-nums text-gray-900 dark:text-white/90"><%= election_count(election.margin_votes) %> <span class="text-base font-medium text-gray-500">votes</span></p>
-      <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><%= election_percent(election.margin_percent) %> of valid votes</p>
-      <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">Since the previous election <%= election_change_tag(election.margin_change) %></p>
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("election.margin") %></p>
+      <p class="mt-3 text-2xl font-semibold tabular-nums text-gray-900 dark:text-white/90"><%= election_count(election.margin_votes) %> <span class="text-base font-medium text-gray-500"><%= t("election.votes") %></span></p>
+      <p class="mt-1 text-sm text-gray-600 dark:text-gray-300"><%= t("election.of_valid", percent: election_percent(election.margin_percent)) %></p>
+      <p class="mt-3 text-sm text-gray-600 dark:text-gray-300"><%= t("election.since_previous") %> <%= election_change_tag(election.margin_change) %></p>
     </article>
     <article class="relative overflow-hidden rounded-2xl bg-white p-5 shadow-theme-md ring-1 <%= turnout_jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10">
       <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= turnout_jewel[:bar] %>"></span>
       <span class="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-70 <%= turnout_jewel[:wash] %>"></span>
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Turnout</p>
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("election.turnout") %></p>
       <p class="mt-3 text-2xl font-semibold tabular-nums text-gray-900 dark:text-white/90"><%= election_percent(election.turnout_percent) %></p>
       <div class="mt-3 h-2.5 overflow-hidden rounded-full bg-cyan-100 dark:bg-white/10">
         <div class="h-full rounded-full bg-gradient-to-r <%= turnout_jewel[:bar] %>" style="width: <%= election_bar_width(election.turnout_percent) %>%"></div>
       </div>
-      <p class="mt-3 text-sm text-gray-600 dark:text-gray-300"><%= election_count(election.turnout_votes) %> of <%= election_count(election.registered_electors) %> electors</p>
+      <p class="mt-3 text-sm text-gray-600 dark:text-gray-300"><%= t("election.electors_of", votes: election_count(election.turnout_votes), electors: election_count(election.registered_electors)) %></p>
     </article>
   </div>
 
@@ -62,15 +62,15 @@
   <div class="relative mt-4 grid grid-cols-1 gap-4 overflow-hidden rounded-2xl bg-white p-5 shadow-theme-md ring-1 <%= share_jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10 lg:grid-cols-[16rem_1fr] lg:items-center">
     <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= share_jewel[:bar] %>"></span>
     <div>
-      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Vote share</p>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("election.vote_share") %></p>
       <%= pie_chart pie, id: "election-share-#{election.id}", height: "210px", donut: true,
             colors: slices.map(&:last),
             suffix: "%",
             library: dashboard_pie_library %>
     </div>
     <div class="space-y-3">
-      <% election.candidates.each do |candidate| %>
-        <% color = party_swatch(candidate.party) %>
+      <% election.candidates.each_with_index do |candidate, index| %>
+        <% color = slices[index]&.last || party_swatch(candidate.party) %>
         <div>
           <div class="mb-1 flex items-baseline justify-between gap-3">
             <p class="min-w-0 truncate text-sm text-gray-800 dark:text-white/90">
@@ -90,7 +90,7 @@
   <% if elections.size > 1 %>
     <div class="relative mt-4 overflow-hidden rounded-2xl bg-white p-5 shadow-theme-md ring-1 <%= share_jewel[:ring] %> dark:bg-gray-900 dark:ring-white/10">
       <span class="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r <%= share_jewel[:bar] %>"></span>
-      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200">Winner's share by year</p>
+      <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("election.share_by_year") %></p>
       <div class="mt-3 space-y-3">
         <% elections.each do |item| %>
           <% share = item.winning_candidate&.vote_percent %>

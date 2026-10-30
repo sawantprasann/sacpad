@@ -1,12 +1,12 @@
 <% content_for :title, @ticket.ticket_number %>
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Support",
-      title: "Ticket reply",
+      kicker: t("support.kicker"),
+      title: t("support.reply_title"),
       subtitle: @ticket.ticket_number,
       meta: @ticket.category_label
     } do %><% end %>
 
-<%= link_to "← All tickets", support_tickets_path, class: "mt-4 inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300" %>
+<%= link_to t("support.all_tickets"), support_tickets_path, class: "mt-4 inline-flex text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300" %>
 
 <div class="mt-4 grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
   <div class="xl:col-span-2">

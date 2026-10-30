@@ -21,6 +21,7 @@
      data-min-search-select-min-length-value="<%= min_length %>"
      data-min-search-select-placeholder-value="<%= placeholder %>"
      data-min-search-select-empty-text-value="<%= empty_text %>"
+     data-min-search-select-hint-value="<%= t("common.search_hint", count: min_length) %>"
      data-action="focusout->min-search-select#focusOut">
   <%= select_tag name, options_for_select(choices, selected), select_options %>
 
@@ -44,7 +45,7 @@
             data-min-search-select-target="clear"
             data-action="click->min-search-select#clear"
             class="absolute top-1/2 right-9 z-10 hidden -translate-y-1/2 rounded p-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-            aria-label="Clear">
+            aria-label="<%= t("common.clear") %>">
       <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
         <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>

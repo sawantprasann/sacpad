@@ -90,22 +90,24 @@ class ConstituencyElectionResultsTest < ActionDispatch::IntegrationTest
     sign_in User.create!(organization: assembly_org, role: role, name: "Field", email: "field@example.com", password: "password123")
     get "/"
     assert_match "Election result", response.body
-    assert_match "held the seat by 1,509 votes", response.body
-    assert_match "Dr. Tanaji Jayawant Sawant", response.body
-    assert_select "a[href='#{election_result_path}']", text: "View election result"
+    assert_select "a[href='#{election_result_path}']"
+    assert_no_match "dashboard-election-share", response.body
     assert_no_match "Omraje Nimbalkar", response.body
+    assert_no_match "Dr. Tanaji Jayawant Sawant", response.body
     assert_no_match "Margin of victory", response.body
 
     get election_result_path
     assert_match "Vote share", response.body
     assert_match "Margin of victory", response.body
     assert_match "Dr. Tanaji Jayawant Sawant", response.body
+    assert_match "#FF5A1F", response.body
+    assert_match "#2563EB", response.body
     assert_no_match "Omraje Nimbalkar", response.body
 
     sign_out :user
     sign_in User.create!(organization: loksabha_org, role: role, name: "Lok Sabha", email: "ls@example.com", password: "password123")
     get "/"
-    assert_match "Omraje Nimbalkar", response.body
+    assert_no_match "Omraje Nimbalkar", response.body
     assert_no_match "Dr. Tanaji Jayawant Sawant", response.body
 
     get election_result_path(election_year: assembly_result.year)
@@ -128,9 +130,9 @@ class ConstituencyElectionResultsTest < ActionDispatch::IntegrationTest
     sign_in User.create!(organization: org, role: role, name: "Admin", email: "org-admin@example.com", password: "password123")
 
     get "/"
-    assert_match "Dr. Tanaji Jayawant Sawant", response.body
+    assert_no_match "Dr. Tanaji Jayawant Sawant", response.body
     assert_no_match "Earlier winner", response.body
-    assert_select "a[href='#{election_result_path}']", text: "View election result"
+    assert_select "a[href='#{election_result_path}']"
     assert_select "turbo-frame#election-result", count: 0
 
     get election_result_path

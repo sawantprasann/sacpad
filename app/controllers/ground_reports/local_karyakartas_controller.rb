@@ -9,7 +9,7 @@ module GroundReports
       contact.organization = current_user.organization
       authorize contact
       if contact.save
-        redirect_to ground_reports_village_path(@village), notice: "Karyakarta added."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.karyakarta_added")
       else
         redirect_to ground_reports_village_path(@village), alert: contact.errors.full_messages.to_sentence
       end
@@ -19,7 +19,7 @@ module GroundReports
 
     def update
       if @contact.update(contact_params)
-        redirect_to ground_reports_village_path(@village), notice: "Karyakarta updated."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.karyakarta_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -27,7 +27,7 @@ module GroundReports
 
     def destroy
       @contact.discard_by(current_user)
-      redirect_to ground_reports_village_path(@village), notice: "Karyakarta deleted."
+      redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.karyakarta_deleted")
     end
 
     private

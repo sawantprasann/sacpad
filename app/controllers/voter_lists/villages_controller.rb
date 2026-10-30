@@ -31,10 +31,10 @@ module VoterLists
       @village = organization_villages.where(taluka_id: @taluka.id).includes(:assembly, :taluka).find(params[:id])
     end
 
-    # Names are encrypted, so booth-then-name order is applied after the rows are loaded.
-    # The village bounds the set. Export uses the same order as the list.
+    # The village bounds the set. Export uses the same booth-then-serial order as the list.
+    # A name search still loads the rows, because names are encrypted.
     def listed_voters
-      relation = current_user.visible_voters(@village.voters.includes(:booth, :village))
+      relation = current_user.visible_voters(@village.voters.preload(:booth, :village))
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
       relation = filter_sr_no(relation)
       if params[:booth].present?
@@ -50,9 +50,10 @@ module VoterLists
       elsif params[:voted] == "no"
         relation = relation.where.not(id: voted_ids)
       end
-      voters = relation.to_a
-      voters.select! { |voter| voter.matches_name?(params[:name]) } if params[:name].present?
-      voters.sort_by { |voter| [ booth_sort_key(voter.booth&.number), voter_name(voter).downcase, voter.id ] }
+      relation = relation.by_booth_and_serial
+      return relation unless params[:name].present?
+
+      relation.to_a.select { |voter| voter.matches_name?(params[:name]) }
     end
 
     def filter_sr_no(relation)
@@ -64,20 +65,6 @@ module VoterLists
 
     def voted_ids
       VoterTurnout.where(election: @election, voted: true).select(:voter_id)
-    end
-
-    def booth_sort_key(number)
-      text = number.to_s
-      return [ 2, 0, "" ] if text.blank?
-      return [ 0, text.to_i, text ] if text.match?(/\A[0-9]+\z/)
-
-      [ 1, 0, text.downcase ]
-    end
-
-    def voter_name(voter)
-      [ voter.first_name, voter.middle_name, voter.last_name ].compact.join(" ")
-    rescue ActiveRecord::Encryption::Errors::Decryption
-      ""
     end
 
     def load_roll_state(voters)

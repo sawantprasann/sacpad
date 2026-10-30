@@ -346,6 +346,50 @@ input[type="week"] {
   -webkit-appearance: auto;
 }
 
+/* Preflight sets margin: 0 on every element, which drops a native <dialog>
+   in the top-left. margin: auto is what centers it in the viewport. */
+dialog {
+  position: fixed;
+  inset: 0;
+  height: fit-content;
+  margin: auto;
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.98);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    overlay 180ms ease allow-discrete,
+    display 180ms ease allow-discrete;
+}
+
+dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity 180ms ease,
+    overlay 180ms ease allow-discrete,
+    display 180ms ease allow-discrete;
+}
+
+dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+  }
+
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
 .sidebar:hover {
   width: 290px;
 }

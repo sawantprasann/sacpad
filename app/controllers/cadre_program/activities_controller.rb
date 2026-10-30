@@ -36,7 +36,7 @@ module CadreProgram
       authorize @activity
       if @activity.save
         record_activity("cadre_activity.created", record: @activity)
-        redirect_to cadre_program_activity_path(@activity), notice: "Cadre activity logged."
+        redirect_to cadre_program_activity_path(@activity), notice: t("cadre_program.logged")
       else
         build_detail_shells
         load_org_users
@@ -58,7 +58,7 @@ module CadreProgram
       if @activity.update(activity_params.except(:photos))
         @activity.photos.attach(photos) if photos.any?
         record_activity("cadre_activity.updated", record: @activity)
-        redirect_to cadre_program_activity_path(@activity), notice: "Cadre activity updated."
+        redirect_to cadre_program_activity_path(@activity), notice: t("cadre_program.updated")
       else
         build_detail_shells
         load_org_users
@@ -135,7 +135,7 @@ module CadreProgram
     def require_cadre_program_access
       return if current_user.role.can_access?("cadre_program")
 
-      redirect_to root_path, alert: "You don't have access to Cadre Program."
+      redirect_to root_path, alert: t("cadre_program.no_access")
     end
   end
 end

@@ -9,7 +9,7 @@ module GroundReports
       yatra.assign_attributes(yatra_params)
       authorize yatra
       if yatra.save
-        redirect_to ground_reports_village_path(@village), notice: "Yatra note saved."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.yatra_saved")
       else
         redirect_to ground_reports_village_path(@village), alert: yatra.errors.full_messages.to_sentence
       end

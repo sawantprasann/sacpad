@@ -33,6 +33,22 @@ class VoterTest < ActiveSupport::TestCase
     assert_equal "Asha Patil", without_middle.name
   end
 
+  test "roll order is booth number then serial" do
+    village = State.create!(name: "Maharashtra").loksabhas.create!(name: "Baramati").assemblies.create!(name: "Indapur").villages.create!(name: "Nimgaon")
+    booth_two = village.booths.create!(number: "2")
+    booth_ten = village.booths.create!(number: "10")
+    booth_letter = village.booths.create!(number: "B-12")
+    late = Voter.create!(voter_id: "ROLL000003", first_name: "Late", last_name: "Two", sr_no: 3, booth: booth_two, village: village)
+    early_ten = Voter.create!(voter_id: "ROLL000010", first_name: "Early", last_name: "Ten", sr_no: 1, booth: booth_ten, village: village)
+    first = Voter.create!(voter_id: "ROLL000001", first_name: "First", last_name: "Two", sr_no: 1, booth: booth_two, village: village)
+    letter = Voter.create!(voter_id: "ROLL0000B", first_name: "Letter", last_name: "Booth", sr_no: 1, booth: booth_letter, village: village)
+    missing_booth = Voter.create!(voter_id: "ROLL0000N", first_name: "No", last_name: "Booth", sr_no: 1, village: village)
+    blank_serial = Voter.create!(voter_id: "ROLL0000X", first_name: "Blank", last_name: "Serial", booth: booth_two, village: village)
+
+    ordered = Voter.by_booth_and_serial.where(village: village).pluck(:id)
+    assert_equal [ first, late, blank_serial, early_ten, letter, missing_booth ].map(&:id), ordered
+  end
+
   test "Tier-1 versioning records a dedicated VoterVersion on change" do
     v = Voter.create!(voter_id: "V1", first_name: "A", last_name: "Test")
     assert_difference -> { VoterVersion.where(item_id: v.id).count }, 1 do

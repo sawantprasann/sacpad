@@ -16,7 +16,7 @@
         <% elsif field.to_s == "native_locale" %>
           <label class="<%= ta_label_classes %>">Native language</label>
           <%= f.select field,
-                [ [ "Marathi", "mr" ], [ "Tamil", "ta" ], [ "Kannada", "kn" ] ],
+                [ [ "Marathi", "mr" ] ],
                 { include_blank: "English only" },
                 class: ta_field_classes %>
         <% elsif column&.type == :boolean %>

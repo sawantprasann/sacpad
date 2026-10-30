@@ -1,0 +1,144 @@
+<% content_for :title, t("calendar.title") %>
+<% month_label = l(@month, format: "%B %Y") %>
+<% viewing_this_month = @month == @today.beginning_of_month %>
+<div
+  data-controller="calendar"
+  data-calendar-open-value="<%= @open_event_form %>"
+  data-calendar-fresh-value="<%= @open_new_event %>"
+  data-calendar-date-value="<%= @event.starts_on %>"
+  data-new-heading="<%= t("calendar.add_event") %>"
+  data-edit-heading="<%= t("calendar.edit_event") %>"
+  data-save-label="<%= t("calendar.save") %>"
+  data-update-label="<%= t("calendar.update") %>"
+>
+  <%= render layout: "ui/campaign_hero", locals: {
+        kicker: t("calendar.kicker"),
+        title: t("calendar.title"),
+        subtitle: t("calendar.subtitle")
+      } do %><% end %>
+
+  <section class="<%= ta_card_classes %> mt-6 overflow-hidden shadow-theme-md" aria-label="<%= month_label %>">
+    <div class="flex flex-col gap-4 border-b border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-gray-800">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <%= link_to calendar_events_path(month: calendar_month_token(@month.prev_month)),
+              class: "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-white/5",
+              aria: { label: t("calendar.previous_month") } do %>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+          </svg>
+        <% end %>
+        <%= link_to calendar_events_path(month: calendar_month_token(@month.next_month)),
+              class: "inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-white/5",
+              aria: { label: t("calendar.next_month") } do %>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd"/>
+          </svg>
+        <% end %>
+        <h2 class="ml-1 text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl dark:text-white/90"><%= month_label %></h2>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <% if viewing_this_month %>
+          <span class="inline-flex h-10 items-center rounded-lg border border-gray-200 px-3.5 text-sm font-medium text-gray-400 dark:border-gray-700 dark:text-gray-500"><%= t("calendar.today") %></span>
+        <% else %>
+          <%= link_to t("calendar.today"), calendar_events_path, class: "#{ta_btn_secondary} h-10" %>
+        <% end %>
+        <button type="button"
+                class="<%= ta_btn_primary %> h-10 gap-1.5 cursor-pointer px-4"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"
+                data-action="calendar#createOn"
+                data-calendar-date-param="<%= @today.iso8601 %>">
+          <%= t("calendar.add_event") %>
+          <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-7 border-b border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+      <% I18n.t("date.day_names").each_with_index do |name, index| %>
+        <div class="px-1 py-3 text-center text-[11px] font-semibold uppercase tracking-wide text-gray-500 sm:text-xs dark:text-gray-400" title="<%= name %>">
+          <span class="sm:hidden"><%= name.to_s[0] %></span>
+          <span class="hidden sm:inline"><%= I18n.t("date.abbr_day_names")[index] %></span>
+        </div>
+      <% end %>
+    </div>
+
+    <div id="calendar-grid" class="grid grid-cols-7">
+      <% @days = (@grid_start..@grid_end).to_a %>
+      <% @days.each do |day| %>
+        <% in_month = day.beginning_of_month == @month %>
+        <% today = day == @today %>
+        <% day_events = @events_by_day[day] %>
+        <div class="relative min-h-16 border-r border-b border-gray-200 p-1 sm:min-h-28 sm:p-2 md:min-h-32 dark:border-gray-800 <%= "bg-gray-50/80 dark:bg-white/[0.02]" unless in_month %> <%= "bg-brand-50/40 dark:bg-brand-500/5" if today %>">
+          <button type="button"
+                  class="absolute inset-0 z-0 cursor-pointer hover:bg-gray-50/80 dark:hover:bg-white/[0.03]"
+                  data-action="calendar#createOn"
+                  data-calendar-date-param="<%= day.iso8601 %>"
+                  aria-label="<%= t("calendar.add_on", date: l(day, format: :long)) %>"></button>
+          <div class="pointer-events-none relative z-10 flex justify-end sm:justify-start">
+            <% if today %>
+              <span class="inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1.5 text-xs font-semibold" style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= day.day %></span>
+            <% else %>
+              <span class="inline-flex h-7 min-w-7 items-center justify-center px-1 text-xs font-medium <%= in_month ? "text-gray-800 dark:text-white/90" : "text-gray-400 dark:text-gray-500" %>"><%= day.day %></span>
+            <% end %>
+          </div>
+
+          <% if day_events.any? %>
+            <div class="relative z-10 mt-1 hidden flex-col gap-1 md:flex">
+              <% day_events.each do |event| %>
+                <%= button_tag type: "button",
+                      class: "flex w-full items-center gap-1 truncate rounded-md border-l-2 px-1.5 py-0.5 text-left text-xs font-medium #{calendar_chip_class(event.color)}",
+                      title: event.title,
+                      data: { action: "click->calendar#edit", calendar_event_param: calendar_event_payload(event), event_id: event.id } do %>
+                  <% if event.starting_on?(day) %>
+                    <span class="shrink-0 opacity-80"><%= calendar_clock(event.starts_at) %></span>
+                  <% end %>
+                  <span class="truncate"><%= event.title %></span>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="pointer-events-none relative z-10 mt-1 flex flex-wrap justify-end gap-0.5 md:hidden" aria-hidden="true">
+              <% day_events.first(3).each do |event| %>
+                <span class="h-1.5 w-1.5 rounded-full <%= calendar_dot_class(event.color) %>"></span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <% month_days = (@month..@month.end_of_month).select { |day| @events_by_day[day].any? } %>
+  <section class="mt-4 space-y-3 md:hidden" aria-label="<%= month_label %>">
+    <% if month_days.empty? %>
+      <p class="rounded-2xl border border-dashed border-gray-300 px-4 py-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"><%= t("calendar.no_events_month") %></p>
+    <% else %>
+      <% month_days.each do |day| %>
+        <div class="<%= ta_card_classes %> p-4">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90"><%= l(day, format: "%A, %-d %B") %></h3>
+          <ul class="mt-3 space-y-2">
+            <% @events_by_day[day].each do |event| %>
+              <li>
+                <%= button_tag type: "button",
+                      class: "flex w-full items-start gap-3 rounded-xl border-l-2 px-3 py-2 text-left #{calendar_chip_class(event.color)}",
+                      data: { action: "click->calendar#edit", calendar_event_param: calendar_event_payload(event), event_id: event.id } do %>
+                  <span class="w-16 shrink-0 text-xs font-semibold"><%= event.starting_on?(day) ? calendar_clock(event.starts_at) : "–" %></span>
+                  <span class="min-w-0">
+                    <span class="block truncate text-sm font-medium"><%= event.title %></span>
+                    <% if event.location.present? %>
+                      <span class="mt-0.5 block truncate text-xs opacity-75"><%= event.location %></span>
+                    <% end %>
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+
+  <%= render "calendar_events/form" %>
+</div>

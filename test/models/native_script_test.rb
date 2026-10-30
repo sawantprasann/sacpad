@@ -3,9 +3,8 @@ require "test_helper"
 class NativeScriptTest < ActiveSupport::TestCase
   test "english village names become the Lok Sabha script" do
     assert_equal "वाघोलि", NativeScript.transliterate("Wagholi", "mr")
-    assert_equal "वाघोलि", NativeScript.transliterate("Wagholi", "mr")
-    assert NativeScript.transliterate("Wagholi", "ta").present?
-    assert NativeScript.transliterate("Wagholi", "kn").present?
+    assert_nil NativeScript.transliterate("Wagholi", "ta")
+    assert_nil NativeScript.transliterate("Wagholi", "kn")
   end
 
   test "a blank locale or an unchanged word stores nothing" do

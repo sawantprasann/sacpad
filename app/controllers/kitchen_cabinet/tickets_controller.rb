@@ -46,10 +46,13 @@ module KitchenCabinet
       to = params[:to_status]
       if @ticket.may_change_to?(to)
         @ticket.change_status!(to: to, actor: current_user)
-        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Status updated to #{to.to_s.humanize}."
+        redirect_to kitchen_cabinet_ticket_path(@ticket),
+                    notice: t("kitchen_cabinet.status_updated", status: t("kitchen_cabinet.statuses.#{to}"))
       else
         redirect_to kitchen_cabinet_ticket_path(@ticket),
-                    alert: "Can't move from #{@ticket.status.humanize} to #{to.to_s.humanize}."
+                    alert: t("kitchen_cabinet.cannot_move",
+                      from: t("kitchen_cabinet.statuses.#{@ticket.status}"),
+                      to: t("kitchen_cabinet.statuses.#{to}", default: to.to_s.humanize))
       end
     end
 
@@ -83,7 +86,7 @@ module KitchenCabinet
       @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
       authorize @ticket, :update?
       if @ticket.update(ticket_params)
-        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Ticket updated."
+        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: t("kitchen_cabinet.ticket_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -95,7 +98,7 @@ module KitchenCabinet
       @ticket = policy_scope(KitchenCabinet::Ticket).find(params[:id])
       authorize @ticket, :update?
       if @ticket.update(voter_id: params[:voter_id])
-        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Voter ID saved."
+        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: t("kitchen_cabinet.voter_saved")
       else
         redirect_to kitchen_cabinet_ticket_path(@ticket), alert: @ticket.errors.full_messages.to_sentence
       end
@@ -108,13 +111,13 @@ module KitchenCabinet
       voter = Voter.find_by(id: params[:matched_voter_id])
       matches = KitchenCabinet::VoterMatch.for_ticket(@ticket)
       if @ticket.voter_id.present? || voter.nil? || matches.none? { |row| row.id == voter.id }
-        redirect_to kitchen_cabinet_ticket_path(@ticket), alert: "Choose one of the matched voters."
+        redirect_to kitchen_cabinet_ticket_path(@ticket), alert: t("kitchen_cabinet.choose_match")
         return
       end
 
       @ticket.link_matched_voter!(voter, by: current_user)
       redirect_to kitchen_cabinet_ticket_path(@ticket),
-                  notice: "Linked #{voter.name}. Sentiment set to transit. You'll confirm how they feel when this is closed."
+                  notice: t("kitchen_cabinet.linked_voter", name: voter.name)
     end
 
     private
@@ -178,7 +181,7 @@ module KitchenCabinet
       categories = grouped.keys.map { |_date, name, order| [ order.to_i, name ] }.uniq.sort
       categories.map do |_order, category|
         data = dates.to_h do |date|
-          [ date.to_date.strftime("%d %b %Y"), lookup.fetch([ date, category ], 0) ]
+          [ I18n.l(date.to_date, format: :day), lookup.fetch([ date, category ], 0) ]
         end
         { name: category, data: data }
       end
@@ -189,7 +192,7 @@ module KitchenCabinet
       status_counts = base.group("tickets.status").count
       pie = KitchenCabinet::Ticket.statuses.each_with_object({}) do |(name, value), series|
         count = status_counts[name] || status_counts[value] || status_counts[value.to_s] || 0
-        series[name.humanize] = count if count.positive?
+        series[I18n.t("kitchen_cabinet.statuses.#{name}", default: name.humanize)] = count if count.positive?
       end
 
       by_category = beneficiaries_by_date_and_category(base)
@@ -206,12 +209,12 @@ module KitchenCabinet
       matches = KitchenCabinet::VoterMatch.for_ticket(@ticket)
       if matches.one?
         @ticket.link_matched_voter!(matches.first, by: current_user)
-        redirect_to list, notice: "Ticket ##{@ticket.ticket_number} logged. Matched #{matches.first.name} and set sentiment to transit."
+        redirect_to list, notice: t("kitchen_cabinet.logged_matched", number: @ticket.ticket_number, name: matches.first.name)
       elsif matches.many?
         redirect_to kitchen_cabinet_ticket_path(@ticket),
-                    notice: "Ticket logged. Several voters in this village share this name — select the right one."
+                    notice: t("kitchen_cabinet.logged_several")
       else
-        redirect_to list, notice: "Ticket ##{@ticket.ticket_number} logged."
+        redirect_to list, notice: t("kitchen_cabinet.logged", number: @ticket.ticket_number)
       end
     end
 
@@ -222,7 +225,7 @@ module KitchenCabinet
     # Nav visibility is gated in the sidebar, but access is also enforced here (not UI-only):
     # a user whose role has no Beneficiaries access cannot reach the module even by URL.
     def require_kitchen_cabinet_access
-      redirect_to root_path, alert: "You don't have access to Beneficiaries." unless
+      redirect_to root_path, alert: t("kitchen_cabinet.no_access") unless
         current_user.role.can_access?("kitchen_cabinet")
     end
   end

@@ -5,15 +5,15 @@
 <% th = "border-b border-gray-200 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-5 py-4 align-middle dark:border-gray-800" %>
 <% stats = [
-  ["Total tickets", @counts[:total], "all", "#0b1f44"],
-  ["Pending tickets", @counts[:pending], "pending", "#b45309"],
-  ["Solved tickets", @counts[:solved], "solved", "#039855"]
+  [t("support.total"), @counts[:total], "all", "#0b1f44"],
+  [t("support.pending_tickets"), @counts[:pending], "pending", "#b45309"],
+  [t("support.solved_tickets"), @counts[:solved], "solved", "#039855"]
 ] %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: console ? "Platform Console" : "Support",
-      title: "Support tickets",
-      subtitle: console ? "Complaints raised by people using the app." : "Raise a complaint about the app and follow the reply.",
+      kicker: console ? t("auth.platform_console") : t("support.kicker"),
+      title: t("support.title"),
+      subtitle: console ? t("support.console_subtitle") : t("support.subtitle"),
       meta: (current_user.organization.name if !console && user_signed_in?)
     } do %><% end %>
 
@@ -40,8 +40,8 @@
 
 <div class="mt-6 <%= ta_card_classes %> overflow-hidden">
   <div class="flex flex-col gap-4 border-b border-gray-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5 dark:border-gray-800">
-    <div class="flex shrink-0 flex-wrap gap-2" role="tablist" aria-label="Ticket status">
-      <% [["all", "All"], ["pending", "Pending"], ["solved", "Solved"]].each do |key, label| %>
+    <div class="flex shrink-0 flex-wrap gap-2" role="tablist" aria-label="<%= t("support.ticket_status") %>">
+      <% [["all", t("support.all")], ["pending", t("support.pending")], ["solved", t("support.solved")]].each do |key, label| %>
         <% active = tab == key %>
         <%= link_to label, support_filter_path(console: console, status: key, query: query.presence),
               role: "tab",
@@ -52,7 +52,7 @@
     </div>
     <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
       <% unless console %>
-        <%= link_to "Raise a ticket", new_support_ticket_path,
+        <%= link_to t("support.raise"), new_support_ticket_path,
               class: "#{ta_btn_primary} min-h-11 shrink-0",
               style: "background: #{support_accent}; color: #{support_accent_ink}" %>
       <% end %>
@@ -60,9 +60,9 @@
       <% if tab != "all" %>
         <%= hidden_field_tag :status, tab %>
       <% end %>
-      <label for="support-search" class="sr-only">Search tickets</label>
-      <%= text_field_tag :q, query, id: "support-search", placeholder: "Search tickets", class: ta_field_classes, autocomplete: "off" %>
-      <button type="submit" class="<%= ta_btn_secondary %> shrink-0 cursor-pointer">Search</button>
+      <label for="support-search" class="sr-only"><%= t("support.search_label") %></label>
+      <%= text_field_tag :q, query, id: "support-search", placeholder: t("support.search_placeholder"), class: ta_field_classes, autocomplete: "off" %>
+      <button type="submit" class="<%= ta_btn_secondary %> shrink-0 cursor-pointer"><%= t("common.search") %></button>
     <% end %>
     </div>
   </div>
@@ -72,15 +72,15 @@
     <table class="w-full text-sm">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <th class="<%= th %>">Ticket</th>
+          <th class="<%= th %>"><%= t("support.ticket") %></th>
           <% if console %>
-            <th class="<%= th %>">Requested by</th>
-            <th class="<%= th %>">Organization</th>
+            <th class="<%= th %>"><%= t("support.requested_by") %></th>
+            <th class="<%= th %>"><%= t("support.organization") %></th>
           <% end %>
-          <th class="<%= th %>">Subject</th>
-          <th class="<%= th %>">Category</th>
-          <th class="<%= th %>">Status</th>
-          <th class="<%= th %> text-right">Created</th>
+          <th class="<%= th %>"><%= t("support.subject") %></th>
+          <th class="<%= th %>"><%= t("common.category") %></th>
+          <th class="<%= th %>"><%= t("common.status") %></th>
+          <th class="<%= th %> text-right"><%= t("common.created") %></th>
         </tr>
       </thead>
       <tbody>
@@ -132,16 +132,16 @@
 
   <% if @tickets.empty? %>
     <div class="px-6 py-16 text-center">
-      <p class="text-sm font-medium text-gray-800 dark:text-white/90">No tickets match.</p>
+      <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= t("support.no_match") %></p>
       <p class="mt-1 text-sm text-gray-500">
         <% if console %>
-          Complaints raised from the app will show up here.
+          <%= t("support.console_empty") %>
         <% else %>
-          Tell the SAC-PAD team what is getting in the way.
+          <%= t("support.empty_hint") %>
         <% end %>
       </p>
       <% unless console %>
-        <%= link_to "Raise a ticket", new_support_ticket_path, class: "#{ta_btn_primary} mt-4 min-h-11", style: "background: #{support_accent}; color: #{support_accent_ink}" %>
+        <%= link_to t("support.raise"), new_support_ticket_path, class: "#{ta_btn_primary} mt-4 min-h-11", style: "background: #{support_accent}; color: #{support_accent_ink}" %>
       <% end %>
     </div>
   <% end %>

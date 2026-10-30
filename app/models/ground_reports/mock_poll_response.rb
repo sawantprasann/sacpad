@@ -35,11 +35,15 @@ module GroundReports
     end
 
     def vote_label
-      case vote_intent
-      when true then "Yes"
-      when false then "No"
-      else "Undecided"
-      end
+      I18n.t("common.#{vote_choice || "undecided"}")
+    end
+
+    def self.preference_options
+      preference_bases.keys.map { |key| [ I18n.t("ground_reports.preference.#{key}", default: key.humanize), key ] }
+    end
+
+    def self.vote_options
+      %w[yes no undecided].map { |key| [ I18n.t("common.#{key}"), key ] }
     end
 
     def self.tally_for(village)

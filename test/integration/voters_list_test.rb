@@ -24,6 +24,16 @@ class VotersListTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
+  test "the index lists voters by booth number then serial" do
+    Voter.create!(voter_id: "EARLY00001", first_name: "Early", last_name: "Row", sr_no: 1, booth: @booth, village: @village)
+    Voter.create!(voter_id: "NONE000001", first_name: "No", last_name: "Booth", sr_no: 1, village: @village)
+
+    get voters_path
+    assert_response :success
+    assert_match "Voters are listed by booth number, then serial number.", response.body
+    assert_equal [ "Ravi Kale", "Early Row", "Asha Patil", "No Booth" ], listed_names
+  end
+
   test "the index lists the roll and filters it" do
     get voters_path
     assert_response :success
@@ -149,5 +159,11 @@ class VotersListTest < ActionDispatch::IntegrationTest
     assert_equal "Sr no", sheet.cell(1, 1)
     assert_equal 1, sheet.last_row - 1
     assert_equal "Asha Patil", sheet.cell(2, 3)
+  end
+
+  private
+
+  def listed_names
+    css_select("table tbody tr td:nth-child(3)").map { |cell| cell.text.squish }
   end
 end

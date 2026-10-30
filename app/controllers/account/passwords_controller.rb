@@ -8,7 +8,7 @@ module Account
     def update
       if current_user.update_with_password(password_params)
         bypass_sign_in(current_user)
-        redirect_to root_path, notice: "Password updated."
+        redirect_to root_path, notice: t("account.updated")
       else
         render :edit, status: :unprocessable_entity
       end

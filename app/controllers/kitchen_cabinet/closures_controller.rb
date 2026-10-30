@@ -23,9 +23,9 @@ module KitchenCabinet
           end
         end
       end
-      redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "On record as help delivered."
+      redirect_to kitchen_cabinet_ticket_path(@ticket), notice: t("kitchen_cabinet.closed_notice")
     rescue Date::Error
-      redirect_to kitchen_cabinet_ticket_path(@ticket), alert: "Enter a valid closure date."
+      redirect_to kitchen_cabinet_ticket_path(@ticket), alert: t("kitchen_cabinet.closure_date_invalid")
     end
 
     private
@@ -36,11 +36,11 @@ module KitchenCabinet
       return if @ticket.may_change_to?("closed")
 
       redirect_to kitchen_cabinet_ticket_path(@ticket),
-                  alert: "Move the ticket to In progress before closing."
+                  alert: t("kitchen_cabinet.close_from_progress")
     end
 
     def require_kitchen_cabinet_access
-      redirect_to root_path, alert: "You don't have access to Beneficiaries." unless
+      redirect_to root_path, alert: t("kitchen_cabinet.no_access") unless
         current_user.role.can_access?("kitchen_cabinet")
     end
   end

@@ -22,6 +22,13 @@
               <span class="menu-item-text"><%= t("nav.dashboard") %></span>
             <% end %>
           </li>
+          <% if user_signed_in? && current_user.can_use_calendar? %>
+            <li>
+              <%= link_to calendar_events_path, class: "menu-item group #{controller_name == "calendar_events" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <span class="menu-item-text"><%= t("nav.calendar") %></span>
+              <% end %>
+            </li>
+          <% end %>
           <% if user_signed_in? && current_user.role.can_create_users? %>
             <li>
               <%= link_to users_path, class: "menu-item group #{current_page?(users_path) ? "menu-item-active" : "menu-item-inactive"}" do %>

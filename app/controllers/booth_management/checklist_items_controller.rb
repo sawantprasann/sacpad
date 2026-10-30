@@ -7,7 +7,7 @@ module BoothManagement
     def create
       item = BoothChecklistItem.new(booth: @booth, organization: current_user.organization, label: params.dig(:booth_checklist_item, :label))
       if item.save
-        redirect_to booth_path(@booth), notice: "Checklist item added."
+        redirect_to booth_path(@booth), notice: t("booths.checklist_added")
       else
         redirect_to booth_path(@booth), alert: item.errors.full_messages.to_sentence
       end
@@ -28,7 +28,7 @@ module BoothManagement
     def require_booth_write
       return if current_user.role.can_write?("booth_management")
 
-      redirect_to root_path, alert: "You can't update booth checklists."
+      redirect_to root_path, alert: t("booths.cannot_update")
     end
   end
 end

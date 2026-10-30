@@ -14,6 +14,16 @@ class Voter < ApplicationRecord
   has_many :voter_turnouts, dependent: :destroy
 
   # sr_no is the voter's position on that booth's published roll.
+  # Numeric booth numbers sort as integers (2 before 10). Other numbers follow, then voters with no booth.
+  # Missing serials stay at the end of their booth.
+  scope :by_booth_and_serial, -> {
+    left_joins(:booth).order(
+      Arel.sql("CASE WHEN booths.number ~ '^[0-9]+$' THEN booths.number::bigint END ASC NULLS LAST"),
+      Arel.sql("booths.number ASC NULLS LAST"),
+      Arel.sql("voters.sr_no ASC NULLS LAST"),
+      Arel.sql("voters.id ASC")
+    )
+  }
 
   # PII encrypted at rest (NFR18). Name fields deterministic for searchability.
   # voter_id is deterministic for Ticket lookup; name fields deterministic for voter search/filter.

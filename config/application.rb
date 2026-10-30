@@ -16,9 +16,9 @@ module Sacpad
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # English is the default. mr, ta, and kn are the Lok Sabha native languages.
-    # A missing Tamil or Kannada label falls back to English.
-    config.i18n.available_locales = %i[en mr ta kn]
+    # Campaign pages are English or Marathi. A missing Marathi label falls back
+    # to English. Native names use Devanagari only.
+    config.i18n.available_locales = %i[en mr]
     config.i18n.default_locale = :en
     config.i18n.fallbacks = true
 

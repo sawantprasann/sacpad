@@ -27,6 +27,25 @@ module Api
       render json: { error: e.message }, status: :internal_server_error
     end
 
+    def native_names
+      assembly = Assembly.find(params[:assembly_id])
+      updated = Eci::ImportNativeNames.new(assembly).store_payload(params[:part_number], native_payload)
+      booth = Booth.joins(:village).find_by!(villages: { assembly_id: assembly.id }, number: params[:part_number].to_s)
+      render json: {
+        assembly_id: assembly.id,
+        part: params[:part_number].to_s,
+        village: booth.village.name,
+        updated: updated
+      }
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "Assembly or booth was not found." }, status: :not_found
+    rescue Eci::ImportNativeNames::Error => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    rescue StandardError => e
+      Rails.logger.error("Native name import failed: #{e.class}: #{e.message}")
+      render json: { error: e.message }, status: :internal_server_error
+    end
+
     private
 
     def authenticate_roll_token!
@@ -62,6 +81,16 @@ module Api
     def first_integer(sources, *keys)
       raw = sources.lazy.flat_map { |body| keys.map { |key| body[key] } }.find { |value| value.to_s.strip.present? }
       Integer(raw, exception: false)
+    end
+
+    def native_payload
+      {
+        "taluka" => unsafe_hash(params[:taluka]),
+        "district" => unsafe_hash(params[:district]),
+        "village" => unsafe_hash(params[:village]),
+        "police_station" => unsafe_hash(params[:police_station]),
+        "voters" => Array(params[:voters]).map { |row| unsafe_hash(row) }
+      }
     end
 
     def unsafe_hash(value)

@@ -76,10 +76,10 @@
     </div>
   <% end %>
 
-  <div class="mt-6 <%= ta_card_classes %>" x-data="{ tab: 'line' }">
+  <div class="mt-6 <%= ta_card_classes %>" x-data="{ tab: 'pie' }">
     <div class="border-b border-gray-200 px-4 dark:border-gray-800" role="tablist" aria-label="<%= t("kitchen_cabinet.charts") %>">
       <div class="flex gap-6">
-        <% { "line" => t("kitchen_cabinet.line"), "bar" => t("kitchen_cabinet.bar"), "pie" => t("kitchen_cabinet.pie") }.each do |key, label| %>
+        <% { "pie" => t("kitchen_cabinet.pie"), "bar" => t("kitchen_cabinet.bar"), "line" => t("kitchen_cabinet.line") }.each do |key, label| %>
           <button type="button" role="tab" id="beneficiaries-tab-<%= key %>"
                   @click="tab = '<%= key %>'; $nextTick(() => window.Chartkick && Object.values(Chartkick.charts).forEach((chart) => chart.redraw()))"
                   :aria-selected="(tab === '<%= key %>').toString()"
@@ -92,17 +92,7 @@
       </div>
     </div>
     <div class="p-4 md:p-6">
-      <div x-show="tab === 'line'" role="tabpanel" aria-labelledby="beneficiaries-tab-line">
-        <%= line_chart @charts[:line], id: "beneficiaries-line", height: "280px",
-              colors: line_colors, xtitle: t("kitchen_cabinet.reported_date"), ytitle: t("kitchen_cabinet.chart_count"),
-              empty: t("kitchen_cabinet.no_match_filters") %>
-      </div>
-      <div x-show="tab === 'bar'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-bar">
-        <%= column_chart @charts[:bar], id: "beneficiaries-bar", height: "280px", stacked: true,
-              colors: bar_colors, xtitle: t("kitchen_cabinet.date"), ytitle: t("kitchen_cabinet.chart_count"),
-              empty: t("kitchen_cabinet.no_match_filters") %>
-      </div>
-      <div x-show="tab === 'pie'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-pie">
+      <div x-show="tab === 'pie'" role="tabpanel" aria-labelledby="beneficiaries-tab-pie">
         <div class="grid gap-6 lg:grid-cols-2">
           <div>
             <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("kitchen_cabinet.by_status") %></h3>
@@ -117,6 +107,16 @@
                   empty: t("kitchen_cabinet.no_match_filters") %>
           </div>
         </div>
+      </div>
+      <div x-show="tab === 'bar'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-bar">
+        <%= column_chart @charts[:bar], id: "beneficiaries-bar", height: "280px", stacked: true,
+              colors: bar_colors, xtitle: t("kitchen_cabinet.date"), ytitle: t("kitchen_cabinet.chart_count"),
+              empty: t("kitchen_cabinet.no_match_filters") %>
+      </div>
+      <div x-show="tab === 'line'" x-cloak role="tabpanel" aria-labelledby="beneficiaries-tab-line">
+        <%= line_chart @charts[:line], id: "beneficiaries-line", height: "280px",
+              colors: line_colors, xtitle: t("kitchen_cabinet.reported_date"), ytitle: t("kitchen_cabinet.chart_count"),
+              empty: t("kitchen_cabinet.no_match_filters") %>
       </div>
     </div>
   </div>

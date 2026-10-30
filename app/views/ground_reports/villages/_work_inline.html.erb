@@ -3,8 +3,8 @@
 <% can_write = local_assigns[:can_write] %>
 <section class="<%= ta_card_classes %> overflow-hidden">
   <div class="px-6 py-4">
-    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90">Work inline</h2>
-    <p class="mt-0.5 text-xs text-gray-500">Development taken up for this village, the fund asked, and the work order.</p>
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90"><%= t("ground_reports.work_inline") %></h2>
+    <p class="mt-0.5 text-xs text-gray-500"><%= t("ground_reports.work_help") %></p>
   </div>
 
   <% if works.any? %>
@@ -40,7 +40,7 @@
                         can_write: can_write,
                         edit_path: edit_ground_reports_village_village_work_path(village, work),
                         delete_path: ground_reports_village_village_work_path(village, work),
-                        label: "work inline" %>
+                        label: t("ground_reports.records.work_inline") %>
                 </td>
               <% end %>
             </tr>
@@ -49,11 +49,11 @@
       </table>
     </div>
   <% else %>
-    <p class="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-400 dark:border-gray-800">No work inline yet.</p>
+    <p class="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-400 dark:border-gray-800"><%= t("ground_reports.no_work") %></p>
   <% end %>
 
   <% if can_write %>
-    <%= render "ground_reports/villages/add_panel", label: "Add work" do %>
+    <%= render "ground_reports/villages/add_panel", label: t("ground_reports.add_work") do %>
       <div x-data="{ category: '' }">
       <%= form_with model: GroundReports::VillageWork.new, scope: :village_work,
             url: ground_reports_village_village_works_path(village), class: "space-y-3" do |f| %>

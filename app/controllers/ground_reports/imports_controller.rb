@@ -16,7 +16,7 @@ module GroundReports
       authorize @import
       if @import.save
         ImportGroundReportsJob.perform_later(@import.id)
-        redirect_to ground_reports_import_path(@import, village_id: @village&.id), notice: "Import started."
+        redirect_to ground_reports_import_path(@import, village_id: @village&.id), notice: t("ground_reports.notices.import_started")
       else
         render :new, status: :unprocessable_entity
       end
@@ -42,7 +42,7 @@ module GroundReports
     def require_ground_reports_access
       return if current_user.role.can_access?("ground_reports")
 
-      redirect_to root_path, alert: "You don't have access to Ground Reports."
+      redirect_to root_path, alert: t("ground_reports.no_access")
     end
   end
 end

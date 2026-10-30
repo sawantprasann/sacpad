@@ -9,7 +9,7 @@ module GroundReports
       work.organization = current_user.organization
       authorize work
       if work.save
-        redirect_to ground_reports_village_path(@village), notice: "Work inline added."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.work_added")
       else
         redirect_to ground_reports_village_path(@village), alert: work.errors.full_messages.to_sentence
       end
@@ -19,7 +19,7 @@ module GroundReports
 
     def update
       if @work.update(work_params)
-        redirect_to ground_reports_village_path(@village), notice: "Work inline updated."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.work_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -27,7 +27,7 @@ module GroundReports
 
     def destroy
       @work.discard_by(current_user)
-      redirect_to ground_reports_village_path(@village), notice: "Work inline deleted."
+      redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.work_deleted")
     end
 
     private

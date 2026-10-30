@@ -2,7 +2,7 @@
 <% scope = policy_scope(KitchenCabinet::Ticket) %>
 <% counts = KitchenCabinet::Ticket.statuses.keys.index_with { |status| scope.where(status: status).count } %>
 <% total = counts.values.sum %>
-<% slices = counts.filter_map { |status, count| [ status.humanize, count, status_color(status) ] if count.positive? } %>
+<% slices = counts.filter_map { |status, count| [ t("kitchen_cabinet.statuses.#{status}"), count, status_color(status) ] if count.positive? } %>
 <% pie = slices.to_h { |label, count, _color| [ label, count ] } %>
 
 <% if total.positive? %>
@@ -15,7 +15,7 @@
     <%= render "ui/slice_legend", slices: slices, total: total %>
   </div>
 <% else %>
-  <p class="text-xs text-gray-400">No tickets yet.</p>
+  <p class="text-xs text-gray-400"><%= t("ground_reports.no_tickets") %></p>
 <% end %>
-<%= link_to "View tickets", kitchen_cabinet_tickets_path,
+<%= link_to t("ground_reports.view_tickets"), kitchen_cabinet_tickets_path,
       class: "mt-3 inline-block text-xs #{ta_text_link}" %>

@@ -18,7 +18,7 @@ class SupportTicketsController < ApplicationController
     @ticket = current_user.support_tickets.new(ticket_params)
     @ticket.organization = current_user.organization
     if @ticket.save
-      redirect_to support_ticket_path(@ticket), notice: "Your complaint has been sent. We'll reply on this page."
+      redirect_to support_ticket_path(@ticket), notice: t("support.sent")
     else
       render :new, status: :unprocessable_entity
     end
@@ -34,7 +34,7 @@ class SupportTicketsController < ApplicationController
     if @message.save
       reopened = @ticket.solved? || @ticket.on_hold?
       @ticket.update!(status: :pending) if reopened
-      notice = reopened ? "Reply sent. This ticket is open again." : "Reply sent."
+      notice = reopened ? t("support.reply_reopened") : t("support.reply_sent")
       redirect_to support_ticket_path(@ticket), notice: notice
     else
       render :show, status: :unprocessable_entity

@@ -9,7 +9,7 @@ module VoterLists
     def require_voter_access
       return if current_user.role.can_access?("voter_lists")
 
-      redirect_to root_path, alert: "You don't have access to Voter Lists."
+      redirect_to root_path, alert: t("voters_access.no_access")
     end
 
     def organization_villages

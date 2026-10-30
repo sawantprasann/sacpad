@@ -5,7 +5,7 @@
 <% td = "border-b border-gray-100 px-6 py-4 align-middle text-sm dark:border-gray-800" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Talukas",
+      kicker: t("common.talukas"),
       title: @taluka.name,
       subtitle: @taluka.district.name,
       meta: current_user.organization.name
@@ -14,11 +14,11 @@
 <div class="<%= ta_card_classes %> mt-6 p-6">
   <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">District</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.district") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @taluka.district.name %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Villages</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.villages") %></dt>
       <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @village_total %></dd>
     </div>
   </dl>
@@ -28,46 +28,46 @@
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
     <% unless current_user.booth_manager? %>
       <div>
-        <%= label_tag :village_id, "Village", class: ta_label_classes %>
+        <%= label_tag :village_id, t("common.village"), class: ta_label_classes %>
         <%= render "ui/min_search_select",
               name: :village_id,
               choices: @village_choices.map { |village| [ village.display_name, village.id ] },
               selected: params[:village_id],
-              blank: "All villages",
-              placeholder: "All villages",
-              search_placeholder: "Search villages...",
-              empty_text: "No villages found" %>
+              blank: t("common.all_villages"),
+              placeholder: t("common.all_villages"),
+              search_placeholder: t("kitchen_cabinet.search_villages"),
+              empty_text: t("kitchen_cabinet.no_villages") %>
       </div>
     <% end %>
     <div>
-      <%= label_tag :police_station, "Police station", class: ta_label_classes %>
+      <%= label_tag :police_station, t("common.police_station"), class: ta_label_classes %>
       <%= text_field_tag :police_station, params[:police_station], class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :pin_code, "Pin code", class: ta_label_classes %>
+      <%= label_tag :pin_code, t("common.pin_code"), class: ta_label_classes %>
       <%= text_field_tag :pin_code, params[:pin_code], class: ta_field_classes %>
     </div>
     <div class="flex items-end gap-2">
-      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
-      <%= link_to "Clear", voter_lists_taluka_path(@taluka), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.filter") %></button>
+      <%= link_to t("common.clear"), voter_lists_taluka_path(@taluka), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
     </div>
   </div>
 <% end %>
 
 <div class="mt-6 <%= ta_card_classes %> overflow-hidden">
   <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Villages</h2>
+    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90"><%= t("common.villages") %></h2>
   </div>
   <div class="overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <th class="<%= th %>">Village</th>
-          <th class="<%= th %>">Assembly</th>
-          <th class="<%= th %>">Voters</th>
-          <th class="<%= th %>">Police station</th>
-          <th class="<%= th %>">Pin code</th>
-          <th class="<%= th %> w-12"><span class="sr-only">Open</span></th>
+          <th class="<%= th %>"><%= t("common.village") %></th>
+          <th class="<%= th %>"><%= t("common.assembly") %></th>
+          <th class="<%= th %>"><%= t("common.voters") %></th>
+          <th class="<%= th %>"><%= t("common.police_station") %></th>
+          <th class="<%= th %>"><%= t("common.pin_code") %></th>
+          <th class="<%= th %> w-12"><span class="sr-only"><%= t("common.open") %></span></th>
         </tr>
       </thead>
       <tbody>
@@ -88,7 +88,7 @@
     </table>
     <% if @villages.empty? %>
       <p class="px-6 py-16 text-center text-sm text-gray-400">
-        <%= village_filters.values.any?(&:present?) ? "No villages match." : "No villages in this taluka." %>
+        <%= village_filters.values.any?(&:present?) ? t("voter_lists.no_villages_match") : t("voter_lists.no_villages") %>
       </p>
     <% end %>
   </div>

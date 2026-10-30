@@ -6,9 +6,9 @@
     <table class="campaign-table w-full text-sm">
       <thead class="border-b border-gray-200 text-left text-gray-500 dark:border-gray-800 dark:text-gray-400">
         <tr>
-          <th class="px-5 py-3 font-medium">Party</th>
-          <th class="px-5 py-3 font-medium">Candidate</th>
-          <th class="px-5 py-3 text-right font-medium">Votes</th>
+          <th class="px-5 py-3 font-medium"><%= t("election.party") %></th>
+          <th class="px-5 py-3 font-medium"><%= t("election.candidate") %></th>
+          <th class="px-5 py-3 text-right font-medium"><%= t("election.vote_count") %></th>
           <th class="px-5 py-3 text-right font-medium">%</th>
           <th class="px-5 py-3 text-right font-medium">±%</th>
         </tr>
@@ -29,24 +29,24 @@
           </tr>
         <% end %>
         <tr class="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
-          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2">Margin of victory</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2"><%= t("election.margin") %></td>
           <td class="px-5 py-3 text-right tabular-nums text-gray-800 dark:text-white/90"><%= election_count(election.margin_votes) %></td>
           <td class="px-5 py-3 text-right tabular-nums text-gray-700 dark:text-gray-300"><%= election_percent(election.margin_percent) %></td>
           <td class="px-5 py-3 text-right tabular-nums"><%= election_change_tag(election.margin_change) %></td>
         </tr>
         <tr class="border-b border-gray-100 dark:border-gray-800">
-          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2">Turnout</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2"><%= t("election.turnout") %></td>
           <td class="px-5 py-3 text-right tabular-nums text-gray-800 dark:text-white/90"><%= election_count(election.turnout_votes) %></td>
           <td class="px-5 py-3 text-right tabular-nums text-gray-700 dark:text-gray-300"><%= election_percent(election.turnout_percent) %></td>
           <td class="px-5 py-3 text-right tabular-nums"><%= election_change_tag(election.turnout_change) %></td>
         </tr>
         <tr class="border-b border-gray-100 dark:border-gray-800">
-          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2">Total valid votes</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2"><%= t("election.total_valid") %></td>
           <td class="px-5 py-3 text-right tabular-nums text-gray-800 dark:text-white/90"><%= election_count(election.valid_votes) %></td>
           <td colspan="2"></td>
         </tr>
         <tr class="border-b border-gray-100 dark:border-gray-800">
-          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2">Registered electors</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2"><%= t("election.registered") %></td>
           <td class="px-5 py-3 text-right tabular-nums text-gray-800 dark:text-white/90"><%= election_count(election.registered_electors) %></td>
           <td></td>
           <td class="px-5 py-3 text-right tabular-nums"><%= election_change_tag(election.electors_change) %></td>
@@ -58,7 +58,7 @@
               <%= election.result_label || "—" %>
             </span>
           </td>
-          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2">Swing</td>
+          <td class="px-5 py-3 text-right font-medium text-gray-700 dark:text-gray-300" colspan="2"><%= t("election.swing") %></td>
           <td class="px-5 py-3 text-right tabular-nums"><%= election_change_tag(election.swing) %></td>
         </tr>
       </tbody>

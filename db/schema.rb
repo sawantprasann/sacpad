@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_30_183000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -210,6 +210,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
     t.index ["organization_id"], name: "index_cadre_activity_programs_on_organization_id"
   end
 
+  create_table "calendar_events", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.string "title", null: false
+    t.string "color", default: "primary", null: false
+    t.datetime "starts_at", null: false
+    t.datetime "ends_at", null: false
+    t.string "location"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_calendar_events_on_organization_id"
+    t.index ["user_id", "starts_at"], name: "index_calendar_events_on_user_id_and_starts_at"
+  end
+
   create_table "constituency_election_candidates", force: :cascade do |t|
     t.bigint "constituency_election_id", null: false
     t.bigint "party_id", null: false
@@ -405,6 +420,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
     t.datetime "updated_at", null: false
     t.index ["organization_id"], name: "index_party_memberships_on_organization_id"
     t.index ["party_id"], name: "index_party_memberships_on_party_id"
+  end
+
+  create_table "police_stations", force: :cascade do |t|
+    t.bigint "state_id", null: false
+    t.string "name", null: false
+    t.string "native_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "state_id, lower((name)::text)", name: "index_police_stations_on_state_id_and_lower_name", unique: true
+    t.index ["state_id"], name: "index_police_stations_on_state_id"
   end
 
   create_table "politicians", force: :cascade do |t|
@@ -764,8 +789,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
     t.string "police_station"
     t.string "pin_code"
     t.string "native_name"
+    t.bigint "police_station_id"
     t.index ["assembly_id", "name"], name: "index_villages_on_assembly_id_and_name", unique: true
     t.index ["assembly_id"], name: "index_villages_on_assembly_id"
+    t.index ["police_station_id"], name: "index_villages_on_police_station_id"
     t.index ["taluka_id"], name: "index_villages_on_taluka_id"
   end
 
@@ -887,6 +914,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
   add_foreign_key "cadre_activity_party_program_hosteds", "organizations"
   add_foreign_key "cadre_activity_programs", "cadre_activities"
   add_foreign_key "cadre_activity_programs", "organizations"
+  add_foreign_key "calendar_events", "organizations"
+  add_foreign_key "calendar_events", "users"
   add_foreign_key "constituency_election_candidates", "constituency_elections"
   add_foreign_key "constituency_election_candidates", "parties"
   add_foreign_key "constituency_elections", "parties", column: "gained_from_party_id"
@@ -909,6 +938,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
   add_foreign_key "mock_poll_responses", "villages"
   add_foreign_key "party_memberships", "organizations"
   add_foreign_key "party_memberships", "parties"
+  add_foreign_key "police_stations", "states"
   add_foreign_key "politicians", "organizations"
   add_foreign_key "politicians", "parties"
   add_foreign_key "pr_record_links", "pr_records"
@@ -954,6 +984,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_28_180000) do
   add_foreign_key "village_yatras", "users", column: "updated_by_id"
   add_foreign_key "village_yatras", "villages"
   add_foreign_key "villages", "assemblies"
+  add_foreign_key "villages", "police_stations"
   add_foreign_key "villages", "talukas"
   add_foreign_key "voter_sentiments", "organizations"
   add_foreign_key "voter_sentiments", "voters"

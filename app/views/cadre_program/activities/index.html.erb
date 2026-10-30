@@ -10,7 +10,7 @@
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("nav.cadre_program"),
       title: @category_label || t("nav.cadre_program"),
-      subtitle: pluralize(@pagy.count, "activity"),
+      subtitle: t("cadre_program.activity_count", count: @pagy.count),
       meta: current_user.organization.name
     } do %><% end %>
 
@@ -24,7 +24,7 @@
 </div>
 
 <% columns = CadreProgram::CadreActivity.list_columns(@category_key) %>
-<% list_text = ->(value) { value.respond_to?(:strftime) ? value.strftime("%d %b %Y") : value.presence || "—" } %>
+<% list_text = ->(value) { value.respond_to?(:strftime) ? l_day(value) : value.presence || "—" } %>
 <div class="mt-6 <%= ta_card_classes %> overflow-hidden">
   <div class="hidden xl:block">
     <table class="w-full text-sm">
@@ -33,10 +33,10 @@
           <% columns.each do |label, reader| %>
             <th class="<%= th %>"><%= label %></th>
           <% end %>
-          <th class="<%= th %>">Media value</th>
-          <th class="<%= th %>">Logged by</th>
-          <th class="<%= th %> text-right">Photos</th>
-          <th class="<%= th %> w-28"><span class="sr-only">Actions</span></th>
+          <th class="<%= th %>"><%= t("cadre_program.media_value") %></th>
+          <th class="<%= th %>"><%= t("common.logged_by") %></th>
+          <th class="<%= th %> text-right"><%= t("common.photos") %></th>
+          <th class="<%= th %> w-28"><span class="sr-only"><%= t("common.actions") %></span></th>
         </tr>
       </thead>
       <tbody>
@@ -73,7 +73,7 @@
       </tbody>
     </table>
     <% if @activities.empty? %>
-      <p class="px-6 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("cadre_program.no_activity") %></p>
     <% end %>
   </div>
 
@@ -93,7 +93,7 @@
               </div>
             <% end %>
           </dl>
-          <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= pluralize(activity.photos.size, "photo") %></p>
+          <p class="mt-2 text-xs text-gray-500"><%= activity.owner.name %> · <%= t("cadre_program.photo_count", count: activity.photos.size) %></p>
         <% end %>
         <p class="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300"><%= linkify_text(activity.impact_notes) || "—" %></p>
         <div class="mt-2 flex items-center gap-1">
@@ -105,7 +105,7 @@
       </div>
     <% end %>
     <% if @activities.empty? %>
-      <p class="px-6 py-16 text-center text-sm text-gray-400">No cadre activity yet.</p>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("cadre_program.no_activity") %></p>
     <% end %>
   </div>
 

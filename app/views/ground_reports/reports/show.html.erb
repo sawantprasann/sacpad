@@ -15,13 +15,13 @@
         can_write: policy(@report).update?,
         edit_path: edit_ground_reports_village_report_path(@village, @report),
         delete_path: ground_reports_village_report_path(@village, @report),
-        label: "issue" %>
+        label: t("ground_reports.records.issue") %>
   <%= link_to "Back to village", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
 </div>
 
 <div class="grid gap-4 xl:grid-cols-3">
   <div class="<%= ta_card_classes %> p-6 xl:col-span-2">
-    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Estimated cost</h2>
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.estimated_cost") %></h2>
     <p class="mb-6 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= format_estimated_cost(@report.estimated_cost) %></p>
 
     <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Resolution</h2>
@@ -29,7 +29,7 @@
   </div>
 
   <div class="<%= ta_card_classes %> p-6">
-    <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Testimonials</h2>
+    <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.testimonials") %></h2>
     <% if @report.testimonials.kept.any? %>
       <ul class="space-y-4">
         <% @report.testimonials.kept.each do |item| %>

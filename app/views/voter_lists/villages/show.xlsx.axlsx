@@ -1,4 +1,4 @@
-# Village voter export. Rows follow the same filters and booth-then-name order as the list.
+# Village voter export. Rows follow the same filters and booth-then-serial order as the list.
 wb = xlsx_package.workbook
 wb.add_worksheet(name: "Voters") do |sheet|
   sheet.add_row [ "Sr no", "Voter ID", "Name", "Booth no", "Village", "Sentiment", "Voted" ]
