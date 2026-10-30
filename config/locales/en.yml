@@ -225,7 +225,7 @@ en:
     create_prefix: "Create "
     create_activity: "Create activity"
     select_category: "Select a category"
-    media_value: "Media value"
+    media_value: "Media Value"
     media_placeholder: "Sentiment, local reaction, whether this is likely to move votes"
     no_activity: "No cadre activity yet."
     photo_count:
@@ -621,6 +621,7 @@ en:
     add_karyakarta: "Add karyakarta"
     edit_karyakarta: "Edit karyakarta"
     administrative_contacts: "Administrative contacts"
+    administrative_contact: "Administrative contact"
     no_admin_contacts: "No administrative contacts yet."
     add_contact: "Add contact"
     edit_contact: "Edit administrative contact"

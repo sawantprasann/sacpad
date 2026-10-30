@@ -1,8 +1,8 @@
 # One sheet per section on the village page. Issues are the full viewer-scoped set.
 wb = xlsx_package.workbook
 
-wb.add_worksheet(name: "Issues") do |sheet|
-  sheet.add_row [ "Issue", "Estimated cost", "Resolution", "Logged by", "Testimonials", "Reported" ]
+wb.add_worksheet(name: t("ground_reports.issues")) do |sheet|
+  sheet.add_row [ t("ground_reports.issue"), t("ground_reports.estimated_cost"), t("ground_reports.resolution"), t("common.logged_by"), t("ground_reports.testimonials"), t("common.reported") ]
   @reports.each do |report|
     sheet.add_row [
       report.issue_text,
@@ -10,55 +10,55 @@ wb.add_worksheet(name: "Issues") do |sheet|
       report.resolution_text,
       report.owner.name,
       report.testimonials.size,
-      report.reported_at.strftime("%d %b %Y")
+      l_day(report.reported_at)
     ]
   end
 end
 
-wb.add_worksheet(name: "Worship places") do |sheet|
-  sheet.add_row [ "Name", "Type", "Notes" ]
+wb.add_worksheet(name: t("ground_reports.worship_places")) do |sheet|
+  sheet.add_row [ t("common.name"), t("common.type"), t("common.notes") ]
   @worship_places.each do |place|
     sheet.add_row [ place.name, place.place_type, place.notes ]
   end
 end
 
-wb.add_worksheet(name: "Political position") do |sheet|
-  sheet.add_row [ "Representative", "Title", "Party", "Started", "Ended", "Current" ]
+wb.add_worksheet(name: t("ground_reports.political_position")) do |sheet|
+  sheet.add_row [ t("kitchen_cabinet.representative"), t("common.title"), t("common.party"), t("ground_reports.started"), t("ground_reports.ended"), t("common.current") ]
   @positions.each do |position|
     sheet.add_row [
       position.representative_name,
       position.position_title,
       position.party.name,
-      position.started_at.strftime("%d %b %Y"),
-      position.ended_at&.strftime("%d %b %Y"),
-      ("Current" if position.ended_at.nil?)
+      l_day(position.started_at),
+      (l_day(position.ended_at) if position.ended_at.present?),
+      (t("common.current") if position.ended_at.nil?)
     ]
   end
 end
 
-wb.add_worksheet(name: "Work inline") do |sheet|
-  sheet.add_row [ "Title", "Concern person", "Nidhi asked", "Category", "Work order", "Status", "Attachments" ]
+wb.add_worksheet(name: t("ground_reports.work_inline")) do |sheet|
+  sheet.add_row [ t("common.title"), t("ground_reports.concern_person"), t("ground_reports.nidhi_asked"), t("common.category"), t("ground_reports.work_order"), t("common.status"), t("common.attachments") ]
   @works.each do |work|
     sheet.add_row [
       work.title,
       work.concern_person,
       work.nidhi_asked,
       work.nidhi_label,
-      work.work_order_created_at&.strftime("%d %b %Y"),
-      work.status.humanize,
+      (l_day(work.work_order_created_at) if work.work_order_created_at.present?),
+      work.status_label,
       work.attachments.size
     ]
   end
 end
 
-wb.add_worksheet(name: "People") do |sheet|
-  sheet.add_row [ "Kind", "Name", "Role", "Phone", "Address", "Notes" ]
+wb.add_worksheet(name: t("ground_reports.people")) do |sheet|
+  sheet.add_row [ t("common.type"), t("common.name"), t("common.role"), t("common.phone"), t("common.address"), t("common.notes") ]
   @karyakartas.each do |contact|
-    sheet.add_row [ "Karyakarta", contact.name, nil, contact.phone, contact.address, contact.notes ]
+    sheet.add_row [ t("cadre_program.columns.karyakarta"), contact.name, nil, contact.phone, contact.address, contact.notes ]
   end
   @admin_contacts.each do |contact|
     sheet.add_row [
-      "Administrative contact",
+      t("ground_reports.administrative_contact"),
       contact.name,
       contact.admin_contact_role&.name || contact.role_title,
       contact.phone,
@@ -68,25 +68,25 @@ wb.add_worksheet(name: "People") do |sheet|
   end
 end
 
-wb.add_worksheet(name: "Mock poll") do |sheet|
-  sheet.add_row [ "Politician", "Yes", "No", "Undecided", "Likely" ]
+wb.add_worksheet(name: t("ground_reports.mock_poll")) do |sheet|
+  sheet.add_row [ t("common.politician"), t("common.yes"), t("common.no"), t("common.undecided"), t("common.likely") ]
   @poll_tally.each do |row|
     sheet.add_row [
       row[:politician].name,
       row[:yes],
       row[:no],
       row[:undecided],
-      ("Likely" if @likely_winners.include?(row[:politician]))
+      (t("common.likely") if @likely_winners.include?(row[:politician]))
     ]
   end
   sheet.add_row []
-  sheet.add_row [ "Respondent", "Mobile", "Politician", "Leaning because of", "Vote", "Note" ]
+  sheet.add_row [ t("ground_reports.respondent"), t("common.mobile"), t("common.politician"), t("ground_reports.leaning"), t("ground_reports.vote"), t("common.notes") ]
   @poll_responses.each do |survey|
     sheet.add_row [
       survey.respondent_name,
       survey.respondent_mobile,
       survey.politician.name,
-      survey.preference_basis.humanize,
+      t("ground_reports.preference.#{survey.preference_basis}"),
       survey.vote_label,
       survey.note
     ]

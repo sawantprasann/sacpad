@@ -24,7 +24,7 @@
     <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.estimated_cost") %></h2>
     <p class="mb-6 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= format_estimated_cost(@report.estimated_cost) %></p>
 
-    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Resolution</h2>
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.resolution") %></h2>
     <p class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300"><%= @report.resolution_text.presence || "—" %></p>
   </div>
 
@@ -47,17 +47,17 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="text-sm text-gray-400">No testimonials yet.</p>
+      <p class="text-sm text-gray-400"><%= t("ground_reports.no_testimonials") %></p>
     <% end %>
 
     <% if current_user.role.can_write?("ground_reports") %>
       <div class="mt-6 border-t border-gray-100 pt-4 dark:border-gray-800">
-        <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Add testimonial</h3>
+        <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.add_testimonial") %></h3>
         <%= form_with model: @testimonial, scope: :ground_report_testimonial,
               url: ground_reports_village_report_testimonials_path(@village, @report), method: :post, multipart: true do |f| %>
           <%= render "ground_reports/testimonials/fields", f: f %>
           <button type="submit" class="<%= ta_btn_primary %> mt-4 min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add testimonial</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.add_testimonial") %></button>
         <% end %>
       </div>
     <% end %>

@@ -699,6 +699,7 @@ mr:
     no_karyakartas: "अजून कार्यकर्ते नाहीत."
     add_karyakarta: "कार्यकर्ता जोडा"
     edit_karyakarta: "कार्यकर्ता संपादित करा"
+    administrative_contact: "प्रशासकीय संपर्क"
     administrative_contacts: "प्रशासकीय संपर्क"
     no_admin_contacts: "अजून प्रशासकीय संपर्क नाहीत."
     add_contact: "संपर्क जोडा"

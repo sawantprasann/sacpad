@@ -51,7 +51,7 @@
         <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500"><%= t("ground_reports.testimonials") %></th>
         <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500"><%= t("common.reported") %></th>
         <% if can_write %>
-          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500"><span class="sr-only">Actions</span></th>
+          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500"><span class="sr-only"><%= t("common.actions") %></span></th>
         <% end %>
       </tr>
     </thead>
@@ -153,7 +153,7 @@
             <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
           </div>
           <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add place</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.add_place") %></button>
         <% end %>
       <% end %>
     <% end %>
@@ -213,7 +213,7 @@
             <%= ta_date_picker(form: f, method: :started_at, required: true, value: (f.object.started_at || Date.current)) %>
           </div>
           <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Record position</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.record_position") %></button>
         <% end %>
       <% end %>
     <% end %>
@@ -275,7 +275,7 @@
             <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
           </div>
           <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add karyakarta</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.add_karyakarta") %></button>
         <% end %>
       <% end %>
     <% end %>
@@ -331,7 +331,7 @@
             <%= f.text_area :notes, rows: 2, class: "#{ta_field_classes} h-auto" %>
           </div>
           <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add contact</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.add_contact") %></button>
         <% end %>
       <% end %>
     <% end %>
@@ -441,7 +441,7 @@
             </div>
           </div>
           <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Record response</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.record_response") %></button>
         <% end %>
       <% end %>
     <% else %>

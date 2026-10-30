@@ -33,9 +33,9 @@
     </div>
     <div class="grid gap-4 text-sm text-gray-600 md:grid-cols-2">
       <% if current_user.role.can_import? %>
-        <p><span class="font-medium text-gray-800">Report columns.</span> village, issue, resolution, reported_at</p>
+        <p><span class="font-medium text-gray-800"><%= t("ground_reports.report_columns") %></span> village, issue, resolution, reported_at</p>
       <% end %>
-      <p><span class="font-medium text-gray-800">Mock poll columns.</span> village, politician, respondent_name, respondent_mobile, preference_basis, vote_intent, note</p>
+      <p><span class="font-medium text-gray-800"><%= t("ground_reports.mock_columns") %></span> village, politician, respondent_name, respondent_mobile, preference_basis, vote_intent, note</p>
     </div>
     <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
             style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= @import.mock_poll? ? "Upload" : "Import" %></button>

@@ -16,7 +16,7 @@
               <th class="border-b border-gray-200 px-5 py-3 text-left text-xs font-medium text-gray-500"><%= heading %></th>
             <% end %>
             <% if can_write %>
-              <th class="border-b border-gray-200 px-5 py-3 text-right text-xs font-medium text-gray-500"><span class="sr-only">Actions</span></th>
+              <th class="border-b border-gray-200 px-5 py-3 text-right text-xs font-medium text-gray-500"><span class="sr-only"><%= t("common.actions") %></span></th>
             <% end %>
           </tr>
         </thead>
@@ -99,7 +99,7 @@
           </div>
         </div>
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Add work</button>
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.add_work") %></button>
       <% end %>
       </div>
     <% end %>

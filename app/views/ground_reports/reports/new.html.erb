@@ -24,7 +24,7 @@
         <%= f.text_area :issue_text, rows: 4, class: ta_field_classes, autofocus: true %>
       </div>
       <div class="md:col-span-2">
-        <%= f.label :resolution_text, "Resolution", class: ta_label_classes %>
+        <%= f.label :resolution_text, t("ground_reports.resolution"), class: ta_label_classes %>
         <%= f.text_area :resolution_text, rows: 3, class: ta_field_classes %>
       </div>
       <div>
@@ -37,14 +37,14 @@
       </div>
     </div>
 
-    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Testimonial</h2>
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.testimonial") %></h2>
     <%= f.fields_for :testimonials do |tf| %>
       <%= render "ground_reports/testimonials/fields", f: tf %>
     <% end %>
 
     <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-              style="background: var(--org-party-color); color: var(--org-party-contrast)">Create issue</button>
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.create_issue") %></button>
       <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
     </div>
   <% end %>
