@@ -1,7 +1,12 @@
-<% action_label = @record.persisted? ? "Save changes" : (@record.pr_category ? "Log #{@record.pr_category.name}" : "Log PR record") %>
+<% action_label = @record.persisted? ? t("common.save_changes") : (@record.pr_category ? t("pr.log_named", name: @record.pr_category.name) : t("pr.log_generic")) %>
 <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8"
      data-controller="pr-record-form"
-     data-pr-record-form-thumbnail-url-value="<%= thumbnail_pr_records_path %>">
+     data-pr-record-form-thumbnail-url-value="<%= thumbnail_pr_records_path %>"
+     data-pr-record-form-newspaper-value="<%= t("pr.newspaper") %>"
+     data-pr-record-form-tv-channel-value="<%= t("pr.tv_channel") %>"
+     data-pr-record-form-checking-value="<%= t("pr.checking") %>"
+     data-pr-record-form-no-thumbnail-value="<%= t("pr.no_thumbnail") %>"
+     data-pr-record-form-thumbnail-filled-value="<%= t("pr.thumbnail_filled") %>">
   <%= form_with model: @record, multipart: true do |f| %>
     <% if @record.errors.any? %>
       <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
@@ -9,23 +14,23 @@
 
     <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
       <div>
-        <%= f.label :title, "Title / Headline", class: ta_label_classes %>
+        <%= f.label :title, t("pr.headline"), class: ta_label_classes %>
         <%= f.text_field :title, class: "#{ta_field_classes} min-h-11", autofocus: true %>
       </div>
       <div>
-        <%= f.label :published_on, "Published date", class: ta_label_classes %>
+        <%= f.label :published_on, t("pr.published_date"), class: ta_label_classes %>
         <%= ta_date_picker(form: f, method: :published_on) %>
       </div>
       <div>
-        <%= f.label :sentiment, class: ta_label_classes %>
-        <%= f.select :sentiment, PrRecord.sentiments.keys.map { |key| [ key.humanize, key ] }, {}, class: "#{ta_field_classes} min-h-11" %>
+        <%= f.label :sentiment, t("common.sentiment"), class: ta_label_classes %>
+        <%= f.select :sentiment, PrRecord.sentiments.keys.map { |key| [ t("pr.sentiments.#{key}"), key ] }, {}, class: "#{ta_field_classes} min-h-11" %>
       </div>
       <div>
-        <%= f.label :pr_category_id, "Category", class: ta_label_classes %>
-        <%= f.select :pr_category_id, {}, { include_blank: "Select a category..." },
+        <%= f.label :pr_category_id, t("common.category"), class: ta_label_classes %>
+        <%= f.select :pr_category_id, {}, { include_blank: t("pr.select_category") },
               class: "#{ta_field_classes} min-h-11",
               data: { pr_record_form_target: "category", action: "change->pr-record-form#applyCategory" } do %>
-          <option value="">Select a category...</option>
+          <option value=""><%= t("pr.select_category") %></option>
           <% @categories.each do |category| %>
             <%= tag.option category.name, value: category.id, selected: @record.pr_category_id == category.id, data: { slug: category.slug } %>
           <% end %>
@@ -33,11 +38,11 @@
       </div>
 
       <div class="md:col-span-2" data-pr-record-form-target="platformWrap">
-        <%= f.label :media_platform_id, "TV channel", class: ta_label_classes, data: { pr_record_form_target: "platformLabel" } %>
-        <%= f.select :media_platform_id, {}, { include_blank: "Select…" },
+        <%= f.label :media_platform_id, t("pr.tv_channel"), class: ta_label_classes, data: { pr_record_form_target: "platformLabel" } %>
+        <%= f.select :media_platform_id, {}, { include_blank: t("pr.select_blank") },
               class: "#{ta_field_classes} min-h-11",
               data: { pr_record_form_target: "platform" } do %>
-          <option value="">Select…</option>
+          <option value=""><%= t("pr.select_blank") %></option>
           <% @platforms.each do |platform| %>
             <%= tag.option platform.name,
                   value: platform.id,
@@ -45,19 +50,19 @@
                   data: { category: platform.pr_category&.slug } %>
           <% end %>
         <% end %>
-        <p class="mt-1 text-xs text-gray-500">Names are managed in the console. Electronic media lists TV channels. Print media lists mainline papers.</p>
+        <p class="mt-1 text-xs text-gray-500"><%= t("pr.platform_help") %></p>
       </div>
 
       <div class="md:col-span-2">
-        <%= f.label :description, "Details", class: ta_label_classes %>
+        <%= f.label :description, t("common.details"), class: ta_label_classes %>
         <%= f.text_area :description, rows: 4, class: ta_field_classes %>
       </div>
     </div>
 
     <div data-pr-record-form-target="links" class="mb-6">
       <div class="mb-3 flex items-center justify-between gap-3">
-        <h3 class="text-sm font-semibold text-gray-800 dark:text-white/90">Links</h3>
-        <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#addLink">Add link</button>
+        <h3 class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("pr.links") %></h3>
+        <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#addLink"><%= t("pr.add_link") %></button>
       </div>
       <div data-pr-record-form-target="linkRows" class="space-y-3">
         <%= f.fields_for :links do |link_form| %>
@@ -68,41 +73,41 @@
         <div class="rounded-xl border border-gray-200 p-4 dark:border-gray-700" data-link-row>
           <div class="grid gap-3 md:grid-cols-2">
             <div class="md:col-span-2">
-              <label class="<%= ta_label_classes %>">Link</label>
+              <label class="<%= ta_label_classes %>"><%= t("pr.link") %></label>
               <input type="url" name="pr_record[links_attributes][__INDEX__][url]" data-link-url class="<%= ta_field_classes %> min-h-11">
             </div>
             <div class="md:col-span-2">
-              <label class="<%= ta_label_classes %>">Thumbnail URL</label>
-              <input type="url" name="pr_record[links_attributes][__INDEX__][thumbnail_url]" data-link-thumb class="<%= ta_field_classes %> min-h-11" placeholder="Filled when this link has a thumbnail">
+              <label class="<%= ta_label_classes %>"><%= t("pr.thumbnail_url") %></label>
+              <input type="url" name="pr_record[links_attributes][__INDEX__][thumbnail_url]" data-link-thumb class="<%= ta_field_classes %> min-h-11" placeholder="<%= t("pr.thumbnail_placeholder") %>">
             </div>
           </div>
           <div class="mt-3 flex flex-wrap items-center gap-3">
-            <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#fetchThumbnail">Fetch thumbnail</button>
-            <button type="button" class="text-sm text-gray-500" data-action="pr-record-form#removeLink">Remove</button>
+            <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#fetchThumbnail"><%= t("pr.fetch_thumbnail") %></button>
+            <button type="button" class="text-sm text-gray-500" data-action="pr-record-form#removeLink"><%= t("pr.remove") %></button>
             <p class="text-xs text-gray-500" data-link-status></p>
           </div>
         </div>
       </template>
-      <p class="mt-2 text-xs text-gray-500">Each link is checked on its own. Fetching a thumbnail stores only the image URL, and only for that link.</p>
+      <p class="mt-2 text-xs text-gray-500"><%= t("pr.link_help") %></p>
     </div>
 
     <div data-pr-record-form-target="outdoor" class="mb-6">
-      <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90">Outdoor ad placements</h3>
+      <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("pr.outdoor") %></h3>
       <div class="space-y-2 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
         <%= f.fields_for :outdoor_ad_counts do |oac| %>
           <div class="flex items-center gap-2">
             <%= oac.select :outdoor_ad_type_id,
                   options_from_collection_for_select(OutdoorAdType.active, :id, :name, oac.object.outdoor_ad_type_id),
-                  { include_blank: "Select ad type..." },
+                  { include_blank: t("pr.select_ad_type") },
                   class: "#{ta_field_classes} min-h-11" %>
-            <%= oac.number_field :count, placeholder: "Count", class: "#{ta_field_classes} min-h-11 w-28" %>
+            <%= oac.number_field :count, placeholder: t("pr.count"), class: "#{ta_field_classes} min-h-11 w-28" %>
           </div>
         <% end %>
       </div>
     </div>
 
     <div class="mb-6">
-      <%= f.label :attachments, "Attachments", class: ta_label_classes %>
+      <%= f.label :attachments, t("common.attachments"), class: ta_label_classes %>
       <%= f.file_field :attachments, multiple: true,
             class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
     </div>
@@ -110,7 +115,7 @@
     <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
               style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= action_label %></button>
-      <%= link_to "Cancel", (@record.persisted? ? pr_record_path(@record) : pr_records_path), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+      <%= link_to t("common.cancel"), (@record.persisted? ? pr_record_path(@record) : pr_records_path), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
     </div>
   <% end %>
 </div>

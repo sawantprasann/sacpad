@@ -10,7 +10,7 @@ module GroundReports
       position.organization = current_user.organization
       authorize position
       if position.save
-        redirect_to ground_reports_village_path(@village), notice: "Political position recorded."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.position_recorded")
       else
         redirect_to ground_reports_village_path(@village), alert: position.errors.full_messages.to_sentence
       end
@@ -20,7 +20,7 @@ module GroundReports
 
     def update
       if @position.update(position_params)
-        redirect_to ground_reports_village_path(@village), notice: "Political position updated."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.position_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -28,7 +28,7 @@ module GroundReports
 
     def destroy
       @position.discard_by(current_user)
-      redirect_to ground_reports_village_path(@village), notice: "Political position deleted."
+      redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.position_deleted")
     end
 
     private

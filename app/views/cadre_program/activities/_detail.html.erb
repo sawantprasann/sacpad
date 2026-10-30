@@ -1,66 +1,53 @@
 <% detail = activity.matching_detail %>
 <% if detail %>
+  <% wide = %w[notes point_of_discussion work_submitted resolution] %>
   <div class="<%= ta_card_classes %> p-6">
-    <h2 class="border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90">Details</h2>
+    <h2 class="border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90"><%= t("cadre_program.sections.details") %></h2>
     <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
       <% case detail
          when CadreProgram::CadreActivityProgram %>
-        <% [
-             [ "Program name", detail.program_name ],
-             [ "Occasion", detail.occasion ],
-             [ "Location", detail.location ],
-             [ "Occurred on", detail.occurred_on&.strftime("%d %b %Y") ],
-             [ "Host", detail.host ],
-             [ "Notes", detail.notes ]
-           ].each do |label, value| %>
-          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
-            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
-            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
-          </div>
-        <% end %>
+        <% rows = [
+             [ :program_name, detail.program_name ],
+             [ :occasion, detail.occasion ],
+             [ :location, detail.location ],
+             [ :occurred_on, l_day(detail.occurred_on) ],
+             [ :host, detail.host ],
+             [ :notes, detail.notes ]
+           ] %>
       <% when CadreProgram::CadreActivityLeadershipMeet %>
-        <% [
-             [ "Whom to meet", detail.whom_to_meet ],
-             [ "Point of discussion", detail.point_of_discussion ],
-             [ "Work submitted", detail.work_submitted ],
-             [ "Submitted on", detail.submitted_on&.strftime("%d %b %Y") ],
-             [ "Follow up on", detail.followup_on&.strftime("%d %b %Y") ],
-             [ "Resolution", detail.resolution_notes ]
-           ].each do |label, value| %>
-          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
-            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
-            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
-          </div>
-        <% end %>
+        <% rows = [
+             [ :whom_to_meet, detail.whom_to_meet ],
+             [ :point_of_discussion, detail.point_of_discussion ],
+             [ :work_submitted, detail.work_submitted ],
+             [ :submitted_on, l_day(detail.submitted_on) ],
+             [ :follow_up_on, l_day(detail.followup_on) ],
+             [ :resolution, detail.resolution_notes ]
+           ] %>
       <% when CadreProgram::CadreActivityPartyProgramHosted %>
-        <% [
-             [ "Program name", detail.program_name ],
-             [ "Hosted on", detail.hosted_on&.strftime("%d %b %Y") ],
-             [ "Location", detail.location ],
-             [ "Total attendees", detail.total_attendees ],
-             [ "Print media", detail.print_media ],
-             [ "Electronic media", detail.electronic_media ]
-           ].each do |label, value| %>
-          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
-            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
-            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
-          </div>
-        <% end %>
+        <% rows = [
+             [ :program_name, detail.program_name ],
+             [ :hosted_on, l_day(detail.hosted_on) ],
+             [ :location, detail.location ],
+             [ :total_attendees, detail.total_attendees ],
+             [ :print_media, detail.print_media ],
+             [ :electronic_media, detail.electronic_media ]
+           ] %>
       <% when CadreProgram::CadreActivityOneToOne %>
         <% karyakarta = detail.karyakarta_user&.name || detail.karyakarta_name_text %>
-        <% [
-             [ "Karyakarta", karyakarta ],
-             [ "Assignment", detail.assignment ],
-             [ "Resolved", detail.resolved? ? "Yes" : "No" ],
-             [ "From", detail.from_date&.strftime("%d %b %Y") ],
-             [ "To", detail.to_date&.strftime("%d %b %Y") ],
-             [ "Notes", detail.notes ]
-           ].each do |label, value| %>
-          <div class="<%= "sm:col-span-2" if %w[Notes Point\ of\ discussion Work\ submitted Resolution].include?(label) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
-            <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= label %></dt>
-            <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
-          </div>
-        <% end %>
+        <% rows = [
+             [ :karyakarta, karyakarta ],
+             [ :assignment, detail.assignment ],
+             [ :resolved, detail.resolved? ? t("common.yes") : t("common.no") ],
+             [ :from, l_day(detail.from_date) ],
+             [ :to, l_day(detail.to_date) ],
+             [ :notes, detail.notes ]
+           ] %>
+      <% end %>
+      <% rows.each do |key, value| %>
+        <div class="<%= "sm:col-span-2" if wide.include?(key.to_s) %> rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]">
+          <dt class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("cadre_program.columns.#{key}") %></dt>
+          <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= value.presence || "—" %></dd>
+        </div>
       <% end %>
     </dl>
   </div>

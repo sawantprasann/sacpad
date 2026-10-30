@@ -1,6 +1,6 @@
 <% content_for :title, @import.mock_poll? ? "Upload mock poll" : "Import" %>
-<% breadcrumb "Ground Reports", ground_reports_villages_path %>
-<% breadcrumb @village.name, ground_reports_village_path(@village) if @village %>
+<% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
+<% breadcrumb @village.display_name, ground_reports_village_path(@village) if @village %>
 <% breadcrumb @import.mock_poll? ? "Upload mock poll" : "Import" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
@@ -33,9 +33,9 @@
     </div>
     <div class="grid gap-4 text-sm text-gray-600 md:grid-cols-2">
       <% if current_user.role.can_import? %>
-        <p><span class="font-medium text-gray-800">Report columns.</span> village, issue, resolution, reported_at</p>
+        <p><span class="font-medium text-gray-800"><%= t("ground_reports.report_columns") %></span> village, issue, resolution, reported_at</p>
       <% end %>
-      <p><span class="font-medium text-gray-800">Mock poll columns.</span> village, politician, respondent_name, respondent_mobile, preference_basis, vote_intent, note</p>
+      <p><span class="font-medium text-gray-800"><%= t("ground_reports.mock_columns") %></span> village, politician, respondent_name, respondent_mobile, preference_basis, vote_intent, note</p>
     </div>
     <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
             style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= @import.mock_poll? ? "Upload" : "Import" %></button>

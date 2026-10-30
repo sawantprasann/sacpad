@@ -1,47 +1,47 @@
-<% content_for :title, "Booth #{@booth.number}" %>
-<% breadcrumb "Booth Management", booths_path %>
-<% breadcrumb "Booth #{@booth.number}" %>
+<% content_for :title, t("booths.booth_title", number: @booth.number) %>
+<% breadcrumb t("nav.booth_management"), booths_path %>
+<% breadcrumb "#{t("nav.booth")} #{@booth.number}" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Booth Management",
-      title: "Booth #{@booth.number}",
+      kicker: t("booths.title"),
+      title: t("booths.booth_title", number: @booth.number),
       subtitle: [ @booth.name, @booth.village.name ].compact.join(" · "),
-      meta: "#{@voted_count} of #{@voter_count} marked voted · #{@election.name}"
+      meta: t("booths.voted_meta", voted: @voted_count, total: @voter_count, election: @election.name)
     } do %><% end %>
 
 <div class="mt-4 flex justify-end">
-  <%= link_to "Voter list", voters_path(booth: @booth.number, village_id: @booth.village_id), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+  <%= link_to t("booths.voter_list"), voters_path(booth: @booth.number, village_id: @booth.village_id), class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
 </div>
 
 <section class="<%= ta_card_classes %> mt-6 p-6">
   <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500">Booth no</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500"><%= t("common.booth_no") %></dt>
       <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.number %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500">Name</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500"><%= t("common.name") %></dt>
       <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.name.presence || "—" %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500">Village</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500"><%= t("common.village") %></dt>
       <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.village.name %></dd>
     </div>
     <div>
-      <dt class="text-xs font-medium uppercase text-gray-500">Station type</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500"><%= t("booths.station_type") %></dt>
       <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.station_type.presence || "—" %></dd>
     </div>
     <div class="sm:col-span-2">
-      <dt class="text-xs font-medium uppercase text-gray-500">Address</dt>
+      <dt class="text-xs font-medium uppercase text-gray-500"><%= t("common.address") %></dt>
       <dd class="mt-1 text-sm text-gray-900 dark:text-white/90"><%= @booth.address.presence || "—" %></dd>
     </div>
   </dl>
-  <p class="mt-6 text-sm text-gray-500">Voted marks belong to <%= @election.name %>. A booth manager records them from the voter list.</p>
+  <p class="mt-6 text-sm text-gray-500"><%= t("booths.marks_belong", election: @election.name) %></p>
 </section>
 
 <section class="<%= ta_card_classes %> mt-6 p-6">
-  <h2 class="text-sm font-semibold text-gray-800 dark:text-white/90">Booth manager</h2>
-  <p class="mt-1 text-sm text-gray-500">A booth manager can sign in and open only this booth's voter list.</p>
+  <h2 class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("booths.manager") %></h2>
+  <p class="mt-1 text-sm text-gray-500"><%= t("booths.manager_help") %></p>
 
   <% if @managers.any? %>
     <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
@@ -51,37 +51,37 @@
           <p class="mt-0.5 text-xs text-gray-500">
             <%= manager.email %>
             <% if manager.phone.present? %> · <span class="tabular-nums"><%= manager.phone %></span><% end %>
-            <%= " · Inactive" unless manager.active? %>
+            <%= " · #{t("common.inactive")}" unless manager.active? %>
           </p>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p class="mt-4 text-sm text-gray-500">No booth manager yet.</p>
+    <p class="mt-4 text-sm text-gray-500"><%= t("booths.no_manager") %></p>
   <% end %>
 
   <% if current_user.can_add_booth_manager? %>
     <%= form_with scope: :user, url: booth_managers_path(@booth), class: "mt-6" do |f| %>
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
-          <%= f.label :name, class: ta_label_classes %>
+          <%= f.label :name, t("common.name"), class: ta_label_classes %>
           <%= f.text_field :name, class: ta_field_classes, required: true %>
         </div>
         <div>
-          <%= f.label :email, class: ta_label_classes %>
+          <%= f.label :email, t("common.email"), class: ta_label_classes %>
           <%= f.email_field :email, class: ta_field_classes, required: true %>
         </div>
         <div>
-          <%= f.label :phone, class: ta_label_classes %>
+          <%= f.label :phone, t("common.phone"), class: ta_label_classes %>
           <%= f.telephone_field :phone, class: ta_field_classes %>
         </div>
         <div>
-          <%= f.label :password, "Initial password", class: ta_label_classes %>
+          <%= f.label :password, t("team.initial_password"), class: ta_label_classes %>
           <%= f.password_field :password, class: ta_field_classes, required: true, autocomplete: "new-password" %>
         </div>
       </div>
       <div class="mt-4">
-        <%= f.submit "Add booth manager", class: "#{ta_btn_primary} min-h-11 cursor-pointer", style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
+        <%= f.submit t("booths.add_manager"), class: "#{ta_btn_primary} min-h-11 cursor-pointer", style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
       </div>
     <% end %>
   <% end %>

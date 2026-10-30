@@ -26,7 +26,7 @@ module GroundReports
       authorize @report
       if @report.save
         record_activity("ground_report.created", record: @report)
-        redirect_to ground_reports_village_report_path(@village, @report), notice: "Issue logged."
+        redirect_to ground_reports_village_report_path(@village, @report), notice: t("ground_reports.notices.issue_logged")
       else
         @report.testimonials.build(content_type: :text) if @report.testimonials.empty?
         render :new, status: :unprocessable_entity
@@ -38,7 +38,7 @@ module GroundReports
     def update
       if @report.update(report_params)
         record_activity("ground_report.updated", record: @report)
-        redirect_to ground_reports_village_path(@village), notice: "Issue updated."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.issue_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -47,7 +47,7 @@ module GroundReports
     def destroy
       @report.discard_by(current_user)
       record_activity("ground_report.discarded", record: @report)
-      redirect_to ground_reports_village_path(@village), notice: "Issue deleted."
+      redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.issue_deleted")
     end
 
     private
@@ -71,7 +71,7 @@ module GroundReports
     def require_ground_reports_access
       return if current_user.role.can_access?("ground_reports")
 
-      redirect_to root_path, alert: "You don't have access to Ground Reports."
+      redirect_to root_path, alert: t("ground_reports.no_access")
     end
   end
 end

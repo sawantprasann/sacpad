@@ -1,12 +1,12 @@
-<% content_for :title, "#{@village.name} — issue" %>
-<% breadcrumb "Ground Reports", ground_reports_villages_path %>
-<% breadcrumb @village.name, ground_reports_village_path(@village) %>
+<% content_for :title, "#{@village.display_name} — issue" %>
+<% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
+<% breadcrumb @village.display_name, ground_reports_village_path(@village) %>
 <% breadcrumb truncate(@report.issue_text, length: 48) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: "Ground Reports",
       title: @report.issue_text,
-      subtitle: @village.name,
+      subtitle: @village.display_name,
       meta: "Logged by #{@report.owner.name} · #{@report.reported_at.strftime("%d %b %Y")}"
     } do %><% end %>
 
@@ -15,21 +15,21 @@
         can_write: policy(@report).update?,
         edit_path: edit_ground_reports_village_report_path(@village, @report),
         delete_path: ground_reports_village_report_path(@village, @report),
-        label: "issue" %>
+        label: t("ground_reports.records.issue") %>
   <%= link_to "Back to village", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
 </div>
 
 <div class="grid gap-4 xl:grid-cols-3">
   <div class="<%= ta_card_classes %> p-6 xl:col-span-2">
-    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Estimated cost</h2>
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.estimated_cost") %></h2>
     <p class="mb-6 text-sm tabular-nums text-gray-700 dark:text-gray-300"><%= format_estimated_cost(@report.estimated_cost) %></p>
 
-    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Resolution</h2>
+    <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.resolution") %></h2>
     <p class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300"><%= @report.resolution_text.presence || "—" %></p>
   </div>
 
   <div class="<%= ta_card_classes %> p-6">
-    <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">Testimonials</h2>
+    <h2 class="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.testimonials") %></h2>
     <% if @report.testimonials.kept.any? %>
       <ul class="space-y-4">
         <% @report.testimonials.kept.each do |item| %>
@@ -47,17 +47,17 @@
         <% end %>
       </ul>
     <% else %>
-      <p class="text-sm text-gray-400">No testimonials yet.</p>
+      <p class="text-sm text-gray-400"><%= t("ground_reports.no_testimonials") %></p>
     <% end %>
 
     <% if current_user.role.can_write?("ground_reports") %>
       <div class="mt-6 border-t border-gray-100 pt-4 dark:border-gray-800">
-        <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Add testimonial</h3>
+        <h3 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("ground_reports.add_testimonial") %></h3>
         <%= form_with model: @testimonial, scope: :ground_report_testimonial,
               url: ground_reports_village_report_testimonials_path(@village, @report), method: :post, multipart: true do |f| %>
           <%= render "ground_reports/testimonials/fields", f: f %>
           <button type="submit" class="<%= ta_btn_primary %> mt-4 min-h-11 cursor-pointer"
-                  style="background: var(--org-party-color); color: var(--org-party-contrast)">Add testimonial</button>
+                  style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("ground_reports.add_testimonial") %></button>
         <% end %>
       </div>
     <% end %>

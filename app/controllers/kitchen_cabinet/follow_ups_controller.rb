@@ -12,7 +12,7 @@ module KitchenCabinet
       follow_up = @ticket.follow_ups.new(follow_up_params)
       follow_up.created_by = current_user
       if follow_up.save
-        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: "Follow-up added."
+        redirect_to kitchen_cabinet_ticket_path(@ticket), notice: t("kitchen_cabinet.follow_up_added")
       else
         redirect_to kitchen_cabinet_ticket_path(@ticket), alert: follow_up.errors.full_messages.to_sentence
       end
@@ -21,7 +21,7 @@ module KitchenCabinet
     private
 
     def require_kitchen_cabinet_access
-      redirect_to root_path, alert: "You don't have access to Beneficiaries." unless
+      redirect_to root_path, alert: t("kitchen_cabinet.no_access") unless
         current_user.role.can_access?("kitchen_cabinet")
     end
 

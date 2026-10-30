@@ -83,11 +83,11 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     assert_select "tbody a", text: "Kalas", count: 0
   end
 
-  test "a village lists voters by booth then name and filters the roll" do
+  test "a village lists voters by booth number then serial and filters the roll" do
     get voter_lists_taluka_village_path(@taluka, @village)
 
     assert_response :success
-    assert_equal [ "Amit Kale", "Zara Pawar", "Asha Patil", "Bala Shinde" ], voter_names
+    assert_equal [ "Zara Pawar", "Amit Kale", "Asha Patil", "Bala Shinde" ], voter_names
     assert_match "bg-green-50", response.body
     assert_select "a[href=?]", voter_lists_taluka_village_path(@taluka, @village, format: :xlsx)
 
@@ -118,14 +118,14 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     assert_equal [ "Tanaji Jayvant Savant" ], voter_names
   end
 
-  test "export is limited to the village and keeps booth then name order" do
+  test "export is limited to the village and keeps booth then serial order" do
     get voter_lists_taluka_village_path(@taluka, @village, format: :xlsx)
 
     assert_response :success
     assert_match "voters-nimgaon.xlsx", response.headers["Content-Disposition"]
     sheet = workbook.sheet(0)
     assert_equal "Sr no", sheet.cell(1, 1)
-    assert_equal [ "Amit Kale", "Zara Pawar", "Asha Patil", "Bala Shinde" ], (2..sheet.last_row).map { |row| sheet.cell(row, 3) }
+    assert_equal [ "Zara Pawar", "Amit Kale", "Asha Patil", "Bala Shinde" ], (2..sheet.last_row).map { |row| sheet.cell(row, 3) }
     assert_equal [ "2", "2", "10", "A" ], (2..sheet.last_row).map { |row| sheet.cell(row, 4).to_s }
 
     get voter_lists_taluka_village_path(@taluka, @village, format: :xlsx, name: "amit")

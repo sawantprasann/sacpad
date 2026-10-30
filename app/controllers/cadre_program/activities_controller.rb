@@ -36,7 +36,7 @@ module CadreProgram
       authorize @activity
       if @activity.save
         record_activity("cadre_activity.created", record: @activity)
-        redirect_to cadre_program_activity_path(@activity), notice: "Cadre activity logged."
+        redirect_to cadre_program_activity_path(@activity), notice: t("cadre_program.logged")
       else
         build_detail_shells
         load_org_users
@@ -58,7 +58,7 @@ module CadreProgram
       if @activity.update(activity_params.except(:photos))
         @activity.photos.attach(photos) if photos.any?
         record_activity("cadre_activity.updated", record: @activity)
-        redirect_to cadre_program_activity_path(@activity), notice: "Cadre activity updated."
+        redirect_to cadre_program_activity_path(@activity), notice: t("cadre_program.updated")
       else
         build_detail_shells
         load_org_users
@@ -72,7 +72,7 @@ module CadreProgram
       relation = policy_scope(CadreActivity)
       if params[:category].present? && CadreActivity.categories.key?(params[:category])
         @category_key = params[:category]
-        @category_label = CadreActivity::CATEGORY_LABELS[@category_key]
+        @category_label = CadreActivity.localized_category(@category_key)
         relation = relation.where(category: @category_key)
       end
       relation.order(created_at: :desc, id: :desc)
@@ -135,7 +135,7 @@ module CadreProgram
     def require_cadre_program_access
       return if current_user.role.can_access?("cadre_program")
 
-      redirect_to root_path, alert: "You don't have access to Cadre Program."
+      redirect_to root_path, alert: t("cadre_program.no_access")
     end
   end
 end

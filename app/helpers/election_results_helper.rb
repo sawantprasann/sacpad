@@ -48,7 +48,7 @@ module ElectionResultsHelper
   end
 
   def election_change_tag(value, fresh: false)
-    return content_tag(:span, "New", class: "text-gray-500") if fresh
+    return content_tag(:span, t("election.fresh"), class: "text-gray-500") if fresh
     return "—" if value.nil?
 
     formatted = number_with_precision(value.abs, precision: 2)
@@ -65,41 +65,50 @@ module ElectionResultsHelper
     winner = election.winning_candidate
     return if winner.blank?
 
-    margin = election.margin_votes.present? ? " by #{election_count(election.margin_votes)} votes" : ""
+    margin = election.margin_votes.present? ? t("election.by_votes", count: election_count(election.margin_votes)) : ""
     if election.gain? && election.gained_from_party
       from = election.gained_from_party.abbreviation.presence || election.gained_from_party.name
-      "#{winner.candidate_name} took the seat from #{from}#{margin}."
+      t("election.took_seat", name: winner.candidate_name, from: from, margin: margin)
     else
-      "#{winner.candidate_name} held the seat#{margin}."
+      t("election.held_seat", name: winner.candidate_name, margin: margin)
     end
   end
 
   def election_result_line(election)
     if election.gain? && election.gained_from_party
       from = election.gained_from_party.abbreviation.presence || election.gained_from_party.name
-      "Took the seat from #{from}"
+      t("election.took_line", from: from)
     else
-      "Held the seat"
+      t("election.held_line")
     end
   end
 
-  def election_vote_slices(election)
-    seen = Hash.new(0)
-    election.candidates.map do |candidate|
-      party = candidate.party.abbreviation.presence || candidate.party.name
-      seen[party] += 1
-      label = seen[party] > 1 ? "#{party} #{seen[party]}" : party
-      [ label, candidate.votes.to_i, party_swatch(candidate.party) ]
-    end
+  # Vote-share donut. Stored party colors are often navy, gray, or near-white,
+  # which wash out on the white card, so each slice gets a saturated color.
+  ELECTION_PIE_COLORS = %w[
+    #FF5A1F
+    #2563EB
+    #16A34A
+    #E11D48
+    #F59E0B
+    #7C3AED
+    #0891B2
+    #DB2777
+    #65A30D
+    #4F46E5
+  ].freeze
+
+  def election_pie_color(index)
+    ELECTION_PIE_COLORS[index % ELECTION_PIE_COLORS.length]
   end
 
   def election_share_slices(election)
     seen = Hash.new(0)
-    election.candidates.map do |candidate|
+    election.candidates.each_with_index.map do |candidate, index|
       party = candidate.party.abbreviation.presence || candidate.party.name
       seen[party] += 1
       label = seen[party] > 1 ? "#{party} #{seen[party]}" : party
-      [ label, candidate.vote_percent.to_f, party_swatch(candidate.party) ]
+      [ label, candidate.vote_percent.to_f, election_pie_color(index) ]
     end
   end
 

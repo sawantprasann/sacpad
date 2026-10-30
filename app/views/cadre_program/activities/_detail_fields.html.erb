@@ -6,31 +6,31 @@
 
 <fieldset class="mb-6" x-show="category == 'program_by_party' || category == 'personal_program'" x-cloak
           :disabled="category !== 'program_by_party' && category !== 'personal_program'">
-  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Program</h2>
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("cadre_program.sections.program") %></h2>
   <%= f.fields_for :program do |p| %>
     <div class="<%= grid %>">
       <div>
-        <%= p.label :program_name, "Program name", class: ta_label_classes %>
+        <%= p.label :program_name, t("cadre_program.columns.program_name"), class: ta_label_classes %>
         <%= p.text_field :program_name, class: field %>
       </div>
       <div>
-        <%= p.label :occasion, class: ta_label_classes %>
+        <%= p.label :occasion, t("cadre_program.columns.occasion"), class: ta_label_classes %>
         <%= p.text_field :occasion, class: field %>
       </div>
       <div>
-        <%= p.label :location, class: ta_label_classes %>
+        <%= p.label :location, t("cadre_program.columns.location"), class: ta_label_classes %>
         <%= p.text_field :location, class: field %>
       </div>
       <div>
-        <%= p.label :occurred_on, "Occurred on", class: ta_label_classes %>
+        <%= p.label :occurred_on, t("cadre_program.columns.occurred_on"), class: ta_label_classes %>
         <%= ta_date_picker(form: p, method: :occurred_on) %>
       </div>
       <div>
-        <%= p.label :host, class: ta_label_classes %>
+        <%= p.label :host, t("cadre_program.columns.host"), class: ta_label_classes %>
         <%= p.text_field :host, class: field %>
       </div>
       <div class="<%= wide %>">
-        <%= p.label :notes, class: ta_label_classes %>
+        <%= p.label :notes, t("cadre_program.columns.notes"), class: ta_label_classes %>
         <%= p.text_area :notes, rows: 3, class: ta_field_classes %>
       </div>
     </div>
@@ -38,31 +38,31 @@
 </fieldset>
 
 <fieldset class="mb-6" x-show="category == 'leadership_meets'" x-cloak :disabled="category !== 'leadership_meets'">
-  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Leadership meet</h2>
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("cadre_program.sections.leadership") %></h2>
   <%= f.fields_for :leadership_meet do |p| %>
     <div class="<%= grid %>">
       <div>
-        <%= p.label :whom_to_meet, "Whom to meet", class: ta_label_classes %>
+        <%= p.label :whom_to_meet, t("cadre_program.columns.whom_to_meet"), class: ta_label_classes %>
         <%= p.text_field :whom_to_meet, class: field %>
       </div>
       <div>
-        <%= p.label :submitted_on, "Submitted on", class: ta_label_classes %>
+        <%= p.label :submitted_on, t("cadre_program.columns.submitted_on"), class: ta_label_classes %>
         <%= ta_date_picker(form: p, method: :submitted_on) %>
       </div>
       <div>
-        <%= p.label :followup_on, "Follow up on", class: ta_label_classes %>
+        <%= p.label :followup_on, t("cadre_program.columns.follow_up_on"), class: ta_label_classes %>
         <%= ta_date_picker(form: p, method: :followup_on) %>
       </div>
       <div class="<%= wide %>">
-        <%= p.label :point_of_discussion, "Point of discussion", class: ta_label_classes %>
+        <%= p.label :point_of_discussion, t("cadre_program.columns.point_of_discussion"), class: ta_label_classes %>
         <%= p.text_area :point_of_discussion, rows: 3, class: ta_field_classes %>
       </div>
       <div class="<%= wide %>">
-        <%= p.label :work_submitted, "Work submitted", class: ta_label_classes %>
+        <%= p.label :work_submitted, t("cadre_program.columns.work_submitted"), class: ta_label_classes %>
         <%= p.text_area :work_submitted, rows: 3, class: ta_field_classes %>
       </div>
       <div class="<%= wide %>">
-        <%= p.label :resolution_notes, "Resolution", class: ta_label_classes %>
+        <%= p.label :resolution_notes, t("cadre_program.columns.resolution"), class: ta_label_classes %>
         <%= p.text_area :resolution_notes, rows: 3, class: ta_field_classes %>
       </div>
     </div>
@@ -70,31 +70,31 @@
 </fieldset>
 
 <fieldset class="mb-6" x-show="category == 'party_programs_hosted'" x-cloak :disabled="category !== 'party_programs_hosted'">
-  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Party program hosted</h2>
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("cadre_program.sections.hosted") %></h2>
   <%= f.fields_for :party_program_hosted do |p| %>
     <div class="<%= grid %>">
       <div>
-        <%= p.label :program_name, "Program name", class: ta_label_classes %>
+        <%= p.label :program_name, t("cadre_program.columns.program_name"), class: ta_label_classes %>
         <%= p.text_field :program_name, class: field %>
       </div>
       <div>
-        <%= p.label :hosted_on, "Hosted on", class: ta_label_classes %>
+        <%= p.label :hosted_on, t("cadre_program.columns.hosted_on"), class: ta_label_classes %>
         <%= ta_date_picker(form: p, method: :hosted_on) %>
       </div>
       <div>
-        <%= p.label :location, class: ta_label_classes %>
+        <%= p.label :location, t("cadre_program.columns.location"), class: ta_label_classes %>
         <%= p.text_field :location, class: field %>
       </div>
       <div>
-        <%= p.label :total_attendees, "Total attendees", class: ta_label_classes %>
+        <%= p.label :total_attendees, t("cadre_program.columns.total_attendees"), class: ta_label_classes %>
         <%= p.number_field :total_attendees, min: 0, class: field %>
       </div>
       <div>
-        <%= p.label :print_media, "Print media", class: ta_label_classes %>
+        <%= p.label :print_media, t("cadre_program.columns.print_media"), class: ta_label_classes %>
         <%= p.text_field :print_media, class: field %>
       </div>
       <div>
-        <%= p.label :electronic_media, "Electronic media", class: ta_label_classes %>
+        <%= p.label :electronic_media, t("cadre_program.columns.electronic_media"), class: ta_label_classes %>
         <%= p.text_field :electronic_media, class: field %>
       </div>
     </div>
@@ -102,36 +102,36 @@
 </fieldset>
 
 <fieldset class="mb-6" x-show="category == 'one_to_one'" x-cloak :disabled="category !== 'one_to_one'">
-  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">One to one</h2>
+  <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("cadre_program.sections.one_to_one") %></h2>
   <%= f.fields_for :one_to_one do |p| %>
     <div class="<%= grid %>">
       <div>
-        <%= p.label :karyakarta_user_id, "Karyakarta", class: ta_label_classes %>
+        <%= p.label :karyakarta_user_id, t("cadre_program.columns.karyakarta"), class: ta_label_classes %>
         <%= p.collection_select :karyakarta_user_id, @org_users, :id, :name,
-              { include_blank: "Not in the team list" }, class: field %>
+              { include_blank: t("cadre_program.not_in_team") }, class: field %>
       </div>
       <div>
-        <%= p.label :karyakarta_name_text, "Name, if they have no login", class: ta_label_classes %>
+        <%= p.label :karyakarta_name_text, t("cadre_program.name_without_login"), class: ta_label_classes %>
         <%= p.text_field :karyakarta_name_text, class: field %>
       </div>
       <div>
-        <%= p.label :assignment, class: ta_label_classes %>
+        <%= p.label :assignment, t("cadre_program.columns.assignment"), class: ta_label_classes %>
         <%= p.text_field :assignment, class: field %>
       </div>
       <div class="flex min-h-11 items-end gap-2 pb-2">
         <%= p.check_box :resolved, class: "h-5 w-5 rounded border-gray-300" %>
-        <%= p.label :resolved, "Resolved", class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+        <%= p.label :resolved, t("cadre_program.columns.resolved"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
       </div>
       <div>
-        <%= p.label :from_date, "From", class: ta_label_classes %>
+        <%= p.label :from_date, t("cadre_program.columns.from"), class: ta_label_classes %>
         <%= ta_date_picker(form: p, method: :from_date) %>
       </div>
       <div>
-        <%= p.label :to_date, "To", class: ta_label_classes %>
+        <%= p.label :to_date, t("cadre_program.columns.to"), class: ta_label_classes %>
         <%= ta_date_picker(form: p, method: :to_date) %>
       </div>
       <div class="<%= wide %>">
-        <%= p.label :notes, class: ta_label_classes %>
+        <%= p.label :notes, t("cadre_program.columns.notes"), class: ta_label_classes %>
         <%= p.text_area :notes, rows: 3, class: ta_field_classes %>
       </div>
     </div>

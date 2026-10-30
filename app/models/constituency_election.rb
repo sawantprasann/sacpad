@@ -43,11 +43,12 @@ class ConstituencyElection < ApplicationRecord
   def heading
     return title if title.present?
 
-    "#{year} #{constituency_kind} election · #{constituency&.name}"
+    I18n.t("election.heading", year: year, kind: constituency_kind, name: constituency&.name)
   end
 
   def constituency_kind
-    constituency_type == "Loksabha" ? "Lok Sabha" : "Assembly"
+    key = constituency_type == "Loksabha" ? "loksabha" : "assembly"
+    I18n.t("election.kinds.#{key}")
   end
 
   def winning_candidate
@@ -61,9 +62,9 @@ class ConstituencyElection < ApplicationRecord
 
     if gain? && gained_from_party
       from = gained_from_party.abbreviation.presence || gained_from_party.name
-      "#{name} gain from #{from}"
+      I18n.t("election.gain_from", party: name, from: from)
     else
-      "#{name} #{outcome}"
+      I18n.t("election.outcome_label", party: name, outcome: I18n.t("election.outcomes.#{outcome}", default: outcome))
     end
   end
 

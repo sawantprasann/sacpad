@@ -1,7 +1,7 @@
 # Kitchen Cabinet ticket export (Story 1.8, FR49) — rows come from the viewer-scoped relation.
 wb = xlsx_package.workbook
 wb.add_worksheet(name: "Tickets") do |sheet|
-  sheet.add_row [ "Ticket", "Beneficiary name", "Representative name", "Village", "Category", "Status", "Reported date" ]
+  sheet.add_row [ t("kitchen_cabinet.ticket"), t("kitchen_cabinet.beneficiary_name"), t("kitchen_cabinet.representative_name"), t("common.village"), t("kitchen_cabinet.category"), t("common.status"), t("common.reported_date") ]
   @tickets.each do |ticket|
     sheet.add_row [
       ticket.ticket_number,
@@ -9,7 +9,7 @@ wb.add_worksheet(name: "Tickets") do |sheet|
       ticket.representative_name,
       ticket.village,
       ticket.ticket_category.name,
-      ticket.status.humanize,
+      t("kitchen_cabinet.statuses.#{ticket.status}"),
       ticket.reported_at
     ]
   end

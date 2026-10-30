@@ -39,7 +39,7 @@ class PrRecordsController < ApplicationController
     authorize @record
     if @record.save
       redirect_to pr_records_path(category: @record.pr_category&.slug),
-                  notice: "PR record ##{@record.record_number} logged."
+                  notice: t("pr.logged", number: @record.record_number)
     else
       prepare_form
       render :new, status: :unprocessable_entity
@@ -56,7 +56,7 @@ class PrRecordsController < ApplicationController
     @record = policy_scope(PrRecord).find(params[:id])
     authorize @record, :update?
     if @record.update(record_params)
-      redirect_to pr_record_path(@record), notice: "PR record updated."
+      redirect_to pr_record_path(@record), notice: t("pr.updated")
     else
       prepare_form
       render :edit, status: :unprocessable_entity
@@ -92,7 +92,7 @@ class PrRecordsController < ApplicationController
   end
 
   def require_pr_access
-    redirect_to root_path, alert: "You don't have access to PR records." unless
+    redirect_to root_path, alert: t("pr.no_access") unless
       current_user.role.can_access?("pr")
   end
 end

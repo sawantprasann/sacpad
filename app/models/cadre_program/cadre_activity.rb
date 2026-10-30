@@ -49,46 +49,48 @@ module CadreProgram
     # Columns for a category submenu. The unfiltered list keeps a short shared set because
     # the shapes do not line up.
     PROGRAM_LIST_COLUMNS = [
-      [ "Program name", ->(activity) { activity.program&.program_name } ],
-      [ "Occasion", ->(activity) { activity.program&.occasion } ],
-      [ "Location", ->(activity) { activity.program&.location } ],
-      [ "Host", ->(activity) { activity.program&.host } ],
-      [ "Occurred on", ->(activity) { activity.program&.occurred_on } ]
+      [ "program_name", ->(activity) { activity.program&.program_name } ],
+      [ "occasion", ->(activity) { activity.program&.occasion } ],
+      [ "location", ->(activity) { activity.program&.location } ],
+      [ "host", ->(activity) { activity.program&.host } ],
+      [ "occurred_on", ->(activity) { activity.program&.occurred_on } ]
     ].freeze
     LIST_COLUMNS = {
       "program_by_party" => PROGRAM_LIST_COLUMNS,
       "personal_program" => PROGRAM_LIST_COLUMNS,
       "leadership_meets" => [
-        [ "Whom to meet", ->(activity) { activity.leadership_meet&.whom_to_meet } ],
-        [ "Point of discussion", ->(activity) { activity.leadership_meet&.point_of_discussion } ],
-        [ "Work submitted", ->(activity) { activity.leadership_meet&.work_submitted } ],
-        [ "Submitted on", ->(activity) { activity.leadership_meet&.submitted_on } ],
-        [ "Follow up on", ->(activity) { activity.leadership_meet&.followup_on } ]
+        [ "whom_to_meet", ->(activity) { activity.leadership_meet&.whom_to_meet } ],
+        [ "point_of_discussion", ->(activity) { activity.leadership_meet&.point_of_discussion } ],
+        [ "work_submitted", ->(activity) { activity.leadership_meet&.work_submitted } ],
+        [ "submitted_on", ->(activity) { activity.leadership_meet&.submitted_on } ],
+        [ "follow_up_on", ->(activity) { activity.leadership_meet&.followup_on } ]
       ].freeze,
       "party_programs_hosted" => [
-        [ "Program name", ->(activity) { activity.party_program_hosted&.program_name } ],
-        [ "Location", ->(activity) { activity.party_program_hosted&.location } ],
-        [ "Total attendees", ->(activity) { activity.party_program_hosted&.total_attendees } ],
-        [ "Print media", ->(activity) { activity.party_program_hosted&.print_media } ],
-        [ "Electronic media", ->(activity) { activity.party_program_hosted&.electronic_media } ],
-        [ "Hosted on", ->(activity) { activity.party_program_hosted&.hosted_on } ]
+        [ "program_name", ->(activity) { activity.party_program_hosted&.program_name } ],
+        [ "location", ->(activity) { activity.party_program_hosted&.location } ],
+        [ "total_attendees", ->(activity) { activity.party_program_hosted&.total_attendees } ],
+        [ "print_media", ->(activity) { activity.party_program_hosted&.print_media } ],
+        [ "electronic_media", ->(activity) { activity.party_program_hosted&.electronic_media } ],
+        [ "hosted_on", ->(activity) { activity.party_program_hosted&.hosted_on } ]
       ].freeze,
       "one_to_one" => [
-        [ "Karyakarta", ->(activity) { activity.one_to_one&.karyakarta_user&.name || activity.one_to_one&.karyakarta_name_text } ],
-        [ "Assignment", ->(activity) { activity.one_to_one&.assignment } ],
-        [ "Resolved", ->(activity) { detail = activity.one_to_one; detail && (detail.resolved? ? "Yes" : "No") } ],
-        [ "From", ->(activity) { activity.one_to_one&.from_date } ],
-        [ "To", ->(activity) { activity.one_to_one&.to_date } ]
+        [ "karyakarta", ->(activity) { activity.one_to_one&.karyakarta_user&.name || activity.one_to_one&.karyakarta_name_text } ],
+        [ "assignment", ->(activity) { activity.one_to_one&.assignment } ],
+        [ "resolved", ->(activity) { detail = activity.one_to_one; detail && (detail.resolved? ? I18n.t("common.yes") : I18n.t("common.no")) } ],
+        [ "from", ->(activity) { activity.one_to_one&.from_date } ],
+        [ "to", ->(activity) { activity.one_to_one&.to_date } ]
       ].freeze
     }.freeze
     DEFAULT_LIST_COLUMNS = [
-      [ "Activity", ->(activity) { activity.detail_headline } ],
-      [ "Category", ->(activity) { activity.category_label } ],
-      [ "Occurred on", ->(activity) { activity.occurred_on } ]
+      [ "activity", ->(activity) { activity.detail_headline } ],
+      [ "category", ->(activity) { activity.category_label } ],
+      [ "occurred_on", ->(activity) { activity.occurred_on } ]
     ].freeze
 
     def self.list_columns(category_key)
-      LIST_COLUMNS.fetch(category_key.to_s, DEFAULT_LIST_COLUMNS)
+      LIST_COLUMNS.fetch(category_key.to_s, DEFAULT_LIST_COLUMNS).map do |key, reader|
+        [ I18n.t("cadre_program.columns.#{key}"), reader ]
+      end
     end
 
     validates :category, presence: true
@@ -96,8 +98,19 @@ module CadreProgram
     before_validation :keep_only_matching_detail
     validate :matching_detail_required
 
+    def self.localized_category(key)
+      label = CATEGORY_LABELS[key.to_s]
+      return if label.blank?
+
+      I18n.t("cadre_program.categories.#{key}", default: label)
+    end
+
+    def self.localized_category_labels
+      CATEGORY_LABELS.keys.index_with { |key| localized_category(key) }
+    end
+
     def category_label
-      CATEGORY_LABELS[category]
+      self.class.localized_category(category)
     end
 
     # Feed and export rollups. One GROUP BY on this table — not a union of the detail tables.
@@ -105,7 +118,7 @@ module CadreProgram
     def self.counts_by_category
       reorder(nil).group(:category).count.each_with_object({}) do |(key, count), labeled|
         slug = key.is_a?(Integer) ? categories.key(key) : key.to_s
-        labeled[CATEGORY_LABELS.fetch(slug, slug)] = count
+        labeled[localized_category(slug) || slug] = count
       end
     end
 

@@ -1,12 +1,12 @@
-<% content_for :title, @category ? "PR Records — #{@category.name}" : "PR Records" %>
+<% content_for :title, @category ? "#{t("pr.kicker")} — #{@category.name}" : t("pr.kicker") %>
 <% list_params = request.query_parameters.slice("category", "q") %>
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "PR Records",
-      title: "PR Records",
-      subtitle: [ @category&.name, pluralize(@pagy.count, "record") ].compact.join(" · "),
+      kicker: t("pr.kicker"),
+      title: t("pr.kicker"),
+      subtitle: [ @category&.name, t("pr.count_label", count: @pagy.count) ].compact.join(" · "),
       meta: current_user.organization.name
     } do %><% end %>
 
@@ -14,7 +14,7 @@
   <%= render "ui/module_toolbar",
         export_url: pr_records_path(list_params.merge(format: :xlsx)),
         new_url: (new_pr_record_path(category: @category&.slug) if current_user.role.can_write?("pr")),
-        new_label: "Log record",
+        new_label: t("pr.log_record"),
         accent: org_accent_color,
         accent_ink: org_accent_foreground %>
 </div>
@@ -22,20 +22,20 @@
 <%= form_with url: pr_records_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
     <div>
-      <%= label_tag :category, "Category", class: ta_label_classes %>
+      <%= label_tag :category, t("common.category"), class: ta_label_classes %>
       <%= select_tag :category,
             options_from_collection_for_select(@categories, :slug, :name, params[:category]),
-            include_blank: "Any category",
+            include_blank: t("pr.any_category"),
             class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :q, "Title", class: ta_label_classes %>
-      <%= text_field_tag :q, params[:q], class: ta_field_classes, placeholder: "Search title or details" %>
+      <%= label_tag :q, t("common.title"), class: ta_label_classes %>
+      <%= text_field_tag :q, params[:q], class: ta_field_classes, placeholder: t("pr.search_placeholder") %>
     </div>
     <div class="flex items-end gap-2">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-              style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
-      <%= link_to "Clear", pr_records_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.filter") %></button>
+      <%= link_to t("common.clear"), pr_records_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
     </div>
   </div>
 <% end %>
@@ -45,12 +45,12 @@
     <table class="w-full text-sm">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <th class="<%= th %>">Title</th>
-          <th class="<%= th %>">Category</th>
-          <th class="<%= th %>">Platform</th>
-          <th class="<%= th %>">Sentiment</th>
-          <th class="<%= th %>">Logged by</th>
-          <th class="<%= th %> text-right">Published</th>
+          <th class="<%= th %>"><%= t("common.title") %></th>
+          <th class="<%= th %>"><%= t("common.category") %></th>
+          <th class="<%= th %>"><%= t("pr.platform") %></th>
+          <th class="<%= th %>"><%= t("common.sentiment") %></th>
+          <th class="<%= th %>"><%= t("common.logged_by") %></th>
+          <th class="<%= th %> text-right"><%= t("pr.published") %></th>
         </tr>
       </thead>
       <tbody>
@@ -61,15 +61,15 @@
             </td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.pr_category.name %></td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.media_platform&.name || record.media_platform_name || "—" %></td>
-            <td class="<%= td %>"><%= record.sentiment.humanize %></td>
+            <td class="<%= td %>"><%= t("pr.sentiments.#{record.sentiment}") %></td>
             <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= record.owner.name %></td>
-            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= record.published_on.strftime("%d %b %Y") %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= l_day(record.published_on) %></td>
           </tr>
         <% end %>
       </tbody>
     </table>
     <% if @records.empty? %>
-      <p class="px-6 py-16 text-center text-sm text-gray-400">No records yet.</p>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("pr.none") %></p>
     <% end %>
   </div>
 
@@ -77,12 +77,12 @@
     <% @records.each do |record| %>
       <%= link_to pr_record_path(record), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
         <p class="#{ta_text_link}"><%= record.title %></p>
-        <p class="mt-1 text-sm text-gray-600"><%= record.pr_category.name %> · <%= record.media_platform&.name || record.media_platform_name || "No platform" %></p>
-        <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %> · <%= record.published_on.strftime("%d %b %Y") %></p>
+        <p class="mt-1 text-sm text-gray-600"><%= record.pr_category.name %> · <%= record.media_platform&.name || record.media_platform_name || t("pr.no_platform") %></p>
+        <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %> · <%= l_day(record.published_on) %></p>
       <% end %>
     <% end %>
     <% if @records.empty? %>
-      <p class="px-6 py-16 text-center text-sm text-gray-400">No records yet.</p>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("pr.none") %></p>
     <% end %>
   </div>
 

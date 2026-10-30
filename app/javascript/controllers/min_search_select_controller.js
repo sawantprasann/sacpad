@@ -8,7 +8,8 @@ export default class extends Controller {
   static values = {
     minLength: { type: Number, default: 2 },
     placeholder: { type: String, default: "Select..." },
-    emptyText: { type: String, default: "No options found" }
+    emptyText: { type: String, default: "No options found" },
+    hint: { type: String, default: "Please enter %{count} or more characters" }
   }
 
   connect() {
@@ -201,7 +202,7 @@ export default class extends Controller {
     const selected = this.selectTarget.value
 
     this.hintTarget.classList.toggle("hidden", ready)
-    this.hintTarget.textContent = `Please enter ${this.minLengthValue} or more characters`
+    this.hintTarget.textContent = this.hintValue.replace("%{count}", this.minLengthValue)
     this.emptyTarget.textContent = this.emptyTextValue
     this.emptyTarget.classList.toggle("hidden", !(ready && visible.length === 0))
 

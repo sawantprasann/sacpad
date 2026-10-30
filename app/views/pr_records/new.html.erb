@@ -1,6 +1,6 @@
 <% action_label = @record.pr_category ? "Log #{@record.pr_category.name}" : "Log PR record" %>
 <% content_for :title, action_label %>
-<% breadcrumb "PR Records", pr_records_path %>
+<% breadcrumb t("nav.pr_records"), pr_records_path %>
 <% breadcrumb action_label %>
 
 <%= render layout: "ui/campaign_hero", locals: {

@@ -43,9 +43,17 @@ class SupportTicket < ApplicationRecord
   after_create :record_opening_message
 
   def self.human_attribute_name(attr, options = {})
-    return "Complaint" if attr.to_s == "opening_body"
+    return I18n.t("support.complaint") if attr.to_s == "opening_body"
 
     super
+  end
+
+  def self.category_options
+    CATEGORY_LABELS.keys.map { |key| [ I18n.t("support.categories.#{key}", default: CATEGORY_LABELS[key]), key ] }
+  end
+
+  def self.status_options
+    STATUS_LABELS.keys.map { |key| [ I18n.t("support.statuses.#{key}", default: STATUS_LABELS[key]), key ] }
   end
 
   def self.apply_list_filters(relation, status:, query:)
@@ -81,11 +89,11 @@ class SupportTicket < ApplicationRecord
   end
 
   def category_label
-    CATEGORY_LABELS[category]
+    I18n.t("support.categories.#{category}", default: CATEGORY_LABELS[category])
   end
 
   def status_label
-    STATUS_LABELS[status]
+    I18n.t("support.statuses.#{status}", default: STATUS_LABELS[status])
   end
 
   def status_color

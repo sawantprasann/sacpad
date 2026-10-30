@@ -1,46 +1,46 @@
-<% content_for :title, "Booth Management" %>
+<% content_for :title, t("booths.title") %>
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500" %>
 <% td = "border-b border-gray-100 px-6 py-4 text-sm" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Booths",
-      title: "Booth Management",
-      subtitle: pluralize(@pagy.count, "booth"),
+      kicker: t("booths.kicker"),
+      title: t("booths.title"),
+      subtitle: t("booths.count", count: @pagy.count),
       meta: "#{current_user.organization.name} · #{@election.name}"
     } do %><% end %>
 
 <%= form_with url: booths_path, method: :get, class: "mt-6 #{ta_card_classes} p-4 md:p-5" do %>
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
     <div>
-      <%= label_tag :number, "Booth no", class: ta_label_classes %>
+      <%= label_tag :number, t("common.booth_no"), class: ta_label_classes %>
       <%= text_field_tag :number, params[:number], class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :name, "Name", class: ta_label_classes %>
+      <%= label_tag :name, t("common.name"), class: ta_label_classes %>
       <%= text_field_tag :name, params[:name], class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :village_id, "Village", class: ta_label_classes %>
+      <%= label_tag :village_id, t("common.village"), class: ta_label_classes %>
       <%= render "ui/min_search_select",
             name: :village_id,
             choices: @villages.map { |village| [ village.name, village.id ] },
             selected: params[:village_id],
-            blank: "Any village",
-            placeholder: "Any village",
-            search_placeholder: "Search villages...",
-            empty_text: "No villages found" %>
+            blank: t("kitchen_cabinet.any_village"),
+            placeholder: t("kitchen_cabinet.any_village"),
+            search_placeholder: t("kitchen_cabinet.search_villages"),
+            empty_text: t("kitchen_cabinet.no_villages") %>
     </div>
     <div>
-      <%= label_tag :address, "Address", class: ta_label_classes %>
+      <%= label_tag :address, t("common.address"), class: ta_label_classes %>
       <%= text_field_tag :address, params[:address], class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :station_type, "Station type", class: ta_label_classes %>
-      <%= select_tag :station_type, options_for_select(@station_types, params[:station_type]), include_blank: "Any type", class: ta_field_classes %>
+      <%= label_tag :station_type, t("booths.station_type"), class: ta_label_classes %>
+      <%= select_tag :station_type, options_for_select(@station_types, params[:station_type]), include_blank: t("booths.any_type"), class: ta_field_classes %>
     </div>
     <div class="flex items-end gap-2">
-      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
-      <%= link_to "Clear", booths_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.filter") %></button>
+      <%= link_to t("common.clear"), booths_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
     </div>
   </div>
 <% end %>
@@ -49,7 +49,7 @@
   <table class="w-full">
     <thead class="bg-gray-50 dark:bg-white/[0.03]">
       <tr>
-        <% [ "Booth no", "Name", "Village", "Voters", "Voted" ].each do |heading| %>
+        <% [ t("common.booth_no"), t("common.name"), t("common.village"), t("common.voters"), t("common.voted") ].each do |heading| %>
           <th class="<%= th %>"><%= heading %></th>
         <% end %>
       </tr>
@@ -69,7 +69,7 @@
     </tbody>
   </table>
   <% if @booths.empty? %>
-    <p class="px-6 py-16 text-center text-sm text-gray-400">No booths match these filters.</p>
+    <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("booths.no_match") %></p>
   <% end %>
 </div>
 <%= render "ui/pagination", pagy: @pagy, nav_class: "pagination-nav mt-4 flex items-center gap-2" %>

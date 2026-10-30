@@ -5,6 +5,7 @@ class Organization < ApplicationRecord
 
   has_many :users, dependent: :restrict_with_error
   has_many :support_tickets, dependent: :restrict_with_error
+  has_many :calendar_events, dependent: :destroy
   has_many :party_memberships, dependent: :destroy
   has_many :admin_organizations, dependent: :destroy
   has_many :politicians, dependent: :destroy
@@ -28,6 +29,14 @@ class Organization < ApplicationRecord
 
   def villages
     Village.where(assembly_id: assemblies.select(:id))
+  end
+
+  # English plus this seat's language. An Assembly seat uses its Lok Sabha's language.
+  def native_locale
+    case constituency
+    when Loksabha then constituency.native_locale
+    when Assembly then constituency.loksabha&.native_locale
+    end
   end
 
   # Deactivation cascade (§3.1a): one toggle cuts off every user under the org (enforced in

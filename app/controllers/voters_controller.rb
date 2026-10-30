@@ -36,20 +36,20 @@ class VotersController < ApplicationController
     voted = ActiveModel::Type::Boolean.new.cast(params[:voted])
     VoterTurnout.mark!(election: election, voter: @voter, voted: voted, by: current_user)
     redirect_back fallback_location: voted_return_path,
-                  notice: voted ? "Marked as voted for #{election.name}." : "Marked as not voted for #{election.name}."
+                  notice: voted ? t("voters_access.marked_voted", election: election.name) : t("voters_access.marked_not_voted", election: election.name)
   end
 
   def update_mobile
     digits = params[:mobile].to_s.gsub(/\D/, "")
     unless digits.match?(/\A\d{10}\z/)
-      redirect_to voter_path(@voter), alert: "Enter a 10-digit mobile number."
+      redirect_to voter_path(@voter), alert: t("voters_access.mobile_invalid")
       return
     end
 
     if @voter.update(mobile: digits)
-      redirect_to voter_path(@voter), notice: "Mobile number saved."
+      redirect_to voter_path(@voter), notice: t("voters_access.mobile_saved")
     else
-      redirect_to voter_path(@voter), alert: @voter.errors.full_messages.to_sentence.presence || "Couldn't save the mobile number."
+      redirect_to voter_path(@voter), alert: @voter.errors.full_messages.to_sentence.presence || t("voters_access.mobile_failed")
     end
   end
 
@@ -65,7 +65,7 @@ class VotersController < ApplicationController
     relation = relation.where(sr_no: params[:sr_no]) if params[:sr_no].present?
     relation = relation.where(village_id: params[:village_id]) if params[:village_id].present?
     if params[:booth].present?
-      relation = relation.joins(:booth).where(booths: { number: params[:booth].strip })
+      relation = relation.where(booth_id: Booth.where(number: params[:booth].strip).select(:id))
     end
     if params[:sentiment].present?
       ids = VoterSentiment.where(sentiment_status: params[:sentiment]).select(:voter_id)
@@ -81,7 +81,7 @@ class VotersController < ApplicationController
       matched = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
       relation = Voter.where(id: matched)
     end
-    relation.includes(:booth, :village).order(Arel.sql("sr_no ASC NULLS LAST"), :id)
+    relation.preload(:booth, :village).by_booth_and_serial
   end
 
   def load_roll_state(voters)
@@ -106,13 +106,13 @@ class VotersController < ApplicationController
   def require_voter_access
     return if current_user.role.can_access?("voter_lists")
 
-    redirect_to root_path, alert: "You don't have access to Voter Lists."
+    redirect_to root_path, alert: t("voters_access.no_access")
   end
 
   def require_voter_write
     return if current_user.role.can_write?("voter_lists")
 
-    redirect_to voters_path, alert: "You can't update the voter list."
+    redirect_to voters_path, alert: t("voters_access.cannot_update")
   end
 
   def current_organization

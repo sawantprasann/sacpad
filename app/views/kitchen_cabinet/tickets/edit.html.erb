@@ -1,11 +1,11 @@
-<% content_for :title, "Edit Ticket #{@ticket.ticket_number}" %>
-<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
+<% content_for :title, t("kitchen_cabinet.edit_title", number: @ticket.ticket_number) %>
+<% breadcrumb t("nav.beneficiaries"), kitchen_cabinet_tickets_path %>
 <% breadcrumb @ticket.person_name, kitchen_cabinet_ticket_path(@ticket) %>
-<% breadcrumb "Edit" %>
+<% breadcrumb t("nav.edit") %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Beneficiaries",
-      title: "Edit ticket #{@ticket.ticket_number}",
+      kicker: t("nav.beneficiaries"),
+      title: t("kitchen_cabinet.edit_title", number: @ticket.ticket_number),
       subtitle: @ticket.person_name
     } do %><% end %>
 
@@ -24,63 +24,63 @@
     <% end %>
 
     <div>
-      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Beneficiary name</label>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("kitchen_cabinet.beneficiary_name") %></label>
       <%= f.text_field :person_name, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     </div>
 
     <div>
-      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Representative name</label>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("kitchen_cabinet.representative_name") %></label>
       <%= f.text_field :representative_name, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Village</label>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("common.village") %></label>
         <%= render "ui/min_search_select",
               name: "ticket[village]",
               choices: Village.order(:name).pluck(:name),
               selected: @ticket.village,
-              blank: "Select a village...",
-              placeholder: "Select a village...",
-              search_placeholder: "Search villages...",
-              empty_text: "No villages found" %>
+              blank: t("common.select_village"),
+              placeholder: t("common.select_village"),
+              search_placeholder: t("kitchen_cabinet.search_villages"),
+              empty_text: t("kitchen_cabinet.no_villages") %>
       </div>
       <div>
-        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Mobile</label>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("common.mobile") %></label>
         <%= f.telephone_field :mobile, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500",
               inputmode: "numeric", pattern: "[0-9]{10}", maxlength: 10, autocomplete: "tel",
-              placeholder: "10-digit mobile number", title: "Enter a 10-digit mobile number",
+              placeholder: t("common.mobile_number_placeholder"), title: t("common.mobile_title"),
               oninput: "this.value = this.value.replace(/\\D/g, '').slice(0, 10)" %>
       </div>
     </div>
 
     <div>
-      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Description</label>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("common.description") %></label>
       <%= f.text_area :description, rows: 4, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
       <div>
-        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Category</label>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("kitchen_cabinet.category") %></label>
         <%= f.select :ticket_category_id,
               options_from_collection_for_select(TicketCategory.active.order(:name), :id, :name, @ticket.ticket_category_id),
               {},
               class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
       </div>
       <div>
-        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Issue Type</label>
+        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("kitchen_cabinet.issue_type") %></label>
         <%= f.text_field :nature_of_issue, class: "w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500" %>
       </div>
     </div>
 
     <div>
-      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Reported Date</label>
+      <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"><%= t("common.reported_date") %></label>
       <%= ta_date_picker(form: f, method: :reported_at) %>
     </div>
 
     <div class="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-      <%= f.submit "Save Changes", class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
-      <%= link_to "Cancel", kitchen_cabinet_ticket_path(@ticket), class: "bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
+      <%= f.submit t("common.save_changes"), class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
+      <%= link_to t("common.cancel"), kitchen_cabinet_ticket_path(@ticket), class: "bg-gray-400 hover:bg-gray-500 text-white font-semibold px-6 py-2 rounded-lg transition-colors" %>
     </div>
   <% end %>
 </div>

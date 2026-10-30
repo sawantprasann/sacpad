@@ -2,7 +2,14 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [ "category", "platform", "platformWrap", "platformLabel", "links", "linkRows", "linkTemplate", "outdoor" ]
-  static values = { thumbnailUrl: String }
+  static values = {
+    thumbnailUrl: String,
+    newspaper: String,
+    tvChannel: String,
+    checking: String,
+    noThumbnail: String,
+    thumbnailFilled: String
+  }
 
   connect() {
     this.applyCategory()
@@ -16,7 +23,7 @@ export default class extends Controller {
     this.platformWrapTarget.hidden = !showPlatform
     this.linksTarget.hidden = !linkSlugs.includes(slug)
     this.outdoorTarget.hidden = slug !== "outdoor-media"
-    this.platformLabelTarget.textContent = (slug === "print" || slug === "local-print") ? "Newspaper" : "TV channel"
+    this.platformLabelTarget.textContent = (slug === "print" || slug === "local-print") ? this.newspaperValue : this.tvChannelValue
     const current = this.platformTarget.value
     this.platformTarget.querySelectorAll("option").forEach((option) => {
       if (!option.value) return
@@ -51,7 +58,7 @@ export default class extends Controller {
     const row = event.target.closest("[data-link-row]")
     const status = row.querySelector("[data-link-status]")
     const url = row.querySelector("[data-link-url]").value
-    status.textContent = "Checking this link…"
+    status.textContent = this.checkingValue
     const token = document.querySelector("meta[name='csrf-token']")?.content
     const response = await fetch(this.thumbnailUrlValue, {
       method: "POST",
@@ -64,10 +71,10 @@ export default class extends Controller {
     })
     const data = await response.json()
     if (!response.ok) {
-      status.textContent = data.error || "No thumbnail on this link."
+      status.textContent = data.error || this.noThumbnailValue
       return
     }
     row.querySelector("[data-link-thumb]").value = data.thumbnail_url
-    status.textContent = "Thumbnail URL filled for this link only."
+    status.textContent = this.thumbnailFilledValue
   }
 }

@@ -9,7 +9,7 @@ module GroundReports
       place.organization = current_user.organization
       authorize place
       if place.save
-        redirect_to ground_reports_village_path(@village), notice: "Worship place added."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.worship_added")
       else
         redirect_to ground_reports_village_path(@village), alert: place.errors.full_messages.to_sentence
       end
@@ -19,7 +19,7 @@ module GroundReports
 
     def update
       if @place.update(place_params)
-        redirect_to ground_reports_village_path(@village), notice: "Worship place updated."
+        redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.worship_updated")
       else
         render :edit, status: :unprocessable_entity
       end
@@ -27,7 +27,7 @@ module GroundReports
 
     def destroy
       @place.discard_by(current_user)
-      redirect_to ground_reports_village_path(@village), notice: "Worship place deleted."
+      redirect_to ground_reports_village_path(@village), notice: t("ground_reports.notices.worship_deleted")
     end
 
     private

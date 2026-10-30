@@ -1,16 +1,16 @@
-<% content_for :title, "Ground Reports" %>
+<% content_for :title, t("nav.ground_reports") %>
 <% page_link = "inline-flex h-9 items-center rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Ground Reports",
-      title: "Ground Reports",
-      subtitle: pluralize(@pagy.count, "village"),
+      kicker: t("nav.ground_reports"),
+      title: t("nav.ground_reports"),
+      subtitle: t("ground_reports.village_count", count: @pagy.count),
       meta: current_user.organization.name
     } do %><% end %>
 
 <% if current_user.role.can_import? %>
   <div class="mt-4 flex justify-end">
-    <%= link_to "Import", new_ground_reports_import_path, class: "#{page_link} min-h-11 cursor-pointer" %>
+    <%= link_to t("ground_reports.import"), new_ground_reports_import_path, class: "#{page_link} min-h-11 cursor-pointer" %>
   </div>
 <% end %>
 
@@ -18,27 +18,27 @@
       class: "#{current_user.role.can_import? ? "mt-4" : "mt-6"} #{ta_card_classes} p-4 md:p-5" do %>
   <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,16rem)_minmax(0,16rem)_auto] lg:items-end">
     <div>
-      <%= label_tag :taluka_id, "Taluka", class: ta_label_classes %>
+      <%= label_tag :taluka_id, t("common.taluka"), class: ta_label_classes %>
       <%= select_tag :taluka_id,
             options_from_collection_for_select(@talukas, :id, :name, params[:taluka_id]),
-            include_blank: "All talukas",
+            include_blank: t("common.all_talukas"),
             class: ta_field_classes %>
     </div>
     <div>
-      <%= label_tag :village_id, "Village", class: ta_label_classes %>
+      <%= label_tag :village_id, t("common.village"), class: ta_label_classes %>
       <%= render "ui/min_search_select",
             name: :village_id,
-            choices: @filter_villages.map { |village| [ village.name, village.id ] },
+            choices: @filter_villages.map { |village| [ village.display_name, village.id ] },
             selected: params[:village_id],
-            blank: "All villages",
-            placeholder: "All villages",
-            search_placeholder: "Search villages...",
-            empty_text: "No villages found" %>
+            blank: t("common.all_villages"),
+            placeholder: t("common.all_villages"),
+            search_placeholder: t("kitchen_cabinet.search_villages"),
+            empty_text: t("kitchen_cabinet.no_villages") %>
     </div>
     <div class="flex items-end gap-2">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-              style="background: var(--org-party-color); color: var(--org-party-contrast)">Filter</button>
-      <%= link_to "Clear", ground_reports_villages_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.filter") %></button>
+      <%= link_to t("common.clear"), ground_reports_villages_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
     </div>
   </div>
 <% end %>
@@ -48,17 +48,17 @@
     <table class="w-full text-sm">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <th class="border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800">Village</th>
-          <th class="border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800">Taluka</th>
-          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:border-gray-800">Total nidhi</th>
-          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:border-gray-800"><span class="sr-only">Actions</span></th>
+          <th class="border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800"><%= t("common.village") %></th>
+          <th class="border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800"><%= t("common.taluka") %></th>
+          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:border-gray-800"><%= t("ground_reports.total_nidhi") %></th>
+          <th class="border-b border-gray-200 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:border-gray-800"><span class="sr-only"><%= t("common.actions") %></span></th>
         </tr>
       </thead>
       <tbody>
         <% @villages.each do |village| %>
           <tr class="hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
             <td class="border-b border-gray-100 px-6 py-4 dark:border-gray-800">
-              <%= link_to village.name, ground_reports_village_path(village),
+              <%= link_to village.display_name, ground_reports_village_path(village),
                     class: ta_text_link %>
             </td>
             <td class="border-b border-gray-100 px-6 py-4 text-gray-600 dark:border-gray-800 dark:text-gray-300"><%= village.taluka&.name || "—" %></td>

@@ -2,7 +2,7 @@
 columns = CadreProgram::CadreActivity.list_columns(@category_key)
 wb = xlsx_package.workbook
 wb.add_worksheet(name: "Cadre activity") do |sheet|
-  sheet.add_row columns.map(&:first) + [ "Media value", "Logged by", "Photos" ]
+  sheet.add_row columns.map(&:first) + [ t("cadre_program.media_value"), t("common.logged_by"), t("common.photos") ]
   @activities.each do |activity|
     sheet.add_row(
       columns.map { |_label, reader| reader.call(activity) } + [

@@ -100,15 +100,15 @@ module ApplicationHelper
     return [] unless user
 
     module_widgets = [
-      { title: "Open tickets by status", mod: "kitchen_cabinet" },
-      { title: "Recent cadre activity",  mod: "cadre_program" },
-      { title: "Recent ground reports",  mod: "ground_reports" }
+      { title: t("dashboard.open_tickets"), mod: "kitchen_cabinet" },
+      { title: t("dashboard.recent_cadre"),  mod: "cadre_program" },
+      { title: t("dashboard.recent_ground_reports"),  mod: "ground_reports" }
     ].select { |w| user.role.can_access?(w[:mod]) }
 
     admin_widgets =
       if user.role.can_create_users?
         [
-          { title: "Recent deletions", admin_only: true }
+          { title: t("dashboard.recent_deletions"), admin_only: true }
         ]
       else
         []
@@ -176,16 +176,64 @@ module ApplicationHelper
   end
 
   def status_series_colors(labels, fallback:)
-    Array(labels).map { |label| status_color(label.to_s.parameterize(separator: "_")) || fallback }
+    by_label = KitchenCabinet::Ticket.statuses.keys.index_by { |status| t("kitchen_cabinet.statuses.#{status}", default: status.humanize) }
+    Array(labels).map do |label|
+      status = by_label[label] || label.to_s.parameterize(separator: "_")
+      status_color(status) || fallback
+    end
   end
 
-  def ta_date_picker(name: nil, id: nil, value: nil, required: false, form: nil, method: nil)
+  def l_day(value)
+    return "—" if value.blank?
+
+    l(value.to_date, format: :day)
+  end
+
+  def l_stamp(value)
+    return "—" if value.blank?
+
+    l(value.in_time_zone("Asia/Kolkata"), format: :stamp)
+  end
+
+  def t_enum(scope, key)
+    return "—" if key.blank?
+
+    t("#{scope}.#{key}", default: key.to_s.humanize)
+  end
+
+  def t_enum_options(keys, scope)
+    keys.map { |key| [ t_enum(scope, key), key ] }
+  end
+
+  def sentiment_label(status)
+    t_enum("common.sentiments", status)
+  end
+
+  def voted_label(voted)
+    voted ? t("common.voted") : t("common.not_voted")
+  end
+
+  def datepicker_locale
+    {
+      firstDayOfWeek: 0,
+      weekdays: {
+        shorthand: I18n.t("date.abbr_day_names"),
+        longhand: I18n.t("date.day_names")
+      },
+      months: {
+        shorthand: Array(I18n.t("date.abbr_month_names")).compact,
+        longhand: Array(I18n.t("date.month_names")).compact
+      }
+    }
+  end
+
+  def ta_date_picker(name: nil, id: nil, value: nil, required: false, form: nil, method: nil, placeholder: nil, input_data: nil)
     if form && method
       name = form.field_name(method)
       id = form.field_id(method)
       value = form.object&.public_send(method) if value.nil?
     end
-    render "ui/date_picker", name: name, id: id, value: value, required: required
+    render "ui/date_picker", name: name, id: id, value: value, required: required, placeholder: placeholder, input_data: input_data
   end
 
   def support_accent
@@ -212,13 +260,11 @@ module ApplicationHelper
     return "" if time.blank?
 
     local = time.in_time_zone("Asia/Kolkata")
-    "#{local.strftime("%a, %-l:%M %p")} · #{time_ago_in_words(time)} ago"
+    t("support.time_ago", clock: l(local, format: "%a, %-l:%M %p"), time: time_ago_in_words(time))
   end
 
   def support_date(time)
-    return "—" if time.blank?
-
-    time.in_time_zone("Asia/Kolkata").strftime("%d %b %Y")
+    l_day(time&.in_time_zone("Asia/Kolkata"))
   end
 
   def support_initials(name)
@@ -234,11 +280,11 @@ module ApplicationHelper
   def dashboard_greeting
     hour = dashboard_now.hour
     if hour < 12
-      "Good morning"
+      t("dashboard.good_morning")
     elsif hour < 17
-      "Good afternoon"
+      t("dashboard.good_afternoon")
     else
-      "Good evening"
+      t("dashboard.good_evening")
     end
   end
 
@@ -260,7 +306,7 @@ module ApplicationHelper
   end
 
   def icon_action_link(action, url, label: nil, **html)
-    label ||= action.to_s.capitalize
+    label ||= t("common.#{action}", default: action.to_s.capitalize)
     link_to action_icon(action), url, icon_action_attrs(action, label).merge(html)
   end
 
@@ -276,7 +322,7 @@ module ApplicationHelper
   end
 
   def icon_action_button(action, url, label: nil, method: nil, confirm: nil, **html)
-    label ||= action.to_s.capitalize
+    label ||= t("common.#{action}", default: action.to_s.capitalize)
     attrs = icon_action_attrs(action, label).merge(html)
     attrs[:data] = (attrs[:data] || {}).merge(turbo_confirm: confirm) if confirm.present?
     button_to(url, { method: method || :delete, form: { class: "inline-flex" } }.merge(attrs)) do

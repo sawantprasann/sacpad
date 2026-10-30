@@ -67,6 +67,7 @@ Rails.application.routes.draw do
 
   namespace :api do
     post "assemblies/:assembly_id/parts/:part_number", to: "rolls#create"
+    post "assemblies/:assembly_id/parts/:part_number/native_names", to: "rolls#native_names"
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
@@ -150,10 +151,17 @@ Rails.application.routes.draw do
   # latest year; this page holds the full result and the other years.
   resource :election_result, only: :show, controller: "election_results"
 
+  # Personal calendar for Org Admin and PA. Each of them keeps their own appointments.
+  resources :calendar_events, path: "calendar", only: %i[index create update destroy]
+
   # Signed-in password change. Devise's /password/edit is the emailed reset link.
   namespace :account do
     resource :password, only: %i[edit update]
   end
+
+  # English or Marathi. Saved on the user when signed in, and in a cookie so
+  # the sign-in page keeps the choice.
+  resource :locale, only: :update
 
   # Defines the root path route ("/")
   root "home#index"

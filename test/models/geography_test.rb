@@ -12,7 +12,7 @@ class GeographyTest < ActiveSupport::TestCase
   end
 
   test "geography and parties are NOT tenant-scoped (global reference data)" do
-    [ State, Loksabha, Assembly, Village, Booth, Party ].each do |klass|
+    [ State, Loksabha, Assembly, Village, Booth, PoliceStation, Party ].each do |klass|
       assert_not klass.ancestors.include?(OrganizationScoped), "#{klass} must be global, not tenant-scoped"
     end
   end

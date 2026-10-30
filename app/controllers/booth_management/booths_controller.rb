@@ -61,7 +61,7 @@ module BoothManagement
     def require_booth_access
       return if current_user.role.can_access?("booth_management")
 
-      redirect_to root_path, alert: "You don't have access to Booth Management."
+      redirect_to root_path, alert: t("booths.no_access")
     end
   end
 end

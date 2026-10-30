@@ -1,7 +1,7 @@
-# Voter list export. Rows follow the same filters as the list.
+# Voter list export. Rows follow the same filters and booth-then-serial order as the list.
 wb = xlsx_package.workbook
 wb.add_worksheet(name: "Voters") do |sheet|
-  sheet.add_row [ "Sr no", "Voter ID", "Name", "Booth no", "Village", "Sentiment", "Voted" ]
+  sheet.add_row [ t("common.sr_no"), t("common.voter_id"), t("common.name"), t("common.booth_no"), t("common.village"), t("common.sentiment"), t("common.voted") ]
   @voters.each do |voter|
     sentiment = @sentiments[voter.id]
     turnout = @turnouts[voter.id]

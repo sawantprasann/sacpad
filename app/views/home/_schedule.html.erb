@@ -1,0 +1,54 @@
+<section class="min-w-0" aria-labelledby="home-schedule-heading" x-data="{ day: 'today' }">
+  <article class="overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
+    <span class="block h-1.5 bg-gradient-to-r from-[#FF9933] to-[#465FFF]" aria-hidden="true"></span>
+    <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+      <div class="min-w-0">
+        <h2 id="home-schedule-heading" class="text-sm font-semibold text-gray-900 dark:text-white/90"><%= t("calendar.home_title") %></h2>
+        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+          <span x-show="day === 'today'"><%= l(@schedule_today, format: "%A, %-d %B") %></span>
+          <span x-show="day === 'tomorrow'" x-cloak><%= l(@schedule_tomorrow, format: "%A, %-d %B") %></span>
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-white/5" role="tablist" aria-label="<%= t("calendar.home_title") %>">
+          <button type="button" role="tab" id="schedule-tab-today"
+                  @click="day = 'today'"
+                  :aria-selected="(day === 'today').toString()"
+                  :class="day === 'today' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90'"
+                  class="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold">
+            <%= t("calendar.today") %>
+            <% if @today_events.any? %>
+              <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-gray-700 dark:bg-white/10 dark:text-gray-200"><%= @today_events.size %></span>
+            <% end %>
+          </button>
+          <button type="button" role="tab" id="schedule-tab-tomorrow"
+                  @click="day = 'tomorrow'"
+                  :aria-selected="(day === 'tomorrow').toString()"
+                  :class="day === 'tomorrow' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white' : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white/90'"
+                  class="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold">
+            <%= t("calendar.tomorrow") %>
+            <% if @tomorrow_events.any? %>
+              <span class="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-gray-700 dark:bg-white/10 dark:text-gray-200"><%= @tomorrow_events.size %></span>
+            <% end %>
+          </button>
+        </div>
+        <%= link_to t("calendar.open_calendar"), calendar_events_path, class: "#{ta_btn_secondary} h-8 px-3 text-xs" %>
+      </div>
+    </div>
+
+    <%= render "home/schedule_day",
+          section_id: "schedule-today",
+          tab_id: "schedule-tab-today",
+          day: "today",
+          date: @schedule_today,
+          events: @today_events,
+          empty: t("calendar.nothing_today") %>
+    <%= render "home/schedule_day",
+          section_id: "schedule-tomorrow",
+          tab_id: "schedule-tab-tomorrow",
+          day: "tomorrow",
+          date: @schedule_tomorrow,
+          events: @tomorrow_events,
+          empty: t("calendar.nothing_tomorrow") %>
+  </article>
+</section>

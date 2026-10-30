@@ -13,7 +13,7 @@ module BoothManagement
       manager.booth = @booth
       manager.parent = current_user
       if manager.save
-        redirect_to booth_path(@booth), notice: "#{manager.name} can now manage booth #{@booth.number}."
+        redirect_to booth_path(@booth), notice: t("booths.manager_added", name: manager.name, number: @booth.number)
       else
         redirect_to booth_path(@booth), alert: manager.errors.full_messages.to_sentence
       end
@@ -32,13 +32,13 @@ module BoothManagement
     def require_booth_access
       return if current_user.role.can_access?("booth_management")
 
-      redirect_to root_path, alert: "You don't have access to Booth Management."
+      redirect_to root_path, alert: t("booths.no_access")
     end
 
     def require_booth_manager_creator
       return if current_user.can_add_booth_manager?
 
-      redirect_to booth_path(@booth), alert: "Only an org admin or manager can add a booth manager."
+      redirect_to booth_path(@booth), alert: t("booths.only_admin")
     end
   end
 end

@@ -4,15 +4,15 @@
 <% quiet = "#{tool} border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-white/5" %>
 <div class="flex flex-wrap items-center gap-2">
   <% if local_assigns[:export_url] %>
-    <%= link_to "Export Excel", export_url, class: quiet %>
+    <%= link_to t("kitchen_cabinet.export_excel"), export_url, class: quiet %>
   <% else %>
-    <button type="button" class="<%= quiet %>">Export Excel</button>
+    <button type="button" class="<%= quiet %>"><%= t("kitchen_cabinet.export_excel") %></button>
   <% end %>
   <% if local_assigns[:new_url] %>
     <%= link_to new_url,
           class: "inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full shadow-sm transition hover:opacity-90",
           style: "background: #{local_assigns[:accent].presence || "var(--org-party-color)"}; color: #{local_assigns[:accent_ink].presence || "var(--org-party-contrast)"};",
-          aria: { label: local_assigns[:new_label].presence || "Create" } do %>
+          aria: { label: local_assigns[:new_label].presence || t("common.create") } do %>
       <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
       </svg>

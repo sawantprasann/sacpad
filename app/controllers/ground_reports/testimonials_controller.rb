@@ -11,7 +11,7 @@ module GroundReports
       testimonial.created_by = current_user
       authorize testimonial
       if testimonial.save
-        redirect_to ground_reports_village_report_path(village, report), notice: "Testimonial added."
+        redirect_to ground_reports_village_report_path(village, report), notice: t("ground_reports.notices.testimonial_added")
       else
         redirect_to ground_reports_village_report_path(village, report),
                     alert: testimonial.errors.full_messages.to_sentence
@@ -27,7 +27,7 @@ module GroundReports
     def require_ground_reports_access
       return if current_user.role.can_access?("ground_reports")
 
-      redirect_to root_path, alert: "You don't have access to Ground Reports."
+      redirect_to root_path, alert: t("ground_reports.no_access")
     end
   end
 end

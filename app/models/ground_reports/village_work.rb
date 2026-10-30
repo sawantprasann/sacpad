@@ -31,10 +31,24 @@ module GroundReports
     validates :nidhi_asked, numericality: { greater_than_or_equal_to: 0 }
     validates :nidhi_category_name, presence: true, if: :nidhi_other?
 
+    def self.nidhi_options
+      NIDHI_CATEGORY_LABELS.keys.map do |key|
+        [ I18n.t("ground_reports.nidhi.#{key}", default: NIDHI_CATEGORY_LABELS[key]), key ]
+      end
+    end
+
+    def self.status_options
+      statuses.keys.map { |key| [ I18n.t("ground_reports.work_statuses.#{key}", default: key.humanize), key ] }
+    end
+
     def nidhi_label
       return nidhi_category_name if nidhi_other? && nidhi_category_name.present?
 
-      NIDHI_CATEGORY_LABELS[nidhi_category]
+      I18n.t("ground_reports.nidhi.#{nidhi_category}", default: NIDHI_CATEGORY_LABELS[nidhi_category])
+    end
+
+    def status_label
+      I18n.t("ground_reports.work_statuses.#{status}", default: status.to_s.humanize)
     end
   end
 end

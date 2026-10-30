@@ -1,13 +1,13 @@
-<% content_for :title, "Create ticket" %>
+<% content_for :title, t("nav.create_ticket") %>
 <% back_path = kitchen_cabinet_tickets_path %>
-<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
-<% breadcrumb "Create ticket" %>
+<% breadcrumb t("nav.beneficiaries"), kitchen_cabinet_tickets_path %>
+<% breadcrumb t("nav.create_ticket") %>
 
 <div>
   <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Beneficiaries",
-        title: "Create ticket",
-        subtitle: "Choose a category, then record the beneficiary, the issue, and any photos."
+        kicker: t("nav.beneficiaries"),
+        title: t("nav.create_ticket"),
+        subtitle: t("kitchen_cabinet.create_subtitle")
       } do %><% end %>
 
   <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
@@ -20,68 +20,68 @@
 
       <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <div class="md:col-span-2">
-          <%= f.label :ticket_category_id, "Category", class: ta_label_classes %>
+          <%= f.label :ticket_category_id, t("kitchen_cabinet.category"), class: ta_label_classes %>
           <%= f.collection_select :ticket_category_id, @categories, :id, :name,
-                { include_blank: "Choose a category..." },
+                { include_blank: t("kitchen_cabinet.choose_category") },
                 class: "#{ta_field_classes} min-h-11", required: true %>
         </div>
         <div>
-          <%= f.label :village, "Village / ward", class: ta_label_classes %>
+          <%= f.label :village, t("kitchen_cabinet.village_ward"), class: ta_label_classes %>
           <%= render "ui/min_search_select",
                 name: "ticket[village]",
                 choices: Village.order(:name).pluck(:name),
                 selected: @ticket.village,
-                blank: "Select a village...",
-                placeholder: "Select a village...",
-                search_placeholder: "Search villages...",
-                empty_text: "No villages found",
+                blank: t("common.select_village"),
+                placeholder: t("common.select_village"),
+                search_placeholder: t("kitchen_cabinet.search_villages"),
+                empty_text: t("kitchen_cabinet.no_villages"),
                 autofocus: true %>
         </div>
         <div>
-          <%= f.label :representative_name, "Representative name", class: ta_label_classes %>
+          <%= f.label :representative_name, t("kitchen_cabinet.representative_name"), class: ta_label_classes %>
           <%= f.text_field :representative_name, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
-          <%= f.label :person_name, "Beneficiary name", class: ta_label_classes %>
+          <%= f.label :person_name, t("kitchen_cabinet.beneficiary_name"), class: ta_label_classes %>
           <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
-          <%= f.label :mobile, "Mobile number", class: ta_label_classes %>
+          <%= f.label :mobile, t("common.mobile_number"), class: ta_label_classes %>
           <%= f.telephone_field :mobile, class: "#{ta_field_classes} min-h-11",
                 inputmode: "numeric", pattern: "[0-9]{10}", maxlength: 10, autocomplete: "tel",
-                placeholder: "10-digit mobile number", title: "Enter a 10-digit mobile number",
+                placeholder: t("common.mobile_number_placeholder"), title: t("common.mobile_title"),
                 oninput: "this.value = this.value.replace(/\\D/g, '').slice(0, 10)" %>
         </div>
         <div>
-          <%= f.label :nature_of_issue, class: ta_label_classes %>
+          <%= f.label :nature_of_issue, t("kitchen_cabinet.nature"), class: ta_label_classes %>
           <%= f.text_field :nature_of_issue, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
-          <%= f.label :reported_value, "Reported value", class: ta_label_classes %>
+          <%= f.label :reported_value, t("kitchen_cabinet.reported_value"), class: ta_label_classes %>
           <%= f.number_field :reported_value, step: "0.01", class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
-          <%= f.label :reported_at, "Reported date", class: ta_label_classes %>
+          <%= f.label :reported_at, t("common.reported_date"), class: ta_label_classes %>
           <%= ta_date_picker(form: f, method: :reported_at) %>
         </div>
         <div class="md:col-span-2">
-          <%= f.label :description, class: ta_label_classes %>
+          <%= f.label :description, t("common.description"), class: ta_label_classes %>
           <%= f.text_area :description, rows: 5, class: ta_field_classes %>
         </div>
         <div class="md:col-span-2">
-          <%= f.label :attachments, "Photos", class: ta_label_classes %>
+          <%= f.label :attachments, t("common.photos"), class: ta_label_classes %>
           <div class="rounded-xl border border-dashed border-gray-300 p-4 dark:border-gray-700">
             <%= f.file_field :attachments, multiple: true, accept: "image/*",
                   class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
-            <p class="mt-2 text-xs text-gray-500">Add one or more photos of the issue.</p>
+            <p class="mt-2 text-xs text-gray-500"><%= t("kitchen_cabinet.photo_help") %></p>
           </div>
         </div>
       </div>
 
       <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-                style="background: var(--org-party-color); color: var(--org-party-contrast)">Create ticket</button>
-        <%= link_to "Cancel", back_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("nav.create_ticket") %></button>
+        <%= link_to t("common.cancel"), back_path, class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
       </div>
     <% end %>
   </div>

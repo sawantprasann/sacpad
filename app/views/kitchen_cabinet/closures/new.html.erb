@@ -1,8 +1,8 @@
-<% content_for :title, "Close ticket #{@ticket.ticket_number}" %>
+<% content_for :title, t("kitchen_cabinet.close_title", number: @ticket.ticket_number) %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "Beneficiaries",
-      title: "Close ticket",
+      kicker: t("nav.beneficiaries"),
+      title: t("kitchen_cabinet.close_ticket"),
       subtitle: "#{@ticket.ticket_number} · #{@ticket.person_name}"
     } do %><% end %>
 
@@ -10,28 +10,28 @@
 
   <%= form_with url: kitchen_cabinet_ticket_closure_path(@ticket), method: :post, class: "space-y-6" do %>
     <div class="<%= ta_card_classes %> p-6">
-      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Step 1 — Confirm resolution</h2>
-      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Confirm this grievance was resolved. Closing records it as help delivered.</p>
-      <label class="<%= ta_label_classes %>">Closure date</label>
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("kitchen_cabinet.step_one") %></h2>
+      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400"><%= t("kitchen_cabinet.step_one_help") %></p>
+      <label class="<%= ta_label_classes %>"><%= t("kitchen_cabinet.closure_date") %></label>
       <%= ta_date_picker(name: "closure_date", id: "closure_date", value: Date.current) %>
     </div>
 
     <div class="<%= ta_card_classes %> p-6">
-      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Step 2 — Voter &amp; sentiment <span class="font-normal text-gray-400">(optional)</span></h2>
-      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Attach a voter and record how they feel. Both are optional — a blank or unmatched voter ID still closes the ticket.</p>
+      <h2 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300"><%= t("kitchen_cabinet.step_two_html", optional: t("common.optional")).html_safe %></h2>
+      <p class="mb-4 text-sm text-gray-500 dark:text-gray-400"><%= t("kitchen_cabinet.step_two_help") %></p>
       <div class="mb-4">
-        <label class="<%= ta_label_classes %>">Voter ID</label>
-        <%= text_field_tag :voter_id, @ticket.voter_id, placeholder: "Voter ID", class: "#{ta_field_classes} min-h-11" %>
+        <label class="<%= ta_label_classes %>"><%= t("common.voter_id") %></label>
+        <%= text_field_tag :voter_id, @ticket.voter_id, placeholder: t("common.voter_id"), class: "#{ta_field_classes} min-h-11" %>
         <% if @ticket.voter_id.present? %>
-          <p class="mt-2 text-xs text-gray-500">This voter was matched when the ticket was logged. Record how they feel now.</p>
+          <p class="mt-2 text-xs text-gray-500"><%= t("kitchen_cabinet.matched_help") %></p>
         <% end %>
       </div>
       <%= render "ui/sentiment_picker" %>
     </div>
 
     <div class="flex gap-3">
-      <%= submit_tag "Close ticket", class: "#{ta_btn_primary} min-h-11" %>
-      <%= link_to "Cancel", kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
+      <%= submit_tag t("kitchen_cabinet.close_ticket"), class: "#{ta_btn_primary} min-h-11" %>
+      <%= link_to t("common.cancel"), kitchen_cabinet_ticket_path(@ticket), class: "#{ta_btn_secondary} inline-flex items-center min-h-11" %>
     </div>
   <% end %>
 </div>

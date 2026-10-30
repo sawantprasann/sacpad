@@ -13,6 +13,12 @@
           <% klass = field.to_s.sub(/_id\z/, "").classify.constantize %>
           <% label_method = klass.column_names.include?("name") ? :name : :number %>
           <%= f.collection_select field, klass.order(label_method), :id, label_method, {}, class: ta_field_classes %>
+        <% elsif field.to_s == "native_locale" %>
+          <label class="<%= ta_label_classes %>">Native language</label>
+          <%= f.select field,
+                [ [ "Marathi", "mr" ] ],
+                { include_blank: "English only" },
+                class: ta_field_classes %>
         <% elsif column&.type == :boolean %>
           <label class="flex items-center gap-2 <%= ta_label_classes %>">
             <%= f.check_box field, class: "h-4 w-4 rounded border-gray-300 text-brand-500" %>

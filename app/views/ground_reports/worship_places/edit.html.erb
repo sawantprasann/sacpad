@@ -25,7 +25,7 @@
 
     <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
-              style="background: var(--org-party-color); color: var(--org-party-contrast)">Save changes</button>
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.save_changes") %></button>
       <%= link_to "Cancel", ground_reports_village_path(@village), class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
     </div>
   <% end %>

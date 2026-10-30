@@ -1,9 +1,15 @@
 class Booth < ApplicationRecord
+  include NativeNamed
+
   # booth numbers repeat across assemblies/loksabhas, so this is a real catalog row, not a flat int (§6.7).
   belongs_to :village
   has_many :voters, dependent: :nullify
   has_many :booth_managers, class_name: "User", dependent: :nullify
   validates :number, presence: true
+
+  def resolved_native_locale
+    village&.assembly&.loksabha&.native_locale
+  end
 
   # Roll-cover totals live on the booth. These are the voters actually stored for that booth.
   def voter_gender_counts

@@ -1,27 +1,27 @@
 <% voter_name = begin
-     "#{@voter.first_name} #{@voter.last_name}"
+     @voter.display_name
    rescue ActiveRecord::Encryption::Errors::Decryption
-     "Voter (unable to decrypt)"
+     t("common.unable_to_decrypt")
    end %>
 <div class="space-y-6">
   <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Voters",
+        kicker: t("voters.kicker"),
         title: voter_name,
         meta: current_user.organization.name
       } do %><% end %>
   <div class="flex justify-end">
-    <%= link_to "Back to list", voters_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+    <%= link_to t("common.back_to_list"), voters_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
   </div>
 
   <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
     <!-- Voter Info -->
     <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
       <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Voter Information</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white"><%= t("common.voter_information") %></h2>
       </div>
       <div class="px-6 py-4 space-y-4">
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Voter ID</label>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.voter_id") %></label>
           <p class="mt-1 text-sm font-mono text-gray-900 dark:text-white">
             <% begin %>
               <%= @voter.voter_id %>
@@ -31,17 +31,17 @@
           </p>
         </div>
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Full Name</label>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.full_name") %></label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white">
             <% begin %>
-              <%= [@voter.first_name, @voter.middle_name, @voter.last_name].compact.join(" ") %>
+              <%= @voter.display_name %>
             <% rescue ActiveRecord::Encryption::Errors::Decryption %>
               <span class="text-gray-400">—</span>
             <% end %>
           </p>
         </div>
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Mobile</label>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.mobile") %></label>
           <% begin %>
             <% if current_user.role.can_write?("voter_lists") %>
               <%= form_with url: update_mobile_voter_path(@voter), method: :patch, class: "mt-2 flex flex-wrap items-center gap-2" do %>
@@ -50,10 +50,10 @@
                       maxlength: 10,
                       pattern: "[0-9]{10}",
                       inputmode: "numeric",
-                      placeholder: "10-digit mobile",
+                      placeholder: t("common.mobile_placeholder"),
                       autocomplete: "tel",
                       required: true %>
-                <%= submit_tag(@voter.mobile.present? ? "Update mobile" : "Add mobile",
+                <%= submit_tag(@voter.mobile.present? ? t("common.update_mobile") : t("common.add_mobile"),
                       class: "#{ta_btn_primary} min-h-11 cursor-pointer",
                       style: "background: var(--org-party-color); color: var(--org-party-contrast)") %>
               <% end %>
@@ -65,33 +65,33 @@
           <% end %>
         </div>
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Sr no</label>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.sr_no") %></label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.sr_no || "—" %></p>
         </div>
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Booth no</label>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.booth_no") %></label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.booth&.number || "—" %></p>
         </div>
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Village</label>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.village") %></label>
           <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.village&.name || "—" %></p>
         </div>
         <div>
-          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Created</label>
-          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= @voter.created_at.strftime("%b %d, %Y") %></p>
+          <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= t("common.created") %></label>
+          <p class="mt-1 text-sm text-gray-900 dark:text-white"><%= l_day(@voter.created_at) %></p>
         </div>
       </div>
     </div>
 
     <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
       <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Voted</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white"><%= t("common.voted") %></h2>
       </div>
       <div class="px-6 py-4">
         <label class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400"><%= @election.name %></label>
-        <p class="mt-2 text-sm text-gray-800 dark:text-white/90"><%= @turnout&.voted? ? "Voted" : "Not voted" %></p>
+        <p class="mt-2 text-sm text-gray-800 dark:text-white/90"><%= voted_label(@turnout&.voted?) %></p>
         <% if current_user.role.can_write?("voter_lists") %>
-          <%= button_to (@turnout&.voted? ? "Mark not voted" : "Mark voted"),
+          <%= button_to (@turnout&.voted? ? t("common.mark_not_voted") : t("common.mark_voted")),
                 update_voted_voter_path(@voter),
                 method: :patch,
                 params: { voted: @turnout&.voted? ? "0" : "1" },

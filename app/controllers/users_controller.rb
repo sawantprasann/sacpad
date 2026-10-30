@@ -17,7 +17,7 @@ class UsersController < ApplicationController
     @user.parent = current_user
     authorize @user
     if @user.save
-      redirect_to users_path, notice: "User created."
+      redirect_to users_path, notice: t("team.created")
     else
       render :new, status: :unprocessable_entity
     end

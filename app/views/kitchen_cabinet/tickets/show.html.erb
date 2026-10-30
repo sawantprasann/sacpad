@@ -1,16 +1,16 @@
 <% content_for :title, "#{@ticket.person_name} · #{@ticket.ticket_number}" %>
 <% list_path = kitchen_cabinet_tickets_path(category: @ticket.ticket_category.slug) %>
-<% breadcrumb "Beneficiaries", kitchen_cabinet_tickets_path %>
+<% breadcrumb t("nav.beneficiaries"), kitchen_cabinet_tickets_path %>
 <% breadcrumb @ticket.ticket_category.name, list_path %>
 <% breadcrumb @ticket.person_name %>
 <% field = "rounded-xl bg-amber-50/70 px-4 py-3 ring-1 ring-amber-100 dark:bg-white/[0.03] dark:ring-white/10" %>
 <% label = "text-xs font-medium tracking-wide text-amber-700/80 uppercase dark:text-amber-200" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-        kicker: "Beneficiaries",
+        kicker: t("nav.beneficiaries"),
         title: @ticket.person_name,
         subtitle: [ @ticket.ticket_number, @ticket.ticket_category.name, @ticket.village.presence ].compact.join(" · "),
-        meta: "Reported #{@ticket.reported_at&.strftime("%d %b %Y") || "—"} · #{@ticket.owner.name}"
+        meta: t("kitchen_cabinet.reported_meta", date: l_day(@ticket.reported_at), owner: @ticket.owner.name)
       } do %><% end %>
 
   <div class="mt-4 flex flex-wrap items-center justify-end gap-2">
@@ -20,49 +20,49 @@
     <% if policy(@ticket).edit? %>
       <%= icon_action_link :edit, edit_kitchen_cabinet_ticket_path(@ticket) %>
     <% end %>
-    <%= link_to "Back to list", list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
+    <%= link_to t("common.back_to_list"), list_path, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
   </div>
 
   <div class="mt-6 grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
     <div class="space-y-4 xl:col-span-2">
-      <%= render layout: "ui/jewel_card", locals: { accent_index: 0, title: "Ticket" } do %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 0, title: t("kitchen_cabinet.ticket") } do %>
         <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div class="<%= field %>">
-            <dt class="<%= label %>">Beneficiary name</dt>
+            <dt class="<%= label %>"><%= t("kitchen_cabinet.beneficiary_name") %></dt>
             <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.person_name %></dd>
           </div>
           <div class="<%= field %>">
-            <dt class="<%= label %>">Representative name</dt>
+            <dt class="<%= label %>"><%= t("kitchen_cabinet.representative_name") %></dt>
             <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.representative_name.presence || "—" %></dd>
           </div>
           <div class="<%= field %>">
-            <dt class="<%= label %>">Village / ward</dt>
+            <dt class="<%= label %>"><%= t("kitchen_cabinet.village_ward") %></dt>
             <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.village.presence || "—" %></dd>
           </div>
           <div class="<%= field %>">
-            <dt class="<%= label %>">Mobile</dt>
+            <dt class="<%= label %>"><%= t("common.mobile") %></dt>
             <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.mobile.presence || "—" %></dd>
           </div>
           <div class="<%= field %>">
-            <dt class="<%= label %>">Reported date</dt>
-            <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_at&.strftime("%d %b %Y") || "—" %></dd>
+            <dt class="<%= label %>"><%= t("common.reported_date") %></dt>
+            <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= l_day(@ticket.reported_at) %></dd>
           </div>
           <div class="<%= field %>">
-            <dt class="<%= label %>">Nature of issue</dt>
+            <dt class="<%= label %>"><%= t("kitchen_cabinet.nature") %></dt>
             <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @ticket.nature_of_issue.presence || "—" %></dd>
           </div>
           <div class="<%= field %>">
-            <dt class="<%= label %>">Reported value</dt>
+            <dt class="<%= label %>"><%= t("kitchen_cabinet.reported_value") %></dt>
             <dd class="mt-1 text-sm tabular-nums text-gray-800 dark:text-white/90"><%= @ticket.reported_value.present? ? number_to_currency(@ticket.reported_value, unit: "₹") : "—" %></dd>
           </div>
           <div class="<%= field %> sm:col-span-2">
-            <dt class="<%= label %>">Description</dt>
+            <dt class="<%= label %>"><%= t("common.description") %></dt>
             <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= @ticket.description.presence || "—" %></dd>
           </div>
         </dl>
       <% end %>
 
-      <%= render layout: "ui/jewel_card", locals: { accent_index: 1, title: "Attachments" } do %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 1, title: t("common.attachments") } do %>
         <% if @ticket.attachments.attached? %>
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <% @ticket.attachments.each do |att| %>
@@ -74,19 +74,19 @@
             <% end %>
           </div>
         <% else %>
-          <p class="rounded-xl border border-dashed border-cyan-200 px-4 py-8 text-center text-sm text-cyan-800/70 dark:border-cyan-900">No attachments.</p>
+          <p class="rounded-xl border border-dashed border-cyan-200 px-4 py-8 text-center text-sm text-cyan-800/70 dark:border-cyan-900"><%= t("common.no_attachments") %></p>
         <% end %>
       <% end %>
 
-      <%= render layout: "ui/jewel_card", locals: { accent_index: 2, title: "Follow-up log" } do %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 2, title: t("kitchen_cabinet.follow_ups") } do %>
         <% if policy(@ticket).update? %>
           <%= form_with url: kitchen_cabinet_ticket_follow_ups_path(@ticket), scope: :ticket_follow_up,
                 method: :post, multipart: true, class: "mb-6" do |f| %>
-            <%= f.text_area :note, rows: 3, placeholder: "What was done about this issue?", class: ta_field_classes %>
+            <%= f.text_area :note, rows: 3, placeholder: t("kitchen_cabinet.follow_up_placeholder"), class: ta_field_classes %>
             <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
               <%= f.file_field :attachment, accept: "image/*,.pdf",
                     class: "block cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-indigo-800" %>
-              <%= f.submit "Add follow-up", class: "#{ta_btn_primary} min-h-11 cursor-pointer" %>
+              <%= f.submit t("kitchen_cabinet.add_follow_up"), class: "#{ta_btn_primary} min-h-11 cursor-pointer" %>
             </div>
           <% end %>
         <% end %>
@@ -98,7 +98,7 @@
               <li class="rounded-xl bg-indigo-50/70 p-4 ring-1 ring-indigo-100 dark:bg-white/[0.03] dark:ring-white/10">
                 <div class="mb-1 flex items-center justify-between text-xs text-gray-400">
                   <span class="font-medium text-gray-600 dark:text-gray-300"><%= fu.created_by.name %></span>
-                  <span class="tabular-nums"><%= fu.created_at.strftime("%d %b %Y %H:%M") %></span>
+                  <span class="tabular-nums"><%= l_stamp(fu.created_at) %></span>
                 </div>
                 <p class="whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= fu.note %></p>
                 <% if fu.attachment.attached? %>
@@ -114,13 +114,13 @@
             <% end %>
           </ol>
         <% else %>
-          <p class="text-sm text-gray-400">No follow-ups yet.</p>
+          <p class="text-sm text-gray-400"><%= t("kitchen_cabinet.no_follow_ups") %></p>
         <% end %>
       <% end %>
     </div>
 
     <div class="space-y-4">
-      <%= render layout: "ui/jewel_card", locals: { accent_index: 4, title: "Status" } do %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 4, title: t("common.status") } do %>
         <div><%= render "ui/status_pill", status: @ticket.status %></div>
 
         <% allowed = KitchenCabinet::Ticket::TRANSITIONS.fetch(@ticket.status, []) %>
@@ -128,47 +128,47 @@
           <div class="mt-4 flex flex-wrap gap-2">
             <% allowed.each do |to| %>
               <% if to == "closed" %>
-                <%= link_to "Close…", new_kitchen_cabinet_ticket_closure_path(@ticket),
+                <%= link_to t("kitchen_cabinet.close"), new_kitchen_cabinet_ticket_closure_path(@ticket),
                       class: "#{ta_btn_secondary} inline-flex items-center min-h-11 cursor-pointer" %>
               <% else %>
-                <%= button_to to.humanize, status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
+                <%= button_to t("kitchen_cabinet.statuses.#{to}"), status_kitchen_cabinet_ticket_path(@ticket), method: :patch,
                       params: { to_status: to }, class: "#{ta_btn_secondary} min-h-11 cursor-pointer" %>
               <% end %>
             <% end %>
           </div>
         <% else %>
-          <p class="mt-3 text-xs text-gray-400">This ticket is closed.</p>
+          <p class="mt-3 text-xs text-gray-400"><%= t("kitchen_cabinet.ticket_closed") %></p>
         <% end %>
 
-        <h3 class="mt-5 mb-2 text-xs font-semibold tracking-wide text-amber-700/80 uppercase">History</h3>
+        <h3 class="mt-5 mb-2 text-xs font-semibold tracking-wide text-amber-700/80 uppercase"><%= t("kitchen_cabinet.history") %></h3>
         <% changes = @ticket.status_changes.order(:created_at) %>
         <% if changes.any? %>
           <ul class="space-y-2 text-xs text-gray-500">
             <% changes.each do |c| %>
               <li>
-                <%= c.from_status&.humanize || "—" %> → <strong class="text-gray-700 dark:text-gray-300"><%= c.to_status.humanize %></strong>
-                · <%= c.actor.name %> · <span class="tabular-nums"><%= c.created_at.strftime("%d %b %Y %H:%M") %></span>
+                <%= c.from_status.present? ? t("kitchen_cabinet.statuses.#{c.from_status}") : "—" %> → <strong class="text-gray-700 dark:text-gray-300"><%= t("kitchen_cabinet.statuses.#{c.to_status}") %></strong>
+                · <%= c.actor.name %> · <span class="tabular-nums"><%= l_stamp(c.created_at) %></span>
               </li>
             <% end %>
           </ul>
         <% else %>
-          <p class="text-xs text-gray-400">No changes yet.</p>
+          <p class="text-xs text-gray-400"><%= t("kitchen_cabinet.no_changes") %></p>
         <% end %>
       <% end %>
 
-      <%= render layout: "ui/jewel_card", locals: { accent_index: 3, title: "Voter ID" } do %>
+      <%= render layout: "ui/jewel_card", locals: { accent_index: 3, title: t("common.voter_id") } do %>
         <% if @voter_matches.to_a.many? && @ticket.voter_id.blank? %>
-          <p class="mb-3 text-sm text-gray-600 dark:text-gray-300">Several voters in this village share this name. Select one to link the voter id and set sentiment to transit.</p>
+          <p class="mb-3 text-sm text-gray-600 dark:text-gray-300"><%= t("kitchen_cabinet.several_voters") %></p>
           <ul class="space-y-2">
             <% @voter_matches.each do |voter| %>
               <li class="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-amber-50/70 px-3 py-2 ring-1 ring-amber-100">
                 <span class="text-sm text-gray-800">
-                  <span class="font-medium"><%= voter.name %></span>
+                  <span class="font-medium"><%= voter.display_name %></span>
                   · <%= voter.voter_id %>
-                  · Booth <%= voter.booth&.number || "—" %>
-                  <% if voter.sr_no %>· Sr <%= voter.sr_no %><% end %>
+                  · <%= t("kitchen_cabinet.booth_sr", booth: voter.booth&.number || "—") %>
+                  <% if voter.sr_no %>· <%= t("kitchen_cabinet.sr", number: voter.sr_no) %><% end %>
                 </span>
-                <%= button_to "Select", match_voter_kitchen_cabinet_ticket_path(@ticket), method: :post,
+                <%= button_to t("kitchen_cabinet.select_voter"), match_voter_kitchen_cabinet_ticket_path(@ticket), method: :post,
                       params: { matched_voter_id: voter.id },
                       class: "#{ta_btn_secondary} min-h-9 cursor-pointer text-xs" %>
               </li>

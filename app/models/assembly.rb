@@ -1,4 +1,6 @@
 class Assembly < ApplicationRecord
+  include NativeNamed
+
   belongs_to :loksabha
   has_many :election_results, class_name: "ConstituencyElection", as: :constituency, inverse_of: :constituency, dependent: :restrict_with_error
   has_many :villages, dependent: :restrict_with_error
@@ -6,6 +8,10 @@ class Assembly < ApplicationRecord
   validates :name, presence: true
   validates :first_part, :last_part, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validate :part_range_order
+
+  def resolved_native_locale
+    loksabha&.native_locale
+  end
 
   private
 

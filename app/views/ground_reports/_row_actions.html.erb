@@ -1,6 +1,6 @@
 <% if can_write %>
   <div class="inline-flex shrink-0 items-center gap-1">
     <%= icon_action_link :edit, edit_path %>
-    <%= icon_action_button :delete, delete_path, confirm: "Delete this #{label}?" %>
+    <%= icon_action_button :delete, delete_path, confirm: t("common.delete_confirm", record: label) %>
   </div>
 <% end %>

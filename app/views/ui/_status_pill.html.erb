@@ -1,7 +1,6 @@
 <%# Ticket workflow status — subtle tint + dot (never solid; distinct from RAG). Carries a label
     + dot so meaning never rests on color alone (UX-DR5/UX-DR7). %>
-<% labels = { "open" => "Open", "in_progress" => "In progress", "closed" => "Closed", "blocked" => "Blocked" } %>
-<% lbl = labels[status.to_s] %>
+<% lbl = t("kitchen_cabinet.statuses.#{status}", default: status.to_s.humanize) %>
 <% color = status_color(status) %>
 <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
       style="background: color-mix(in srgb, <%= color %> 12%, transparent); color: <%= color %>">

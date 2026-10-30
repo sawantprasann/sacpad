@@ -1,15 +1,15 @@
 <% console = local_assigns.fetch(:console, false) %>
 <aside class="<%= ta_card_classes %> p-5 md:p-6">
-  <h2 class="text-base font-semibold text-gray-900 dark:text-white/90">Ticket details</h2>
+  <h2 class="text-base font-semibold text-gray-900 dark:text-white/90"><%= t("support.details") %></h2>
   <dl class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
     <% rows = [
-      ["Requested by", @ticket.user.name],
-      ["Email", @ticket.user.email],
-      (["Organization", @ticket.organization.name] if console),
-      ["Ticket ID", @ticket.ticket_number],
-      ["Category", @ticket.category_label],
-      ["Created", support_date(@ticket.created_at)],
-      ["Updated", support_date(@ticket.updated_at)]
+      [t("support.requested_by"), @ticket.user.name],
+      [t("common.email"), @ticket.user.email],
+      ([t("support.organization"), @ticket.organization.name] if console),
+      [t("support.ticket_id"), @ticket.ticket_number],
+      [t("common.category"), @ticket.category_label],
+      [t("common.created"), support_date(@ticket.created_at)],
+      [t("support.updated"), support_date(@ticket.updated_at)]
     ].compact %>
     <% rows.each do |label, value| %>
       <div class="flex items-start justify-between gap-4 py-3 text-sm">
@@ -18,7 +18,7 @@
       </div>
     <% end %>
     <div class="flex items-center justify-between gap-4 py-3 text-sm">
-      <dt class="text-gray-500">Status</dt>
+      <dt class="text-gray-500"><%= t("common.status") %></dt>
       <dd><%= render "support_tickets/status", ticket: @ticket %></dd>
     </div>
   </dl>
