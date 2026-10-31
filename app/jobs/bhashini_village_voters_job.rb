@@ -10,6 +10,7 @@ class BhashiniVillageVotersJob < ApplicationJob
   URL = URI("https://anuvaad.bhashini.gov.in/v1/pipeline")
   SERVICE_ID = "bhashini/sarvam/nmt"
   BATCH_SIZE = 200
+  RETRY_STATUSES = %w[429 502 503 504].freeze
 
   def perform(village_id)
     village = Village.find(village_id)
@@ -17,11 +18,20 @@ class BhashiniVillageVotersJob < ApplicationJob
     saved = 0
     skipped = 0
 
-    Rails.logger.info("[BhashiniVillageVotersJob] start village=#{village.id} #{village.name} voters=#{voters.size}")
+    batch_count = (voters.size.to_f / BATCH_SIZE).ceil
+    log "start village=#{village.id} #{village.name} voters=#{voters.size} batches=#{batch_count}"
 
-    voters.each_slice(BATCH_SIZE) do |batch|
+    voters.each_slice(BATCH_SIZE).with_index do |batch, batch_index|
+      batch_no = batch_index + 1
       names = batch.map { |voter| english_name(voter) }
+      log "sending village=#{village.id} batch=#{batch_no}/#{batch_count} names=#{names.size}"
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       translated = self.class.translate(names)
+      seconds = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).round(1)
+      log "received village=#{village.id} batch=#{batch_no}/#{batch_count} rows=#{translated.size} seconds=#{seconds}"
+
+      batch_saved = 0
+      batch_skipped = 0
       batch.each_with_index do |voter, index|
         row = translated[index] || {}
         target = row["target"].to_s.squish
@@ -30,15 +40,21 @@ class BhashiniVillageVotersJob < ApplicationJob
         attrs = native_attrs(voter, target)
         if attrs.nil?
           skipped += 1
+          batch_skipped += 1
           next
         end
 
         PaperTrail.request(enabled: false) { voter.update!(attrs) }
         saved += 1
+        batch_saved += 1
       end
+      log "saved village=#{village.id} batch=#{batch_no}/#{batch_count} saved=#{batch_saved} skipped=#{batch_skipped} total_saved=#{saved} total_skipped=#{skipped}"
     end
 
-    Rails.logger.info("[BhashiniVillageVotersJob] done village=#{village.id} #{village.name} saved=#{saved} skipped=#{skipped}")
+    log "done village=#{village.id} #{village.name} saved=#{saved} skipped=#{skipped}"
+  rescue StandardError => error
+    log "failed village=#{village_id} #{error.class}: #{error.message}", level: :error
+    raise
   end
 
   def self.translate(names)
@@ -65,24 +81,59 @@ class BhashiniVillageVotersJob < ApplicationJob
     }
 
     6.times do |attempt|
-      http = Net::HTTP.new(URL.host, URL.port)
-      http.use_ssl = true
-      http.open_timeout = 15
-      http.read_timeout = 180
-      request = Net::HTTP::Post.new(URL)
-      request["Content-Type"] = "application/json"
-      request["Accept"] = "application/json"
-      request.body = body.to_json
-      response = http.request(request)
-      parsed = JSON.parse(response.body)
-      output = parsed.dig("pipelineResponse", 0, "output")
+      log "http attempt=#{attempt + 1}/6 names=#{names.size}"
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      response = post(body)
+      seconds = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).round(1)
+      parsed = json_body(response)
+      output = parsed&.dig("pipelineResponse", 0, "output")
+      log "http status=#{response.code} json=#{parsed.present?} rows=#{output.is_a?(Array) ? output.size : 0} seconds=#{seconds}"
       return output if output.is_a?(Array) && output.size == names.size
 
-      wait = parsed["error"].to_s[/after (\d+) seconds/i, 1] || (response.code == "429" ? "20" : nil)
-      raise "Bhashini #{response.code}: #{response.body}" if wait.blank? || attempt == 5
+      wait = parsed&.dig("error").to_s[/after (\d+) seconds/i, 1]
+      wait ||= "20" if parsed.nil? || RETRY_STATUSES.include?(response.code)
+      if wait.blank? || attempt == 5
+        raise "Bhashini #{response.code}: #{response.body.to_s[0, 180]}"
+      end
 
-      sleep wait.to_i + 1
+      log "retry in #{wait.to_i + 1}s attempt=#{attempt + 1}/6 status=#{response.code}", level: :warn
+      pause(wait.to_i + 1)
     end
+  end
+
+  def self.log(message, level: :info)
+    line = "[BhashiniVillageVotersJob] #{message}"
+    Rails.logger.public_send(level, line)
+    $stdout.puts(line)
+    $stdout.flush
+  end
+
+  def self.post(body)
+    http = Net::HTTP.new(URL.host, URL.port)
+    http.use_ssl = true
+    http.open_timeout = 15
+    http.read_timeout = 180
+    request = Net::HTTP::Post.new(URL)
+    request["Content-Type"] = "application/json"
+    request["Accept"] = "application/json"
+    request.body = body.to_json
+    http.request(request)
+  end
+
+  # A 504 from the gateway is an HTML page, not JSON. Treat that as a failed
+  # attempt so the batch is sent again instead of killing the village job.
+  def self.json_body(response)
+    JSON.parse(response.body)
+  rescue JSON::ParserError
+    nil
+  end
+
+  def self.pause(seconds)
+    sleep seconds
+  end
+
+  def log(message, level: :info)
+    self.class.log(message, level: level)
   end
 
   def english_name(voter)
