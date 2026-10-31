@@ -68,9 +68,6 @@ Rails.application.routes.draw do
   namespace :api do
     post "assemblies/:assembly_id/parts/:part_number", to: "rolls#create"
     post "assemblies/:assembly_id/parts/:part_number/native_names", to: "rolls#native_names"
-    get "districts/:district_id/villages", to: "voter_names#villages"
-    get "villages/:village_id/voter_names", to: "voter_names#show"
-    post "villages/:village_id/voter_names", to: "voter_names#update"
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
