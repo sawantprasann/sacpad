@@ -30,7 +30,8 @@ class VoterTest < ActiveSupport::TestCase
     patil = Voter.create!(voter_id: "TJP0000001", first_name: "Tanaji", last_name: "Patil")
 
     assert_equal [ tanaji.id ], Voter.matching_name("tanaji savant").pluck(:id)
-    assert_equal [ tanaji.id ], Voter.matching_name("naji").pluck(:id)
+    assert_equal [ tanaji.id, patil.id ].sort, Voter.matching_name("naji").pluck(:id).sort
+    assert_equal [ tanaji.id ], Voter.matching_name("yvant").pluck(:id)
     assert_equal [ tanaji.id, patil.id ].sort, Voter.matching_name("t").pluck(:id).sort
     assert_empty Voter.matching_name("   ")
     assert_includes Voter.matching_name("tanaji savant").to_sql, "name_search_tokens"
