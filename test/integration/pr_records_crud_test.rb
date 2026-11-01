@@ -108,6 +108,29 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index shows each coverage link" do
+    ActsAsTenant.with_tenant(@org) do
+      record = @org.pr_records.create!(
+        owner: @user,
+        title: "Linked Coverage",
+        published_on: Date.today,
+        sentiment: :positive,
+        pr_category: @category,
+        media_platform: @platform,
+        url: "https://news.example/legacy"
+      )
+      record.links.create!(url: "https://news.example/story", position: 0)
+      record.links.create!(url: "https://news.example/clip", position: 1)
+    end
+
+    get pr_records_path
+    assert_response :success
+    assert_select "th", text: "Link"
+    assert_select "a[href='https://news.example/story'][target=_blank]"
+    assert_select "a[href='https://news.example/clip'][target=_blank]"
+    assert_select "a[href='https://news.example/legacy']", count: 0
+  end
+
   test "user can create record with owner set to current_user" do
     ActsAsTenant.with_tenant(@org) do
       post pr_records_path, params: {

@@ -8,7 +8,7 @@ class CalendarTest < ActionDispatch::IntegrationTest
     @role = Role.find_or_create_by!(slug: "pa") { |role| role.name = "PA" }
     @user = User.create!(organization: @org, role: @role, name: "Asha", email: "asha-#{SecureRandom.hex(4)}@example.com", password: "password123")
     @other = User.create!(organization: @org, role: @role, name: "Nia", email: "nia-#{SecureRandom.hex(4)}@example.com", password: "password123")
-    @today = CalendarEvent.zone.today
+    @today = Time.zone.today
   end
 
   test "guests are sent to sign in" do

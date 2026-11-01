@@ -16,8 +16,7 @@ class HomeController < ApplicationController
   end
 
   def load_schedule
-    zone = CalendarEvent.zone
-    @schedule_today = zone.today
+    @schedule_today = Time.zone.today
     @schedule_tomorrow = @schedule_today + 1.day
     @today_events = current_user.calendar_events.on_date(@schedule_today).chronological.to_a
     @tomorrow_events = current_user.calendar_events.on_date(@schedule_tomorrow).chronological.to_a

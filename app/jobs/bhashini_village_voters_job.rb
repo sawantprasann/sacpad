@@ -14,12 +14,15 @@ class BhashiniVillageVotersJob < ApplicationJob
 
   def perform(village_id)
     village = Village.find(village_id)
-    voters = village.voters.to_a.select { |voter| english_name(voter).present? }
+    # A rerun should not send names already saved yesterday or today.
+    window = self.class.recent_window
+    skipped_recent = village.voters.where(updated_at: window).count
+    voters = village.voters.where.not(updated_at: window).to_a.select { |voter| english_name(voter).present? }
     saved = 0
     skipped = 0
 
     batch_count = (voters.size.to_f / BATCH_SIZE).ceil
-    log "start village=#{village.id} #{village.name} voters=#{voters.size} batches=#{batch_count}"
+    log "start village=#{village.id} #{village.name} voters=#{voters.size} skipped_recent=#{skipped_recent} batches=#{batch_count}"
 
     voters.each_slice(BATCH_SIZE).with_index do |batch, batch_index|
       batch_no = batch_index + 1
@@ -51,10 +54,17 @@ class BhashiniVillageVotersJob < ApplicationJob
       log "saved village=#{village.id} batch=#{batch_no}/#{batch_count} saved=#{batch_saved} skipped=#{batch_skipped} total_saved=#{saved} total_skipped=#{skipped}"
     end
 
-    log "done village=#{village.id} #{village.name} saved=#{saved} skipped=#{skipped}"
+    log "done village=#{village.id} #{village.name} saved=#{saved} skipped=#{skipped} skipped_recent=#{skipped_recent}"
   rescue StandardError => error
     log "failed village=#{village_id} #{error.class}: #{error.message}", level: :error
     raise
+  end
+
+  # Yesterday and today on the India calendar. updated_at is stored in UTC.
+  def self.recent_window
+    zone = ActiveSupport::TimeZone["Asia/Kolkata"]
+    start_of_today = zone.now.beginning_of_day
+    (start_of_today - 1.day)...(start_of_today + 1.day)
   end
 
   def self.translate(names)

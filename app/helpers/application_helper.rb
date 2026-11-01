@@ -281,7 +281,7 @@ module ApplicationHelper
     letters.join.upcase.presence || "S"
   end
 
-  # Campaign desk clock. Users are in India; the app time zone is still UTC.
+  # Campaign desk clock in India Standard Time.
   def dashboard_now
     Time.current.in_time_zone("Asia/Kolkata")
   end

@@ -1,0 +1,11 @@
+<%# Sentiment filter. Dots match the voter-row colors. %>
+<%= render "ui/colored_select",
+      name: :sentiment,
+      id: "sentiment",
+      selected: params[:sentiment],
+      blank: t("common.any_sentiment"),
+      choices: [
+        [ sentiment_label("pleased"), "pleased", "#16a34a" ],
+        [ sentiment_label("transit"), "transit", "#d97706" ],
+        [ sentiment_label("displeased"), "displeased", "#dc2626" ]
+      ] %>

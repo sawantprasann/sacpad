@@ -32,7 +32,6 @@ module VoterLists
     end
 
     # The village bounds the set. Export uses the same booth-then-serial order as the list.
-    # A name search still loads the rows, because names are encrypted.
     def listed_voters
       relation = current_user.visible_voters(@village.voters.preload(:booth, :village))
       relation = relation.where(voter_id: params[:voter_id].strip) if params[:voter_id].present?
@@ -50,10 +49,8 @@ module VoterLists
       elsif params[:voted] == "no"
         relation = relation.where.not(id: voted_ids)
       end
-      relation = relation.by_booth_and_serial
-      return relation unless params[:name].present?
-
-      relation.to_a.select { |voter| voter.matches_name?(params[:name]) }
+      relation = relation.matching_name(params[:name]) if params[:name].present?
+      relation.by_booth_and_serial
     end
 
     def filter_sr_no(relation)

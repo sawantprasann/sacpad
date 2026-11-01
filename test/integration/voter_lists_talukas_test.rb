@@ -126,6 +126,7 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal [ "Zara Pawar", "Amit Kale", "Asha Patil", "Bala Shinde" ], voter_names
     assert_match "bg-green-50", response.body
+    assert_select "[data-controller=colored-select] option[value=pleased][data-color='#16a34a']", text: "Pleased"
     assert_select "a[href=?]", voter_lists_taluka_village_path(@taluka, @village, format: :xlsx)
 
     get voter_lists_taluka_village_path(@taluka, @village, voter_id: "AMT1111111", name: "amit", booth: "2", sr_no: 8, sentiment: "pleased")

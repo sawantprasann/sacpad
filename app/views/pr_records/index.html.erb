@@ -46,6 +46,7 @@
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
           <th class="<%= th %>"><%= t("common.title") %></th>
+          <th class="<%= th %>"><%= t("pr.link") %></th>
           <th class="<%= th %>"><%= t("common.category") %></th>
           <th class="<%= th %>"><%= t("pr.platform") %></th>
           <th class="<%= th %>"><%= t("common.sentiment") %></th>
@@ -58,6 +59,9 @@
           <tr class="group hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
             <td class="<%= td %> max-w-xs">
               <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
+            </td>
+            <td class="<%= td %> max-w-xs">
+              <%= render "pr_records/links", record: record %>
             </td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.pr_category.name %></td>
             <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.media_platform&.name || record.media_platform_name || "—" %></td>
@@ -75,11 +79,12 @@
 
   <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
     <% @records.each do |record| %>
-      <%= link_to pr_record_path(record), class: "block px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]" do %>
-        <p class="#{ta_text_link}"><%= record.title %></p>
+      <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]">
+        <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
+        <div class="mt-1"><%= render "pr_records/links", record: record %></div>
         <p class="mt-1 text-sm text-gray-600"><%= record.pr_category.name %> · <%= record.media_platform&.name || record.media_platform_name || t("pr.no_platform") %></p>
         <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %> · <%= l_day(record.published_on) %></p>
-      <% end %>
+      </div>
     <% end %>
     <% if @records.empty? %>
       <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("pr.none") %></p>

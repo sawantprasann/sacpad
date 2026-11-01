@@ -5,7 +5,7 @@ class PrRecordsController < ApplicationController
   def index
     @categories = PrCategory.active
     @category = @categories.find { |category| category.slug == params[:category] }
-    relation = policy_scope(PrRecord).includes(:pr_category, :owner, :media_platform)
+    relation = policy_scope(PrRecord).includes(:pr_category, :owner, :media_platform, :links)
     relation = relation.where(pr_category_id: @category.id) if @category
     if params[:q].present?
       term = "%#{params[:q].strip}%"

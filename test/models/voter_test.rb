@@ -25,6 +25,21 @@ class VoterTest < ActiveSupport::TestCase
     assert_not voter.matches_name?("   ")
   end
 
+  test "name search is a database lookup and does not store the name" do
+    tanaji = Voter.create!(voter_id: "TJS0000001", first_name: "Tanaji", middle_name: "Jayvant", last_name: "Savant")
+    patil = Voter.create!(voter_id: "TJP0000001", first_name: "Tanaji", last_name: "Patil")
+
+    assert_equal [ tanaji.id ], Voter.matching_name("tanaji savant").pluck(:id)
+    assert_equal [ tanaji.id ], Voter.matching_name("naji").pluck(:id)
+    assert_equal [ tanaji.id, patil.id ].sort, Voter.matching_name("t").pluck(:id).sort
+    assert_empty Voter.matching_name("   ")
+    assert_includes Voter.matching_name("tanaji savant").to_sql, "name_search_tokens"
+
+    raw = Voter.connection.select_value("SELECT name_search_tokens::text FROM voters WHERE id = #{tanaji.id}")
+    assert_not_includes raw.to_s.downcase, "tanaji"
+    assert_not_includes raw.to_s.downcase, "savant"
+  end
+
   test "name joins the stored name parts and skips a blank middle name" do
     with_middle = Voter.new(first_name: "Asha", middle_name: "Ramesh", last_name: "Patil")
     assert_equal "Asha Ramesh Patil", with_middle.name

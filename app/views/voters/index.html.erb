@@ -53,14 +53,7 @@
     <% unless current_user.booth_manager? %>
       <div>
         <%= label_tag :sentiment, t("common.sentiment"), class: ta_label_classes %>
-        <%= select_tag :sentiment,
-              options_for_select([
-                [ "● #{sentiment_label("pleased")}", "pleased" ],
-                [ "● #{sentiment_label("transit")}", "transit" ],
-                [ "● #{sentiment_label("displeased")}", "displeased" ]
-              ], params[:sentiment]),
-              include_blank: t("common.any_sentiment"),
-              class: ta_field_classes %>
+        <%= render "ui/sentiment_filter" %>
       </div>
     <% end %>
     <div>

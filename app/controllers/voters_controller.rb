@@ -77,10 +77,7 @@ class VotersController < ApplicationController
       voted_ids = VoterTurnout.where(election: @election, voted: true).select(:voter_id)
       relation = relation.where.not(id: voted_ids)
     end
-    if params[:name].present?
-      matched = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
-      relation = Voter.where(id: matched)
-    end
+    relation = relation.matching_name(params[:name]) if params[:name].present?
     relation.preload(:booth, :village).by_booth_and_serial
   end
 

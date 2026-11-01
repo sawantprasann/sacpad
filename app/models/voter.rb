@@ -4,6 +4,9 @@ class Voter < ApplicationRecord
   # via VoterSentiment table. The Voter Lists bulk-import experience (Epic 6) uploads once here,
   # and all orgs reference the same records.
   include FullyVersioned   # Tier-1 VoterVersion history for PII edits
+  self.paper_trail_options = paper_trail_options.merge(
+    skip: Array(paper_trail_options[:skip]) | [ "name_search_tokens" ]
+  )
 
   belongs_to :booth, optional: true
   belongs_to :state, optional: true
@@ -25,8 +28,11 @@ class Voter < ApplicationRecord
     )
   }
 
-  # PII encrypted at rest (NFR18). Name fields deterministic for searchability.
-  # voter_id is deterministic for Ticket lookup; name fields deterministic for voter search/filter.
+  # Case-insensitive substring match on the English and native names.
+  scope :matching_name, ->(query) { NameSearch.apply(all, query) }
+
+  # PII encrypted at rest (NFR18). voter_id is deterministic for Ticket lookup.
+  # Name search uses name_search_tokens (HMAC substrings), not the ciphertext.
   encrypts :voter_id, deterministic: true
   encrypts :first_name, deterministic: true
   encrypts :last_name, deterministic: true
@@ -39,6 +45,7 @@ class Voter < ApplicationRecord
   validates :first_name, :last_name, presence: true
 
   before_validation :fill_native_person_names
+  before_save :assign_name_search_tokens
 
   def name
     [ first_name, middle_name, last_name ].compact_blank.join(" ")
@@ -60,10 +67,28 @@ class Voter < ApplicationRecord
     words = query.to_s.squish.downcase.split
     return false if words.empty?
 
-    full = [ name, native_full_name ].compact_blank.join(" ").downcase
-    words.all? { |word| full.include?(word) }
+    words.all? { |word| searchable_name.include?(word) }
   rescue ActiveRecord::Encryption::Errors::Decryption
     false
+  end
+
+  def searchable_name
+    self.class.searchable_name_from(
+      first_name: first_name,
+      middle_name: middle_name,
+      last_name: last_name,
+      native_first_name: native_first_name,
+      native_middle_name: native_middle_name,
+      native_last_name: native_last_name
+    )
+  end
+
+  def self.searchable_name_from(...)
+    NameSearch.searchable_from(...)
+  end
+
+  def self.name_search_tokens_for(...)
+    NameSearch.tokens_for(searchable_name_from(...))
   end
 
   # Male, female, other, and blank genders for a voter set. Defaults to every voter.
@@ -93,6 +118,18 @@ class Voter < ApplicationRecord
     loksabha&.native_locale.presence ||
       assembly&.loksabha&.native_locale.presence ||
       village&.assembly&.loksabha&.native_locale
+  end
+
+  def assign_name_search_tokens
+    tokens = self.class.name_search_tokens_for(
+      first_name: first_name,
+      middle_name: middle_name,
+      last_name: last_name,
+      native_first_name: native_first_name,
+      native_middle_name: native_middle_name,
+      native_last_name: native_last_name
+    )
+    self.name_search_tokens = tokens if name_search_tokens != tokens
   end
 
   def fill_native_person_names

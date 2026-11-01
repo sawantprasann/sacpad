@@ -39,50 +39,63 @@
   <p class="mt-6 text-sm text-gray-500"><%= t("booths.marks_belong", election: @election.name) %></p>
 </section>
 
-<section class="<%= ta_card_classes %> mt-6 p-6">
-  <h2 class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("booths.manager") %></h2>
-  <p class="mt-1 text-sm text-gray-500"><%= t("booths.manager_help") %></p>
+<section class="<%= ta_card_classes %> mt-6 overflow-hidden">
+  <div class="px-6 py-4">
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90"><%= t("booths.manager") %></h2>
+    <p class="mt-0.5 text-xs text-gray-500"><%= t("booths.manager_help") %></p>
+  </div>
 
   <% if @managers.any? %>
-    <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
-      <% @managers.each do |manager| %>
-        <li class="py-3">
-          <p class="text-sm font-medium text-gray-900 dark:text-white/90"><%= manager.name %></p>
-          <p class="mt-0.5 text-xs text-gray-500">
-            <%= manager.email %>
-            <% if manager.phone.present? %> · <span class="tabular-nums"><%= manager.phone %></span><% end %>
-            <%= " · #{t("common.inactive")}" unless manager.active? %>
-          </p>
-        </li>
-      <% end %>
-    </ul>
+    <div class="overflow-x-auto border-t border-gray-100 dark:border-gray-800">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 dark:bg-white/[0.03]">
+          <tr>
+            <th class="border-b border-gray-200 px-5 py-3 text-left text-xs font-medium text-gray-500"><%= t("common.name") %></th>
+            <th class="border-b border-gray-200 px-5 py-3 text-left text-xs font-medium text-gray-500"><%= t("common.email") %></th>
+            <th class="border-b border-gray-200 px-5 py-3 text-left text-xs font-medium text-gray-500"><%= t("common.phone") %></th>
+            <th class="border-b border-gray-200 px-5 py-3 text-left text-xs font-medium text-gray-500"><%= t("common.status") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @managers.each do |manager| %>
+            <tr class="last:[&>td]:border-b-0">
+              <td class="border-b border-gray-100 px-5 py-3 font-medium text-gray-900 dark:border-gray-800 dark:text-white/90"><%= manager.name %></td>
+              <td class="border-b border-gray-100 px-5 py-3 text-gray-700 dark:border-gray-800"><%= manager.email %></td>
+              <td class="border-b border-gray-100 px-5 py-3 tabular-nums text-gray-700 dark:border-gray-800"><%= manager.phone.presence || "—" %></td>
+              <td class="border-b border-gray-100 px-5 py-3 text-gray-700 dark:border-gray-800"><%= manager.active? ? "—" : t("common.inactive") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
   <% else %>
-    <p class="mt-4 text-sm text-gray-500"><%= t("booths.no_manager") %></p>
+    <p class="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-400 dark:border-gray-800"><%= t("booths.no_manager") %></p>
   <% end %>
 
   <% if current_user.can_add_booth_manager? %>
-    <%= form_with scope: :user, url: booth_managers_path(@booth), class: "mt-6" do |f| %>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <%= f.label :name, t("common.name"), class: ta_label_classes %>
-          <%= f.text_field :name, class: ta_field_classes, required: true %>
+    <%= render "ground_reports/villages/add_panel", label: t("booths.add_manager") do %>
+      <%= form_with scope: :user, url: booth_managers_path(@booth), class: "space-y-3" do |f| %>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <%= f.label :name, t("common.name"), class: ta_label_classes %>
+            <%= f.text_field :name, class: ta_field_classes, required: true %>
+          </div>
+          <div>
+            <%= f.label :email, t("common.email"), class: ta_label_classes %>
+            <%= f.email_field :email, class: ta_field_classes, required: true %>
+          </div>
+          <div>
+            <%= f.label :phone, t("common.phone"), class: ta_label_classes %>
+            <%= f.telephone_field :phone, class: ta_field_classes %>
+          </div>
+          <div>
+            <%= f.label :password, t("team.initial_password"), class: ta_label_classes %>
+            <%= f.password_field :password, class: ta_field_classes, required: true, autocomplete: "new-password" %>
+          </div>
         </div>
-        <div>
-          <%= f.label :email, t("common.email"), class: ta_label_classes %>
-          <%= f.email_field :email, class: ta_field_classes, required: true %>
-        </div>
-        <div>
-          <%= f.label :phone, t("common.phone"), class: ta_label_classes %>
-          <%= f.telephone_field :phone, class: ta_field_classes %>
-        </div>
-        <div>
-          <%= f.label :password, t("team.initial_password"), class: ta_label_classes %>
-          <%= f.password_field :password, class: ta_field_classes, required: true, autocomplete: "new-password" %>
-        </div>
-      </div>
-      <div class="mt-4">
-        <%= f.submit t("booths.add_manager"), class: "#{ta_btn_primary} min-h-11 cursor-pointer", style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
-      </div>
+        <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
+                style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("booths.add_manager") %></button>
+      <% end %>
     <% end %>
   <% end %>
 </section>

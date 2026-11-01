@@ -41,6 +41,11 @@ class VotersListTest < ActionDispatch::IntegrationTest
     assert_match "XYZ7654321", @response.body
     assert_match "bg-green-50", @response.body
     assert_select "[data-controller=min-search-select][data-min-search-select-min-length-value='2']"
+    assert_select "[data-controller=colored-select] select[name=sentiment]" do
+      assert_select "option[value=pleased][data-color='#16a34a']", text: "Pleased"
+      assert_select "option[value=transit][data-color='#d97706']", text: "Transit"
+      assert_select "option[value=displeased][data-color='#dc2626']", text: "Displeased"
+    end
     assert_select "select[name=village_id]" do
       assert_select "option", text: "Any village"
       assert_select "option", text: "Nimgaon"

@@ -73,8 +73,7 @@ module Console
     end
 
     def filter_voters_by_name(relation)
-      ids = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
-      Voter.includes(:booth).where(id: ids).order(:id)
+      relation.matching_name(params[:name])
     end
 
     def voter_filters

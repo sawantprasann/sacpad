@@ -45,6 +45,9 @@ class Eci::ImportBoothVotersTest < ActiveSupport::TestCase
     assert_equal @assembly, asha.assembly
     assert_equal @village, asha.village
     assert_equal [ "Ravi", "Kale" ], [ ravi.first_name, ravi.last_name ]
+    assert_equal [ asha.id ], Voter.matching_name("asha patil").pluck(:id)
+    raw_tokens = Voter.connection.select_value("SELECT name_search_tokens::text FROM voters WHERE id = #{asha.id}")
+    assert_not_includes raw_tokens.to_s.downcase, "asha"
   end
 
   test "updates an existing epic instead of inserting a second voter" do

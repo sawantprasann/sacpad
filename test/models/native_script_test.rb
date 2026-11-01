@@ -47,6 +47,8 @@ class NativeScriptTest < ActiveSupport::TestCase
     I18n.with_locale(:mr) { assert_equal "तानाजि जायवानत सावानत", voter.display_name }
     assert voter.matches_name?("तानाजि")
     assert voter.matches_name?("Tanaji")
+    assert_equal [ voter.id ], Voter.matching_name("तानाजि").pluck(:id)
+    assert_equal [ voter.id ], Voter.matching_name("Tanaji").pluck(:id)
 
     voter.update!(native_first_name: "तानाजी", first_name: "Tanaji")
     assert_equal "तानाजी", voter.reload.native_first_name

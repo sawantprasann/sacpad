@@ -11,7 +11,7 @@ class CalendarEventTest < ActiveSupport::TestCase
   test "stores the chosen clock time in India Standard Time" do
     event = create_event(starts_on: "2026-10-30", starts_time: "09:30", ends_on: "2026-10-30", ends_time: "10:15")
 
-    zone = CalendarEvent.zone
+    zone = Time.zone
     assert_equal zone.local(2026, 10, 30, 9, 30), event.starts_at
     assert_equal zone.local(2026, 10, 30, 10, 15), event.ends_at
     assert_equal "2026-10-30", event.starts_on

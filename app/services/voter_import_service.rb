@@ -59,7 +59,7 @@ class VoterImportService
     end
 
     # Prepare voter attributes
-    {
+    prepared = {
       voter_id: row[:voter_id].to_s.strip,
       first_name: row[:first_name].to_s.strip,
       last_name: row[:last_name].to_s.strip,
@@ -71,6 +71,12 @@ class VoterImportService
       village: row[:village].to_s.strip.presence,
       booth_id: find_or_nil_booth_id(row[:booth_id])
     }
+    prepared[:name_search_tokens] = Voter.name_search_tokens_for(
+      first_name: prepared[:first_name],
+      middle_name: prepared[:middle_name],
+      last_name: prepared[:last_name]
+    )
+    prepared
   rescue StandardError => e
     results[:errors] << "Error processing row #{row.inspect}: #{e.message}"
     nil
@@ -87,7 +93,7 @@ class VoterImportService
   end
 
   def upsert_batch(batch)
-    update_only_columns = %i[first_name last_name middle_name mobile state loksabha assembly village booth_id]
+    update_only_columns = %i[first_name last_name middle_name mobile state loksabha assembly village booth_id name_search_tokens]
 
     Voter.upsert_all(
       batch,

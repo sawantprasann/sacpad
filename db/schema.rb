@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_30_183000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -869,10 +869,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_30_183000) do
     t.text "native_first_name"
     t.text "native_middle_name"
     t.text "native_last_name"
+    t.text "name_search_tokens", default: [], null: false, array: true
     t.index ["assembly_id"], name: "index_voters_on_assembly_id"
     t.index ["booth_id", "sr_no"], name: "index_voters_on_booth_id_and_sr_no"
     t.index ["booth_id"], name: "index_voters_on_booth_id"
     t.index ["loksabha_id"], name: "index_voters_on_loksabha_id"
+    t.index ["name_search_tokens"], name: "index_voters_on_name_search_tokens", using: :gin
     t.index ["sr_no"], name: "index_voters_on_sr_no"
     t.index ["state_id"], name: "index_voters_on_state_id"
     t.index ["village_id"], name: "index_voters_on_village_id"

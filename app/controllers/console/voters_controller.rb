@@ -100,8 +100,7 @@ module Console
         return relation
       end
 
-      ids = relation.filter_map { |voter| voter.id if voter.matches_name?(params[:name]) }
-      Voter.includes(:booth, :village).where(id: ids).order(created_at: :desc)
+      relation.matching_name(params[:name])
     end
   end
 end

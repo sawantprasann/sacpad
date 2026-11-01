@@ -10,7 +10,7 @@ module Eci
     UPSERT_BATCH = 500
     UPSERT_COLUMNS = %i[
       first_name middle_name last_name age house_no gender sr_no
-      booth_id state_id loksabha_id assembly_id village_id
+      booth_id state_id loksabha_id assembly_id village_id name_search_tokens
     ].freeze
 
     def self.pdf_url(state_cd, ac_number, part_number)
@@ -203,6 +203,7 @@ module Eci
       return 0 if rows.empty?
 
       rows.each_slice(UPSERT_BATCH) do |slice|
+        stamp_name_search_tokens(slice)
         Voter.upsert_all(slice, unique_by: :voter_id, update_only: UPSERT_COLUMNS)
       end
       rows.size
@@ -233,6 +234,24 @@ module Eci
         }
       end
       by_epic.values
+    end
+
+    # upsert_all skips callbacks. Keep native-name digests when a roll is imported again.
+    def stamp_name_search_tokens(slice)
+      existing = Voter.where(voter_id: slice.map { |row| row[:voter_id] })
+        .select(:id, :voter_id, :native_first_name, :native_middle_name, :native_last_name)
+        .index_by(&:voter_id)
+      slice.each do |row|
+        current = existing[row[:voter_id]]
+        row[:name_search_tokens] = Voter.name_search_tokens_for(
+          first_name: row[:first_name],
+          middle_name: row[:middle_name],
+          last_name: row[:last_name],
+          native_first_name: current&.native_first_name,
+          native_middle_name: current&.native_middle_name,
+          native_last_name: current&.native_last_name
+        )
+      end
     end
 
     def elector_count(cover, *keys)

@@ -57,13 +57,12 @@ class CalendarEventsController < ApplicationController
   end
 
   def load_month
-    @zone = CalendarEvent.zone
-    @today = @zone.today
+    @today = Time.zone.today
     @month = parsed_month
     @grid_start = @month.beginning_of_week(:sunday)
     @grid_end = @month.end_of_month.end_of_week(:sunday)
-    from = @zone.local(@grid_start.year, @grid_start.month, @grid_start.day)
-    to = @zone.local(@grid_end.year, @grid_end.month, @grid_end.day) + 1.day
+    from = Time.zone.local(@grid_start.year, @grid_start.month, @grid_start.day)
+    to = Time.zone.local(@grid_end.year, @grid_end.month, @grid_end.day) + 1.day
     @events = current_user.calendar_events.covering(from, to).chronological.to_a
     @events_by_day = Hash.new { |days, day| days[day] = [] }
     @events.each do |event|
@@ -113,6 +112,6 @@ class CalendarEventsController < ApplicationController
   end
 
   def month_token(time)
-    time.in_time_zone(CalendarEvent.zone).strftime("%Y-%m")
+    time.in_time_zone.strftime("%Y-%m")
   end
 end

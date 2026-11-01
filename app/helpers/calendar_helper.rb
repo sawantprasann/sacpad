@@ -37,9 +37,8 @@ module CalendarHelper
   end
 
   def calendar_event_payload(event)
-    zone = CalendarEvent.zone
-    starts = event.starts_at.in_time_zone(zone)
-    ends = event.ends_at.in_time_zone(zone)
+    starts = event.starts_at.in_time_zone
+    ends = event.ends_at.in_time_zone
     {
       url: calendar_event_path(event),
       title: event.title,
@@ -54,13 +53,12 @@ module CalendarHelper
   end
 
   def calendar_clock(time)
-    time.in_time_zone(CalendarEvent.zone).strftime("%-I:%M %p")
+    time.in_time_zone.strftime("%-I:%M %p")
   end
 
   def calendar_time_range(event)
-    zone = CalendarEvent.zone
-    starts = event.starts_at.in_time_zone(zone)
-    ends = event.ends_at.in_time_zone(zone)
+    starts = event.starts_at.in_time_zone
+    ends = event.ends_at.in_time_zone
     left = starts.strftime("%-I:%M %p")
     right = ends.strftime("%-I:%M %p")
     return "#{left} – #{right}" if starts.to_date == ends.to_date

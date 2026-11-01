@@ -1,7 +1,4 @@
 class CalendarEvent < ApplicationRecord
-  # The app time zone is UTC. Schedules are kept in India Standard Time so a
-  # 9:00 AM appointment stays on that calendar day.
-  ZONE_NAME = "Asia/Kolkata"
   COLORS = %w[danger success primary warning].freeze
 
   include OrganizationScoped
@@ -20,28 +17,24 @@ class CalendarEvent < ApplicationRecord
 
   scope :chronological, -> { order(:starts_at, :id) }
 
-  def self.zone
-    Time.find_zone!(ZONE_NAME)
-  end
-
   def self.covering(from_time, to_time)
     where(arel_table[:starts_at].lt(to_time)).where(arel_table[:ends_at].gt(from_time))
   end
 
   def self.on_date(date)
     day = date.to_date
-    from = zone.local(day.year, day.month, day.day)
+    from = Time.zone.local(day.year, day.month, day.day)
     covering(from, from + 1.day)
   end
 
   def occurs_on?(date)
     day = date.to_date
-    from = self.class.zone.local(day.year, day.month, day.day)
+    from = Time.zone.local(day.year, day.month, day.day)
     starts_at.present? && ends_at.present? && starts_at < (from + 1.day) && ends_at > from
   end
 
   def starting_on?(date)
-    starts_at.present? && starts_at.in_time_zone(self.class.zone).to_date == date.to_date
+    starts_at.present? && starts_at.in_time_zone.to_date == date.to_date
   end
 
   def starts_on
@@ -87,7 +80,7 @@ class CalendarEvent < ApplicationRecord
   private
 
   def local_stamp(time)
-    time&.in_time_zone(self.class.zone)
+    time&.in_time_zone
   end
 
   def parts_submitted?
@@ -115,7 +108,7 @@ class CalendarEvent < ApplicationRecord
 
     date = Date.iso8601(date_str.to_s)
     hour, minute = time_str.split(":").map(&:to_i)
-    self.class.zone.local(date.year, date.month, date.day, hour, minute)
+    Time.zone.local(date.year, date.month, date.day, hour, minute)
   rescue ArgumentError
     nil
   end

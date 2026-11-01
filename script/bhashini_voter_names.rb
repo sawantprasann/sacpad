@@ -1,13 +1,13 @@
 # Paste into a production Rails console, or load this file:
 #
 #   load Rails.root.join("script/bhashini_voter_names.rb")
-#   District.where("name ILIKE ?", "%Pune%").pluck(:id, :name)
-#   BhashiniVoterNames.run(district_id: 123, dry_run: true)
-#   BhashiniVoterNames.run(district_id: 123, dry_run: false)
+#   Village.where("name ILIKE ?", "%VAKADI%").pluck(:id, :name)
+#   BhashiniVoterNames.run(village_id: 1111, dry_run: true)
+#   BhashiniVoterNames.run(village_id: 1111, dry_run: false)
 #
-# One district. Voters stay grouped by village. Each request holds at most 200
-# names, so a larger village is split into several requests. Four requests run
-# at the same time.
+# One village. Each request holds at most 200 names, so a larger village is
+# split into several requests. Four requests run at the same time.
+# district_id still works: it runs this same path once per village in that district.
 # Stores the Marathi parts on native_first_name, native_middle_name, and
 # native_last_name.
 #
@@ -26,15 +26,30 @@ module BhashiniVoterNames
   SERVICE_ID = "bhashini/sarvam/nmt"
   BATCH_SIZE = 200
 
-  def self.run(district_id:, dry_run: true, threads: 4, dest_lang: nil, rewrite: true)
-    district = District.find(district_id)
-    dest_lang = dest_lang.presence || district.resolved_native_locale.presence || "mr"
-    voters = Voter.where(village_id: Village.where(taluka_id: district.talukas.select(:id)).select(:id))
+  def self.run(village_id: nil, district_id: nil, dry_run: true, threads: 4, dest_lang: nil, rewrite: true)
+    if village_id
+      run_village(Village.find(village_id), dry_run:, threads:, dest_lang:, rewrite:)
+    elsif district_id
+      district = District.find(district_id)
+      villages = Village.where(taluka_id: district.talukas.select(:id))
+      puts "district #{district.id} #{district.name}: villages=#{villages.count}"
+      villages.find_each do |village|
+        run_village(village, dry_run:, threads:, dest_lang:, rewrite:)
+      end
+    else
+      raise ArgumentError, "Pass village_id or district_id"
+    end
+  end
+
+  def self.run_village(village, dry_run:, threads:, dest_lang:, rewrite:)
+    dest_lang = dest_lang.presence || village.resolved_native_locale.presence || "mr"
+    voters = Voter.where(village_id: village.id)
     groups = village_groups(voters, rewrite).flat_map { |group| group.each_slice(BATCH_SIZE).to_a }
-    puts "district #{district.id} #{district.name}: requests=#{groups.size} voters=#{groups.sum(&:size)} threads=#{threads} dest_lang=#{dest_lang}"
+    puts "village #{village.id} #{village.name}: requests=#{groups.size} voters=#{groups.sum(&:size)} threads=#{threads} dest_lang=#{dest_lang}"
 
     saved, skipped = parallel(groups, dest_lang, dry_run, threads)
-    puts "done saved=#{saved} skipped=#{skipped} dry_run=#{dry_run}"
+    puts "done village=#{village.id} #{village.name} saved=#{saved} skipped=#{skipped} dry_run=#{dry_run}"
+    [ saved, skipped ]
   end
 
   def self.village_groups(voters, rewrite)
