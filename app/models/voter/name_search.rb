@@ -13,7 +13,7 @@ class Voter
       return relation.none if words.empty?
 
       if words.all? { |word| indexable_word?(word) }
-        relation.where(containment(words))
+        with_tokens(relation, words)
       else
         verify(relation, query, words)
       end
@@ -34,17 +34,17 @@ class Voter
       word.length >= 2 && word.length <= MAX_INDEXED_LENGTH
     end
 
-    def containment(words)
+    # Bound parameters, not interpolated SQL. The values are HMAC digests.
+    def with_tokens(relation, words)
       tokens = words.map { |word| blind_token(word) }.uniq
-      quoted = tokens.map { |token| Voter.connection.quote(token) }.join(", ")
-      Arel.sql("voters.name_search_tokens @> ARRAY[#{quoted}]::text[]")
+      relation.where("voters.name_search_tokens @> ARRAY[?]::text[]", tokens)
     end
 
     # One-character words are too common to index. Narrow with the other words,
     # then confirm the same way the in-memory matcher does.
     def verify(relation, query, words)
       indexable = words.select { |word| indexable_word?(word) }
-      narrowed = indexable.empty? ? relation : relation.where(containment(indexable))
+      narrowed = indexable.empty? ? relation : with_tokens(relation, indexable)
       ids = narrowed.unscope(:order, :includes, :select).distinct.pluck(Arel.sql("voters.id"))
       matched = []
       ids.each_slice(500) do |slice|
