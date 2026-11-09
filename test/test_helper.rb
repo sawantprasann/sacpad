@@ -10,6 +10,8 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
-    # Add more helper methods to be used by all tests here...
+    # A request or an earlier example can leave I18n.locale on Marathi. Start each
+    # test in English so labels do not depend on who ran first in this process.
+    setup { I18n.locale = I18n.default_locale }
   end
 end

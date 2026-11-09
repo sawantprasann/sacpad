@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
   # Tenant isolation, layer 1: set the current organization explicitly per request.
   set_current_tenant_through_filter
   before_action :set_current_organization
-  before_action :set_locale
+  around_action :set_locale
 
   # A cross-tenant / not-permitted access surfaces as 404, never 403 (never confirm existence).
   rescue_from Pundit::NotAuthorizedError, with: :not_found
@@ -52,12 +52,17 @@ class ApplicationController < ActionController::Base
   end
 
   # The platform console stays English. Org pages follow the signed-in user's
-  # saved language, then the locale cookie, then English.
+  # saved language, then the locale cookie, then English. The locale is restored
+  # after the request so a Marathi page cannot leak into the next test or job.
   def set_locale
-    if request.path.start_with?("/console")
-      I18n.locale = I18n.default_locale
-      return
+    I18n.with_locale(locale_for_request) do
+      sync_locale_cookie(I18n.locale) if user_signed_in? && !console_request?
+      yield
     end
+  end
+
+  def locale_for_request
+    return I18n.default_locale if console_request?
 
     if user_signed_in?
       allowed = allowed_locales
@@ -67,11 +72,14 @@ class ApplicationController < ActionController::Base
         User.reset_column_information
         User.find(current_user.id).update_columns(preferred_locale: "en", updated_at: Time.current)
       end
+      locale
     else
-      locale = cookie_locale || I18n.default_locale
+      cookie_locale || I18n.default_locale
     end
-    I18n.locale = locale
-    sync_locale_cookie(locale) if user_signed_in?
+  end
+
+  def console_request?
+    request.path.start_with?("/console")
   end
 
   # English, plus the signed-in organization's Lok Sabha language.

@@ -10,7 +10,7 @@ module Console
 
     allow_browser versions: :modern
     before_action :authenticate_admin!
-    before_action :set_english_locale
+    around_action :set_english_locale
     layout "console"
 
     rescue_from Pundit::NotAuthorizedError, with: :not_found
@@ -24,7 +24,7 @@ module Console
     # Console controllers do not inherit ApplicationController, so they never hit its
     # locale filter. Keep the console in English even when an earlier request left Marathi set.
     def set_english_locale
-      I18n.locale = I18n.default_locale
+      I18n.with_locale(I18n.default_locale) { yield }
     end
 
     def deletion_failure_message(record)
