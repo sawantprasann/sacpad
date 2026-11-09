@@ -1,0 +1,118 @@
+<% content_for :title, t("social.title") %>
+<% can_connect = policy(SocialMedia::SocialPage).connect? %>
+<% pages_by_provider = @pages.group_by(&:provider) %>
+<% networks = [
+     { key: "facebook", ready: true, wash: "linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)" },
+     { key: "instagram", ready: true, wash: "linear-gradient(135deg, #ffb199 0%, #ff6f91 100%)" },
+     { key: "youtube", ready: false, wash: "linear-gradient(135deg, #ffb347 0%, #ff5a5f 100%)" },
+     { key: "twitter", ready: false, wash: "linear-gradient(135deg, #9bb0d1 0%, #5d7294 100%)" }
+   ] %>
+<% th = "whitespace-nowrap px-5 py-3 text-left text-xs font-medium text-gray-500" %>
+<% td = "whitespace-nowrap border-t border-gray-100 px-5 py-4 align-middle dark:border-white/10" %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("social.kicker"),
+      title: t("social.title"),
+      subtitle: t("social.subtitle"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<% if can_connect %>
+  <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("social.stat_networks") %></h2>
+      <p class="mt-0.5 text-sm text-gray-500"><%= t("social.networks_count", live: @pages.count(&:connection_active?).positive? ? 1 : 0, total: 4) %></p>
+    </div>
+    <%= render "social_connections/connect_action" %>
+  </div>
+
+  <section class="mt-4 grid grid-cols-2 gap-4 xl:grid-cols-4">
+    <% networks.each do |network| %>
+      <% rows = pages_by_provider[network[:key]] || [] %>
+      <% live = rows.count(&:connection_active?) %>
+      <% badge = if !network[:ready] && rows.empty?
+           t("social.coming_next")
+         elsif live.positive?
+           t("social.status.active")
+         elsif rows.any?(&:connection_needs_reauth?)
+           t("social.status.needs_reauth")
+         elsif rows.any?
+           t("social.status.disconnected")
+         else
+           t("social.not_connected")
+         end %>
+      <article class="relative min-h-36 overflow-hidden rounded-2xl px-5 py-4 text-white shadow-sm" style="background: <%= network[:wash] %>">
+        <span class="pointer-events-none absolute rounded-full" style="width: 8.5rem; height: 8.5rem; right: -2.4rem; bottom: -2.8rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
+        <span class="pointer-events-none absolute rounded-full" style="width: 6.25rem; height: 6.25rem; right: 1.4rem; top: -2.1rem; background: rgba(255,255,255,0.2);" aria-hidden="true"></span>
+        <span class="pointer-events-none absolute rounded-full" style="width: 4.25rem; height: 4.25rem; right: 3.1rem; bottom: 0.15rem; background: rgba(255,255,255,0.22);" aria-hidden="true"></span>
+        <div class="relative flex items-start justify-between gap-3">
+          <p class="text-sm font-medium text-white/95"><%= t("social.networks.#{network[:key]}") %></p>
+          <%= render "social_connections/mark", provider: network[:key], size: "h-8 w-8 text-sm", on_color: true %>
+        </div>
+        <p class="relative mt-5 text-3xl font-semibold leading-none tabular-nums"><%= rows.size %></p>
+        <p class="relative mt-3 text-sm text-white/90"><%= badge %> · <%= t("social.live_count", count: live) %></p>
+      </article>
+    <% end %>
+  </section>
+<% end %>
+
+<% if @sample_pages %>
+  <p class="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200"><%= t("social.sample_banner") %></p>
+<% end %>
+
+<section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
+  <div class="flex items-center justify-between gap-3 px-5 py-4">
+    <h2 class="text-base font-semibold text-gray-900 dark:text-white/90"><%= t("social.connected") %></h2>
+    <div class="flex items-center gap-2">
+      <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold tabular-nums text-gray-600 dark:bg-white/10 dark:text-gray-300"><%= @pages.size %></span>
+      <% if policy(SocialMedia::SocialPage).publish? %>
+        <%= link_to new_social_connection_path,
+              class: "inline-flex h-11 w-11 items-center justify-center rounded-full text-white shadow-sm transition hover:opacity-90",
+              style: "background: #2563eb;",
+              aria: { label: t("social.composer_new") } do %>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
+          </svg>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full min-w-[760px] border-collapse text-sm">
+      <thead>
+        <tr class="border-t border-gray-100 bg-gray-50 dark:border-white/10 dark:bg-white/[0.03]">
+          <th class="<%= th %>"><%= t("social.columns.page") %></th>
+          <th class="<%= th %>"><%= t("social.columns.network") %></th>
+          <th class="<%= th %>"><%= t("social.columns.handle") %></th>
+          <th class="<%= th %>"><%= t("social.columns.type") %></th>
+          <th class="<%= th %>"><%= t("common.status") %></th>
+          <th class="<%= th %>"><%= t("social.columns.connected_by") %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @pages.each do |page| %>
+          <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.03]">
+            <td class="<%= td %>">
+              <%= link_to social_connection_path(page), class: "inline-flex items-center gap-3" do %>
+                <%= render "social_connections/mark", provider: page.provider, size: "h-8 w-8 text-sm" %>
+                <span class="<%= ta_text_link %>"><%= page.name.presence || t("social.unnamed") %></span>
+              <% end %>
+            </td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= t("social.networks.#{page.provider}") %></td>
+            <td class="<%= td %> text-gray-500"><%= page.username.present? ? "@#{page.username}" : "—" %></td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= t("social.page_types.#{page.page_type}") %></td>
+            <td class="<%= td %>"><%= render "social_connections/status", page: page %></td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= page.owner.name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <% if @pages.empty? %>
+    <div class="border-t border-gray-100 px-6 py-14 text-center dark:border-white/10">
+      <p class="text-base font-semibold text-gray-900 dark:text-white"><%= t("social.empty_title") %></p>
+      <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500"><%= t("social.empty_body") %></p>
+    </div>
+  <% end %>
+</section>
+

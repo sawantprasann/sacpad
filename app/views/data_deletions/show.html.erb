@@ -1,0 +1,10 @@
+<% content_for :title, t("social.deletion_title") %>
+
+<section class="mx-auto mt-10 max-w-lg <%= ta_card_classes %> p-6">
+  <h1 class="text-xl font-semibold text-gray-900 dark:text-white/90"><%= t("social.deletion_title") %></h1>
+  <p class="mt-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
+    <%= @request.status_completed? ? t("social.deletion_completed") : t("social.deletion_pending") %>
+  </p>
+  <p class="mt-4 text-xs text-gray-500"><%= t("social.deletion_code") %>: <%= @request.confirmation_code %></p>
+  <p class="mt-1 text-xs text-gray-400"><%= l(@request.created_at, format: :long) %></p>
+</section>

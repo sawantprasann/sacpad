@@ -20,6 +20,9 @@
 <% if current_user.role.can_access?("booth_management") %>
   <% desks << { title: t("nav.booth_management"), blurb: t("dashboard.booth_blurb"), path: booths_path, mark: "booths", jewel: 5 } %>
 <% end %>
+<% if current_user.role.can_access?("social_media") %>
+  <% desks << { title: t("nav.social_media"), blurb: t("dashboard.social_blurb"), path: social_connections_path, mark: "social_media", jewel: 1 } %>
+<% end %>
 <% if @constituency_election %>
   <% desks << { title: t("dashboard.election_result"), blurb: t("dashboard.election_blurb"), path: election_result_path, mark: "constituency_elections", jewel: 4 } %>
 <% end %>

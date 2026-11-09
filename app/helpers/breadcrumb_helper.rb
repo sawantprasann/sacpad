@@ -59,6 +59,8 @@ module BreadcrumbHelper
       "users" => [ t("nav.team"), users_path ],
       "support_tickets" => [ t("nav.support"), support_tickets_path ],
       "pr_records" => [ t("nav.pr_records"), pr_records_path ],
+      "social_connections" => [ t("nav.social_media"), social_connections_path ],
+      "data_deletions" => [ t("social.deletion_title"), nil ],
       "voter_lists/talukas" => [ t("nav.talukas"), voter_lists_talukas_path ],
       "voter_lists/villages" => [ t("nav.talukas"), voter_lists_talukas_path ],
       "voters" => [ t("nav.voter_lists"), voters_path ]

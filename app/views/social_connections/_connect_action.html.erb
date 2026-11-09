@@ -1,0 +1,18 @@
+<% if policy(SocialMedia::SocialPage).connect? %>
+  <% if @facebook_ready %>
+    <%= button_to t("social.connect_facebook"), "/auth/facebook", method: :post,
+          form: { data: { turbo: false }, class: "shrink-0" },
+          class: "#{ta_btn_primary} cursor-pointer",
+          style: "background: var(--org-party-color); color: var(--org-party-contrast)" %>
+  <% else %>
+    <div class="max-w-sm">
+      <p class="text-xs leading-5 text-gray-500"><%= t("social.not_configured") %></p>
+      <% if Rails.env.development? %>
+        <%= button_to t("social.preview"), preview_social_connections_path, method: :post,
+              class: "#{ta_btn_secondary} mt-3 cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+<% else %>
+  <p class="max-w-xs text-xs text-gray-500"><%= t("social.read_only") %></p>
+<% end %>

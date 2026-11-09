@@ -132,12 +132,14 @@
             </li>
           <% end %>
 
-          <li>
-            <span class="menu-item group menu-item-inactive cursor-default">
-              <span class="menu-item-text"><%= t("nav.social_media") %></span>
-              <span class="menu-dropdown-badge menu-dropdown-badge-inactive ml-auto"><%= t("nav.soon") %></span>
-            </span>
-          </li>
+          <% if user_signed_in? && current_user.role.can_access?("social_media") %>
+            <li>
+              <%= link_to social_connections_path,
+                    class: "menu-item group #{params[:controller] == "social_connections" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <span class="menu-item-text"><%= t("nav.social_media") %></span>
+              <% end %>
+            </li>
+          <% end %>
         </ul>
 
         <% if user_signed_in? %>

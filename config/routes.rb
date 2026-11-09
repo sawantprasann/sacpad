@@ -140,6 +140,24 @@ Rails.application.routes.draw do
     end
   end
 
+  # Social Media. Facebook Page connect. Publishing comes after a Page is saved.
+  get "/auth/:provider/callback", to: "social_connections#create"
+  get "/auth/failure", to: "social_connections#failure"
+  resources :social_connections, only: %i[index new show destroy] do
+    member do
+      post :sync
+    end
+    collection do
+      get :choose
+      post :save
+      post :preview
+      post :publish
+    end
+  end
+  post "/meta/deauthorize", to: "meta_webhooks#deauthorize"
+  post "/meta/data_deletion", to: "meta_webhooks#data_deletion"
+  get "/data_deletion/:code", to: "data_deletions#show", as: :data_deletion_status
+
   # PR Records (Epic 4). Story 4.2 captures media coverage; Story 4.3 adds category-specific details.
   resources :pr_records, only: %i[index new create show edit update] do
     collection do

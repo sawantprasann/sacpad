@@ -1,0 +1,74 @@
+<% content_for :title, t("social.composer_new") %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("social.title"),
+      title: t("social.composer_new"),
+      subtitle: t("social.composer_hint"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
+  <div class="h-1.5 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"></div>
+  <div class="p-4 sm:p-6">
+    <%= form_with url: publish_social_connections_path, scope: :bulk_post, multipart: true do |f| %>
+      <%= f.label :body, t("social.composer_prompt"), class: ta_label_classes %>
+      <%= f.text_area :body, rows: 5, class: ta_area_classes %>
+
+      <div class="mt-5" data-controller="media-preview"
+           data-media-preview-mixed-value="<%= t("social.publish_mixed") %>"
+           data-media-preview-limit-value="<%= t("social.composer_media_limit") %>">
+        <%= f.label :media, t("social.composer_media"), class: ta_label_classes %>
+        <div data-media-preview-target="list" class="mt-2 flex flex-wrap gap-3">
+          <label for="bulk_post_media" data-media-preview-target="zone"
+                 data-action="dragover->media-preview#over dragleave->media-preview#leave drop->media-preview#drop"
+                 class="flex cursor-pointer items-center justify-center"
+                 style="width: 7.5rem; height: 7.5rem; border-radius: 0.5rem; background: #f0f2f5; color: #1c1e21;"
+                 aria-label="<%= t("social.composer_media_add") %>">
+            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" aria-hidden="true">
+              <path stroke-linecap="round" d="M12 5v14M5 12h14"/>
+            </svg>
+          </label>
+        </div>
+        <%= f.file_field :media, multiple: true, accept: "image/*,video/*",
+              class: "sr-only",
+              data: { media_preview_target: "input", action: "change->media-preview#choose" } %>
+        <p data-media-preview-target="message" class="mt-2 text-sm font-medium text-amber-700" role="status"></p>
+        <p class="mt-1 text-xs text-gray-500"><%= t("social.composer_media_help") %></p>
+        <template data-media-preview-target="card">
+          <figure class="overflow-hidden bg-gray-100" data-preview style="position: relative; width: 7.5rem; height: 7.5rem; border-radius: 0.5rem;">
+            <img data-slot="image" alt="" hidden style="width: 100%; height: 100%; object-fit: cover;">
+            <video data-slot="video" data-action="click->media-preview#play" muted playsinline hidden style="width: 100%; height: 100%; object-fit: cover; background: #000;"></video>
+            <button type="button" data-action="media-preview#remove"
+                    class="absolute flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm font-semibold text-gray-700 shadow"
+                    style="top: 0.4rem; right: 0.4rem;"
+                    aria-label="<%= t("social.composer_media_remove") %>">&times;</button>
+          </figure>
+        </template>
+      </div>
+
+      <fieldset class="mt-5">
+        <legend class="<%= ta_label_classes %>"><%= t("social.composer_pages") %></legend>
+        <% if @publish_pages.empty? %>
+          <p class="text-sm text-gray-500"><%= t("social.composer_no_pages") %></p>
+        <% else %>
+          <div class="flex flex-wrap gap-2">
+            <% @publish_pages.each do |page| %>
+              <label class="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 text-sm text-gray-800 ring-1 ring-gray-200 dark:bg-white/5 dark:text-gray-200 dark:ring-white/10">
+                <%= check_box_tag "page_ids[]", page.id, @publish_pages.one?, class: "rounded border-gray-300" %>
+                <%= page.name.presence || t("social.unnamed") %>
+              </label>
+            <% end %>
+          </div>
+        <% end %>
+      </fieldset>
+
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <%= f.submit t("social.composer_send"),
+              class: "#{ta_btn_primary} cursor-pointer",
+              style: "background: #2563eb; color: #fff",
+              disabled: @publish_pages.empty? %>
+        <%= link_to t("common.back_to_list"), social_connections_path, class: "#{ta_btn_secondary} min-h-11" %>
+      </div>
+    <% end %>
+  </div>
+</section>
