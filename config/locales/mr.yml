@@ -103,8 +103,6 @@ mr:
   dashboard:
     namaste: "नमस्ते"
     open_a_desk: "डेस्क उघडा"
-    show_desks: "डेस्क दाखवा"
-    hide_desks: "डेस्क लपवा"
     at_a_glance: "एक नजर"
     glance_subtitle: "आज तुमच्या प्रचार डेस्कवरील काम."
     no_modules: "तुमच्या भूमिकेसाठी अजून कोणताही विभाग उपलब्ध नाही."

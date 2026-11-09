@@ -21,10 +21,9 @@ class KitchenCabinetDashboardTest < ActionDispatch::IntegrationTest
     sign_in @alice
     get root_path
     assert_response :success
-    assert_select "details[data-disclosure-key-value=?]", "open-a-desk"
-    assert_select "details[data-disclosure-key-value=?][open]", "open-a-desk", count: 0
+    assert_select "details[data-disclosure-key-value=?]", "open-a-desk", count: 0
     assert_match "Open a desk", @response.body
-    assert_match "Show desks", @response.body
+    assert_select "a[href=?]", kitchen_cabinet_tickets_path
     assert_match "Open tickets by status", @response.body
     assert_match "dashboard-tickets-status", @response.body
     assert_match 'Chartkick["PieChart"]', @response.body
