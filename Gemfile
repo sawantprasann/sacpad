@@ -60,7 +60,7 @@ gem "pdf-reader", "~> 2.14"     # electoral-roll PDF pages for voter sync
 gem "faraday", "~> 2.14"        # HTTP client for Meta/WhatsApp/IVRS adapters
 gem "omniauth-facebook", "~> 10.0" # Facebook Login for connecting Pages
 gem "omniauth-rails_csrf_protection", "~> 1.0"
-gem "aws-sdk-s3", "~> 1.233", require: false # Active Storage S3 backend (all file types)
+gem "aws-sdk-s3", "~> 1.239", require: false # Active Storage S3 backend (all file types)
 
 group :development, :test do
   # N+1 query detection (NFR) — Story 0.1
