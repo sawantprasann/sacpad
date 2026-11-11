@@ -86,7 +86,18 @@ jobs:
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
+        run: |
+          # GitHub's Ubuntu image points apt at azure.archive.ubuntu.com, which
+          # sometimes fails DNS before the tests start.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's/azure\.archive\.ubuntu\.com/archive.ubuntu.com/g' /etc/apt/apt-mirrors.txt
+          fi
+          sudo sed -i 's/azure\.archive\.ubuntu\.com/archive.ubuntu.com/g' /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null || true
+          for attempt in 1 2 3; do
+            sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips && break
+            if [ "$attempt" = "3" ]; then exit 1; fi
+            sleep 15
+          done
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -125,7 +136,18 @@ jobs:
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips
+        run: |
+          # GitHub's Ubuntu image points apt at azure.archive.ubuntu.com, which
+          # sometimes fails DNS before the tests start.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's/azure\.archive\.ubuntu\.com/archive.ubuntu.com/g' /etc/apt/apt-mirrors.txt
+          fi
+          sudo sed -i 's/azure\.archive\.ubuntu\.com/archive.ubuntu.com/g' /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list 2>/dev/null || true
+          for attempt in 1 2 3; do
+            sudo apt-get update && sudo apt-get install --no-install-recommends -y libpq-dev libvips && break
+            if [ "$attempt" = "3" ]; then exit 1; fi
+            sleep 15
+          done
 
       - name: Checkout code
         uses: actions/checkout@v6
