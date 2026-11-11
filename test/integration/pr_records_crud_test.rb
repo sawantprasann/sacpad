@@ -1,4 +1,5 @@
 require "test_helper"
+require "roo"
 
 # Integration tests for PR Records CRUD — comprehensive tests covering
 # org-scoping, policy authorization, and cross-org isolation
@@ -60,6 +61,7 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
   test "category and platform menus list the blank choice once" do
     get new_pr_record_path
     assert_response :success
+    assert_operator response.body.index("Add category"), :<, response.body.index('data-pr-record-form-target="entryRows"')
     assert_select "select[name*='pr_category_id']" do |selects|
       selects.each do |select|
         blanks = select.css("option").select { |option| option.text == "Select a category..." }
@@ -127,7 +129,7 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "index shows each coverage link" do
+  test "index shows each link on the row for its platform" do
     ActsAsTenant.with_tenant(@org) do
       record = @org.pr_records.create!(
         owner: @user,
@@ -147,9 +149,10 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
 
     get pr_records_path
     assert_response :success
-    assert_select "th", text: "Link"
-    assert_select "a[href='https://news.example/story'][target=_blank]"
-    assert_select "a[href='https://news.example/clip'][target=_blank]"
+    assert_select "th", text: "Links"
+    assert_select "a[href='https://news.example/story'][target=_blank]", text: "news.example/story"
+    assert_select "a[href='https://news.example/clip'][target=_blank]", text: "news.example/clip"
+    assert_select "td", text: @platform.name
     assert_select "a[href='https://news.example/legacy']", count: 0
   end
 
@@ -332,10 +335,58 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
 
     get pr_records_path
     assert_match "Shared headline", response.body
+    assert_select "td", text: @category.name
+    assert_select "td", text: print_category.name
+    assert_select "td", text: @platform.name
+    assert_select "td", text: paper.name
 
     get pr_records_path(category: @category.slug)
     assert_match "Shared headline", response.body
     get pr_records_path(category: print_category.slug)
     assert_match "Shared headline", response.body
+  end
+
+  test "excel export lists each category and follows the category filter" do
+    print_category = PrCategory.find_by(slug: "print") || PrCategory.create!(
+      name: "Print Media", slug: "print", active: true, display_order: 2
+    )
+    paper = MediaPlatform.create!(name: "Sakal", slug: "sakal-#{Time.current.to_i}", active: true, pr_category: print_category)
+    ActsAsTenant.with_tenant(@org) do
+      @org.pr_records.create!(
+        owner: @user,
+        title: "Export headline",
+        entries_attributes: [
+          { published_on: Date.current, sentiment: :positive, pr_category: @category, media_platform: @platform, url: "https://tv.example/story" },
+          { published_on: Date.current, sentiment: :neutral, pr_category: print_category, media_platform: paper, url: "https://paper.example/story" }
+        ]
+      )
+    end
+
+    get pr_records_path(format: :xlsx)
+    assert_response :success
+    assert_equal "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", @response.media_type
+    assert_match "pr_records.xlsx", response.headers["Content-Disposition"]
+    cells = xlsx_cells
+    assert_includes cells, "Export headline"
+    assert_includes cells, @category.name
+    assert_includes cells, print_category.name
+    assert_includes cells, "https://tv.example/story"
+
+    get pr_records_path(format: :xlsx, category: print_category.slug)
+    cells = xlsx_cells
+    assert_includes cells, "Export headline"
+    assert_includes cells, print_category.name
+    assert_not_includes cells, @category.name
+    assert_not_includes cells, "https://tv.example/story"
+  end
+
+  def xlsx_cells
+    file = Tempfile.new([ "export", ".xlsx" ])
+    file.binmode
+    file.write(@response.body)
+    file.rewind
+    Roo::Excelx.new(file.path).sheet(0).to_a.flatten.map(&:to_s)
+  ensure
+    file&.close
   end
 end

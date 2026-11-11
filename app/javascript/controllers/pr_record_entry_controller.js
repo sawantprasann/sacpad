@@ -1,15 +1,19 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "category", "platform", "platformWrap", "platformLabel", "links", "outdoor" ]
-  static values = { newspaper: String, tvChannel: String }
+  static targets = [ "category", "platform", "platformWrap", "platformLabel", "links", "outdoor", "title" ]
+  static values = { newspaper: String, tvChannel: String, placeholder: String }
 
   connect() {
     this.applyCategory()
   }
 
   applyCategory() {
-    const slug = this.categoryTarget.selectedOptions[0]?.dataset.slug || ""
+    const selected = this.categoryTarget.selectedOptions[0]
+    const slug = selected?.value ? (selected.dataset.slug || "") : ""
+    if (this.hasTitleTarget) {
+      this.titleTarget.textContent = selected?.value ? selected.textContent.trim() : this.placeholderValue
+    }
     const platformSlugs = [ "electronic", "print", "local-print", "local-electronic" ]
     const linkSlugs = [ "electronic", "local-electronic", "podcasts" ]
     const showPlatform = platformSlugs.includes(slug)

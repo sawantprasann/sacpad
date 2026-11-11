@@ -16,7 +16,7 @@
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("pr.kicker"),
       title: @record.title,
-      subtitle: @record.record_number,
+      subtitle: [ @record.record_number, @record.category_names.join(", ") ].compact_blank.join(" · "),
       meta: meta
     } do %><% end %>
 
@@ -29,8 +29,8 @@
 
 <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
   <div class="order-2 space-y-4 xl:order-1 xl:col-span-2">
-    <% @record.entries.each do |entry| %>
-      <%= render "pr_records/entry", entry: entry %>
+    <% @record.entries.each_with_index do |entry, index| %>
+      <%= render "pr_records/entry", entry: entry, index: index + 1 %>
     <% end %>
   </div>
 
@@ -38,20 +38,26 @@
     <section class="<%= ta_card_classes %> p-6">
       <h2 class="border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90"><%= t("pr.where_appeared") %></h2>
       <ol class="mt-4 space-y-3">
-        <% @record.entries.each do |entry| %>
+        <% @record.entries.each_with_index do |entry, index| %>
           <li>
-            <%= link_to "#pr-entry-#{entry.id}", class: "block rounded-xl bg-gray-50 px-4 py-3 hover:bg-gray-100 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]" do %>
-              <span class="flex items-start justify-between gap-3">
-                <span class="text-sm font-medium text-gray-800 dark:text-white/90"><%= entry.pr_category.name %></span>
-                <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
-              </span>
-              <span class="mt-1 block text-sm text-gray-500 dark:text-gray-400">
-                <%= [ entry.platform_name, l_day(entry.published_on) ].compact.join(" · ") %>
+            <%= link_to "#pr-entry-#{entry.id}", class: "flex items-start gap-3 rounded-xl bg-gray-50 px-4 py-3 hover:bg-gray-100 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]" do %>
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-white/90 dark:ring-gray-700"><%= index + 1 %></span>
+              <span class="min-w-0 flex-1">
+                <span class="flex items-start justify-between gap-3">
+                  <span class="text-sm font-medium text-gray-800 dark:text-white/90"><%= entry.pr_category.name %></span>
+                  <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
+                </span>
+                <span class="mt-1 block text-sm text-gray-500 dark:text-gray-400">
+                  <%= [ entry.platform_name, l_day(entry.published_on) ].compact.join(" · ") %>
+                </span>
               </span>
             <% end %>
           </li>
         <% end %>
       </ol>
+      <p class="mt-4 border-t border-gray-100 pt-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <%= t("common.logged_by") %> · <%= @record.owner.name %>
+      </p>
     </section>
   </aside>
 </div>

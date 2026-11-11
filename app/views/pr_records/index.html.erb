@@ -2,6 +2,7 @@
 <% list_params = request.query_parameters.slice("category", "q") %>
 <% th = "border-b border-gray-200 px-6 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800 dark:text-gray-400" %>
 <% td = "border-b border-gray-100 px-6 py-4 align-middle dark:border-gray-800" %>
+<% sub = "border-b border-gray-100 px-6 py-3 align-middle dark:border-gray-800" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("pr.kicker"),
@@ -46,29 +47,32 @@
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
           <th class="<%= th %>"><%= t("common.title") %></th>
-          <th class="<%= th %>"><%= t("pr.link") %></th>
           <th class="<%= th %>"><%= t("common.category") %></th>
           <th class="<%= th %>"><%= t("pr.platform") %></th>
+          <th class="<%= th %>"><%= t("pr.links") %></th>
           <th class="<%= th %>"><%= t("common.sentiment") %></th>
-          <th class="<%= th %>"><%= t("common.logged_by") %></th>
           <th class="<%= th %> text-right"><%= t("pr.published") %></th>
         </tr>
       </thead>
       <tbody>
-        <% @records.each do |record| %>
-          <tr class="group hover:bg-gray-50 last:[&>td]:border-b-0 dark:hover:bg-white/[0.03]">
-            <td class="<%= td %> max-w-xs">
-              <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
-            </td>
-            <td class="<%= td %> max-w-xs">
-              <%= render "pr_records/links", record: record %>
-            </td>
-            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.category_names.join(", ") %></td>
-            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.platform_names.join(", ").presence || "—" %></td>
-            <td class="<%= td %>"><%= record.entries.map { |entry| t("pr.sentiments.#{entry.sentiment}") }.uniq.join(", ") %></td>
-            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= record.owner.name %></td>
-            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= l_day(record.latest_published_on) if record.latest_published_on %></td>
-          </tr>
+        <% @records.each_with_index do |record, record_index| %>
+          <% entries = pr_index_entries(record, @category) %>
+          <% band = record_index.even? ? "bg-white dark:bg-transparent" : "bg-gray-50/70 dark:bg-white/[0.02]" %>
+          <% entries.each_with_index do |entry, index| %>
+            <tr class="<%= band %> hover:bg-gray-50 dark:hover:bg-white/[0.04]">
+              <% if index.zero? %>
+                <td rowspan="<%= entries.size %>" class="<%= td %> max-w-xs align-top <%= band %>">
+                  <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
+                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= t("common.logged_by") %> · <%= record.owner.name %></p>
+                </td>
+              <% end %>
+              <td class="<%= sub %> text-gray-700 dark:text-gray-300"><%= entry.pr_category.name %></td>
+              <td class="<%= sub %> text-gray-600 dark:text-gray-300"><%= entry.platform_name.presence || "—" %></td>
+              <td class="<%= sub %> max-w-xs"><%= render "pr_records/links", entry: entry %></td>
+              <td class="<%= sub %>"><%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %></td>
+              <td class="<%= sub %> text-right tabular-nums text-gray-500"><%= l_day(entry.published_on) %></td>
+            </tr>
+          <% end %>
         <% end %>
       </tbody>
     </table>
@@ -79,11 +83,23 @@
 
   <div class="divide-y divide-gray-100 xl:hidden dark:divide-gray-800">
     <% @records.each do |record| %>
-      <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]">
+      <div class="px-6 py-4">
         <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
-        <div class="mt-1"><%= render "pr_records/links", record: record %></div>
-        <p class="mt-1 text-sm text-gray-600"><%= record.category_names.join(", ") %> · <%= record.platform_names.join(", ").presence || t("pr.no_platform") %></p>
-        <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %><% if record.latest_published_on %> · <%= l_day(record.latest_published_on) %><% end %></p>
+        <p class="mt-1 text-xs text-gray-500"><%= t("common.logged_by") %> · <%= record.owner.name %></p>
+        <ul class="mt-3 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 dark:divide-gray-800 dark:border-gray-800">
+          <% pr_index_entries(record, @category).each do |entry| %>
+            <li class="px-3 py-3">
+              <div class="flex items-start justify-between gap-3">
+                <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= entry.pr_category.name %></p>
+                <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
+              </div>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                <%= [ entry.platform_name.presence || t("pr.no_platform"), l_day(entry.published_on) ].compact.join(" · ") %>
+              </p>
+              <div class="mt-2"><%= render "pr_records/links", entry: entry %></div>
+            </li>
+          <% end %>
+        </ul>
       </div>
     <% end %>
     <% if @records.empty? %>

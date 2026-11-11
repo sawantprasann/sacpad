@@ -1,0 +1,30 @@
+# One row per category appearance, so a headline in two outlets stays two rows.
+wb = xlsx_package.workbook
+wb.add_worksheet(name: t("pr.kicker")) do |sheet|
+  sheet.add_row [
+    t("common.title"),
+    t("pr.link"),
+    t("common.category"),
+    t("pr.platform"),
+    t("common.sentiment"),
+    t("common.logged_by"),
+    t("pr.published")
+  ]
+  @records.each do |record|
+    record.entries.each do |entry|
+      next if @category && entry.pr_category_id != @category.id
+
+      urls = entry.links.map(&:url).select(&:present?)
+      urls = [ entry.url ] if urls.empty? && entry.url.present?
+      sheet.add_row [
+        record.title,
+        urls.join("\n"),
+        entry.pr_category&.name,
+        entry.platform_name,
+        t("pr.sentiments.#{entry.sentiment}"),
+        record.owner.name,
+        entry.published_on
+      ]
+    end
+  end
+end

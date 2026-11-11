@@ -1,23 +1,57 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "entryRows", "entryTemplate" ]
+  static targets = [ "entryRows", "newEntryRows", "entryTemplate", "categoryNotice" ]
   static values = {
     thumbnailUrl: String,
     checking: String,
     noThumbnail: String,
-    thumbnailFilled: String
+    thumbnailFilled: String,
+    chooseFirst: String
   }
 
   connect() {
     this.entryIndex = Date.now()
+    this.renumber()
   }
 
   addEntry(event) {
     event.preventDefault()
+    const pending = this.pendingCategoryEntry()
+    if (pending) {
+      this.categoryNoticeTarget.textContent = this.chooseFirstValue
+      this.categoryNoticeTarget.classList.remove("hidden")
+      pending.querySelector("[data-pr-record-entry-target='category']")?.focus({ preventScroll: true })
+      return
+    }
+    this.clearCategoryNotice()
     this.entryIndex += 1
     const html = this.entryTemplateTarget.innerHTML.replaceAll("__ENTRY__", String(this.entryIndex))
-    this.entryRowsTarget.insertAdjacentHTML("beforeend", html)
+    this.newEntryRowsTarget.insertAdjacentHTML("afterbegin", html)
+    this.renumber()
+    this.newEntryRowsTarget.querySelector("[data-entry] select")?.focus({ preventScroll: true })
+  }
+
+  categoryChanged() {
+    if (!this.pendingCategoryEntry()) this.clearCategoryNotice()
+  }
+
+  pendingCategoryEntry() {
+    const entries = [
+      ...this.newEntryRowsTarget.querySelectorAll("[data-entry]"),
+      ...this.entryRowsTarget.querySelectorAll("[data-entry]")
+    ]
+    return entries.find((entry) => {
+      if (entry.hidden) return false
+      const select = entry.querySelector("[data-pr-record-entry-target='category']")
+      return select && select.value === ""
+    })
+  }
+
+  clearCategoryNotice() {
+    if (!this.hasCategoryNoticeTarget) return
+    this.categoryNoticeTarget.textContent = ""
+    this.categoryNoticeTarget.classList.add("hidden")
   }
 
   removeEntry(event) {
@@ -30,6 +64,20 @@ export default class extends Controller {
     } else {
       entry.remove()
     }
+    this.renumber()
+  }
+
+  renumber() {
+    let number = 0
+    const assign = (entry) => {
+      if (entry.hidden) return
+      number += 1
+      const slot = entry.querySelector("[data-entry-index]")
+      if (slot) slot.textContent = String(number)
+    }
+    this.entryRowsTarget.querySelectorAll("[data-entry]").forEach(assign)
+    // New blocks sit above the saved ones, but they were added after, so they take the next numbers.
+    ;[ ...this.newEntryRowsTarget.querySelectorAll("[data-entry]") ].reverse().forEach(assign)
   }
 
   addLink(event) {

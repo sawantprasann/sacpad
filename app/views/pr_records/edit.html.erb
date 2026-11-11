@@ -1,11 +1,11 @@
-<% content_for :title, "Edit PR Record #{@record.record_number}" %>
+<% content_for :title, t("pr.edit_record", number: @record.record_number) %>
 <% breadcrumb t("nav.pr_records"), pr_records_path %>
 <% breadcrumb @record.title, pr_record_path(@record) %>
 <% breadcrumb t("nav.edit") %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "PR Records",
-      title: "Edit #{@record.record_number}",
+      kicker: t("pr.kicker"),
+      title: t("pr.edit_record", number: @record.record_number),
       subtitle: @record.title
     } do %><% end %>
 

@@ -2,9 +2,11 @@
 <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8"
      data-controller="pr-record-form"
      data-pr-record-form-thumbnail-url-value="<%= thumbnail_pr_records_path %>"
+     data-action="change->pr-record-form#categoryChanged"
      data-pr-record-form-checking-value="<%= t("pr.checking") %>"
      data-pr-record-form-no-thumbnail-value="<%= t("pr.no_thumbnail") %>"
-     data-pr-record-form-thumbnail-filled-value="<%= t("pr.thumbnail_filled") %>">
+     data-pr-record-form-thumbnail-filled-value="<%= t("pr.thumbnail_filled") %>"
+     data-pr-record-form-choose-first-value="<%= t("pr.choose_category_first") %>">
   <%= form_with model: @record, multipart: true do |f| %>
     <% if @record.errors.any? %>
       <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
@@ -15,10 +17,20 @@
       <%= f.text_field :title, class: "#{ta_field_classes} min-h-11", autofocus: true %>
     </div>
 
-    <div data-pr-record-form-target="entryRows" class="space-y-4">
-      <%= f.fields_for :entries do |entry_form| %>
-        <%= render "pr_records/entry_fields", f: entry_form %>
-      <% end %>
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <p class="text-sm text-gray-500 dark:text-gray-400"><%= t("pr.add_category_hint") %></p>
+      <button type="button" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" data-action="pr-record-form#addEntry"
+              style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("pr.add_category") %></button>
+      <p data-pr-record-form-target="categoryNotice" class="hidden w-full text-sm text-error-500"></p>
+    </div>
+
+    <div class="space-y-4">
+      <div data-pr-record-form-target="newEntryRows" class="space-y-4 empty:hidden"></div>
+      <div data-pr-record-form-target="entryRows" class="space-y-4 empty:hidden">
+        <%= f.fields_for :entries do |entry_form| %>
+          <%= render "pr_records/entry_fields", f: entry_form %>
+        <% end %>
+      </div>
     </div>
 
     <% template_entry = PrRecordEntry.new(published_on: Date.current, sentiment: :neutral) %>
@@ -29,10 +41,6 @@
         <%= render "pr_records/entry_fields", f: entry_form %>
       <% end %>
     </template>
-
-    <div class="mt-4">
-      <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#addEntry"><%= t("pr.add_category") %></button>
-    </div>
 
     <div class="mt-6 flex flex-wrap gap-3 border-t border-gray-100 pt-6 dark:border-gray-800">
       <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
