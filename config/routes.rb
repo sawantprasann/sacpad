@@ -143,6 +143,7 @@ Rails.application.routes.draw do
   # Social Media. Facebook Page connect. Publishing comes after a Page is saved.
   get "/auth/:provider/callback", to: "social_connections#create"
   get "/auth/failure", to: "social_connections#failure"
+  resources :social_posts, only: %i[index edit update destroy]
   resources :social_connections, only: %i[index new show destroy] do
     member do
       post :sync
@@ -150,7 +151,6 @@ Rails.application.routes.draw do
     collection do
       get :choose
       post :save
-      post :preview
       post :publish
     end
   end

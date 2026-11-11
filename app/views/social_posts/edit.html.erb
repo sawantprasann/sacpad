@@ -1,0 +1,45 @@
+<% content_for :title, t("social.edit_post_title") %>
+<% names = @post.targets.map { |target| target.social_page.name.presence || t("social.unnamed") } %>
+<% instagram_published = @post.targets.any? { |target| target.social_page.instagram? && target.status_published? } %>
+<% facebook_remote = @post.targets.any? { |target| !target.social_page.instagram? && target.external_post_id.present? } %>
+<% can_edit = facebook_remote || !instagram_published %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("social.posts"),
+      title: t("social.edit_post_title"),
+      subtitle: t("social.edit_post_hint"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
+  <div class="h-1.5 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"></div>
+  <div class="p-4 sm:p-6">
+    <p class="text-xs font-medium text-gray-500"><%= t("social.sent_to") %></p>
+    <div class="mt-2 flex max-h-40 flex-wrap gap-2 overflow-y-auto">
+      <% names.each do |name| %>
+        <span class="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:bg-white/10 dark:text-gray-200"><%= name %></span>
+      <% end %>
+    </div>
+
+    <% if instagram_published %>
+      <p class="mt-5 rounded-xl bg-gray-50 px-4 py-3 text-sm leading-6 text-gray-600 dark:bg-white/5 dark:text-gray-300"><%= t("social.instagram_caption_locked") %></p>
+    <% end %>
+
+    <% if can_edit %>
+      <%= form_with url: social_post_path(@post), method: :patch, scope: :bulk_post, class: "mt-5" do |f| %>
+        <%= f.label :body, t("social.composer_prompt"), class: ta_label_classes %>
+        <%= f.text_area :body, rows: 5, value: @post.body, class: ta_area_classes %>
+
+        <div class="mt-5 flex flex-wrap items-center gap-3">
+          <%= f.submit t("common.save"), class: "#{ta_btn_primary} cursor-pointer", style: "background: #2563eb; color: #fff" %>
+          <%= link_to t("common.cancel"), social_posts_path, class: "#{ta_btn_secondary} min-h-11" %>
+        </div>
+      <% end %>
+    <% else %>
+      <% if @post.body.present? %>
+        <p class="mt-5 whitespace-pre-wrap text-sm leading-6 text-gray-800 dark:text-gray-200"><%= @post.body %></p>
+      <% end %>
+      <%= link_to t("common.back_to_list"), social_posts_path, class: "#{ta_btn_secondary} mt-5 inline-flex min-h-11 items-center" %>
+    <% end %>
+  </div>
+</section>

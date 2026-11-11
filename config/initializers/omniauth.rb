@@ -14,7 +14,7 @@ app_secret = MetaCredentials.app_secret
 if app_id.present? && app_secret.present?
   Rails.application.config.middleware.use OmniAuth::Builder do
     provider :facebook, app_id, app_secret,
-      scope: %w[pages_show_list pages_manage_posts pages_read_engagement pages_read_user_content instagram_basic].join(","),
+      scope: %w[pages_show_list pages_manage_posts pages_read_engagement pages_read_user_content instagram_basic instagram_content_publish instagram_manage_contents].join(","),
       info_fields: "name",
       secure_image_url: true
   end

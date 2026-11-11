@@ -1,12 +1,11 @@
 class SocialConnectionsController < ApplicationController
   before_action :authenticate_user!
   before_action :require_social_access
-  before_action :require_org_admin, only: %i[create failure choose save destroy preview]
+  before_action :require_org_admin, only: %i[create failure choose save destroy]
 
   def index
     @pages = policy_scope(SocialMedia::SocialPage).includes(:owner).order(:name)
     @facebook_ready = MetaApi.configured?
-    @sample_pages = @pages.any? { |page| page.provider_uid == "sample" }
   end
 
   def show
@@ -70,8 +69,7 @@ class SocialConnectionsController < ApplicationController
     if saved.empty?
       redirect_to choose_social_connections_path(pending_id: pending.id), alert: t("social.pick_one")
     else
-      notice = pending.provider_uid == "sample" ? t("social.sample_saved") : t("social.connected_notice")
-      redirect_to social_connections_path, notice: notice
+      redirect_to social_connections_path, notice: t("social.connected_notice")
     end
   end
 
@@ -95,10 +93,14 @@ class SocialConnectionsController < ApplicationController
     else
       t("social.publish_sent")
     end
-    alert = post.publish_failed? ? t("social.publish_failed") : nil
+    alert = if post.publish_failed?
+      post.targets.reload.filter_map(&:error_message).first.presence || t("social.publish_failed")
+    end
     redirect_to social_connections_path, notice: alert.nil? ? notice : nil, alert: alert
   rescue SocialConnections::PublishFacebookText::NeedText
     redirect_to new_social_connection_path, alert: t("social.publish_need_text")
+  rescue SocialConnections::PublishFacebookText::NeedMedia
+    redirect_to new_social_connection_path, alert: t("social.publish_need_media")
   rescue SocialConnections::PublishFacebookText::NothingSelected
     redirect_to new_social_connection_path, alert: t("social.publish_pick_page")
   rescue SocialConnections::PublishFacebookText::MixedMedia
@@ -123,23 +125,6 @@ class SocialConnectionsController < ApplicationController
       policy_scope(SocialMedia::SocialPage).instagram.where(parent_external_id: page.external_id).find_each(&:disconnect!)
     end
     redirect_to social_connections_path, notice: t("social.disconnected")
-  end
-
-  # Development only, and only before the Meta app keys exist. Builds a checklist
-  # of fake Pages so the screen can be tried without Facebook.
-  def preview
-    not_found unless Rails.env.development?
-    if MetaApi.configured?
-      redirect_to social_connections_path, alert: t("social.already_configured")
-      return
-    end
-
-    pending = current_user.pending_connections.create!(
-      provider: :facebook,
-      provider_uid: "sample",
-      items: sample_pages
-    )
-    redirect_to choose_social_connections_path(pending_id: pending.id)
   end
 
   private
@@ -209,13 +194,4 @@ class SocialConnectionsController < ApplicationController
     end
   end
 
-  def sample_pages
-    [
-      { "id" => "sample-page-1", "name" => "Paranda Youth Page", "category" => "Political Organization",
-        "username" => "paranda.youth", "access_token" => "sample-token-not-real" },
-      { "id" => "sample-page-2", "name" => "Booth 12 Updates", "category" => "Community",
-        "access_token" => "sample-token-not-real-2",
-        "instagram_business_account" => { "id" => "ig-sample", "username" => "booth12" } }
-    ]
-  end
 end

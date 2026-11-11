@@ -23,7 +23,8 @@ class BoothManagementTest < ActionDispatch::IntegrationTest
     get booths_path
     assert_response :success
     assert_match "14", @response.body
-    assert_match "School", @response.body
+    assert_match "Nimgaon", @response.body
+    assert_no_match(%r{<th[^>]*>Name</th>}, @response.body)
     assert_match "Page 1", @response.body
 
     get booths_path(number: "14", name: "School", village_id: @booth.village_id, address: "School road", station_type: "School")

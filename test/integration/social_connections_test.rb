@@ -30,6 +30,9 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match I18n.t("social.title"), response.body
     assert_match I18n.t("social.coming_next"), response.body
+    assert_match I18n.t("social.channels.sms"), response.body
+    assert_match I18n.t("social.channels.whatsapp"), response.body
+    assert_match I18n.t("social.channels.ivrs"), response.body
   end
 
   test "a manager sees the page table and cannot connect or disconnect" do
@@ -42,7 +45,8 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Youth Page", response.body
     assert_select "a[href=?]", new_social_connection_path
-    assert_no_match I18n.t("social.coming_next"), response.body
+    assert_no_match I18n.t("social.networks.youtube"), response.body
+    assert_match I18n.t("social.channels.sms"), response.body
     assert_no_match I18n.t("social.connect_facebook"), response.body
     get new_social_connection_path
     assert_response :success
@@ -78,6 +82,212 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_select "[data-metric=likes]", text: "1,284"
     assert_select "[data-metric=comments]", text: "17"
     assert_no_match "page-secret-token", response.body
+  end
+
+  test "a manager can edit and delete a published post" do
+    page = nil
+    target = nil
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      bulk = SocialMedia::BulkPost.create!(owner: @admin, body: "Booth meeting tonight")
+      target = bulk.targets.create!(social_page: page, status: :published, external_post_id: "111_555", published_at: Time.current)
+    end
+    graph = MetaApi::Graph.singleton_class
+    graph.alias_method(:__orig_post, :post)
+    graph.alias_method(:__orig_delete, :delete)
+    MetaApi::Graph.define_singleton_method(:post) { |*, **| { "success" => true } }
+    MetaApi::Graph.define_singleton_method(:delete) { |*, **| { "success" => true } }
+
+    sign_in @manager
+    get social_connection_path(page)
+    assert_select "a[href=?]", edit_social_post_path(target.bulk_post)
+    get edit_social_post_path(target.bulk_post)
+    assert_response :success
+    assert_match "Booth meeting tonight", response.body
+
+    patch social_post_path(target.bulk_post), params: { bulk_post: { body: "Meeting moved to 8" } }
+    assert_redirected_to social_posts_path
+    ActsAsTenant.with_tenant(@org) { assert_equal "Meeting moved to 8", target.bulk_post.reload.body }
+
+    delete social_post_path(target.bulk_post)
+    assert_redirected_to social_posts_path
+    ActsAsTenant.with_tenant(@org) do
+      assert_nil SocialMedia::BulkPostTarget.find_by(id: target.id)
+      assert target.bulk_post.reload.discarded?
+    end
+    assert_no_match "page-secret-token", response.body
+  ensure
+    graph&.alias_method(:post, :__orig_post) if graph&.method_defined?(:__orig_post)
+    graph&.alias_method(:delete, :__orig_delete) if graph&.method_defined?(:__orig_delete)
+  end
+
+  test "a reader cannot edit or delete a post" do
+    target = nil
+    sign_in @reader
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      bulk = SocialMedia::BulkPost.create!(owner: @admin, body: "Booth meeting tonight")
+      target = bulk.targets.create!(social_page: page, status: :published, external_post_id: "111_555")
+    end
+    get edit_social_post_path(target.bulk_post)
+    assert_response :not_found
+    sign_in @reader
+    delete social_post_path(target.bulk_post)
+    assert_response :not_found
+  end
+
+  test "all posts are split into pages with the newest first" do
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      (SocialPostsController::PAGE_SIZE + 1).times do |n|
+        sent = SocialMedia::BulkPost.create!(owner: @admin, body: "Paged note #{n}", status: :completed)
+        sent.targets.create!(social_page: page, status: :published, external_post_id: "111_#{n}", published_at: n.hours.ago)
+      end
+    end
+
+    sign_in @manager
+    get social_posts_path
+    assert_response :success
+    assert_match "Paged note 0", response.body
+    assert_no_match "Paged note #{SocialPostsController::PAGE_SIZE}", response.body
+    assert_select "nav[aria-label=?]", I18n.t("common.pagination.label")
+    assert_select "a[rel=next]"
+
+    get social_posts_path(page: 2)
+    assert_response :success
+    assert_match "Paged note #{SocialPostsController::PAGE_SIZE}", response.body
+    assert_no_match "Paged note 0", response.body
+  end
+
+  test "a published post shows a network icon that opens that post" do
+    ActsAsTenant.with_tenant(@org) do
+      facebook = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      instagram = SocialMedia::SocialPage.create!(owner: @admin, provider: :instagram, external_id: "ig-9", name: "Youth IG", access_token: "page-secret-token", status: :active)
+      sent = SocialMedia::BulkPost.create!(owner: @admin, body: "Booth meeting tonight", status: :completed)
+      sent.targets.create!(social_page: facebook, status: :published, external_post_id: "111_555", permalink: "https://www.facebook.com/111/posts/555", published_at: Time.current)
+      sent.targets.create!(social_page: instagram, status: :published, external_post_id: "ig-media-1", permalink: "https://www.instagram.com/p/abc/", published_at: Time.current)
+    end
+
+    sign_in @manager
+    get social_posts_path
+    assert_response :success
+    assert_select "a[href=?][target=_blank]", "https://www.facebook.com/111/posts/555"
+    assert_select "a[href=?][target=_blank]", "https://www.instagram.com/p/abc/"
+    assert_no_match "page-secret-token", response.body
+  end
+
+  test "all posts lists the newest published post first" do
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      fresh = SocialMedia::BulkPost.create!(owner: @admin, body: "Fresh booth note", status: :completed)
+      older = SocialMedia::BulkPost.create!(owner: @admin, body: "Old booth note", status: :completed)
+      fresh.targets.create!(social_page: page, status: :published, external_post_id: "111_1", published_at: 1.hour.ago)
+      older.targets.create!(social_page: page, status: :published, external_post_id: "111_2", published_at: 3.days.ago)
+    end
+
+    sign_in @manager
+    get social_posts_path
+    assert_response :success
+    assert_operator response.body.index("Fresh booth note"), :<, response.body.index("Old booth note")
+  end
+
+  test "editing or deleting one post updates every page it was sent to" do
+    sent = nil
+    ActsAsTenant.with_tenant(@org) do
+      youth = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      booth = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "222", name: "Booth Page", access_token: "page-secret-token", status: :active)
+      sent = SocialMedia::BulkPost.create!(owner: @admin, body: "Booth meeting tonight", status: :completed)
+      sent.targets.create!(social_page: youth, status: :published, external_post_id: "111_555", published_at: Time.current)
+      sent.targets.create!(social_page: booth, status: :published, external_post_id: "222_777", published_at: Time.current)
+    end
+    calls = []
+    graph = MetaApi::Graph.singleton_class
+    graph.alias_method(:__orig_post, :post)
+    graph.alias_method(:__orig_delete, :delete)
+    MetaApi::Graph.define_singleton_method(:post) { |path, *| calls << path; { "success" => true } }
+    MetaApi::Graph.define_singleton_method(:delete) { |path, *| calls << path; { "success" => true } }
+
+    sign_in @manager
+    get social_posts_path
+    assert_response :success
+    assert_match "Booth meeting tonight", response.body
+    assert_match "Youth Page", response.body
+    assert_match "Booth Page", response.body
+    assert_select "a[href=?]", edit_social_post_path(sent), count: 1
+
+    patch social_post_path(sent), params: { bulk_post: { body: "Meeting moved to 8" } }
+    assert_redirected_to social_posts_path
+    assert_equal [ "/111_555", "/222_777" ], calls.sort
+    ActsAsTenant.with_tenant(@org) { assert_equal "Meeting moved to 8", sent.reload.body }
+
+    calls.clear
+    delete social_post_path(sent)
+    assert_redirected_to social_posts_path
+    assert_equal [ "/111_555", "/222_777" ], calls.sort
+    ActsAsTenant.with_tenant(@org) do
+      assert_equal 0, sent.targets.count
+      assert sent.reload.discarded?
+    end
+  ensure
+    graph&.alias_method(:post, :__orig_post) if graph&.method_defined?(:__orig_post)
+    graph&.alias_method(:delete, :__orig_delete) if graph&.method_defined?(:__orig_delete)
+  end
+
+  test "an instagram caption cannot be changed after it is published" do
+    sent = nil
+    ActsAsTenant.with_tenant(@org) do
+      instagram = SocialMedia::SocialPage.create!(owner: @admin, provider: :instagram, external_id: "ig-9", name: "Gatha_Veena", access_token: "page-secret-token", status: :active)
+      sent = SocialMedia::BulkPost.create!(owner: @admin, body: "This is the test campaign post.", status: :completed)
+      sent.targets.create!(social_page: instagram, status: :published, external_post_id: "ig-media-1", published_at: Time.current)
+    end
+    graph = MetaApi::Graph.singleton_class
+    graph.alias_method(:__orig_post, :post)
+    calls = []
+    MetaApi::Graph.define_singleton_method(:post) { |path, *| calls << path; { "success" => true } }
+
+    sign_in @manager
+    get edit_social_post_path(sent)
+    assert_response :success
+    assert_match I18n.t("social.instagram_caption_locked"), response.body
+    assert_select "textarea", count: 0
+
+    patch social_post_path(sent), params: { bulk_post: { body: "New words" } }
+    assert_response :unprocessable_entity
+    assert_match I18n.t("social.instagram_caption_locked"), response.body
+    assert_empty calls
+    ActsAsTenant.with_tenant(@org) { assert_equal "This is the test campaign post.", sent.reload.body }
+  ensure
+    graph&.alias_method(:post, :__orig_post) if graph&.method_defined?(:__orig_post)
+  end
+
+  test "a page that refuses the edit is named and the words stay on the others" do
+    sent = nil
+    ActsAsTenant.with_tenant(@org) do
+      youth = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      booth = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "222", name: "Booth Page", access_token: "page-secret-token", status: :active)
+      sent = SocialMedia::BulkPost.create!(owner: @admin, body: "Booth meeting tonight", status: :completed)
+      sent.targets.create!(social_page: youth, status: :published, external_post_id: "111_555", published_at: Time.current)
+      sent.targets.create!(social_page: booth, status: :published, external_post_id: "222_777", published_at: Time.current)
+    end
+    graph = MetaApi::Graph.singleton_class
+    graph.alias_method(:__orig_post, :post)
+    MetaApi::Graph.define_singleton_method(:post) do |path, *|
+      raise MetaApi::Graph::Error.new("caption locked") if path == "/222_777"
+
+      { "success" => true }
+    end
+
+    sign_in @manager
+    patch social_post_path(sent), params: { bulk_post: { body: "Meeting moved to 8" } }
+    assert_redirected_to social_posts_path
+    follow_redirect!
+    assert_match "Booth Page: caption locked", response.body
+    ActsAsTenant.with_tenant(@org) do
+      assert_equal "Meeting moved to 8", sent.reload.body
+      assert_equal "caption locked", sent.targets.find_by!(external_post_id: "222_777").error_message
+    end
+  ensure
+    graph&.alias_method(:post, :__orig_post) if graph&.method_defined?(:__orig_post)
   end
 
   test "opening a connected page pulls its facebook posts and counts" do
@@ -174,6 +384,48 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     end
   ensure
     graph&.alias_method(:upload, :__orig_upload)
+  end
+
+  test "an instagram account can be selected and receives the photo" do
+    page = nil
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(owner: @admin, provider: :instagram, external_id: "ig-9", name: "youth.ig", username: "youth.ig", parent_external_id: "111", access_token: "page-secret-token", status: :active)
+    end
+    sign_in @manager
+    get new_social_connection_path
+    assert_response :success
+    assert_match I18n.t("social.networks.instagram"), response.body
+    assert_match "youth.ig", response.body
+
+    graph = MetaApi::Graph.singleton_class
+    graph.alias_method(:__orig_upload, :upload)
+    graph.alias_method(:__orig_post, :post)
+    graph.alias_method(:__orig_get, :get)
+    MetaApi::Graph.define_singleton_method(:upload) { |*, **| { "id" => "photo-1" } }
+    MetaApi::Graph.define_singleton_method(:post) do |path, _params = {}|
+      path.end_with?("/media_publish") ? { "id" => "ig-media-1" } : { "id" => "container-1" }
+    end
+    MetaApi::Graph.define_singleton_method(:get) do |path, _params = {}|
+      case path
+      when "/photo-1" then { "images" => [ { "source" => "https://cdn.example/a.jpg", "width" => 800 } ] }
+      when "/ig-media-1" then { "permalink" => "https://www.instagram.com/p/abc/" }
+      else { "status_code" => "FINISHED" }
+      end
+    end
+    image = fixture_file_upload("photo.png", "image/png")
+
+    post publish_social_connections_path, params: { bulk_post: { body: "Poster", media: [ image ] }, page_ids: [ page.id ] }
+    assert_redirected_to social_connections_path
+
+    ActsAsTenant.with_tenant(@org) do
+      target = page.bulk_post_targets.find_by!(external_post_id: "ig-media-1")
+      assert target.status_published?
+      assert_equal "https://www.instagram.com/p/abc/", target.permalink
+    end
+  ensure
+    graph&.alias_method(:upload, :__orig_upload) if graph&.method_defined?(:__orig_upload)
+    graph&.alias_method(:post, :__orig_post) if graph&.method_defined?(:__orig_post)
+    graph&.alias_method(:get, :__orig_get) if graph&.method_defined?(:__orig_get)
   end
 
   test "a reader cannot publish a facebook post" do
@@ -330,6 +582,11 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
       instagram = SocialMedia::SocialPage.create!(owner: @admin, provider: :instagram, external_id: "ig-9", name: "youth.ig", parent_external_id: "111", access_token: "page-secret-token", status: :active)
     end
     sign_in @admin
+    get social_connection_path(page)
+    assert_response :success
+    assert_select "[data-confirm-panel-target=panel][hidden]"
+    assert_match I18n.t("social.disconnect_title"), response.body
+    assert_match I18n.t("social.disconnect_confirm"), response.body
     delete social_connection_path(page)
     assert_redirected_to social_connections_path
     ActsAsTenant.with_tenant(@org) do
@@ -356,12 +613,6 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_no_match "Youth Page", response.body
     delete social_connection_path(page)
-    assert_response :not_found
-  end
-
-  test "sample preview is not available outside development" do
-    sign_in @writer
-    post preview_social_connections_path
     assert_response :not_found
   end
 

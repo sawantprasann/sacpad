@@ -55,7 +55,8 @@
             <% @publish_pages.each do |page| %>
               <label class="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1.5 text-sm text-gray-800 ring-1 ring-gray-200 dark:bg-white/5 dark:text-gray-200 dark:ring-white/10">
                 <%= check_box_tag "page_ids[]", page.id, @publish_pages.one?, class: "rounded border-gray-300" %>
-                <%= page.name.presence || t("social.unnamed") %>
+                <span class="font-medium"><%= t("social.networks.#{page.provider}") %></span>
+                <span><%= page.name.presence || page.username.presence || t("social.unnamed") %></span>
               </label>
             <% end %>
           </div>

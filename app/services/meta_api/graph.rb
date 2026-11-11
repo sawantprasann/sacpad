@@ -25,6 +25,25 @@ module MetaApi
     class << self
       def get(path, params = {}) = request(:get, path, params)
       def post(path, params = {}) = request(:post, path, params)
+      def delete(path, params = {}) = request(:delete, path, params)
+
+      # Binary upload for an Instagram resumable video. The token is a header and is not logged.
+      def upload_binary(url, io, token:, file_size:)
+        uri = URI(url)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        http.open_timeout = 10
+        http.read_timeout = 180
+        request = Net::HTTP::Post.new(uri)
+        request["Authorization"] = "OAuth #{token}"
+        request["offset"] = "0"
+        request["file_size"] = file_size.to_s
+        request.body = io.read
+        response = http.request(request)
+        parse!(Struct.new(:body, :status, :success?).new(response.body, response.code.to_i, response.is_a?(Net::HTTPSuccess)))
+      rescue Faraday::Error, Net::OpenTimeout, Net::ReadTimeout, SocketError, SystemCallError => e
+        raise Error.new(e.message, transient: true)
+      end
 
       # Multipart upload for a photo or video. The access token stays in the body and is not logged.
       def upload(path, params = {})
