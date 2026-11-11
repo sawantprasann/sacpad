@@ -55,8 +55,6 @@ en:
   dashboard:
     namaste: "Namaste"
     open_a_desk: "Open a desk"
-    show_desks: "Show desks"
-    hide_desks: "Hide desks"
     at_a_glance: "At a glance"
     glance_subtitle: "The work sitting on your campaign desk today."
     no_modules: "No modules are available to your role yet."
