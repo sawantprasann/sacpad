@@ -1,44 +1,90 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "category", "platform", "platformWrap", "platformLabel", "links", "linkRows", "linkTemplate", "outdoor" ]
+  static targets = [ "entryRows", "newEntryRows", "entryTemplate", "categoryNotice" ]
   static values = {
     thumbnailUrl: String,
-    newspaper: String,
-    tvChannel: String,
     checking: String,
     noThumbnail: String,
-    thumbnailFilled: String
+    thumbnailFilled: String,
+    chooseFirst: String
   }
 
   connect() {
-    this.applyCategory()
+    this.entryIndex = Date.now()
+    this.renumber()
   }
 
-  applyCategory() {
-    const slug = this.categoryTarget.selectedOptions[0]?.dataset.slug || ""
-    const platformSlugs = [ "electronic", "print", "local-print", "local-electronic" ]
-    const linkSlugs = [ "electronic", "local-electronic", "podcasts" ]
-    const showPlatform = platformSlugs.includes(slug)
-    this.platformWrapTarget.hidden = !showPlatform
-    this.linksTarget.hidden = !linkSlugs.includes(slug)
-    this.outdoorTarget.hidden = slug !== "outdoor-media"
-    this.platformLabelTarget.textContent = (slug === "print" || slug === "local-print") ? this.newspaperValue : this.tvChannelValue
-    const current = this.platformTarget.value
-    this.platformTarget.querySelectorAll("option").forEach((option) => {
-      if (!option.value) return
-      const match = option.dataset.category === slug
-      const keep = option.value === current
-      option.hidden = !(match || keep)
-      option.disabled = !(match || keep)
+  addEntry(event) {
+    event.preventDefault()
+    const pending = this.pendingCategoryEntry()
+    if (pending) {
+      this.categoryNoticeTarget.textContent = this.chooseFirstValue
+      this.categoryNoticeTarget.classList.remove("hidden")
+      pending.querySelector("[data-pr-record-entry-target='category']")?.focus({ preventScroll: true })
+      return
+    }
+    this.clearCategoryNotice()
+    this.entryIndex += 1
+    const html = this.entryTemplateTarget.innerHTML.replaceAll("__ENTRY__", String(this.entryIndex))
+    this.newEntryRowsTarget.insertAdjacentHTML("afterbegin", html)
+    this.renumber()
+    this.newEntryRowsTarget.querySelector("[data-entry] select")?.focus({ preventScroll: true })
+  }
+
+  categoryChanged() {
+    if (!this.pendingCategoryEntry()) this.clearCategoryNotice()
+  }
+
+  pendingCategoryEntry() {
+    const entries = [
+      ...this.newEntryRowsTarget.querySelectorAll("[data-entry]"),
+      ...this.entryRowsTarget.querySelectorAll("[data-entry]")
+    ]
+    return entries.find((entry) => {
+      if (entry.hidden) return false
+      const select = entry.querySelector("[data-pr-record-entry-target='category']")
+      return select && select.value === ""
     })
-    if (this.platformTarget.selectedOptions[0]?.disabled) this.platformTarget.value = ""
+  }
+
+  clearCategoryNotice() {
+    if (!this.hasCategoryNoticeTarget) return
+    this.categoryNoticeTarget.textContent = ""
+    this.categoryNoticeTarget.classList.add("hidden")
+  }
+
+  removeEntry(event) {
+    event.preventDefault()
+    const entry = event.target.closest("[data-entry]")
+    const destroy = entry.querySelector("[data-entry-destroy]")
+    if (destroy) {
+      destroy.value = "1"
+      entry.hidden = true
+    } else {
+      entry.remove()
+    }
+    this.renumber()
+  }
+
+  renumber() {
+    let number = 0
+    const assign = (entry) => {
+      if (entry.hidden) return
+      number += 1
+      const slot = entry.querySelector("[data-entry-index]")
+      if (slot) slot.textContent = String(number)
+    }
+    this.entryRowsTarget.querySelectorAll("[data-entry]").forEach(assign)
+    // New blocks sit above the saved ones, but they were added after, so they take the next numbers.
+    ;[ ...this.newEntryRowsTarget.querySelectorAll("[data-entry]") ].reverse().forEach(assign)
   }
 
   addLink(event) {
     event.preventDefault()
-    const html = this.linkTemplateTarget.innerHTML.replaceAll("__INDEX__", Date.now().toString())
-    this.linkRowsTarget.insertAdjacentHTML("beforeend", html)
+    const entry = event.target.closest("[data-entry]")
+    const html = entry.querySelector("[data-link-template]").innerHTML.replaceAll("__LINK__", Date.now().toString())
+    entry.querySelector("[data-link-rows]").insertAdjacentHTML("beforeend", html)
   }
 
   removeLink(event) {

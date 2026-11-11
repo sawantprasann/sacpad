@@ -1,17 +1,23 @@
 <% content_for :title, "#{@record.title} · #{@record.record_number}" %>
-<% list_path = pr_records_path(category: @record.pr_category.slug) %>
+<% categories = @record.entries.map(&:pr_category).uniq %>
+<% dates = @record.entries.filter_map(&:published_on) %>
+<% list_path = categories.one? ? pr_records_path(category: categories.first.slug) : pr_records_path %>
 <% breadcrumb t("nav.pr_records"), pr_records_path %>
-<% breadcrumb @record.pr_category.name, list_path %>
+<% breadcrumb categories.first.name, list_path if categories.one? %>
 <% breadcrumb @record.title %>
-<% field = "rounded-xl bg-gray-50 px-4 py-3 dark:bg-white/[0.03]" %>
-<% label = "text-xs font-medium tracking-wide text-gray-400 uppercase" %>
-<% section = "border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90" %>
+<% meta = if dates.map(&:to_date).uniq.many?
+     t("pr.published_range", from: l_day(dates.min), to: l_day(dates.max), owner: @record.owner.name)
+   elsif dates.any?
+     t("pr.published_meta", date: l_day(dates.first), owner: @record.owner.name)
+   else
+     @record.owner.name
+   end %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("pr.kicker"),
       title: @record.title,
-      subtitle: [ @record.record_number, @record.pr_category.name, t("pr.sentiments.#{@record.sentiment}") ].compact.join(" · "),
-      meta: t("pr.published_meta", date: l_day(@record.published_on), owner: @record.owner.name)
+      subtitle: [ @record.record_number, @record.category_names.join(", ") ].compact_blank.join(" · "),
+      meta: meta
     } do %><% end %>
 
 <div class="mt-4 mb-4 flex flex-wrap items-center justify-end gap-2">
@@ -22,85 +28,36 @@
 </div>
 
 <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
-  <div class="space-y-4 xl:col-span-2">
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>"><%= t("pr.media_coverage") %></h2>
-      <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div class="<%= field %>">
-          <dt class="<%= label %>"><%= t("pr.platform") %></dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @record.media_platform&.name || @record.media_platform_name || "—" %></dd>
-        </div>
-        <div class="<%= field %>">
-          <dt class="<%= label %>"><%= t("common.sentiment") %></dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= t("pr.sentiments.#{@record.sentiment}") %></dd>
-        </div>
-        <div class="<%= field %> sm:col-span-2">
-          <dt class="<%= label %>"><%= t("pr.links") %></dt>
-          <dd class="mt-2 space-y-3 text-sm text-gray-800 dark:text-white/90">
-            <% links = @record.links.to_a %>
-            <% if links.empty? && @record.url.present? %>
-              <% links = [ Struct.new(:url, :thumbnail_url).new(@record.url, @record.thumbnail_url) ] %>
-            <% end %>
-            <% if links.any? %>
-              <% links.each do |link| %>
-                <div class="flex items-center gap-3">
-                  <% if link.thumbnail_url.present? %>
-                    <img src="<%= link.thumbnail_url %>" alt="" class="h-12 w-20 rounded object-cover">
-                  <% end %>
-                  <%= link_to truncate(link.url, length: 60), link.url, target: "_blank", rel: "noopener", class: ta_text_link %>
-                </div>
-              <% end %>
-            <% else %>
-              —
-            <% end %>
-          </dd>
-        </div>
-        <div class="<%= field %> sm:col-span-2">
-          <dt class="<%= label %>"><%= t("common.details") %></dt>
-          <dd class="mt-1 whitespace-pre-line text-sm text-gray-800 dark:text-white/90"><%= @record.description.presence || "—" %></dd>
-        </div>
-      </dl>
-    </section>
-
-    <% if @record.pr_category.slug == "outdoor-media" && @record.outdoor_ad_counts.any? %>
-      <section class="<%= ta_card_classes %> p-6">
-        <h2 class="<%= section %>"><%= t("pr.outdoor_title") %></h2>
-        <div class="mt-4 space-y-2">
-          <% @record.outdoor_ad_counts.each do |count| %>
-            <div class="flex justify-between rounded-lg bg-gray-50 px-4 py-2 dark:bg-white/[0.03]">
-              <span class="text-sm font-medium text-gray-800 dark:text-white/90"><%= count.outdoor_ad_type.name %></span>
-              <span class="text-sm tabular-nums font-semibold text-gray-600 dark:text-gray-400"><%= t("pr.placements", count: count.count) %></span>
-            </div>
-          <% end %>
-        </div>
-      </section>
+  <div class="order-2 space-y-4 xl:order-1 xl:col-span-2">
+    <% @record.entries.each_with_index do |entry, index| %>
+      <%= render "pr_records/entry", entry: entry, index: index + 1 %>
     <% end %>
-
-    <% if @record.pr_category.slug == "podcasts" && @record.podcast %>
-      <section class="<%= ta_card_classes %> p-6">
-        <h2 class="<%= section %>"><%= t("pr.podcast") %></h2>
-        <div class="<%= field %>">
-          <dt class="<%= label %>"><%= t("pr.recording_date") %></dt>
-          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= l_day(@record.podcast.recording_date) %></dd>
-        </div>
-      </section>
-    <% end %>
-
-    <section class="<%= ta_card_classes %> p-6">
-      <h2 class="<%= section %>"><%= t("common.attachments") %></h2>
-      <% if @record.attachments.attached? %>
-        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <% @record.attachments.each do |att| %>
-            <% if att.image? %>
-              <%= image_tag att, class: "aspect-square w-full rounded-xl object-cover" %>
-            <% else %>
-              <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm #{ta_text_link}" %>
-            <% end %>
-          <% end %>
-        </div>
-      <% else %>
-        <p class="mt-4 rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center text-sm text-gray-400 dark:border-gray-700"><%= t("common.no_attachments") %></p>
-      <% end %>
-    </section>
   </div>
+
+  <aside class="order-1 xl:order-2">
+    <section class="<%= ta_card_classes %> p-6">
+      <h2 class="border-b border-gray-100 pb-3 text-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90"><%= t("pr.where_appeared") %></h2>
+      <ol class="mt-4 space-y-3">
+        <% @record.entries.each_with_index do |entry, index| %>
+          <li>
+            <%= link_to "#pr-entry-#{entry.id}", class: "flex items-start gap-3 rounded-xl bg-gray-50 px-4 py-3 hover:bg-gray-100 dark:bg-white/[0.03] dark:hover:bg-white/[0.06]" do %>
+              <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-white/90 dark:ring-gray-700"><%= index + 1 %></span>
+              <span class="min-w-0 flex-1">
+                <span class="flex items-start justify-between gap-3">
+                  <span class="text-sm font-medium text-gray-800 dark:text-white/90"><%= entry.pr_category.name %></span>
+                  <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
+                </span>
+                <span class="mt-1 block text-sm text-gray-500 dark:text-gray-400">
+                  <%= [ entry.platform_name, l_day(entry.published_on) ].compact.join(" · ") %>
+                </span>
+              </span>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+      <p class="mt-4 border-t border-gray-100 pt-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400">
+        <%= t("common.logged_by") %> · <%= @record.owner.name %>
+      </p>
+    </section>
+  </aside>
 </div>

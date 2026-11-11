@@ -20,24 +20,27 @@ class PrRecordPodcastTest < ActiveSupport::TestCase
       @record = @org.pr_records.create!(
         owner: @user,
         title: "Podcast Feature",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: @category,
-        media_platform_name: "News Daily Pod"
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform_name: "News Daily Pod"
+        } ]
       )
+      @entry = @record.entries.first
     end
   end
 
   test "creates podcast with recording date" do
     ActsAsTenant.with_tenant(@org) do
-      podcast = @record.build_podcast(recording_date: 2.days.ago.to_date)
+      podcast = @entry.build_podcast(recording_date: 2.days.ago.to_date)
       assert podcast.save
     end
   end
 
   test "validates recording date is present" do
     ActsAsTenant.with_tenant(@org) do
-      podcast = @record.build_podcast
+      podcast = @entry.build_podcast
       assert_not podcast.save
       assert_includes podcast.errors.full_messages.join, "Recording date"
     end
@@ -45,7 +48,7 @@ class PrRecordPodcastTest < ActiveSupport::TestCase
 
   test "has_one podcast association with dependent destroy" do
     ActsAsTenant.with_tenant(@org) do
-      podcast = @record.create_podcast!(recording_date: 1.day.ago.to_date)
+      podcast = @entry.create_podcast!(recording_date: 1.day.ago.to_date)
       podcast_id = podcast.id
 
       @record.destroy
@@ -55,17 +58,17 @@ class PrRecordPodcastTest < ActiveSupport::TestCase
     end
   end
 
-  test "belongs to pr_record" do
+  test "belongs to pr_record_entry" do
     ActsAsTenant.with_tenant(@org) do
-      podcast = @record.create_podcast!(recording_date: Date.today)
-      assert_equal @record, podcast.pr_record
+      podcast = @entry.create_podcast!(recording_date: Date.today)
+      assert_equal @entry, podcast.pr_record_entry
     end
   end
 
   test "recording date can differ from published_on" do
     ActsAsTenant.with_tenant(@org) do
-      podcast = @record.create_podcast!(recording_date: 7.days.ago.to_date)
-      assert_not_equal @record.published_on, podcast.recording_date
+      podcast = @entry.create_podcast!(recording_date: 7.days.ago.to_date)
+      assert_not_equal @entry.published_on, podcast.recording_date
       assert_equal 7.days.ago.to_date, podcast.recording_date
     end
   end

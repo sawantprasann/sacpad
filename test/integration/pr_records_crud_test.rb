@@ -1,4 +1,5 @@
 require "test_helper"
+require "roo"
 
 # Integration tests for PR Records CRUD — comprehensive tests covering
 # org-scoping, policy authorization, and cross-org isolation
@@ -57,6 +58,24 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
+  test "category and platform menus list the blank choice once" do
+    get new_pr_record_path
+    assert_response :success
+    assert_operator response.body.index("Add category"), :<, response.body.index('data-pr-record-form-target="entryRows"')
+    assert_select "select[name*='pr_category_id']" do |selects|
+      selects.each do |select|
+        blanks = select.css("option").select { |option| option.text == "Select a category..." }
+        assert_equal 1, blanks.size
+      end
+    end
+    assert_select "select[name*='media_platform_id']" do |selects|
+      selects.each do |select|
+        blanks = select.css("option").select { |option| option.text == "Select…" }
+        assert_equal 1, blanks.size
+      end
+    end
+  end
+
   test "authenticated user can view index" do
     get pr_records_path
     assert_response :success
@@ -97,10 +116,12 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       @org.pr_records.create!(
         owner: @user,
         title: "Electronic Coverage",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: @category,
-        media_platform: @platform
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform: @platform
+        } ]
       )
     end
 
@@ -108,26 +129,30 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "index shows each coverage link" do
+  test "index shows each link on the row for its platform" do
     ActsAsTenant.with_tenant(@org) do
       record = @org.pr_records.create!(
         owner: @user,
         title: "Linked Coverage",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: @category,
-        media_platform: @platform,
-        url: "https://news.example/legacy"
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform: @platform,
+          url: "https://news.example/legacy"
+        } ]
       )
-      record.links.create!(url: "https://news.example/story", position: 0)
-      record.links.create!(url: "https://news.example/clip", position: 1)
+      entry = record.entries.first
+      entry.links.create!(url: "https://news.example/story", position: 0)
+      entry.links.create!(url: "https://news.example/clip", position: 1)
     end
 
     get pr_records_path
     assert_response :success
-    assert_select "th", text: "Link"
-    assert_select "a[href='https://news.example/story'][target=_blank]"
-    assert_select "a[href='https://news.example/clip'][target=_blank]"
+    assert_select "th", text: "Links"
+    assert_select "a[href='https://news.example/story'][target=_blank]", text: "news.example/story"
+    assert_select "a[href='https://news.example/clip'][target=_blank]", text: "news.example/clip"
+    assert_select "td", text: @platform.name
     assert_select "a[href='https://news.example/legacy']", count: 0
   end
 
@@ -136,11 +161,15 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       post pr_records_path, params: {
         pr_record: {
           title: "New Coverage",
-          published_on: Date.today,
-          sentiment: "positive",
-          pr_category_id: @category.id,
-          media_platform_id: @platform.id,
-          description: "Test coverage"
+          entries_attributes: {
+            "0" => {
+              published_on: Date.today,
+              sentiment: "positive",
+              pr_category_id: @category.id,
+              media_platform_id: @platform.id,
+              description: "Test coverage"
+            }
+          }
         }
       }
 
@@ -156,10 +185,13 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       post pr_records_path, params: {
         pr_record: {
           title: "Missing Platform",
-          published_on: Date.today,
-          sentiment: "positive",
-          pr_category_id: @category.id
-          # Missing both media_platform_id and media_platform_name
+          entries_attributes: {
+            "0" => {
+              published_on: Date.today,
+              sentiment: "positive",
+              pr_category_id: @category.id
+            }
+          }
         }
       }
 
@@ -174,10 +206,12 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       record = @org.pr_records.create!(
         owner: @user,
         title: "My Record",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: @category,
-        media_platform: @platform
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform: @platform
+        } ]
       )
     end
 
@@ -200,10 +234,12 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       record = @org.pr_records.create!(
         owner: other_user,
         title: "Other User Record",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: @category,
-        media_platform: @platform
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform: @platform
+        } ]
       )
     end
 
@@ -243,15 +279,114 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       other_record = other_org.pr_records.create!(
         owner: user,
         title: "Other Org Record",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: category,
-        media_platform: platform
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: category,
+          media_platform: platform
+        } ]
       )
     end
 
     # Current user from @org tries to access @other_org's record
     get pr_record_path(other_record)
     assert_response 404
+  end
+
+  test "one headline can hold two categories" do
+    print_category = PrCategory.find_by(slug: "print") || PrCategory.create!(
+      name: "Print Media", slug: "print", active: true, display_order: 2
+    )
+    paper = MediaPlatform.create!(name: "Lokmat", slug: "lokmat-#{Time.current.to_i}", active: true, pr_category: print_category)
+
+    post pr_records_path, params: {
+      pr_record: {
+        title: "Shared headline",
+        entries_attributes: {
+          "0" => {
+            published_on: Date.today,
+            sentiment: "positive",
+            pr_category_id: @category.id,
+            media_platform_id: @platform.id,
+            description: "TV coverage"
+          },
+          "1" => {
+            published_on: Date.today,
+            sentiment: "neutral",
+            pr_category_id: print_category.id,
+            media_platform_id: paper.id,
+            description: "Paper coverage"
+          }
+        }
+      }
+    }
+
+    assert_response :redirect
+    record = ActsAsTenant.with_tenant(@org) { PrRecord.kept.find_by!(title: "Shared headline") }
+    assert_equal 2, record.entries.count
+    assert_equal @user.id, record.owner_id
+
+    get pr_record_path(record)
+    assert_response :success
+    assert_match "Shared headline", response.body
+    assert_match "Where it appeared", response.body
+    assert_match @category.name, response.body
+    assert_match print_category.name, response.body
+
+    get pr_records_path
+    assert_match "Shared headline", response.body
+    assert_select "td", text: @category.name
+    assert_select "td", text: print_category.name
+    assert_select "td", text: @platform.name
+    assert_select "td", text: paper.name
+
+    get pr_records_path(category: @category.slug)
+    assert_match "Shared headline", response.body
+    get pr_records_path(category: print_category.slug)
+    assert_match "Shared headline", response.body
+  end
+
+  test "excel export lists each category and follows the category filter" do
+    print_category = PrCategory.find_by(slug: "print") || PrCategory.create!(
+      name: "Print Media", slug: "print", active: true, display_order: 2
+    )
+    paper = MediaPlatform.create!(name: "Sakal", slug: "sakal-#{Time.current.to_i}", active: true, pr_category: print_category)
+    ActsAsTenant.with_tenant(@org) do
+      @org.pr_records.create!(
+        owner: @user,
+        title: "Export headline",
+        entries_attributes: [
+          { published_on: Date.current, sentiment: :positive, pr_category: @category, media_platform: @platform, url: "https://tv.example/story" },
+          { published_on: Date.current, sentiment: :neutral, pr_category: print_category, media_platform: paper, url: "https://paper.example/story" }
+        ]
+      )
+    end
+
+    get pr_records_path(format: :xlsx)
+    assert_response :success
+    assert_equal "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", @response.media_type
+    assert_match "pr_records.xlsx", response.headers["Content-Disposition"]
+    cells = xlsx_cells
+    assert_includes cells, "Export headline"
+    assert_includes cells, @category.name
+    assert_includes cells, print_category.name
+    assert_includes cells, "https://tv.example/story"
+
+    get pr_records_path(format: :xlsx, category: print_category.slug)
+    cells = xlsx_cells
+    assert_includes cells, "Export headline"
+    assert_includes cells, print_category.name
+    assert_not_includes cells, @category.name
+    assert_not_includes cells, "https://tv.example/story"
+  end
+
+  def xlsx_cells
+    file = Tempfile.new([ "export", ".xlsx" ])
+    file.binmode
+    file.write(@response.body)
+    file.rewind
+    Roo::Excelx.new(file.path).sheet(0).to_a.flatten.map(&:to_s)
+  ensure
+    file&.close
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_194000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_133000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -511,57 +511,65 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_194000) do
     t.index ["slug"], name: "index_pr_categories_on_slug", unique: true
   end
 
-  create_table "pr_record_links", force: :cascade do |t|
+  create_table "pr_record_entries", force: :cascade do |t|
     t.bigint "pr_record_id", null: false
-    t.string "url", null: false
-    t.string "thumbnail_url"
-    t.integer "position", default: 0, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pr_record_id"], name: "index_pr_record_links_on_pr_record_id"
-  end
-
-  create_table "pr_record_outdoor_ad_counts", force: :cascade do |t|
-    t.bigint "pr_record_id", null: false
-    t.bigint "outdoor_ad_type_id", null: false
-    t.integer "count", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pr_record_id", "outdoor_ad_type_id"], name: "idx_on_pr_record_id_outdoor_ad_type_id_5cdb583466", unique: true
-  end
-
-  create_table "pr_record_podcasts", force: :cascade do |t|
-    t.bigint "pr_record_id", null: false
-    t.date "recording_date", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pr_record_id"], name: "index_pr_record_podcasts_on_pr_record_id", unique: true
-  end
-
-  create_table "pr_records", force: :cascade do |t|
-    t.bigint "organization_id", null: false
-    t.bigint "owner_id", null: false
     t.bigint "pr_category_id", null: false
     t.bigint "media_platform_id"
-    t.string "record_number", null: false
-    t.string "title", null: false
     t.text "description"
     t.string "url"
     t.string "thumbnail_url"
     t.integer "sentiment", default: 0, null: false
     t.date "published_on", null: false
     t.string "media_platform_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["media_platform_id"], name: "index_pr_record_entries_on_media_platform_id"
+    t.index ["pr_category_id"], name: "index_pr_record_entries_on_pr_category_id"
+    t.index ["pr_record_id"], name: "index_pr_record_entries_on_pr_record_id"
+  end
+
+  create_table "pr_record_links", force: :cascade do |t|
+    t.string "url", null: false
+    t.string "thumbnail_url"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pr_record_entry_id", null: false
+    t.index ["pr_record_entry_id"], name: "index_pr_record_links_on_pr_record_entry_id"
+  end
+
+  create_table "pr_record_outdoor_ad_counts", force: :cascade do |t|
+    t.bigint "outdoor_ad_type_id", null: false
+    t.integer "count", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pr_record_entry_id", null: false
+    t.index ["pr_record_entry_id", "outdoor_ad_type_id"], name: "idx_pr_outdoor_counts_on_entry_and_type", unique: true
+    t.index ["pr_record_entry_id"], name: "index_pr_record_outdoor_ad_counts_on_pr_record_entry_id"
+  end
+
+  create_table "pr_record_podcasts", force: :cascade do |t|
+    t.date "recording_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pr_record_entry_id", null: false
+    t.index ["pr_record_entry_id"], name: "index_pr_record_podcasts_on_pr_record_entry_id", unique: true
+  end
+
+  create_table "pr_records", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "owner_id", null: false
+    t.string "record_number", null: false
+    t.string "title", null: false
     t.datetime "discarded_at"
     t.bigint "discarded_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_pr_records_on_discarded_at"
     t.index ["discarded_by_id"], name: "index_pr_records_on_discarded_by_id"
-    t.index ["media_platform_id"], name: "index_pr_records_on_media_platform_id"
     t.index ["organization_id", "record_number"], name: "index_pr_records_on_organization_id_and_record_number", unique: true
     t.index ["organization_id"], name: "index_pr_records_on_organization_id"
     t.index ["owner_id"], name: "index_pr_records_on_owner_id"
-    t.index ["pr_category_id"], name: "index_pr_records_on_pr_category_id"
   end
 
   create_table "role_permissions", force: :cascade do |t|
@@ -1090,13 +1098,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_194000) do
   add_foreign_key "police_stations", "states"
   add_foreign_key "politicians", "organizations"
   add_foreign_key "politicians", "parties"
-  add_foreign_key "pr_record_links", "pr_records"
+  add_foreign_key "pr_record_entries", "media_platforms"
+  add_foreign_key "pr_record_entries", "pr_categories"
+  add_foreign_key "pr_record_entries", "pr_records"
+  add_foreign_key "pr_record_links", "pr_record_entries"
   add_foreign_key "pr_record_outdoor_ad_counts", "outdoor_ad_types"
-  add_foreign_key "pr_record_outdoor_ad_counts", "pr_records"
-  add_foreign_key "pr_record_podcasts", "pr_records"
-  add_foreign_key "pr_records", "media_platforms"
+  add_foreign_key "pr_record_outdoor_ad_counts", "pr_record_entries"
+  add_foreign_key "pr_record_podcasts", "pr_record_entries"
   add_foreign_key "pr_records", "organizations"
-  add_foreign_key "pr_records", "pr_categories"
   add_foreign_key "pr_records", "users", column: "discarded_by_id"
   add_foreign_key "pr_records", "users", column: "owner_id"
   add_foreign_key "role_permissions", "roles"

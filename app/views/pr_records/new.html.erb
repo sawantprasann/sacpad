@@ -1,12 +1,12 @@
-<% action_label = @record.pr_category ? "Log #{@record.pr_category.name}" : "Log PR record" %>
+<% action_label = t("pr.log_generic") %>
 <% content_for :title, action_label %>
 <% breadcrumb t("nav.pr_records"), pr_records_path %>
 <% breadcrumb action_label %>
 
 <%= render layout: "ui/campaign_hero", locals: {
-      kicker: "PR Records",
+      kicker: t("pr.kicker"),
       title: action_label,
-      subtitle: "Pick the category, then the channel or paper from the admin list."
+      subtitle: t("pr.form_subtitle")
     } do %><% end %>
 
 <%= render "form" %>

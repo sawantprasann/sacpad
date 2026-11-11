@@ -1,9 +1,8 @@
-<% urls = record.links.map(&:url).select(&:present?) %>
-<% urls = [ record.url ] if urls.empty? && record.url.present? %>
+<% urls = pr_entry_urls(entry) %>
 <% if urls.any? %>
   <div class="space-y-1">
     <% urls.each do |url| %>
-      <%= link_to truncate(url, length: 48), url, target: "_blank", rel: "noopener noreferrer", title: url, class: "#{ta_text_link} break-all text-sm" %>
+      <%= link_to pr_link_label(url), url, target: "_blank", rel: "noopener noreferrer", title: url, class: "#{ta_text_link} break-all text-sm" %>
     <% end %>
   </div>
 <% else %>
