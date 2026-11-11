@@ -89,7 +89,7 @@ class ConstituencyElectionResultsTest < ActionDispatch::IntegrationTest
 
     sign_in User.create!(organization: assembly_org, role: role, name: "Field", email: "field@example.com", password: "password123")
     get "/"
-    assert_match "Election result", response.body
+    assert_match "Past result", response.body
     assert_select "a[href='#{election_result_path}']"
     assert_no_match "dashboard-election-share", response.body
     assert_no_match "Omraje Nimbalkar", response.body

@@ -1,0 +1,80 @@
+<% links = entry.links.select { |link| link.url.present? } %>
+<% links = [ entry ] if links.empty? && entry.url.present? %>
+<% label = "text-xs font-medium tracking-wide text-gray-400 uppercase" %>
+
+<section id="pr-entry-<%= entry.id %>" class="<%= ta_card_classes %> scroll-mt-24 p-6">
+  <div class="flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
+    <div class="min-w-0">
+      <h2 class="text-base font-semibold text-gray-900 dark:text-white/90"><%= entry.pr_category.name %></h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <%= [ entry.platform_name, l_day(entry.published_on) ].compact.join(" · ") %>
+      </p>
+    </div>
+    <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
+  </div>
+
+  <% if entry.description.present? %>
+    <div class="mt-4">
+      <p class="<%= label %>"><%= t("common.details") %></p>
+      <div class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-800 dark:text-white/90"><%= linkify_text(entry.description) %></div>
+    </div>
+  <% end %>
+
+  <% if links.any? %>
+    <div class="mt-4">
+      <p class="<%= label %>"><%= t("pr.links") %></p>
+      <div class="mt-2 space-y-2">
+        <% links.each do |link| %>
+          <% host = pr_link_host(link.url) %>
+          <%= link_to link.url, target: "_blank", rel: "noopener", class: "flex items-center gap-3 rounded-xl border border-gray-200 px-3 py-2 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-white/[0.03]" do %>
+            <% if link.thumbnail_url.present? %>
+              <img src="<%= link.thumbnail_url %>" alt="" class="h-14 w-24 shrink-0 rounded-lg object-cover">
+            <% end %>
+            <span class="min-w-0">
+              <span class="block truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= host.presence || link.url %></span>
+              <% if host.present? %>
+                <span class="block truncate text-xs text-gray-500"><%= link.url %></span>
+              <% end %>
+            </span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if entry.pr_category.slug == "outdoor-media" && entry.outdoor_ad_counts.any? %>
+    <div class="mt-4">
+      <p class="<%= label %>"><%= t("pr.outdoor_title") %></p>
+      <div class="mt-2 space-y-2">
+        <% entry.outdoor_ad_counts.each do |count| %>
+          <div class="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-2 dark:bg-white/[0.03]">
+            <span class="text-sm font-medium text-gray-800 dark:text-white/90"><%= count.outdoor_ad_type.name %></span>
+            <span class="text-sm tabular-nums font-semibold text-gray-600 dark:text-gray-400"><%= t("pr.placements", count: count.count) %></span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if entry.pr_category.slug == "podcasts" && entry.podcast %>
+    <div class="mt-4">
+      <p class="<%= label %>"><%= t("pr.recording_date") %></p>
+      <p class="mt-2 text-sm text-gray-800 dark:text-white/90"><%= l_day(entry.podcast.recording_date) %></p>
+    </div>
+  <% end %>
+
+  <% if entry.attachments.attached? %>
+    <div class="mt-4">
+      <p class="<%= label %>"><%= t("common.attachments") %></p>
+      <div class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <% entry.attachments.each do |att| %>
+          <% if att.image? %>
+            <%= image_tag att, class: "aspect-square w-full rounded-xl object-cover" %>
+          <% else %>
+            <%= link_to att.filename, rails_blob_path(att, disposition: "attachment"), class: "text-sm #{ta_text_link}" %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</section>

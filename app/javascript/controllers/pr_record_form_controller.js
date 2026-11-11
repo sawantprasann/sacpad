@@ -1,44 +1,42 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = [ "category", "platform", "platformWrap", "platformLabel", "links", "linkRows", "linkTemplate", "outdoor" ]
+  static targets = [ "entryRows", "entryTemplate" ]
   static values = {
     thumbnailUrl: String,
-    newspaper: String,
-    tvChannel: String,
     checking: String,
     noThumbnail: String,
     thumbnailFilled: String
   }
 
   connect() {
-    this.applyCategory()
+    this.entryIndex = Date.now()
   }
 
-  applyCategory() {
-    const slug = this.categoryTarget.selectedOptions[0]?.dataset.slug || ""
-    const platformSlugs = [ "electronic", "print", "local-print", "local-electronic" ]
-    const linkSlugs = [ "electronic", "local-electronic", "podcasts" ]
-    const showPlatform = platformSlugs.includes(slug)
-    this.platformWrapTarget.hidden = !showPlatform
-    this.linksTarget.hidden = !linkSlugs.includes(slug)
-    this.outdoorTarget.hidden = slug !== "outdoor-media"
-    this.platformLabelTarget.textContent = (slug === "print" || slug === "local-print") ? this.newspaperValue : this.tvChannelValue
-    const current = this.platformTarget.value
-    this.platformTarget.querySelectorAll("option").forEach((option) => {
-      if (!option.value) return
-      const match = option.dataset.category === slug
-      const keep = option.value === current
-      option.hidden = !(match || keep)
-      option.disabled = !(match || keep)
-    })
-    if (this.platformTarget.selectedOptions[0]?.disabled) this.platformTarget.value = ""
+  addEntry(event) {
+    event.preventDefault()
+    this.entryIndex += 1
+    const html = this.entryTemplateTarget.innerHTML.replaceAll("__ENTRY__", String(this.entryIndex))
+    this.entryRowsTarget.insertAdjacentHTML("beforeend", html)
+  }
+
+  removeEntry(event) {
+    event.preventDefault()
+    const entry = event.target.closest("[data-entry]")
+    const destroy = entry.querySelector("[data-entry-destroy]")
+    if (destroy) {
+      destroy.value = "1"
+      entry.hidden = true
+    } else {
+      entry.remove()
+    }
   }
 
   addLink(event) {
     event.preventDefault()
-    const html = this.linkTemplateTarget.innerHTML.replaceAll("__INDEX__", Date.now().toString())
-    this.linkRowsTarget.insertAdjacentHTML("beforeend", html)
+    const entry = event.target.closest("[data-entry]")
+    const html = entry.querySelector("[data-link-template]").innerHTML.replaceAll("__LINK__", Date.now().toString())
+    entry.querySelector("[data-link-rows]").insertAdjacentHTML("beforeend", html)
   }
 
   removeLink(event) {

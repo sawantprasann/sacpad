@@ -63,11 +63,11 @@
             <td class="<%= td %> max-w-xs">
               <%= render "pr_records/links", record: record %>
             </td>
-            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.pr_category.name %></td>
-            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.media_platform&.name || record.media_platform_name || "—" %></td>
-            <td class="<%= td %>"><%= t("pr.sentiments.#{record.sentiment}") %></td>
+            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.category_names.join(", ") %></td>
+            <td class="<%= td %> text-gray-600 dark:text-gray-300"><%= record.platform_names.join(", ").presence || "—" %></td>
+            <td class="<%= td %>"><%= record.entries.map { |entry| t("pr.sentiments.#{entry.sentiment}") }.uniq.join(", ") %></td>
             <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= record.owner.name %></td>
-            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= l_day(record.published_on) %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-500"><%= l_day(record.latest_published_on) if record.latest_published_on %></td>
           </tr>
         <% end %>
       </tbody>
@@ -82,8 +82,8 @@
       <div class="px-6 py-4 hover:bg-gray-50 dark:hover:bg-white/[0.03]">
         <%= link_to record.title, pr_record_path(record), class: ta_text_link %>
         <div class="mt-1"><%= render "pr_records/links", record: record %></div>
-        <p class="mt-1 text-sm text-gray-600"><%= record.pr_category.name %> · <%= record.media_platform&.name || record.media_platform_name || t("pr.no_platform") %></p>
-        <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %> · <%= l_day(record.published_on) %></p>
+        <p class="mt-1 text-sm text-gray-600"><%= record.category_names.join(", ") %> · <%= record.platform_names.join(", ").presence || t("pr.no_platform") %></p>
+        <p class="mt-1 text-xs text-gray-500"><%= record.owner.name %><% if record.latest_published_on %> · <%= l_day(record.latest_published_on) %><% end %></p>
       </div>
     <% end %>
     <% if @records.empty? %>

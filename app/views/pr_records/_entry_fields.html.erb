@@ -1,0 +1,105 @@
+<div class="rounded-xl border border-gray-200 p-4 md:p-5 dark:border-gray-700"
+     data-controller="pr-record-entry"
+     data-entry
+     data-pr-record-entry-newspaper-value="<%= t("pr.newspaper") %>"
+     data-pr-record-entry-tv-channel-value="<%= t("pr.tv_channel") %>"
+     <% if f.object.marked_for_destruction? %>hidden<% end %>>
+  <% if f.object.persisted? %>
+    <%= f.hidden_field :_destroy, value: (f.object.marked_for_destruction? ? "1" : "0"), data: { entry_destroy: true } %>
+  <% end %>
+
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h3 class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("common.category") %></h3>
+    <button type="button" class="text-sm text-gray-500" data-action="pr-record-form#removeEntry"><%= t("pr.remove_category") %></button>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div>
+      <%= f.label :pr_category_id, t("common.category"), class: ta_label_classes %>
+      <%= f.select :pr_category_id, {}, { include_blank: t("pr.select_category") },
+            class: "#{ta_field_classes} min-h-11",
+            data: { pr_record_entry_target: "category", action: "change->pr-record-entry#applyCategory" } do %>
+        <% @categories.each do |category| %>
+          <%= tag.option category.name, value: category.id, selected: f.object.pr_category_id == category.id, data: { slug: category.slug } %>
+        <% end %>
+      <% end %>
+    </div>
+    <div>
+      <%= f.label :published_on, t("pr.published_date"), class: ta_label_classes %>
+      <%= ta_date_picker(form: f, method: :published_on) %>
+    </div>
+    <div>
+      <%= f.label :sentiment, t("common.sentiment"), class: ta_label_classes %>
+      <%= f.select :sentiment, PrRecordEntry.sentiments.keys.map { |key| [ t("pr.sentiments.#{key}"), key ] }, {}, class: "#{ta_field_classes} min-h-11" %>
+    </div>
+
+    <div class="md:col-span-2" data-pr-record-entry-target="platformWrap">
+      <%= f.label :media_platform_id, t("pr.tv_channel"), class: ta_label_classes, data: { pr_record_entry_target: "platformLabel" } %>
+      <%= f.select :media_platform_id, {}, { include_blank: t("pr.select_blank") },
+            class: "#{ta_field_classes} min-h-11",
+            data: { pr_record_entry_target: "platform" } do %>
+        <% @platforms.each do |platform| %>
+          <%= tag.option platform.name,
+                value: platform.id,
+                selected: f.object.media_platform_id == platform.id,
+                data: { category: platform.pr_category&.slug } %>
+        <% end %>
+      <% end %>
+      <p class="mt-1 text-xs text-gray-500"><%= t("pr.platform_help") %></p>
+    </div>
+
+    <div class="md:col-span-2">
+      <%= f.label :description, t("common.details"), class: ta_label_classes %>
+      <%= f.text_area :description, rows: 4, class: ta_field_classes %>
+    </div>
+  </div>
+
+  <div data-pr-record-entry-target="links" class="mt-4">
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <h3 class="text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("pr.links") %></h3>
+      <button type="button" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer" data-action="pr-record-form#addLink"><%= t("pr.add_link") %></button>
+    </div>
+    <div data-link-rows class="space-y-3">
+      <%= f.fields_for :links do |link_form| %>
+        <%= render "pr_records/link_fields", f: link_form %>
+      <% end %>
+    </div>
+    <template data-link-template>
+      <%= f.fields_for :links, PrRecordLink.new, child_index: "__LINK__" do |link_form| %>
+        <%= render "pr_records/link_fields", f: link_form %>
+      <% end %>
+    </template>
+    <p class="mt-2 text-xs text-gray-500"><%= t("pr.link_help") %></p>
+  </div>
+
+  <div data-pr-record-entry-target="outdoor" class="mt-4">
+    <h3 class="mb-3 text-sm font-semibold text-gray-800 dark:text-white/90"><%= t("pr.outdoor") %></h3>
+    <div class="space-y-2 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
+      <%= f.fields_for :outdoor_ad_counts do |oac| %>
+        <div class="flex items-center gap-2">
+          <%= oac.select :outdoor_ad_type_id,
+                options_from_collection_for_select(OutdoorAdType.active, :id, :name, oac.object.outdoor_ad_type_id),
+                { include_blank: t("pr.select_ad_type") },
+                class: "#{ta_field_classes} min-h-11" %>
+          <%= oac.number_field :count, placeholder: t("pr.count"), class: "#{ta_field_classes} min-h-11 w-28" %>
+          <% if oac.object.persisted? %>
+            <%= oac.hidden_field :_destroy, value: "0" %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <%= f.label :attachments, t("common.attachments"), class: ta_label_classes %>
+    <% if f.object.attachments.attached? %>
+      <ul class="mb-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
+        <% f.object.attachments.each do |att| %>
+          <li><%= att.filename %></li>
+        <% end %>
+      </ul>
+    <% end %>
+    <%= f.file_field :attachments, multiple: true,
+          class: "block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-lg file:border-0 file:bg-gray-100 file:px-4 file:py-2 file:text-sm file:font-medium" %>
+  </div>
+</div>

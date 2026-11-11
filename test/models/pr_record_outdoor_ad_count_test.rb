@@ -21,17 +21,20 @@ class PrRecordOutdoorAdCountTest < ActiveSupport::TestCase
       @record = @org.pr_records.create!(
         owner: @user,
         title: "Campaign Ads",
-        published_on: Date.today,
-        sentiment: :positive,
-        pr_category: @category,
-        media_platform_name: "Street Advertising"
+        entries_attributes: [ {
+          published_on: Date.today,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform_name: "Street Advertising"
+        } ]
       )
+      @entry = @record.entries.first
     end
   end
 
   test "creates outdoor ad count with valid attributes" do
     ActsAsTenant.with_tenant(@org) do
-      count = @record.outdoor_ad_counts.build(
+      count = @entry.outdoor_ad_counts.build(
         outdoor_ad_type: @ad_type,
         count: 5
       )
@@ -41,7 +44,7 @@ class PrRecordOutdoorAdCountTest < ActiveSupport::TestCase
 
   test "validates count is present" do
     ActsAsTenant.with_tenant(@org) do
-      count = @record.outdoor_ad_counts.build(outdoor_ad_type: @ad_type)
+      count = @entry.outdoor_ad_counts.build(outdoor_ad_type: @ad_type)
       assert_not count.save
       assert_includes count.errors.full_messages.join, "Count"
     end
@@ -49,7 +52,7 @@ class PrRecordOutdoorAdCountTest < ActiveSupport::TestCase
 
   test "validates count is positive integer" do
     ActsAsTenant.with_tenant(@org) do
-      count = @record.outdoor_ad_counts.build(
+      count = @entry.outdoor_ad_counts.build(
         outdoor_ad_type: @ad_type,
         count: 0
       )
@@ -57,14 +60,14 @@ class PrRecordOutdoorAdCountTest < ActiveSupport::TestCase
     end
   end
 
-  test "prevents duplicate ad type per record" do
+  test "prevents duplicate ad type per entry" do
     ActsAsTenant.with_tenant(@org) do
-      @record.outdoor_ad_counts.create!(
+      @entry.outdoor_ad_counts.create!(
         outdoor_ad_type: @ad_type,
         count: 5
       )
 
-      count2 = @record.outdoor_ad_counts.build(
+      count2 = @entry.outdoor_ad_counts.build(
         outdoor_ad_type: @ad_type,
         count: 3
       )
@@ -72,19 +75,19 @@ class PrRecordOutdoorAdCountTest < ActiveSupport::TestCase
     end
   end
 
-  test "belongs to pr_record" do
+  test "belongs to pr_record_entry" do
     ActsAsTenant.with_tenant(@org) do
-      count = @record.outdoor_ad_counts.create!(
+      count = @entry.outdoor_ad_counts.create!(
         outdoor_ad_type: @ad_type,
         count: 5
       )
-      assert_equal @record, count.pr_record
+      assert_equal @entry, count.pr_record_entry
     end
   end
 
   test "belongs to outdoor_ad_type" do
     ActsAsTenant.with_tenant(@org) do
-      count = @record.outdoor_ad_counts.create!(
+      count = @entry.outdoor_ad_counts.create!(
         outdoor_ad_type: @ad_type,
         count: 5
       )

@@ -1,5 +1,5 @@
-<% urls = record.links.map(&:url).select(&:present?) %>
-<% urls = [ record.url ] if urls.empty? && record.url.present? %>
+<% urls = record.entries.flat_map { |entry| entry.links.map(&:url) }.select(&:present?) %>
+<% urls = record.entries.map(&:url).select(&:present?) if urls.empty? %>
 <% if urls.any? %>
   <div class="space-y-1">
     <% urls.each do |url| %>

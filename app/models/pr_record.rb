@@ -1,52 +1,45 @@
 class PrRecord < ApplicationRecord
-  # Org-scoped PR (Traditional Media) record (Story 4.2). Like Kitchen Cabinet tickets,
-  # each PR record is fully tenant-isolated. Base record for all 6 categories;
-  # category-specific details (Story 4.3) will extend this via separate models.
+  # Org-scoped PR headline. Category, outlet, and coverage details live on entries,
+  # so one headline can be logged in more than one category.
   include OrganizationScoped  # acts_as_tenant(:organization) + organization_id presence
   include SoftDeletable       # discard; discarded_at / discarded_by_id
 
   belongs_to :owner, class_name: "User"
-  belongs_to :pr_category
-  belongs_to :media_platform, optional: true  # FK if using catalog; nil if free-text fallback
-  has_many :outdoor_ad_counts, class_name: "PrRecordOutdoorAdCount", dependent: :destroy
-  has_many :links, class_name: "PrRecordLink", dependent: :destroy
-  has_one :podcast, class_name: "PrRecordPodcast", dependent: :destroy
-  has_many_attached :attachments
+  has_many :entries, -> { order(:id) }, class_name: "PrRecordEntry", dependent: :destroy, inverse_of: :pr_record
 
-  accepts_nested_attributes_for :outdoor_ad_counts, allow_destroy: true, reject_if: :all_blank
-  accepts_nested_attributes_for :podcast, allow_destroy: true, reject_if: :all_blank
-  accepts_nested_attributes_for :links, allow_destroy: true, reject_if: ->(attrs) { attrs[:url].blank? && attrs["url"].blank? }
-
-  before_save :sync_primary_link
-
-  enum :sentiment, { neutral: 0, positive: 1, negative: 2 }, default: :neutral
+  accepts_nested_attributes_for :entries, allow_destroy: true, reject_if: :blank_entry?
 
   validates :title, presence: true
-  validates :pr_category_id, presence: true
-  validates :published_on, presence: true
-  # media_platform_name must be present if media_platform_id is nil (free-text fallback)
-  validate :media_platform_required
+  validate :requires_entry
 
   before_create :assign_record_number
 
-  # Podcasts are links only. Outdoor records use ad types. The other categories pick a catalog name.
-  PLATFORM_OPTIONAL_SLUGS = %w[podcasts outdoor-media].freeze
+  def category_names
+    entries.filter_map { |entry| entry.pr_category&.name }.uniq
+  end
+
+  def platform_names
+    entries.filter_map(&:platform_name).uniq
+  end
+
+  def latest_published_on
+    entries.filter_map(&:published_on).max
+  end
 
   private
 
-  def media_platform_required
-    return if PLATFORM_OPTIONAL_SLUGS.include?(pr_category&.slug)
-    return if media_platform_id.present? || media_platform_name.present?
+  def blank_entry?(attrs)
+    return false if attrs["id"].present? || attrs[:id].present?
 
-    errors.add(:media_platform_name, "is required if no platform is selected")
+    category = attrs[:pr_category_id].presence || attrs["pr_category_id"].presence ||
+               attrs[:pr_category].presence || attrs["pr_category"].presence
+    category.blank?
   end
 
-  def sync_primary_link
-    first = links.reject(&:marked_for_destruction?).find { |link| link.url.present? }
-    return if first.blank?
+  def requires_entry
+    return if entries.reject(&:marked_for_destruction?).any?
 
-    self.url = first.url
-    self.thumbnail_url = first.thumbnail_url if first.thumbnail_url.present?
+    errors.add(:base, I18n.t("pr.entry_required"))
   end
 
   # Human-readable per-org reference: PR-{org_id}-{5-digit-sequence}

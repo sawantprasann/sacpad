@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_133000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -130,6 +130,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
     t.integer "other_electors"
     t.string "native_name"
     t.index ["village_id"], name: "index_booths_on_village_id"
+  end
+
+  create_table "bulk_post_targets", force: :cascade do |t|
+    t.bigint "bulk_post_id", null: false
+    t.bigint "social_page_id", null: false
+    t.bigint "organization_id", null: false
+    t.integer "status", default: 0, null: false
+    t.string "external_post_id"
+    t.string "permalink"
+    t.string "idempotency_key", null: false
+    t.integer "attempts", default: 0, null: false
+    t.string "error_message"
+    t.jsonb "provider_state", default: {}, null: false
+    t.datetime "published_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bulk_post_id", "social_page_id"], name: "index_bulk_post_targets_on_bulk_post_id_and_social_page_id", unique: true
+    t.index ["bulk_post_id"], name: "index_bulk_post_targets_on_bulk_post_id"
+    t.index ["idempotency_key"], name: "index_bulk_post_targets_on_idempotency_key", unique: true
+    t.index ["organization_id", "status"], name: "index_bulk_post_targets_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_bulk_post_targets_on_organization_id"
+    t.index ["social_page_id"], name: "index_bulk_post_targets_on_social_page_id"
+    t.index ["status", "published_at"], name: "index_bulk_post_targets_on_status_and_published_at"
+  end
+
+  create_table "bulk_posts", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "owner_id", null: false
+    t.string "title"
+    t.text "body"
+    t.integer "status", default: 0, null: false
+    t.integer "target_scope", default: 0, null: false
+    t.jsonb "target_filter", default: {}, null: false
+    t.datetime "video_prepared_at"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_bulk_posts_on_discarded_at"
+    t.index ["discarded_by_id"], name: "index_bulk_posts_on_discarded_by_id"
+    t.index ["organization_id", "created_at"], name: "index_bulk_posts_on_organization_id_and_created_at"
+    t.index ["organization_id"], name: "index_bulk_posts_on_organization_id"
+    t.index ["owner_id"], name: "index_bulk_posts_on_owner_id"
   end
 
   create_table "cadre_activities", force: :cascade do |t|
@@ -361,6 +404,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
     t.index ["slug"], name: "index_media_platforms_on_slug", unique: true
   end
 
+  create_table "meta_deletion_requests", force: :cascade do |t|
+    t.string "confirmation_code", null: false
+    t.string "provider", null: false
+    t.string "provider_uid", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["confirmation_code"], name: "index_meta_deletion_requests_on_confirmation_code", unique: true
+    t.index ["provider", "provider_uid"], name: "index_meta_deletion_requests_on_provider_and_provider_uid"
+  end
+
   create_table "mock_poll_responses", force: :cascade do |t|
     t.bigint "village_id", null: false
     t.bigint "organization_id", null: false
@@ -457,57 +511,65 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
     t.index ["slug"], name: "index_pr_categories_on_slug", unique: true
   end
 
-  create_table "pr_record_links", force: :cascade do |t|
+  create_table "pr_record_entries", force: :cascade do |t|
     t.bigint "pr_record_id", null: false
-    t.string "url", null: false
-    t.string "thumbnail_url"
-    t.integer "position", default: 0, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pr_record_id"], name: "index_pr_record_links_on_pr_record_id"
-  end
-
-  create_table "pr_record_outdoor_ad_counts", force: :cascade do |t|
-    t.bigint "pr_record_id", null: false
-    t.bigint "outdoor_ad_type_id", null: false
-    t.integer "count", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pr_record_id", "outdoor_ad_type_id"], name: "idx_on_pr_record_id_outdoor_ad_type_id_5cdb583466", unique: true
-  end
-
-  create_table "pr_record_podcasts", force: :cascade do |t|
-    t.bigint "pr_record_id", null: false
-    t.date "recording_date", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["pr_record_id"], name: "index_pr_record_podcasts_on_pr_record_id", unique: true
-  end
-
-  create_table "pr_records", force: :cascade do |t|
-    t.bigint "organization_id", null: false
-    t.bigint "owner_id", null: false
     t.bigint "pr_category_id", null: false
     t.bigint "media_platform_id"
-    t.string "record_number", null: false
-    t.string "title", null: false
     t.text "description"
     t.string "url"
     t.string "thumbnail_url"
     t.integer "sentiment", default: 0, null: false
     t.date "published_on", null: false
     t.string "media_platform_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["media_platform_id"], name: "index_pr_record_entries_on_media_platform_id"
+    t.index ["pr_category_id"], name: "index_pr_record_entries_on_pr_category_id"
+    t.index ["pr_record_id"], name: "index_pr_record_entries_on_pr_record_id"
+  end
+
+  create_table "pr_record_links", force: :cascade do |t|
+    t.string "url", null: false
+    t.string "thumbnail_url"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pr_record_entry_id", null: false
+    t.index ["pr_record_entry_id"], name: "index_pr_record_links_on_pr_record_entry_id"
+  end
+
+  create_table "pr_record_outdoor_ad_counts", force: :cascade do |t|
+    t.bigint "outdoor_ad_type_id", null: false
+    t.integer "count", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pr_record_entry_id", null: false
+    t.index ["pr_record_entry_id", "outdoor_ad_type_id"], name: "idx_pr_outdoor_counts_on_entry_and_type", unique: true
+    t.index ["pr_record_entry_id"], name: "index_pr_record_outdoor_ad_counts_on_pr_record_entry_id"
+  end
+
+  create_table "pr_record_podcasts", force: :cascade do |t|
+    t.date "recording_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "pr_record_entry_id", null: false
+    t.index ["pr_record_entry_id"], name: "index_pr_record_podcasts_on_pr_record_entry_id", unique: true
+  end
+
+  create_table "pr_records", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "owner_id", null: false
+    t.string "record_number", null: false
+    t.string "title", null: false
     t.datetime "discarded_at"
     t.bigint "discarded_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["discarded_at"], name: "index_pr_records_on_discarded_at"
     t.index ["discarded_by_id"], name: "index_pr_records_on_discarded_by_id"
-    t.index ["media_platform_id"], name: "index_pr_records_on_media_platform_id"
     t.index ["organization_id", "record_number"], name: "index_pr_records_on_organization_id_and_record_number", unique: true
     t.index ["organization_id"], name: "index_pr_records_on_organization_id"
     t.index ["owner_id"], name: "index_pr_records_on_owner_id"
-    t.index ["pr_category_id"], name: "index_pr_records_on_pr_category_id"
   end
 
   create_table "role_permissions", force: :cascade do |t|
@@ -531,6 +593,93 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
     t.boolean "can_import", default: false, null: false
     t.index ["organization_id"], name: "index_roles_on_organization_id"
     t.index ["slug"], name: "index_roles_on_slug", unique: true
+  end
+
+  create_table "social_page_metric_snapshots", force: :cascade do |t|
+    t.bigint "social_page_id", null: false
+    t.bigint "organization_id", null: false
+    t.date "captured_on", null: false
+    t.integer "followers_count"
+    t.integer "posts_count"
+    t.integer "views_count"
+    t.integer "organic_reach"
+    t.integer "paid_reach"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_social_page_metric_snapshots_on_organization_id"
+    t.index ["social_page_id", "captured_on"], name: "index_social_page_snapshots_on_page_and_day", unique: true
+    t.index ["social_page_id"], name: "index_social_page_metric_snapshots_on_social_page_id"
+  end
+
+  create_table "social_pages", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "owner_id", null: false
+    t.integer "provider", null: false
+    t.integer "page_type", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.string "external_id", null: false
+    t.string "provider_uid"
+    t.string "parent_external_id"
+    t.string "name"
+    t.string "username"
+    t.string "url"
+    t.string "profile_image_url"
+    t.boolean "insights_available", default: false, null: false
+    t.text "access_token"
+    t.text "refresh_token"
+    t.datetime "expires_at"
+    t.string "last_error"
+    t.datetime "last_error_at"
+    t.bigint "politician_id"
+    t.bigint "karyakarta_user_id"
+    t.string "karyakarta_name_text"
+    t.string "karyakarta_mobile_text"
+    t.datetime "discarded_at"
+    t.bigint "discarded_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_social_pages_on_discarded_at"
+    t.index ["discarded_by_id"], name: "index_social_pages_on_discarded_by_id"
+    t.index ["karyakarta_user_id"], name: "index_social_pages_on_karyakarta_user_id"
+    t.index ["organization_id", "provider", "external_id"], name: "index_social_pages_org_provider_external_kept", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["organization_id", "status"], name: "index_social_pages_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_social_pages_on_organization_id"
+    t.index ["owner_id"], name: "index_social_pages_on_owner_id"
+    t.index ["politician_id"], name: "index_social_pages_on_politician_id"
+    t.index ["provider", "provider_uid"], name: "index_social_pages_on_provider_and_provider_uid"
+  end
+
+  create_table "social_pending_connections", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.integer "provider", null: false
+    t.string "provider_uid"
+    t.text "payload", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expires_at"], name: "index_social_pending_connections_on_expires_at"
+    t.index ["organization_id"], name: "index_social_pending_connections_on_organization_id"
+    t.index ["provider", "provider_uid"], name: "index_social_pending_connections_on_provider_and_provider_uid"
+    t.index ["user_id"], name: "index_social_pending_connections_on_user_id"
+  end
+
+  create_table "social_post_metrics", force: :cascade do |t|
+    t.bigint "bulk_post_target_id", null: false
+    t.bigint "organization_id", null: false
+    t.integer "likes_count"
+    t.integer "comments_count"
+    t.integer "shares_count"
+    t.integer "views_count"
+    t.integer "reach"
+    t.integer "organic_reach"
+    t.integer "paid_reach"
+    t.datetime "fetched_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bulk_post_target_id", "fetched_at"], name: "idx_on_bulk_post_target_id_fetched_at_af5cf371df"
+    t.index ["bulk_post_target_id"], name: "index_social_post_metrics_on_bulk_post_target_id"
+    t.index ["organization_id"], name: "index_social_post_metrics_on_organization_id"
   end
 
   create_table "states", force: :cascade do |t|
@@ -905,6 +1054,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
   add_foreign_key "booth_checklist_items", "booths"
   add_foreign_key "booth_checklist_items", "organizations"
   add_foreign_key "booths", "villages"
+  add_foreign_key "bulk_post_targets", "bulk_posts"
+  add_foreign_key "bulk_post_targets", "organizations"
+  add_foreign_key "bulk_post_targets", "social_pages"
+  add_foreign_key "bulk_posts", "organizations"
+  add_foreign_key "bulk_posts", "users", column: "discarded_by_id"
+  add_foreign_key "bulk_posts", "users", column: "owner_id"
   add_foreign_key "cadre_activities", "organizations"
   add_foreign_key "cadre_activities", "users", column: "owner_id"
   add_foreign_key "cadre_activity_leadership_meets", "cadre_activities"
@@ -943,17 +1098,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_100000) do
   add_foreign_key "police_stations", "states"
   add_foreign_key "politicians", "organizations"
   add_foreign_key "politicians", "parties"
-  add_foreign_key "pr_record_links", "pr_records"
+  add_foreign_key "pr_record_entries", "media_platforms"
+  add_foreign_key "pr_record_entries", "pr_categories"
+  add_foreign_key "pr_record_entries", "pr_records"
+  add_foreign_key "pr_record_links", "pr_record_entries"
   add_foreign_key "pr_record_outdoor_ad_counts", "outdoor_ad_types"
-  add_foreign_key "pr_record_outdoor_ad_counts", "pr_records"
-  add_foreign_key "pr_record_podcasts", "pr_records"
-  add_foreign_key "pr_records", "media_platforms"
+  add_foreign_key "pr_record_outdoor_ad_counts", "pr_record_entries"
+  add_foreign_key "pr_record_podcasts", "pr_record_entries"
   add_foreign_key "pr_records", "organizations"
-  add_foreign_key "pr_records", "pr_categories"
   add_foreign_key "pr_records", "users", column: "discarded_by_id"
   add_foreign_key "pr_records", "users", column: "owner_id"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "roles", "organizations"
+  add_foreign_key "social_page_metric_snapshots", "organizations"
+  add_foreign_key "social_page_metric_snapshots", "social_pages"
+  add_foreign_key "social_pages", "organizations"
+  add_foreign_key "social_pages", "politicians"
+  add_foreign_key "social_pages", "users", column: "discarded_by_id"
+  add_foreign_key "social_pages", "users", column: "karyakarta_user_id"
+  add_foreign_key "social_pages", "users", column: "owner_id"
+  add_foreign_key "social_pending_connections", "organizations"
+  add_foreign_key "social_pending_connections", "users"
+  add_foreign_key "social_post_metrics", "bulk_post_targets"
+  add_foreign_key "social_post_metrics", "organizations"
   add_foreign_key "support_messages", "organizations"
   add_foreign_key "support_messages", "support_tickets"
   add_foreign_key "support_tickets", "organizations"
