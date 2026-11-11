@@ -10,6 +10,8 @@ class Organization < ApplicationRecord
   has_many :admin_organizations, dependent: :destroy
   has_many :politicians, dependent: :destroy
   has_many :pr_records, dependent: :destroy
+  has_many :social_pages, class_name: "SocialMedia::SocialPage", dependent: :restrict_with_error
+  has_many :bulk_posts, class_name: "SocialMedia::BulkPost", dependent: :restrict_with_error
 
   validates :name, presence: true
   validates :constituency_type, inclusion: { in: %w[Loksabha Assembly] }, allow_nil: true

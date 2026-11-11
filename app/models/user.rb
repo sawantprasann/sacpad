@@ -14,6 +14,9 @@ class User < ApplicationRecord
   belongs_to :booth, optional: true
   has_many :support_tickets, dependent: :restrict_with_error
   has_many :calendar_events, dependent: :destroy
+  has_many :social_pages, class_name: "SocialMedia::SocialPage", foreign_key: :owner_id, dependent: :restrict_with_error
+  has_many :pending_connections, class_name: "SocialMedia::PendingConnection", dependent: :delete_all
+  has_many :bulk_posts, class_name: "SocialMedia::BulkPost", foreign_key: :owner_id, dependent: :restrict_with_error
   has_one_attached :photo
 
   validates :name, presence: true

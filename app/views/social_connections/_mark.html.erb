@@ -1,0 +1,42 @@
+<% key = provider.to_s %>
+<% ink = {
+     "facebook" => "#1877F2",
+     "instagram" => "linear-gradient(145deg, #f9ce34 0%, #ee2a7b 52%, #6228d7 100%)",
+     "youtube" => "#FF0000",
+     "twitter" => "#141414",
+     "sms" => "#3ec6a8",
+     "whatsapp" => "#22c55e",
+     "ivrs" => "#7c6cf0"
+   }[key] || "#465FFF" %>
+<% size = local_assigns[:size].presence || "h-10 w-10 text-lg" %>
+<% fill = local_assigns[:on_color] ? "rgba(255,255,255,0.22)" : ink %>
+<span class="inline-flex shrink-0 items-center justify-center rounded-xl text-white <%= "shadow-sm" unless local_assigns[:on_color] %> <%= size %>" style="background: <%= fill %>" aria-hidden="true">
+  <% case key %>
+  <% when "facebook" %>
+    <span class="font-bold leading-none">f</span>
+  <% when "instagram" %>
+    <svg class="h-[46%] w-[46%]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="4" y="4" width="16" height="16" rx="4"/>
+      <circle cx="12" cy="12" r="3.2"/>
+      <circle cx="17" cy="7" r="0.8" fill="currentColor" stroke="none"/>
+    </svg>
+  <% when "youtube" %>
+    <svg class="h-[46%] w-[46%]" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M9.2 7.4v9.2l8-4.6-8-4.6z"/>
+    </svg>
+  <% when "sms" %>
+    <svg class="h-[46%] w-[46%]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M5 6.5h14v9H8l-3 2.5v-2.5H5v-9z" stroke-linejoin="round"/>
+    </svg>
+  <% when "whatsapp" %>
+    <svg class="h-[46%] w-[46%]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M7 17.5 5.5 20l.8-3A7.2 7.2 0 1 1 7 17.5z" stroke-linejoin="round"/>
+    </svg>
+  <% when "ivrs" %>
+    <svg class="h-[46%] w-[46%]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M8 4.5h3l1 3-2 1a11 11 0 0 0 5 5l1-2 3 1v3c0 .8-.7 1.5-1.5 1.4A13 13 0 0 1 6.6 6c-.1-.8.6-1.5 1.4-1.5z" stroke-linejoin="round"/>
+    </svg>
+  <% else %>
+    <span class="font-bold leading-none">X</span>
+  <% end %>
+</span>

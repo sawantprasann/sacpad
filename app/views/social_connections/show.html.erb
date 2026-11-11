@@ -1,0 +1,146 @@
+<% content_for :title, @page.name.presence || t("social.unnamed") %>
+<% wash = {
+     "facebook" => "linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)",
+     "instagram" => "linear-gradient(135deg, #ffb199 0%, #ff6f91 100%)",
+     "youtube" => "linear-gradient(135deg, #ffb347 0%, #ff5a5f 100%)",
+     "twitter" => "linear-gradient(135deg, #9bb0d1 0%, #5d7294 100%)"
+   }[@page.provider] || "linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)" %>
+<% stats = [
+     [ t("social.metric_followers"), @page_totals[:followers], "linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)", "followers" ],
+     [ t("social.posts"), @page_totals[:posts], "linear-gradient(135deg, #ffb199 0%, #ff6f91 100%)", "posts" ],
+     [ t("social.metric_views"), @page_totals[:views], "linear-gradient(135deg, #7ee0c8 0%, #3ec6a8 100%)", "views" ],
+     [ t("social.metric_reach"), @page_totals[:reach], "linear-gradient(135deg, #ffb347 0%, #ff8a4c 100%)", "reach" ]
+   ] %>
+<% karyakarta = @page.karyakarta_user&.name.presence || @page.karyakarta_name_text %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("social.networks.#{@page.provider}"),
+      title: @page.name.presence || t("social.unnamed"),
+      subtitle: [ @page.username.present? ? "@#{@page.username}" : nil, t("social.status.#{@page.status}") ].compact.join(" · "),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<div data-controller="confirm-panel">
+  <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex min-w-0 items-center gap-3">
+      <%= render "social_connections/mark", provider: @page.provider, size: "h-11 w-11 text-lg" %>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <p class="truncate text-sm font-semibold text-gray-900 dark:text-white"><%= @page.name.presence || t("social.unnamed") %></p>
+          <%= render "social_connections/status", page: @page %>
+        </div>
+        <p class="truncate text-xs text-gray-500"><%= @page.username.present? ? "@#{@page.username}" : t("social.networks.#{@page.provider}") %></p>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <% if @page.url.present? %>
+        <%= link_to t("social.open_page"), @page.url, target: "_blank", rel: "noopener", class: "#{ta_btn_secondary} min-h-11" %>
+      <% end %>
+      <% if policy(@page).destroy? && !@page.connection_disconnected? %>
+        <button type="button" data-confirm-panel-target="prompt" data-action="confirm-panel#open" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer"><%= t("social.disconnect") %></button>
+      <% end %>
+      <%= link_to t("common.back_to_list"), social_connections_path, class: "#{ta_btn_secondary} min-h-11" %>
+    </div>
+  </div>
+
+  <% if policy(@page).destroy? && !@page.connection_disconnected? %>
+    <div data-confirm-panel-target="panel" hidden class="mt-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-red-200 dark:bg-gray-900 dark:ring-red-500/40">
+      <p class="text-sm font-semibold text-gray-900 dark:text-white"><%= t("social.disconnect_title") %></p>
+      <p class="mt-1 max-w-xl text-sm leading-6 text-gray-600 dark:text-gray-300"><%= t("social.disconnect_confirm") %></p>
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <%= button_to t("social.disconnect"), social_connection_path(@page), method: :delete,
+              class: "inline-flex min-h-11 cursor-pointer items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white",
+              style: "background: #dc2626;" %>
+        <button type="button" data-action="confirm-panel#close" class="<%= ta_btn_secondary %> min-h-11 cursor-pointer"><%= t("common.cancel") %></button>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<section class="mt-5 grid grid-cols-2 gap-4 xl:grid-cols-4">
+  <% stats.each do |label, value, background, key| %>
+    <article class="relative min-h-32 overflow-hidden rounded-2xl px-5 py-4 text-white shadow-sm" style="background: <%= background %>">
+      <span class="pointer-events-none absolute rounded-full" style="width: 7rem; height: 7rem; right: -1.8rem; bottom: -2.2rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
+      <span class="pointer-events-none absolute rounded-full" style="width: 4.5rem; height: 4.5rem; right: 1.6rem; top: -1.4rem; background: rgba(255,255,255,0.2);" aria-hidden="true"></span>
+      <p class="relative text-sm font-medium text-white/95"><%= label %></p>
+      <p class="relative mt-4 text-3xl font-semibold leading-none tabular-nums" data-total="<%= key %>"><%= value.nil? ? "—" : number_with_delimiter(value) %></p>
+    </article>
+  <% end %>
+</section>
+
+<section class="mt-6">
+  <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("social.posts") %></h2>
+      <% if @targets.size >= SocialConnections::ImportFacebookPosts::LIMIT && @page_totals[:posts].to_i > @targets.size %>
+        <p class="mt-1 text-sm text-gray-500"><%= t("social.latest_posts", count: @targets.size) %></p>
+      <% end %>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to t("social.all_posts"), social_posts_path, class: "#{ta_btn_secondary} min-h-11" %>
+      <% if MetaApi.configured? && SocialConnections::ImportFacebookPosts.importable?(@page) %>
+        <%= button_to t("social.refresh_posts"), sync_social_connection_path(@page), class: "#{ta_btn_secondary} cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+  <% if @targets.empty? %>
+    <div class="rounded-2xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
+      <p class="text-base font-semibold text-gray-900 dark:text-white"><%= t("social.no_posts_title") %></p>
+      <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500"><%= @page.instagram? ? t("social.instagram_connected_body") : t("social.no_posts_body") %></p>
+    </div>
+  <% else %>
+    <div class="space-y-3">
+      <% @targets.each do |target| %>
+        <%= render "social_connections/post", target: target, metrics: @metrics %>
+      <% end %>
+    </div>
+  <% end %>
+</section>
+
+<section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
+  <div class="h-1.5" style="background: <%= wash %>"></div>
+  <div class="p-5 sm:p-6">
+    <h2 class="text-sm font-semibold text-gray-900 dark:text-white/90"><%= t("social.about_page") %></h2>
+    <dl class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <dt class="text-xs text-gray-400"><%= t("social.columns.network") %></dt>
+        <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= t("social.networks.#{@page.provider}") %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-gray-400"><%= t("social.columns.type") %></dt>
+        <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= t("social.page_types.#{@page.page_type}") %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-gray-400"><%= t("social.columns.connected_by") %></dt>
+        <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @page.owner.name %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-gray-400"><%= t("social.connected_on") %></dt>
+        <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= l_stamp(@page.created_at) %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-gray-400"><%= t("social.karyakarta") %></dt>
+        <dd class="mt-1 text-sm text-gray-800 dark:text-white/90">
+          <%= karyakarta.presence || "—" %>
+          <% if @page.karyakarta_mobile_text.present? %><span class="text-gray-500">· <%= @page.karyakarta_mobile_text %></span><% end %>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-xs text-gray-400"><%= t("social.open_page") %></dt>
+        <dd class="mt-1 break-all text-sm text-gray-800 dark:text-white/90">
+          <% if @page.url.present? %>
+            <%= link_to @page.url, @page.url, target: "_blank", rel: "noopener", class: ta_text_link %>
+          <% else %>
+            —
+          <% end %>
+        </dd>
+      </div>
+      <% if @page.last_error.present? %>
+        <div class="sm:col-span-2 lg:col-span-3">
+          <dt class="text-xs text-gray-400"><%= t("social.last_error") %></dt>
+          <dd class="mt-1 text-sm text-gray-800 dark:text-white/90"><%= @page.last_error %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+</section>

@@ -1,0 +1,8 @@
+<% tone = if page.connection_active?
+     "bg-emerald-50 text-emerald-700 ring-emerald-200"
+   elsif page.connection_needs_reauth?
+     "bg-amber-50 text-amber-800 ring-amber-200"
+   else
+     "bg-gray-100 text-gray-600 ring-gray-200"
+   end %>
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset <%= tone %>"><%= t("social.status.#{page.status}") %></span>

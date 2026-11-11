@@ -49,7 +49,7 @@
   <table class="w-full">
     <thead class="bg-gray-50 dark:bg-white/[0.03]">
       <tr>
-        <% [ t("common.booth_no"), t("common.name"), t("common.village"), t("common.voters"), t("common.voted") ].each do |heading| %>
+        <% [ t("common.booth_no"), t("common.village"), t("common.voters"), t("common.voted") ].each do |heading| %>
           <th class="<%= th %>"><%= heading %></th>
         <% end %>
       </tr>
@@ -60,7 +60,6 @@
           <td class="<%= td %> font-medium">
             <%= link_to booth.number, booth_path(booth), class: ta_text_link %>
           </td>
-          <td class="<%= td %> text-gray-700"><%= booth.display_name.presence || "—" %></td>
           <td class="<%= td %> text-gray-700"><%= booth.village.display_name %></td>
           <td class="<%= td %> tabular-nums text-gray-700"><%= @voter_counts[booth.id] || 0 %></td>
           <td class="<%= td %> tabular-nums text-gray-700"><%= @voted_counts[booth.id] || 0 %></td>
