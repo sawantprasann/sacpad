@@ -30,7 +30,8 @@ class CadreProgramNavTest < ActionDispatch::IntegrationTest
     CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label|
       assert_select "a[href=?]", cadre_program_activities_path(category: key), text: label
     end
-    assert_select ".menu-dropdown-badge", text: "soon", count: 1
+    assert_select ".menu-dropdown-badge", count: 0
+    assert_select "a[href=?]", social_connections_path, count: 0
     assert_no_match(/Ground Reports/, @response.body)
     assert_no_match(/RAG Mapping/, @response.body)
     assert_no_match(/Voter Lists/, @response.body)

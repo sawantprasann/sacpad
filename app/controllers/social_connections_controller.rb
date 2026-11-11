@@ -193,5 +193,4 @@ class SocialConnectionsController < ApplicationController
       }
     end
   end
-
 end
