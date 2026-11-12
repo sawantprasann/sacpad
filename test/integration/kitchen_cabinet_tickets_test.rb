@@ -29,8 +29,8 @@ class KitchenCabinetTicketsTest < ActionDispatch::IntegrationTest
     assert_select "label", text: "Representative name"
     assert_select "label", text: "Village / ward"
     body = @response.body
-    assert_operator body.index(">Village / ward<"), :<, body.index(">Representative name<")
-    assert_operator body.index(">Representative name<"), :<, body.index(">Beneficiary name<")
+    assert_operator body.index(">Village / ward<"), :<, body.index(">Beneficiary name<")
+    assert_operator body.index(">Beneficiary name<"), :<, body.index(">Representative name<")
     assert_select "input[name=?][maxlength=10][pattern=?][inputmode=numeric]", "ticket[mobile]", "[0-9]{10}"
     assert_select "[data-controller=datepicker] input[name=?]", "ticket[reported_at]"
     assert_select "button[type=submit].cursor-pointer", text: "Create ticket"
