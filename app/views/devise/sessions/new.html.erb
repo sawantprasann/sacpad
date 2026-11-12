@@ -1,13 +1,17 @@
-<% content_for :title, "#{t("auth.sign_in")} · SAC-PAD" %>
+<% content_for :title, "#{t("auth.sign_in")} · PolitoMatrix" %>
 <% console = resource_name.to_s == "admin" %>
 <div class="flex min-h-screen w-full">
   <div class="flex w-full flex-1 flex-col justify-center bg-gray-50 px-6 py-12 lg:w-1/2 dark:bg-gray-900">
     <div class="mx-auto w-full max-w-md">
       <div class="mb-8 flex items-center gap-3">
-        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold" style="background: #f59e0b; color: #0b1f44;">SP</span>
+        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold" style="background: #f59e0b; color: #0b1f44;">PM</span>
         <div>
-          <p class="text-sm font-semibold" style="color: #0b1f44;">SAC-PAD</p>
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= console ? t("auth.platform_console") : t("auth.campaign_desk") %></p>
+          <p class="text-sm font-semibold" style="color: #0b1f44;">PolitoMatrix</p>
+          <% if console %>
+            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-200"><%= t("auth.platform_console") %></p>
+          <% else %>
+            <p class="text-xs font-medium leading-snug text-amber-800 dark:text-amber-200"><%= t("account.tagline") %></p>
+          <% end %>
         </div>
       </div>
 
@@ -87,7 +91,7 @@
 
     <div class="relative px-12" style="padding-right: 15rem;">
       <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/80"><%= console ? t("auth.platform_console") : t("dashboard.namaste") %></p>
-      <p class="mt-3 text-4xl font-bold tracking-tight text-white">SAC-PAD</p>
+      <p class="mt-3 text-4xl font-bold tracking-tight text-white">PolitoMatrix</p>
       <p class="mt-3 text-base font-medium text-white/95"><%= t("account.tagline") %></p>
     </div>
 

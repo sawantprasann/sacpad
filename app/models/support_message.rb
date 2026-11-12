@@ -20,11 +20,11 @@ class SupportMessage < ApplicationRecord
   end
 
   def author_name
-    author&.name.presence || (from_support? ? "SAC-PAD support" : "User")
+    author&.name.presence || (from_support? ? "PolitoMatrix support" : "User")
   end
 
   def author_detail
-    from_support? ? "SAC-PAD support" : author&.email
+    from_support? ? "PolitoMatrix support" : author&.email
   end
 
   def self.image_problems(files)

@@ -75,10 +75,10 @@ module ApplicationHelper
   end
 
   def document_title
-    raw = content_for(:title).to_s.sub(/\s*·\s*SAC-PAD\z/, "").strip
-    return "SAC-PAD" if raw.blank?
+    raw = content_for(:title).to_s.sub(/\s*·\s*PolitoMatrix\z/, "").strip
+    return "PolitoMatrix" if raw.blank?
 
-    "#{raw} · SAC-PAD"
+    "#{raw} · PolitoMatrix"
   end
 
   # URLs typed into a note (Media Value and the same text elsewhere) become links

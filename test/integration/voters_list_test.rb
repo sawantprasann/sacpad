@@ -12,7 +12,7 @@ class VotersListTest < ActionDispatch::IntegrationTest
     @other_village = assembly.villages.create!(name: "Kalas")
     @booth = @village.booths.create!(number: "14")
     @other_booth = @other_village.booths.create!(number: "2")
-    @asha = Voter.create!(voter_id: "ABC1234567", first_name: "Asha", last_name: "Patil", sr_no: 12, booth: @booth, village: @village)
+    @asha = Voter.create!(voter_id: "ABC1234567", first_name: "Asha", last_name: "Patil", age: 34, sr_no: 12, booth: @booth, village: @village)
     @ravi = Voter.create!(voter_id: "XYZ7654321", first_name: "Ravi", last_name: "Kale", sr_no: 4, booth: @other_booth, village: @other_village)
     ActsAsTenant.with_tenant(@org) do
       VoterSentiment.create!(voter: @asha, sentiment_status: :pleased, voted: false)
@@ -39,6 +39,9 @@ class VotersListTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "ABC1234567", @response.body
     assert_match "XYZ7654321", @response.body
+    assert_select "th", text: "Age"
+    asha = css_select("tbody tr").find { |row| row.text.include?("Asha Patil") }
+    assert_equal "34", asha.at_css("td:nth-child(4)").text.squish
     assert_match "bg-green-50", @response.body
     assert_select "[data-controller=min-search-select][data-min-search-select-min-length-value='2']"
     assert_select "[data-controller=colored-select] select[name=sentiment]" do
@@ -162,8 +165,10 @@ class VotersListTest < ActionDispatch::IntegrationTest
     file.close
     sheet = Roo::Spreadsheet.open(file.path, extension: :xlsx).sheet(0)
     assert_equal "Sr no", sheet.cell(1, 1)
+    assert_equal "Age", sheet.cell(1, 4)
     assert_equal 1, sheet.last_row - 1
     assert_equal "Asha Patil", sheet.cell(2, 3)
+    assert_equal 34, sheet.cell(2, 4)
   end
 
   private

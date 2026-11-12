@@ -94,7 +94,7 @@
     <table class="w-full">
       <thead class="bg-gray-50 dark:bg-white/[0.03]">
         <tr>
-          <% [ t("common.sr_no"), t("common.voter_id"), t("common.name"), t("common.booth"), t("common.sentiment"), t("common.voted") ].each do |heading| %>
+          <% [ t("common.sr_no"), t("common.voter_id"), t("common.name"), t("common.age"), t("common.booth"), t("common.sentiment"), t("common.voted") ].each do |heading| %>
             <th class="<%= th %>"><%= heading %></th>
           <% end %>
         </tr>
@@ -119,6 +119,7 @@
                 <span class="text-gray-400">—</span>
               <% end %>
             </td>
+            <td class="<%= td %> tabular-nums text-gray-700"><%= voter.age || "—" %></td>
             <td class="<%= td %> tabular-nums text-gray-700"><%= voter.booth&.number || "—" %></td>
             <td class="<%= td %>">
               <% if status %>

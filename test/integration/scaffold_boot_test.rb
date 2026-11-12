@@ -15,7 +15,7 @@ class ScaffoldBootTest < ActionDispatch::IntegrationTest
     assert_select "aside", true, "shared sidebar region should render"
     assert_select "header", true, "shared top-bar region should render"
     assert_select "main", true, "content region should render"
-    assert_match "SAC-PAD", @response.body
+    assert_match "PolitoMatrix", @response.body
   end
 
   test "an unauthenticated visitor is sent to the shell-less sign-in page" do

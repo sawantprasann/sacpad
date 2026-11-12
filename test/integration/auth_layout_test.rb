@@ -9,7 +9,9 @@ class AuthLayoutTest < ActionDispatch::IntegrationTest
     assert_select "aside", false, "login page must NOT render the app sidebar"
     assert_select "nav.sidebar", false
     assert_match "Sign In", @response.body
-    assert_match "SAC-PAD", @response.body
+    assert_match "PolitoMatrix", @response.body
+    assert_match "Changed Policies with Changing Politics", @response.body
+    assert_no_match(/Campaign desk/, @response.body)
   end
 
   test "the admin console sign-in also uses the auth layout (no steel shell)" do

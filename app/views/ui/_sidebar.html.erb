@@ -1,5 +1,5 @@
 <%# TailAdmin sidebar: real structure + .menu-item component classes. Collapses on mobile via
-    Alpine sidebarToggle (body x-data). Our nav + SAC-PAD branding (not TailAdmin's logo). %>
+    Alpine sidebarToggle (body x-data). Our nav + PolitoMatrix branding (not TailAdmin's logo). %>
 <aside
   :class="sidebarToggle ? 'translate-x-0' : '-translate-x-full'"
   class="campaign-sidebar sidebar fixed top-0 left-0 z-50 flex h-screen w-[290px] flex-col overflow-y-auto px-5 transition-all duration-300 xl:static xl:translate-x-0"
@@ -7,8 +7,8 @@
 >
   <div class="flex items-center gap-2 pt-8 pb-7">
     <%= link_to root_path, class: "flex items-center gap-2" do %>
-      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold" style="background: #f59e0b; color: #0b1f44">SP</span>
-      <span class="campaign-wordmark text-lg font-semibold">SAC-PAD</span>
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold" style="background: #f59e0b; color: #0b1f44">PM</span>
+      <span class="campaign-wordmark text-lg font-semibold">PolitoMatrix</span>
     <% end %>
   </div>
 

@@ -124,6 +124,7 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     get voter_lists_taluka_village_path(@taluka, @village)
 
     assert_response :success
+    assert_select "th", text: "Age"
     assert_equal [ "Zara Pawar", "Amit Kale", "Asha Patil", "Bala Shinde" ], voter_names
     assert_match "bg-green-50", response.body
     assert_select "[data-controller=colored-select] option[value=pleased][data-color='#16a34a']", text: "Pleased"
@@ -164,7 +165,8 @@ class VoterListsTalukasTest < ActionDispatch::IntegrationTest
     sheet = workbook.sheet(0)
     assert_equal "Sr no", sheet.cell(1, 1)
     assert_equal [ "Zara Pawar", "Amit Kale", "Asha Patil", "Bala Shinde" ], (2..sheet.last_row).map { |row| sheet.cell(row, 3) }
-    assert_equal [ "2", "2", "10", "A" ], (2..sheet.last_row).map { |row| sheet.cell(row, 4).to_s }
+    assert_equal "Age", sheet.cell(1, 4)
+    assert_equal [ "2", "2", "10", "A" ], (2..sheet.last_row).map { |row| sheet.cell(row, 5).to_s }
 
     get voter_lists_taluka_village_path(@taluka, @village, format: :xlsx, name: "amit")
     sheet = workbook.sheet(0)
