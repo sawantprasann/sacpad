@@ -1,0 +1,12 @@
+<%# Colored total, in the same shape as the social network cards. %>
+<article class="relative min-h-36 overflow-hidden rounded-2xl px-5 py-4 text-white shadow-sm" style="background: <%= wash %>">
+  <span class="pointer-events-none absolute rounded-full" style="width: 8.5rem; height: 8.5rem; right: -2.4rem; bottom: -2.8rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
+  <span class="pointer-events-none absolute rounded-full" style="width: 6.25rem; height: 6.25rem; right: 1.4rem; top: -2.1rem; background: rgba(255,255,255,0.2);" aria-hidden="true"></span>
+  <p class="relative text-sm font-medium text-white/95"><%= label %></p>
+  <p class="relative mt-5 text-3xl font-semibold leading-none tabular-nums"><%= format_nidhi(amount) %></p>
+  <% if local_assigns[:href] %>
+    <%= link_to link_label, href, class: "relative mt-3 inline-block text-sm font-medium text-white underline decoration-white/60 underline-offset-2 hover:decoration-white" %>
+  <% elsif local_assigns[:detail] %>
+    <p class="relative mt-3 text-sm text-white/90"><%= detail %></p>
+  <% end %>
+</article>

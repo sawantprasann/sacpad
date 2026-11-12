@@ -1,0 +1,103 @@
+<% content_for :title, t("ground_reports.works_title") %>
+<% breadcrumb t("nav.ground_reports"), ground_reports_villages_path %>
+<% breadcrumb t("ground_reports.works_title") %>
+<% washes = {
+     "not_started" => "linear-gradient(135deg, #94a3b8 0%, #475569 100%)",
+     "in_progress" => "linear-gradient(135deg, #7ec8ff 0%, #2970ff 100%)",
+     "completed" => "linear-gradient(135deg, #86efac 0%, #039855 100%)"
+   } %>
+<% th = "border-b border-gray-200 px-4 py-3 text-left text-xs font-medium text-gray-500 dark:border-gray-800" %>
+<% td = "border-b border-gray-100 px-4 py-3 align-middle text-sm dark:border-gray-800" %>
+<% export_filters = {} %>
+<% export_filters[:status] = params[:status] if params[:status].present? %>
+<% export_filters[:village] = params[:village] if params[:village].present? %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("nav.ground_reports"),
+      title: t("ground_reports.works_title"),
+      subtitle: t("ground_reports.works_subtitle", amount: format_nidhi(@nidhi_by_status.values.sum)),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<section class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+  <% GroundReports::VillageWork.statuses.keys.each do |status| %>
+    <%= render "ground_reports/nidhi_stat",
+          label: t("ground_reports.work_statuses.#{status}"),
+          amount: @nidhi_by_status[status],
+          wash: washes[status],
+          detail: t("ground_reports.nidhi_asked") %>
+  <% end %>
+</section>
+
+<div class="mt-6 flex justify-end">
+  <%= render "ui/module_toolbar", export_url: ground_reports_work_inlines_path(**export_filters, format: :xlsx) %>
+</div>
+
+<%= form_with url: ground_reports_work_inlines_path, method: :get, class: "mt-4 #{ta_card_classes} p-4 md:p-5" do %>
+  <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,16rem)_minmax(0,16rem)_auto] lg:items-end">
+    <div>
+      <%= label_tag :status, t("common.status"), class: ta_label_classes %>
+      <%= select_tag :status,
+            options_for_select(GroundReports::VillageWork.status_options, params[:status]),
+            include_blank: t("ground_reports.any_status"),
+            class: ta_field_classes %>
+    </div>
+    <div>
+      <%= label_tag :village, t("common.village"), class: ta_label_classes %>
+      <%= render "ui/min_search_select",
+            name: :village,
+            choices: @villages.map { |village| [ village.display_name, village.name ] },
+            selected: params[:village],
+            blank: t("kitchen_cabinet.any_village"),
+            placeholder: t("kitchen_cabinet.any_village"),
+            search_placeholder: t("kitchen_cabinet.search_villages"),
+            empty_text: t("kitchen_cabinet.no_villages") %>
+    </div>
+    <div class="flex items-end gap-2">
+      <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("common.filter") %></button>
+      <%= link_to t("common.clear"), ground_reports_work_inlines_path, class: "#{ta_btn_secondary} inline-flex min-h-11 items-center" %>
+    </div>
+  </div>
+<% end %>
+
+<div class="mt-6 <%= ta_card_classes %> overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-white/[0.03]">
+        <tr>
+          <% [ t("common.village"), t("common.title"), t("ground_reports.concern_person"), t("ground_reports.nidhi_asked"), t("common.category"), t("ground_reports.work_order"), t("common.status") ].each do |heading| %>
+            <th class="<%= th %>"><%= heading %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @works.each do |work| %>
+          <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.03]">
+            <td class="<%= td %>">
+              <%= link_to work.village.display_name, ground_reports_village_path(work.village), class: ta_text_link %>
+            </td>
+            <td class="<%= td %> font-medium text-gray-900 dark:text-white/90"><%= work.title %></td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= work.concern_person %></td>
+            <td class="<%= td %> text-right tabular-nums text-gray-700 dark:text-gray-300"><%= format_nidhi(work.nidhi_asked) %></td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= work.nidhi_label %></td>
+            <td class="<%= td %> tabular-nums text-gray-500"><%= work.work_order_created_at ? l(work.work_order_created_at.to_date, format: :day_short) : "—" %></td>
+            <td class="<%= td %> text-gray-700 dark:text-gray-300"><%= work.status_label %></td>
+          </tr>
+        <% end %>
+      </tbody>
+      <% if @works.any? %>
+        <tfoot>
+          <tr>
+            <td class="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white" colspan="3"><%= t("ground_reports.nidhi_sum") %></td>
+            <td class="px-4 py-3 text-right text-sm font-semibold tabular-nums text-gray-900 dark:text-white"><%= format_nidhi(@nidhi_sum) %></td>
+            <td colspan="3"></td>
+          </tr>
+        </tfoot>
+      <% end %>
+    </table>
+    <% if @works.empty? %>
+      <p class="px-6 py-16 text-center text-sm text-gray-400"><%= t("ground_reports.no_works_match") %></p>
+    <% end %>
+  </div>
+  <%= render "ui/pagination", pagy: @pagy %>
+</div>

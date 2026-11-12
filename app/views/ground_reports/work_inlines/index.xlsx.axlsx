@@ -1,0 +1,25 @@
+# Work inline export. Rows follow the status and village filters on the list.
+wb = xlsx_package.workbook
+wb.add_worksheet(name: "Work inline") do |sheet|
+  sheet.add_row [
+    t("common.village"),
+    t("common.title"),
+    t("ground_reports.concern_person"),
+    t("ground_reports.nidhi_asked"),
+    t("common.category"),
+    t("ground_reports.work_order"),
+    t("common.status")
+  ]
+  @works.each do |work|
+    sheet.add_row [
+      work.village.display_name,
+      work.title,
+      work.concern_person,
+      work.nidhi_asked.to_f,
+      work.nidhi_label,
+      work.work_order_created_at&.to_date,
+      work.status_label
+    ]
+  end
+  sheet.add_row [ nil, nil, t("ground_reports.nidhi_sum"), @nidhi_sum.to_f ]
+end

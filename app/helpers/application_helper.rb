@@ -111,6 +111,7 @@ module ApplicationHelper
     module_widgets = [
       { title: t("dashboard.open_tickets"), mod: "kitchen_cabinet" },
       { title: t("dashboard.recent_cadre"),  mod: "cadre_program" },
+      { title: t("dashboard.work_nidhi"), mod: "ground_reports", chart: true, partial: "ground_reports/work_status_chart" },
       { title: t("dashboard.recent_ground_reports"),  mod: "ground_reports" }
     ].select { |w| user.role.can_access?(w[:mod]) }
 

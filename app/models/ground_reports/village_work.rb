@@ -41,6 +41,14 @@ module GroundReports
       statuses.keys.map { |key| [ I18n.t("ground_reports.work_statuses.#{key}", default: key.humanize), key ] }
     end
 
+    # Sum of nidhi asked for each status. Missing statuses are zero.
+    def self.nidhi_totals_by_status
+      raw = group(:status).sum(:nidhi_asked)
+      statuses.each_with_object({}) do |(key, value), totals|
+        totals[key] = (raw[key] || raw[value] || 0).to_d
+      end
+    end
+
     def nidhi_label
       return nidhi_category_name if nidhi_other? && nidhi_category_name.present?
 

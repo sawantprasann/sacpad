@@ -25,20 +25,21 @@
     <div class="flex h-screen overflow-hidden">
       <%= render "ui/sidebar" %>
 
-      <div class="relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
+      <div class="relative flex flex-1 flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
         <%# Mobile overlay when sidebar is open %>
         <div x-show="sidebarToggle" @click="sidebarToggle = false"
              class="fixed inset-0 z-40 bg-gray-900/50 xl:hidden" x-cloak></div>
 
         <%= render "ui/top_bar" %>
 
-        <main>
+        <main class="flex-1 overflow-y-auto">
           <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
             <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
             <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
             <%= yield %>
           </div>
         </main>
+        <%= render "ui/copyright_footer" %>
       </div>
     </div>
     <%= render "ui/confirm_dialog" %>

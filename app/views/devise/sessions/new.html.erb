@@ -1,7 +1,8 @@
 <% content_for :title, "#{t("auth.sign_in")} · PolitoMatrix" %>
 <% console = resource_name.to_s == "admin" %>
-<div class="flex min-h-screen w-full">
-  <div class="flex w-full flex-1 flex-col justify-center bg-gray-50 px-6 py-12 lg:w-1/2 dark:bg-gray-900">
+<div class="flex h-screen w-full overflow-hidden">
+  <div class="flex h-full min-h-0 w-full flex-col bg-gray-50 lg:w-1/2 dark:bg-gray-900">
+    <div class="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-6 py-8">
     <div class="mx-auto w-full max-w-md">
       <div class="mb-8 flex items-center gap-3">
         <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold" style="background: #f59e0b; color: #0b1f44;">PM</span>
@@ -70,10 +71,12 @@
         </div>
       <% end %>
     </div>
+    </div>
+    <%= render "ui/copyright_footer" %>
   </div>
 
   <div
-    class="relative hidden min-h-screen w-full overflow-hidden lg:flex lg:w-1/2 lg:items-center"
+    class="relative hidden h-full min-h-0 w-full overflow-hidden lg:flex lg:w-1/2 lg:items-center"
     style="background:
       radial-gradient(circle at 92% 0%, rgba(255,255,255,0.28), transparent 26%),
       radial-gradient(circle at 0% 100%, rgba(255,214,10,0.35), transparent 34%),

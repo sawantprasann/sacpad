@@ -972,6 +972,9 @@ pre[class*="language-"] {
   color: #d0d5dd;
 }
 
+.campaign-footer {
+  flex-shrink: 0;
+}
 .campaign-header {
   background: #ffffff;
   border-bottom: 1px solid #e4e7ec;

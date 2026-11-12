@@ -12,6 +12,7 @@ class AuthLayoutTest < ActionDispatch::IntegrationTest
     assert_match "PolitoMatrix", @response.body
     assert_match "Changed Policies with Changing Politics", @response.body
     assert_no_match(/Campaign desk/, @response.body)
+    assert_match "© #{Date.current.year} PolitoMatrix", @response.body
   end
 
   test "the admin console sign-in also uses the auth layout (no steel shell)" do

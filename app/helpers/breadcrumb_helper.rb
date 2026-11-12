@@ -54,6 +54,7 @@ module BreadcrumbHelper
       "kitchen_cabinet/follow_ups" => [ t("nav.beneficiaries"), kitchen_cabinet_tickets_path ],
       "cadre_program/activities" => [ t("nav.cadre_program"), cadre_program_activities_path ],
       "ground_reports/villages" => [ t("nav.ground_reports"), ground_reports_villages_path ],
+      "ground_reports/work_inlines" => [ t("nav.ground_reports"), ground_reports_villages_path ],
       "ground_reports/reports" => [ t("nav.ground_reports"), ground_reports_villages_path ],
       "ground_reports/imports" => [ t("nav.ground_reports"), ground_reports_villages_path ],
       "users" => [ t("nav.team"), users_path ],

@@ -16,7 +16,7 @@
     </div>
     <%# Each module supplies its own body at app/views/<mod>/_dashboard_widget.html.erb. The framework
         stays generic (FR50) — no module-specific code here. %>
-    <% body = widget[:mod] && "#{widget[:mod]}/dashboard_widget" %>
+    <% body = widget[:partial].presence || (widget[:mod] && "#{widget[:mod]}/dashboard_widget") %>
     <% if body && lookup_context.exists?(body, [], true) %>
       <div class="mt-4"><%= render body, widget: widget %></div>
     <% else %>
