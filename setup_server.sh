@@ -257,7 +257,7 @@ EnvironmentFile=$APP_DIR/.env
 # Socket must be group-writable so www-data (in the deploy group) can connect.
 UMask=0007
 ExecStart=/home/$DEPLOY_USER/.rbenv/shims/bundle exec puma -C $APP_DIR/config/puma.rb
-ExecReload=/bin/kill -SIGUSR1 \$MAINPID
+ExecReload=/bin/kill -SIGUSR2 \$MAINPID
 Restart=always
 RestartSec=5
 StandardOutput=append:/var/log/puma_${APP_NAME}.log

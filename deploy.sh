@@ -34,6 +34,12 @@ echo "=====> [deploy] Precompiling assets"
 bundle exec rails assets:precompile
 
 echo "=====> [deploy] Restarting Puma"
-sudo systemctl restart puma_${APP_NAME}
+# Hot restart keeps the socket open. A full stop drops it and every open request returns 500.
+if bundle exec pumactl -S "$APP_DIR/tmp/pids/server.state" restart; then
+  echo "=====> [deploy] Puma reloaded without dropping connections"
+else
+  echo "=====> [deploy] Reload failed, restarting the service"
+  sudo systemctl restart "puma_${APP_NAME}"
+fi
 
 echo "=====> [deploy] Done"
