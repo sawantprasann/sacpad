@@ -14,6 +14,8 @@ APP_DIR="/var/www/$APP_NAME"
 RUBY_VERSION="3.4.6"
 REPO_URL="git@github.com:sawantprasann/sacpad.git"
 SERVER_IP="143.110.248.201"
+APP_DOMAIN="politomatrix.com"
+WWW_DOMAIN="www.politomatrix.com"
 DB_PASSWORD_FILE="/root/.sacpad_db_password"
 ADMIN_PASSWORD_FILE="/root/.sacpad_admin_password"
 
@@ -293,7 +295,7 @@ upstream puma_${APP_NAME} {
 
 server {
   listen 80;
-  server_name ${SERVER_IP};
+  server_name ${APP_DOMAIN} ${WWW_DOMAIN};
 
   root $APP_DIR/public;
   access_log /var/log/nginx/${APP_NAME}_access.log;
@@ -340,8 +342,9 @@ echo "======================================================"
 echo " Setup complete!"
 echo "======================================================"
 echo ""
-echo " App:     http://${SERVER_IP}"
-echo " Health:  curl http://${SERVER_IP}/up"
+echo " App:     https://${APP_DOMAIN}"
+echo "          https://${WWW_DOMAIN}"
+echo " Health:  curl https://${APP_DOMAIN}/up"
 echo ""
 echo " Platform admin (change this password after first login):"
 echo "   email:    ${ADMIN_EMAIL}"
@@ -353,6 +356,6 @@ echo "      Name: DO_SSH_PRIVATE_KEY"
 echo "      Value:"
 echo "      cat /home/$DEPLOY_USER/.ssh/id_ed25519"
 echo "   2. Merge to main to run tests and deploy"
-echo "   3. (Optional) Point a domain at ${SERVER_IP}, then run:"
-echo "      certbot --nginx -d yourdomain.com"
+echo "   3. Point ${APP_DOMAIN} and ${WWW_DOMAIN} at ${SERVER_IP}, then run:"
+echo "      certbot --nginx -d ${APP_DOMAIN} -d ${WWW_DOMAIN}"
 echo ""

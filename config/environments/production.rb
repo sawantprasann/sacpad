@@ -24,14 +24,14 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  # config.assume_ssl = true
+  # Nginx terminates TLS for politomatrix.com. Treat proxied requests as HTTPS.
+  config.assume_ssl = true
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  config.force_ssl = true
 
   # Skip http-to-https redirect for the default health check endpoint.
-  # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
   # Log to STDOUT with the current request id as a default log tag.
   config.log_tags = [ :request_id ]
@@ -57,8 +57,10 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  # Set host to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "example.com" }
+  # Links in mail, jobs, and Active Storage use the public production host.
+  config.action_mailer.default_url_options = { host: "politomatrix.com", protocol: "https" }
+  config.action_mailer.asset_host = "https://politomatrix.com"
+  config.action_controller.default_url_options = { host: "politomatrix.com", protocol: "https" }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {
@@ -90,12 +92,20 @@ Rails.application.configure do
     config.active_record.encryption[setting] = value if value
   end
 
-  # Enable DNS rebinding protection and other `Host` header attacks.
-  # config.hosts = [
-  #   "example.com",     # Allow requests from example.com
-  #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
-  # ]
-  #
-  # Skip DNS rebinding protection for the default health check endpoint.
-  # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  # Only the public production hosts may reach the app.
+  config.hosts = [
+    "politomatrix.com",
+    "www.politomatrix.com"
+  ]
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+
+  config.action_cable.allowed_request_origins = [
+    "https://politomatrix.com",
+    "https://www.politomatrix.com"
+  ]
+
+  config.after_initialize do
+    Rails.application.routes.default_url_options = { host: "politomatrix.com", protocol: "https" }
+    ActionMailer::Base.default from: "Politomatrix <noreply@politomatrix.com>"
+  end
 end
