@@ -68,11 +68,26 @@ module KitchenCabinet
       @ticket.owner = current_user          # organization is set by acts_as_tenant, never from params
       authorize @ticket
       if @ticket.save
+        link_chosen_voter
         redirect_after_create
       else
         @categories = TicketCategory.active.order(:display_order, :name)
         render :new, status: :unprocessable_entity
       end
+    end
+
+    # Debounced village search for the create form. Two or more letters, capped list.
+    def voter_suggestions
+      authorize Ticket.new, :create?
+      result = VoterMatch.suggest(
+        organization: current_user.organization,
+        village_name: params[:village],
+        query: params[:q]
+      )
+      render json: {
+        voters: result[:voters].map { |voter| voter_suggestion(voter) },
+        truncated: result[:truncated]
+      }
     end
 
     # Edit ticket (org admins can edit any ticket; team leads see read-only).
@@ -204,8 +219,47 @@ module KitchenCabinet
       }
     end
 
+    # A voter picked from the village search is linked even when the typed spelling differs.
+    # A voter outside that village is ignored and the exact-name fallback still runs.
+    def link_chosen_voter
+      voter = chosen_voter
+      return unless voter
+
+      @ticket.person_name = voter.display_name
+      @ticket.link_matched_voter!(voter, by: current_user)
+    end
+
+    def chosen_voter
+      return if params[:matched_voter_id].blank?
+
+      voter = Voter.find_by(id: params[:matched_voter_id])
+      return unless VoterMatch.in_village?(current_user.organization, @ticket.village, voter)
+
+      voter
+    end
+
+    def voter_suggestion(voter)
+      {
+        id: voter.id,
+        name: voter.name,
+        label: voter.display_name,
+        voter_id: voter.voter_id,
+        booth: voter.booth&.number,
+        sr_no: voter.sr_no
+      }
+    end
+
     def redirect_after_create
       list = kitchen_cabinet_tickets_path(category: @ticket.ticket_category&.slug)
+      if @ticket.voter_id.present?
+        redirect_to list, notice: t(
+          "kitchen_cabinet.logged_matched",
+          number: @ticket.ticket_number,
+          name: @ticket.matched_voter&.name || @ticket.person_name
+        )
+        return
+      end
+
       matches = KitchenCabinet::VoterMatch.for_ticket(@ticket)
       if matches.one?
         @ticket.link_matched_voter!(matches.first, by: current_user)

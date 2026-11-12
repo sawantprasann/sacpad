@@ -312,6 +312,10 @@ server {
   }
 
   location @puma {
+    # Signed-in replies include a session cookie. The default 8k buffer rejects them.
+    proxy_buffer_size       32k;
+    proxy_buffers           8 32k;
+    proxy_busy_buffers_size 64k;
     proxy_set_header  X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header  X-Forwarded-Proto \$scheme;
     proxy_set_header  Host \$http_host;

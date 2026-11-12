@@ -18,6 +18,16 @@ class KitchenCabinetVoterMatchTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
+  test "the create form asks for a village before searching its voters" do
+    get new_kitchen_cabinet_ticket_path
+    assert_response :success
+    assert_select "[data-controller=voter-lookup][data-voter-lookup-url-value=?]",
+                  voter_suggestions_kitchen_cabinet_tickets_path
+    assert_select "[data-voter-lookup-target=village]"
+    assert_select "[data-voter-lookup-target=query]"
+    assert_select "option", text: "Nimgaon"
+  end
+
   test "one exact name match links the voter, sets transit sentiment, and copies the mobile" do
     @other.update!(mobile: "1111111111")
     assert_difference -> { KitchenCabinet::Ticket.unscoped.count }, 1 do
@@ -54,6 +64,74 @@ class KitchenCabinetVoterMatchTest < ActionDispatch::IntegrationTest
     patch status_kitchen_cabinet_ticket_path(ticket), params: { to_status: "in_progress" }
     assert_redirected_to kitchen_cabinet_ticket_path(ticket)
     assert ticket.reload.in_progress?
+  end
+
+  test "village search returns partial matches in that village only" do
+    other = @village.assembly.villages.create!(name: "Bhigwan")
+    Voter.create!(
+      voter_id: "DDD4444444", first_name: "Asha", last_name: "Kale",
+      booth: other.booths.create!(number: "2"), village: other, sr_no: 1
+    )
+
+    get voter_suggestions_kitchen_cabinet_tickets_path, params: { village: "Nimgaon", q: "a" }
+    assert_response :success
+    assert_empty JSON.parse(response.body).fetch("voters")
+
+    get voter_suggestions_kitchen_cabinet_tickets_path, params: { village: "Nimgaon", q: "ash" }
+    ids = JSON.parse(response.body).fetch("voters").map { |row| row.fetch("voter_id") }
+    assert_includes ids, "AAA1111111"
+    assert_includes ids, "BBB2222222"
+    assert_not_includes ids, "DDD4444444"
+  end
+
+  test "a Marathi session keeps the native name in the search result and on the ticket" do
+    @village.assembly.loksabha.update!(native_locale: "mr")
+    @asha.update!(native_first_name: "आशा", native_last_name: "पाटील")
+    @user.update!(preferred_locale: "mr")
+
+    get voter_suggestions_kitchen_cabinet_tickets_path, params: { village: "Nimgaon", q: "asha" }
+    row = JSON.parse(response.body).fetch("voters").find { |voter| voter.fetch("voter_id") == "AAA1111111" }
+    assert_equal "आशा पाटील", row.fetch("label")
+
+    post kitchen_cabinet_tickets_path, params: {
+      ticket: ticket_attrs("Asha"),
+      matched_voter_id: @asha.id
+    }
+    ticket = KitchenCabinet::Ticket.unscoped.order(:id).last
+    assert_equal "आशा पाटील", ticket.person_name
+    assert_equal "AAA1111111", ticket.voter_id
+  end
+
+  test "picking a voter links them even when the typed name is misspelled" do
+    assert_difference -> { KitchenCabinet::Ticket.unscoped.count }, 1 do
+      post kitchen_cabinet_tickets_path, params: {
+        ticket: ticket_attrs("Asha Ptl").merge(mobile: "9990001111"),
+        matched_voter_id: @asha.id
+      }
+    end
+    ticket = KitchenCabinet::Ticket.unscoped.order(:id).last
+    assert_equal "AAA1111111", ticket.voter_id
+    assert_equal "Asha Patil", ticket.person_name
+    assert_equal "9990001111", @asha.reload.mobile
+    assert_redirected_to kitchen_cabinet_tickets_path(category: "water-match")
+    ActsAsTenant.with_tenant(@org) do
+      assert VoterSentiment.find_by!(voter: @asha).sentiment_transit?
+    end
+  end
+
+  test "a voter outside the selected village is not linked from the picker" do
+    other = @village.assembly.villages.create!(name: "Bhigwan")
+    outsider = Voter.create!(
+      voter_id: "DDD4444444", first_name: "Asha", last_name: "Kale",
+      booth: other.booths.create!(number: "2"), village: other, sr_no: 1
+    )
+    post kitchen_cabinet_tickets_path, params: {
+      ticket: ticket_attrs("Asha Kale"),
+      matched_voter_id: outsider.id
+    }
+    ticket = KitchenCabinet::Ticket.unscoped.order(:id).last
+    assert_nil ticket.voter_id
+    assert_equal "Asha Kale", ticket.person_name
   end
 
   test "no match leaves the close flow unchanged and a closed ticket cannot be edited" do

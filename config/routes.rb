@@ -123,6 +123,9 @@ Rails.application.routes.draw do
   # ticket capture (1.2) and the real scoped browse list (1.3) fill it in later.
   namespace :kitchen_cabinet do
     resources :tickets, only: %i[index new create show edit update] do
+      collection do
+        get :voter_suggestions
+      end
       member do
         patch :status
         patch :voter

@@ -10,7 +10,17 @@
         subtitle: t("kitchen_cabinet.create_subtitle")
       } do %><% end %>
 
-  <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8">
+  <div class="mt-6 <%= ta_card_classes %> p-6 md:p-8"
+       data-controller="voter-lookup"
+       data-voter-lookup-url-value="<%= voter_suggestions_kitchen_cabinet_tickets_path %>"
+       data-voter-lookup-min-length-value="2"
+       data-voter-lookup-hint-value="<%= t("kitchen_cabinet.search_voters_hint", count: 2) %>"
+       data-voter-lookup-pick-village-value="<%= t("kitchen_cabinet.select_village_first") %>"
+       data-voter-lookup-empty-value="<%= t("kitchen_cabinet.no_voters_match") %>"
+       data-voter-lookup-narrow-value="<%= t("kitchen_cabinet.voters_narrow", count: 20) %>"
+       data-voter-lookup-picked-value="<%= t("kitchen_cabinet.voter_picked", name: "%{name}") %>"
+       data-voter-lookup-searching-value="<%= t("kitchen_cabinet.searching_voters") %>"
+       data-voter-lookup-failed-value="<%= t("kitchen_cabinet.voter_search_failed") %>">
     <%# scope: :ticket — the model is KitchenCabinet::Ticket, so without this the params would be
         nested under `kitchen_cabinet_ticket` and the controller's require(:ticket) would miss them. %>
     <%= form_with model: @ticket, scope: :ticket, url: kitchen_cabinet_tickets_path, method: :post, multipart: true do |f| %>
@@ -29,21 +39,51 @@
           <%= f.label :village, t("kitchen_cabinet.village_ward"), class: ta_label_classes %>
           <%= render "ui/min_search_select",
                 name: "ticket[village]",
-                choices: Village.order(:name).pluck(:name),
+                choices: current_user.organization.villages.order(:name).map { |village| [ village.display_name, village.name ] },
                 selected: @ticket.village,
                 blank: t("common.select_village"),
                 placeholder: t("common.select_village"),
                 search_placeholder: t("kitchen_cabinet.search_villages"),
                 empty_text: t("kitchen_cabinet.no_villages"),
-                autofocus: true %>
+                autofocus: true,
+                select_data: {
+                  voter_lookup_target: "village",
+                  action: "change->voter-lookup#villageChanged"
+                } %>
+        </div>
+        <div class="relative min-w-0"
+             data-voter-lookup-target="anchor"
+             data-action="focusout->voter-lookup#focusOut">
+          <%= f.label :person_name, t("kitchen_cabinet.beneficiary_name"), class: ta_label_classes %>
+          <%= f.text_field :person_name, autocomplete: "off", class: "#{ta_field_classes} min-h-11",
+                role: "combobox",
+                aria: { autocomplete: "list", expanded: false, controls: "voter-lookup-results" },
+                data: {
+                  voter_lookup_target: "query",
+                  action: "input->voter-lookup#search keydown->voter-lookup#keydown"
+                } %>
+          <%= hidden_field_tag :matched_voter_id, params[:matched_voter_id], data: { voter_lookup_target: "voterId" } %>
+          <div id="voter-lookup-results"
+               data-voter-lookup-target="results"
+               data-action="mousedown->voter-lookup#keepFocus click->voter-lookup#choose"
+               hidden
+               role="listbox"
+               class="z-50 max-h-72 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-gray-900"></div>
+          <p data-voter-lookup-target="status" class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= t("kitchen_cabinet.select_village_first") %></p>
+          <template data-voter-lookup-target="optionTemplate">
+            <button type="button"
+                    class="flex w-full cursor-pointer items-center rounded-lg bg-gray-100 px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 focus:bg-gray-100 focus:outline-hidden dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/5 dark:focus:bg-white/5"
+                    role="option">
+              <span data-title class="min-w-0 truncate"></span>
+            </button>
+          </template>
+          <template data-voter-lookup-target="messageTemplate">
+            <p class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400"></p>
+          </template>
         </div>
         <div>
           <%= f.label :representative_name, t("kitchen_cabinet.representative_name"), class: ta_label_classes %>
           <%= f.text_field :representative_name, class: "#{ta_field_classes} min-h-11" %>
-        </div>
-        <div>
-          <%= f.label :person_name, t("kitchen_cabinet.beneficiary_name"), class: ta_label_classes %>
-          <%= f.text_field :person_name, class: "#{ta_field_classes} min-h-11" %>
         </div>
         <div>
           <%= f.label :mobile, t("common.mobile_number"), class: ta_label_classes %>

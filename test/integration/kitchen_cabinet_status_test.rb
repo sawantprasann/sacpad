@@ -24,6 +24,15 @@ class KitchenCabinetStatusTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "an open ticket shows the next step as start work" do
+    t = ticket_for(@alice)
+    sign_in @alice
+    get kitchen_cabinet_ticket_path(t)
+    assert_response :success
+    assert_select "button", text: "Start work"
+    assert_match "Click Start work to move it to In progress", response.body
+  end
+
   test "a write owner advances status — a log row is written and the pill updates" do
     t = ticket_for(@alice)
     sign_in @alice
