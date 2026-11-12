@@ -31,7 +31,9 @@ threads threads_count, threads_count
 app_dir = File.expand_path("..", __dir__)
 
 # Production sits behind Nginx on a Unix socket. Other environments keep the TCP port.
+# One worker lets a deploy start the new process before the old one stops, so open pages do not all 500.
 if ENV["RAILS_ENV"] == "production"
+  workers ENV.fetch("WEB_CONCURRENCY", 1)
   bind "unix://#{app_dir}/tmp/puma.sock"
   pidfile "#{app_dir}/tmp/pids/server.pid"
   state_path "#{app_dir}/tmp/pids/server.state"

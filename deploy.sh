@@ -34,11 +34,12 @@ echo "=====> [deploy] Precompiling assets"
 bundle exec rails assets:precompile
 
 echo "=====> [deploy] Restarting Puma"
-# Hot restart keeps the socket open. A full stop drops it and every open request returns 500.
-if bundle exec pumactl -S "$APP_DIR/tmp/pids/server.state" restart; then
+# Phased restart keeps the old process answering until the new one is ready.
+# The first deploy after turning workers on cannot do that, so it falls back to a full restart.
+if bundle exec pumactl -S "$APP_DIR/tmp/pids/server.state" phased-restart; then
   echo "=====> [deploy] Puma reloaded without dropping connections"
 else
-  echo "=====> [deploy] Reload failed, restarting the service"
+  echo "=====> [deploy] Phased reload unavailable, restarting the service"
   sudo systemctl restart "puma_${APP_NAME}"
 fi
 
