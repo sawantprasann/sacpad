@@ -51,6 +51,8 @@ class ConsoleLoksabhaAssembliesTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "a[aria-label=View]"
+    assert_select "button[aria-label=Delete][data-turbo-confirm=?]", "Delete this record?"
+    assert_select "#confirm-dialog[hidden] [data-confirm-accept]"
     assert_select "a", text: "Assemblies", count: 0
 
     get console_loksabha_path(@loksabha)

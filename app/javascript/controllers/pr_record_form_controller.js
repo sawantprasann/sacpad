@@ -7,7 +7,9 @@ export default class extends Controller {
     checking: String,
     noThumbnail: String,
     thumbnailFilled: String,
-    chooseFirst: String
+    chooseFirst: String,
+    lastCategory: String,
+    removeFailed: String
   }
 
   connect() {
@@ -54,17 +56,76 @@ export default class extends Controller {
     this.categoryNoticeTarget.classList.add("hidden")
   }
 
-  removeEntry(event) {
+  async removeEntry(event) {
     event.preventDefault()
-    const entry = event.target.closest("[data-entry]")
+    const button = event.currentTarget
+    const entry = button.closest("[data-entry]")
+    if (!entry || entry.hidden) return
+    const ask = window.sacpadConfirm || ((text, options = {}) => Promise.resolve(options.alert ? true : window.confirm(text)))
+    if (this.visibleEntries().length <= 1) {
+      await ask(this.lastCategoryValue, { alert: true })
+      return
+    }
+    const message = button.dataset.confirm
+    if (message && !(await ask(message))) return
+
+    const url = button.dataset.destroyUrl
+    if (url) {
+      button.disabled = true
+      const removed = await this.destroyEntry(url)
+      button.disabled = false
+      if (!removed) return
+    }
+
     const destroy = entry.querySelector("[data-entry-destroy]")
-    if (destroy) {
+    if (destroy && !url) {
       destroy.value = "1"
       entry.hidden = true
     } else {
       entry.remove()
     }
+    if (!this.pendingCategoryEntry()) this.clearCategoryNotice()
     this.renumber()
+  }
+
+  visibleEntries() {
+    return [
+      ...this.newEntryRowsTarget.querySelectorAll("[data-entry]"),
+      ...this.entryRowsTarget.querySelectorAll("[data-entry]")
+    ].filter((entry) => !entry.hidden)
+  }
+
+  async destroyEntry(url) {
+    const token = document.querySelector("meta[name='csrf-token']")?.content
+    let response
+    try {
+      response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "X-CSRF-Token": token
+        }
+      })
+    } catch {
+      await this.tell(this.removeFailedValue)
+      return false
+    }
+    if (response.ok) return true
+
+    let message = this.removeFailedValue
+    try {
+      const data = await response.json()
+      if (data.error) message = data.error
+    } catch {
+      // The response had no JSON body. The fallback message still explains the failure.
+    }
+    await this.tell(message)
+    return false
+  }
+
+  tell(message) {
+    const ask = window.sacpadConfirm || ((text) => Promise.resolve(window.alert(text)))
+    return ask(message, { alert: true })
   }
 
   renumber() {

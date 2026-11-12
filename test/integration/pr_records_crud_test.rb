@@ -380,6 +380,141 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
     assert_not_includes cells, "https://tv.example/story"
   end
 
+  test "show page can delete one category after confirmation" do
+    record, print_category = record_with_two_categories
+    removed = ActsAsTenant.with_tenant(@org) { record.entries.find_by!(pr_category: print_category) }
+
+    get pr_record_path(record)
+    assert_response :success
+    assert_select "#confirm-dialog[hidden] [data-confirm-accept]"
+    assert_select "#confirm-dialog [data-confirm-cancel]", text: "Cancel"
+    assert_select "button[aria-label=?][data-turbo-confirm=?]",
+      I18n.t("pr.delete_category", name: print_category.name),
+      I18n.t("pr.delete_category_named_confirm", name: print_category.name),
+      count: 2
+
+    assert_difference -> { ActsAsTenant.with_tenant(@org) { record.entries.count } }, -1 do
+      delete pr_record_entry_path(record, removed)
+    end
+    assert_redirected_to pr_record_path(record)
+    follow_redirect!
+    assert_match I18n.t("pr.category_removed", name: print_category.name), response.body
+    assert_select "button.action-icon-delete", count: 0
+  end
+
+  test "the only category on a record cannot be deleted" do
+    record = ActsAsTenant.with_tenant(@org) do
+      @org.pr_records.create!(
+        owner: @user,
+        title: "Single category",
+        entries_attributes: [ {
+          published_on: Date.current,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform: @platform
+        } ]
+      )
+    end
+
+    get pr_record_path(record)
+    assert_response :success
+    assert_select "button.action-icon-delete", count: 0
+
+    assert_no_difference -> { ActsAsTenant.with_tenant(@org) { record.entries.count } } do
+      delete pr_record_entry_path(record, record.entries.first)
+    end
+    assert_redirected_to pr_record_path(record)
+    follow_redirect!
+    assert_match I18n.t("pr.last_category"), response.body
+  end
+
+  test "edit form puts a delete icon on every category" do
+    record, = record_with_two_categories
+
+    get edit_pr_record_path(record)
+    assert_response :success
+    ActsAsTenant.with_tenant(@org) do
+      record.entries.each do |entry|
+        assert_select "button.action-icon-delete[aria-label=?][data-confirm=?][data-destroy-url=?][data-action=?]",
+          I18n.t("pr.remove_category"),
+          I18n.t("pr.delete_category_confirm"),
+          pr_record_entry_path(record, entry),
+          "pr-record-form#removeEntry"
+      end
+    end
+  end
+
+  test "saving the form removes a category marked for deletion" do
+    record, print_category = record_with_two_categories
+    kept, removed = ActsAsTenant.with_tenant(@org) do
+      [ record.entries.find_by!(pr_category: @category), record.entries.find_by!(pr_category: print_category) ]
+    end
+
+    patch pr_record_path(record), params: {
+      pr_record: {
+        title: record.title,
+        entries_attributes: {
+          "0" => { id: kept.id },
+          "1" => { id: removed.id, _destroy: "1" }
+        }
+      }
+    }
+
+    assert_redirected_to pr_record_path(record)
+    assert_equal [ kept.id ], ActsAsTenant.with_tenant(@org) { record.entries.reload.pluck(:id) }
+  end
+
+  test "a read-only user cannot delete a category" do
+    record, print_category = record_with_two_categories
+    reader = ActsAsTenant.with_tenant(@org) do
+      role = Role.create!(name: "Reader", slug: "reader-#{Time.current.to_i}")
+      role.role_permissions.create!(module_name: "pr", access_level: "read")
+      user = User.create!(
+        organization: @org,
+        email: "reader-#{Time.current.to_i}@example.com",
+        password: "password",
+        name: "Reader",
+        role: role
+      )
+      record.update!(owner: user)
+      user
+    end
+    removed = ActsAsTenant.with_tenant(@org) { record.entries.find_by!(pr_category: print_category) }
+
+    sign_in reader
+    get pr_record_path(record)
+    assert_response :success
+    assert_select "button.action-icon-delete", count: 0
+
+    assert_no_difference -> { ActsAsTenant.with_tenant(@org) { record.entries.count } } do
+      delete pr_record_entry_path(record, removed)
+    end
+    assert_response :not_found
+  end
+
+  def record_with_two_categories
+    print_category = PrCategory.find_by(slug: "print") || PrCategory.create!(
+      name: "Print Media", slug: "print", active: true, display_order: 2
+    )
+    paper = MediaPlatform.create!(
+      name: "Lokmat",
+      slug: "lokmat-#{SecureRandom.hex(4)}",
+      active: true,
+      pr_category: print_category
+    )
+    record = ActsAsTenant.with_tenant(@org) do
+      @org.pr_records.create!(
+        owner: @user,
+        title: "Two categories",
+        entries_attributes: [
+          { published_on: Date.current, sentiment: :positive, pr_category: @category, media_platform: @platform },
+          { published_on: Date.current, sentiment: :neutral, pr_category: print_category, media_platform: paper }
+        ]
+      )
+    end
+    [ record, print_category ]
+  end
+
   def xlsx_cells
     file = Tempfile.new([ "export", ".xlsx" ])
     file.binmode

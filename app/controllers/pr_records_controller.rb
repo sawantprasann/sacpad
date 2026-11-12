@@ -84,6 +84,27 @@ class PrRecordsController < ApplicationController
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
+  def destroy_entry
+    @record = policy_scope(PrRecord).includes(entries: :pr_category).find(params[:pr_record_id])
+    authorize @record, :update?
+    entry = @record.entries.find(params[:entry_id])
+    if @record.entries.one?
+      message = t("pr.last_category")
+      respond_to do |format|
+        format.html { redirect_to pr_record_path(@record), alert: message }
+        format.json { render json: { error: message }, status: :unprocessable_entity }
+      end
+      return
+    end
+
+    name = entry.pr_category.name
+    entry.destroy!
+    respond_to do |format|
+      format.html { redirect_to pr_record_path(@record), notice: t("pr.category_removed", name: name) }
+      format.json { head :no_content }
+    end
+  end
+
   private
 
   def record_params

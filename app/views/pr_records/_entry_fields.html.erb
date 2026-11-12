@@ -17,7 +17,15 @@
         <h3 data-pr-record-entry-target="title" class="truncate text-sm font-semibold text-gray-900 dark:text-white/90"><%= f.object.pr_category&.name.presence || t("pr.choose_category") %></h3>
       </div>
     </div>
-    <button type="button" class="shrink-0 text-sm text-gray-500" data-action="pr-record-form#removeEntry"><%= t("pr.remove_category") %></button>
+    <button type="button"
+            class="action-icon action-icon-delete shrink-0"
+            title="<%= t("pr.remove_category") %>"
+            aria-label="<%= t("pr.remove_category") %>"
+            data-action="pr-record-form#removeEntry"
+            data-confirm="<%= t("pr.delete_category_confirm") %>"
+            <% if f.object.persisted? %>data-destroy-url="<%= pr_record_entry_path(@record, f.object) %>"<% end %>>
+      <%= action_icon(:delete) %>
+    </button>
   </div>
 
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">

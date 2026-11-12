@@ -332,6 +332,7 @@ module ApplicationHelper
 
   def icon_action_button(action, url, label: nil, method: nil, confirm: nil, **html)
     label ||= t("common.#{action}", default: action.to_s.capitalize)
+    confirm = t("common.delete_record_confirm") if action.to_sym == :delete && confirm.nil?
     attrs = icon_action_attrs(action, label).merge(html)
     attrs[:data] = (attrs[:data] || {}).merge(turbo_confirm: confirm) if confirm.present?
     button_to(url, { method: method || :delete, form: { class: "inline-flex" } }.merge(attrs)) do

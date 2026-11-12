@@ -13,7 +13,10 @@
         </p>
       </div>
     </div>
-    <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
+    <div class="flex shrink-0 items-center gap-2">
+      <%= render "ui/badge", label: t("pr.sentiments.#{entry.sentiment}"), tone: pr_sentiment_tone(entry.sentiment) %>
+      <%= render "pr_records/entry_delete", entry: entry %>
+    </div>
   </div>
 
   <% if entry.description.present? %>

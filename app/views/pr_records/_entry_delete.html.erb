@@ -1,0 +1,6 @@
+<% if policy(@record).edit? && @record.entries.many? %>
+  <%= icon_action_button :delete,
+        pr_record_entry_path(@record, entry),
+        label: t("pr.delete_category", name: entry.pr_category.name),
+        confirm: t("pr.delete_category_named_confirm", name: entry.pr_category.name) %>
+<% end %>

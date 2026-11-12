@@ -1,6 +1,63 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
 import "@hotwired/turbo-rails"
 import "controllers"
+
+// Same confirmation block as the console flash dialog. A delete proceeds only
+// after Confirm. Cancel, Escape, and the backdrop leave the record in place.
+let confirmClose = null
+
+function confirmDialog(message, options = {}) {
+  const root = document.getElementById("confirm-dialog")
+  if (!root) return Promise.resolve(options.alert ? true : window.confirm(message))
+  if (confirmClose) confirmClose(false)
+
+  const alertOnly = options.alert === true
+  const title = root.querySelector("[data-confirm-title]")
+  const body = root.querySelector("[data-confirm-message]")
+  const accept = root.querySelector("[data-confirm-accept]")
+  const cancel = root.querySelector("[data-confirm-cancel]")
+  const ok = root.querySelector("[data-confirm-ok]")
+  const backdrop = root.querySelector("[data-confirm-backdrop]")
+  title.textContent = options.title || root.dataset.title
+  body.textContent = message
+  accept.textContent = options.acceptLabel || root.dataset.accept
+  accept.hidden = alertOnly
+  cancel.hidden = alertOnly
+  ok.hidden = !alertOnly
+  root.hidden = false
+  ;(alertOnly ? ok : cancel).focus()
+
+  return new Promise((resolve) => {
+    const finish = (answer) => {
+      if (confirmClose !== finish) return
+      confirmClose = null
+      root.hidden = true
+      accept.removeEventListener("click", onAccept)
+      cancel.removeEventListener("click", onCancel)
+      ok.removeEventListener("click", onOk)
+      backdrop.removeEventListener("click", onCancel)
+      document.removeEventListener("keydown", onKey)
+      resolve(answer)
+    }
+    const onAccept = () => finish(true)
+    const onOk = () => finish(true)
+    const onCancel = () => finish(alertOnly)
+    const onKey = (event) => {
+      if (event.key === "Escape") onCancel()
+    }
+    confirmClose = finish
+    accept.addEventListener("click", onAccept)
+    cancel.addEventListener("click", onCancel)
+    ok.addEventListener("click", onOk)
+    backdrop.addEventListener("click", onCancel)
+    document.addEventListener("keydown", onKey)
+  })
+}
+
+window.sacpadConfirm = confirmDialog
+if (window.Turbo?.config?.forms) {
+  window.Turbo.config.forms.confirm = (message) => confirmDialog(message)
+}
 import "chartkick"
 import "Chart.bundle"
 
