@@ -34,13 +34,6 @@ echo "=====> [deploy] Precompiling assets"
 bundle exec rails assets:precompile
 
 echo "=====> [deploy] Restarting Puma"
-# Phased restart keeps the old process answering until the new one is ready.
-# The first deploy after turning workers on cannot do that, so it falls back to a full restart.
-if bundle exec pumactl -S "$APP_DIR/tmp/pids/server.state" phased-restart; then
-  echo "=====> [deploy] Puma reloaded without dropping connections"
-else
-  echo "=====> [deploy] Phased reload unavailable, restarting the service"
-  sudo systemctl restart "puma_${APP_NAME}"
-fi
+sudo systemctl restart "puma_${APP_NAME}"
 
 echo "=====> [deploy] Done"
