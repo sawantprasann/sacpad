@@ -19,12 +19,14 @@
         <ul class="mb-6 flex flex-col gap-1">
           <li>
             <%= link_to root_path, class: "menu-item group #{current_page?(root_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+              <%= menu_desk_icon("dashboard") %>
               <span class="menu-item-text"><%= t("nav.dashboard") %></span>
             <% end %>
           </li>
           <% if user_signed_in? && current_user.can_use_calendar? %>
             <li>
               <%= link_to calendar_events_path, class: "menu-item group #{controller_name == "calendar_events" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("calendar") %>
                 <span class="menu-item-text"><%= t("nav.calendar") %></span>
               <% end %>
             </li>
@@ -32,6 +34,7 @@
           <% if user_signed_in? && current_user.role.can_create_users? %>
             <li>
               <%= link_to users_path, class: "menu-item group #{current_page?(users_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("team") %>
                 <span class="menu-item-text"><%= t("nav.team") %></span>
               <% end %>
             </li>
@@ -44,6 +47,7 @@
             <li>
               <%= link_to election_result_path,
                     class: "menu-item group #{params[:controller] == "election_results" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("constituency_elections") %>
                 <span class="menu-item-text"><%= t("nav.election_result") %></span>
               <% end %>
             </li>
@@ -54,6 +58,7 @@
             <li>
               <%= link_to kitchen_cabinet_tickets_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("kitchen_cabinet/") ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("kitchen_cabinet") %>
                 <span class="menu-item-text"><%= t("nav.beneficiaries") %></span>
               <% end %>
             </li>
@@ -68,6 +73,7 @@
               <button type="button" @click="open = !open"
                 class="menu-item group w-full <%= on_cadre_program ? "menu-item-active" : "menu-item-inactive" %>"
                 :class="open ? 'menu-item-active' : 'menu-item-inactive'">
+                <%= menu_desk_icon("cadre_program") %>
                 <span class="menu-item-text"><%= t("nav.cadre_program") %></span>
                 <svg class="ml-auto h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
                      viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -93,6 +99,7 @@
             <li>
               <%= link_to ground_reports_villages_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("ground_reports/") ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("ground_reports") %>
                 <span class="menu-item-text"><%= t("nav.ground_reports") %></span>
               <% end %>
             </li>
@@ -103,6 +110,7 @@
             <li>
               <%= link_to pr_records_path,
                     class: "menu-item group #{params[:controller] == "pr_records" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("pr") %>
                 <span class="menu-item-text"><%= t("nav.pr_records") %></span>
               <% end %>
             </li>
@@ -112,12 +120,14 @@
             <li>
               <%= link_to voters_path,
                     class: "menu-item group #{params[:controller] == "voters" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("voters") %>
                 <span class="menu-item-text"><%= t("nav.voter_lists") %></span>
               <% end %>
             </li>
             <li>
               <%= link_to voter_lists_talukas_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("voter_lists/") ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("taluka") %>
                 <span class="menu-item-text"><%= t("nav.taluka") %></span>
               <% end %>
             </li>
@@ -127,6 +137,7 @@
             <li>
               <%= link_to booths_path,
                     class: "menu-item group #{params[:controller].to_s.start_with?("booth_management/") ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("booths") %>
                 <span class="menu-item-text"><%= t("nav.booth_management") %></span>
               <% end %>
             </li>
@@ -136,6 +147,7 @@
             <li>
               <%= link_to social_connections_path,
                     class: "menu-item group #{params[:controller] == "social_connections" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("social_media") %>
                 <span class="menu-item-text"><%= t("nav.social_media") %></span>
               <% end %>
             </li>
@@ -148,6 +160,7 @@
             <li>
               <%= link_to support_tickets_path,
                     class: "menu-item group #{params[:controller] == "support_tickets" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("support") %>
                 <span class="menu-item-text"><%= t("nav.support") %></span>
               <% end %>
             </li>

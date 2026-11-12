@@ -150,6 +150,11 @@ module ApplicationHelper
     DASHBOARD_JEWELS[index.to_i % DASHBOARD_JEWELS.length]
   end
 
+  # Sidebar glyph. Same drawing as the matching desk, in the rail's quiet ink.
+  def menu_desk_icon(name)
+    render "ui/desk_mark", name: name, plain: true
+  end
+
   def status_color(status)
     TICKET_STATUS_COLORS[status.to_s]
   end

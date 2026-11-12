@@ -24,6 +24,7 @@ class KitchenCabinetDashboardTest < ActionDispatch::IntegrationTest
     assert_select "details[data-disclosure-key-value=?]", "open-a-desk", count: 0
     assert_match "Open a desk", @response.body
     assert_select "a[href=?]", kitchen_cabinet_tickets_path
+    assert_select "a.menu-item[href=?] svg path[d=?]", kitchen_cabinet_tickets_path, "M8 7h8M8 11h8M8 15h5"
     assert_match "Open tickets by status", @response.body
     assert_match "dashboard-tickets-status", @response.body
     assert_match 'Chartkick["PieChart"]', @response.body

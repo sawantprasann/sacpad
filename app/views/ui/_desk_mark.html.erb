@@ -1,8 +1,33 @@
-<%# Small mark for dashboard desks. Decorative chrome, not a status indicator. %>
+<%# Small mark for dashboard desks. Decorative chrome, not a status indicator.
+    The menu uses the same glyph without the jewel chip. %>
 <% mark = local_assigns[:name].to_s %>
 <% box_class = local_assigns[:box_class].presence || "h-11 w-11 [&_svg]:h-5 [&_svg]:w-5" %>
+<% if local_assigns[:plain] %>
+<span class="menu-mark inline-flex h-5 w-5 shrink-0 items-center justify-center [&_svg]:h-5 [&_svg]:w-5">
+<% else %>
 <span class="inline-flex shrink-0 items-center justify-center rounded-2xl text-white shadow-sm <%= box_class %> <%= local_assigns[:chip_class] %>">
+<% end %>
   <% case mark %>
+  <% when "dashboard" %>
+    <svg class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6.5v6.5H4V4zM13.5 4H20v6.5h-6.5V4zM4 13.5h6.5V20H4v-6.5zM13.5 13.5H20V20h-6.5v-6.5z"/>
+    </svg>
+  <% when "calendar" %>
+    <svg class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 3.5V6M16 3.5V6M4.5 9.5h15"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 5h12a1.5 1.5 0 011.5 1.5V19a1.5 1.5 0 01-1.5 1.5H6A1.5 1.5 0 014.5 19V6.5A1.5 1.5 0 016 5z"/>
+    </svg>
+  <% when "team" %>
+    <svg class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <circle cx="12" cy="8" r="3"/>
+      <path stroke-linecap="round" d="M6 19.5c.8-3 3-4.5 6-4.5s5.2 1.5 6 4.5"/>
+    </svg>
+  <% when "support" %>
+    <svg class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="8"/>
+      <circle cx="12" cy="12" r="3"/>
+      <path stroke-linecap="round" d="M6.3 6.3l2.2 2.2M15.5 15.5l2.2 2.2M17.7 6.3l-2.2 2.2M8.5 15.5l-2.2 2.2"/>
+    </svg>
   <% when "constituency_elections" %>
     <svg class="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5M4 19h16"/>

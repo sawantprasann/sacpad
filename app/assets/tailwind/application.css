@@ -964,6 +964,18 @@ pre[class*="language-"] {
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
 }
+.campaign-sidebar .menu-mark {
+  color: #98a2b3;
+}
+.campaign-sidebar .menu-mark svg {
+  stroke-width: 1.5;
+}
+.campaign-sidebar .menu-item-active .menu-mark {
+  color: #f59e0b;
+}
+.campaign-sidebar .menu-item-inactive:hover .menu-mark {
+  color: #ffffff;
+}
 .campaign-sidebar nav ul ul {
   border-color: rgba(255, 255, 255, 0.12);
 }
