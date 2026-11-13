@@ -33,7 +33,7 @@
           <% end %>
           <% if user_signed_in? && current_user.role.can_create_users? %>
             <li>
-              <%= link_to users_path, class: "menu-item group #{current_page?(users_path) ? "menu-item-active" : "menu-item-inactive"}" do %>
+              <%= link_to users_path, class: "menu-item group #{controller_name == "users" ? "menu-item-active" : "menu-item-inactive"}" do %>
                 <%= menu_desk_icon("team") %>
                 <span class="menu-item-text"><%= t("nav.team") %></span>
               <% end %>

@@ -82,8 +82,12 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   # Active Record Encryption — DEV-ONLY keys (not sensitive). Production keys come from
-  # encrypted credentials (config.active_record.encryption.*), never checked in here.
+  # ACTIVE_RECORD_ENCRYPTION_* in the server .env, never checked in here.
   config.active_record.encryption.primary_key = "dev_primary_key_0123456789abcdef0"
   config.active_record.encryption.deterministic_key = "dev_deterministic_key_0123456789a"
   config.active_record.encryption.key_derivation_salt = "dev_key_derivation_salt_0123456789a"
+
+  config.after_initialize do
+    ActionMailer::Base.default from: ENV["MAIL_FROM"].presence || "Politomatrix <no-reply@politomatrix.com>"
+  end
 end

@@ -6,6 +6,11 @@ module Console
     before_action :set_user
 
     def reset_password
+      if @user.pending_invitation?
+        redirect_to console_organization_path(@organization), alert: "#{@user.name} has not accepted the invite. Resend the invite instead of setting a password."
+        return
+      end
+
       if @user.update(password_params)
         @user.unlock_access! if @user.access_locked?
         record_activity("user.password_reset", record: @user, organization: @organization)
@@ -16,9 +21,15 @@ module Console
     end
 
     def send_reset
-      @user.send_reset_password_instructions
-      record_activity("user.password_reset_email", record: @user, organization: @organization)
-      redirect_to console_organization_path(@organization), notice: "Password reset link sent to #{@user.email}."
+      if @user.pending_invitation?
+        @user.resend_invitation!
+        record_activity("user.invitation_resent", record: @user, organization: @organization)
+        redirect_to console_organization_path(@organization), notice: "Invite resent to #{@user.email}."
+      else
+        @user.send_reset_password_instructions
+        record_activity("user.password_reset_email", record: @user, organization: @organization)
+        redirect_to console_organization_path(@organization), notice: "Password reset link sent to #{@user.email}."
+      end
     end
 
     private

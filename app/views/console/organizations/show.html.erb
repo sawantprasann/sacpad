@@ -113,9 +113,13 @@
                 <td class="px-6 py-4 text-gray-700 dark:text-gray-300"><%= user.email %></td>
                 <td class="px-6 py-4 text-gray-700 dark:text-gray-300"><%= user.role.name %></td>
                 <td class="px-6 py-4 text-gray-500"><%= user.parent&.name || "—" %></td>
-                <td class="px-6 py-4"><%= render "ui/badge", label: (user.active? ? "active" : "inactive"), tone: (user.active? ? "green" : "gray") %></td>
+                <td class="px-6 py-4"><%= render "ui/badge", label: (user.pending_invitation? ? "invited" : (user.active? ? "active" : "inactive")), tone: (user.pending_invitation? ? "amber" : (user.active? ? "green" : "gray")) %></td>
                 <td class="px-6 py-4 tabular-nums text-gray-500"><%= user.current_sign_in_at&.strftime("%d %b %Y %H:%M") || "Never" %></td>
                 <td class="px-6 py-4" x-data="{ open: false }">
+                  <% if user.pending_invitation? %>
+                    <%= button_to "Resend invite", send_reset_console_organization_org_user_path(@organization, user),
+                          class: "campaign-btn inline-flex h-8 cursor-pointer items-center rounded-lg px-3 text-xs font-semibold text-white" %>
+                  <% else %>
                   <button type="button" @click="open = true"
                           class="campaign-btn inline-flex h-8 cursor-pointer items-center rounded-lg px-3 text-xs font-semibold text-white">
                     Reset
@@ -149,6 +153,7 @@
                       </div>
                     </div>
                   </template>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

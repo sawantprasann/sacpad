@@ -1,0 +1,16 @@
+<%# locals: action, url, label, method (optional), confirm (optional) %>
+<span class="inline-flex"
+      x-data="{ show: false, x: 0, y: 0, place() { const r = this.$el.getBoundingClientRect(); this.x = r.left + (r.width / 2); this.y = r.top; this.show = true } }"
+      @mouseenter="place()"
+      @mouseleave="show = false"
+      @focusin="place()"
+      @focusout="show = false">
+  <% if local_assigns[:method] %>
+    <%= icon_action_button action, url, label: label, method: method, confirm: local_assigns[:confirm], title: nil %>
+  <% else %>
+    <%= icon_action_link action, url, label: label, title: nil %>
+  <% end %>
+  <span x-show="show" x-cloak aria-hidden="true"
+        class="pointer-events-none fixed z-[9999] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg bg-gray-900 px-2.5 py-1 text-xs font-medium text-white shadow-tooltip"
+        :style="`left: ${x}px; top: ${y - 12}px`"><%= label %></span>
+</span>

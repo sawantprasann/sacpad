@@ -1168,3 +1168,18 @@ pre[class*="language-"] {
   background: rgba(240, 68, 56, 0.16);
   border-color: rgba(253, 162, 155, 0.35);
 }
+.action-icon-reactivate {
+  color: #039855;
+  background: #ecfdf3;
+  border-color: #abefc6;
+}
+.action-icon-reactivate:hover {
+  color: #027a48;
+  background: #d1fadf;
+  border-color: #6ce9a6;
+}
+.dark .action-icon-reactivate {
+  color: #6ce9a6;
+  background: rgba(18, 183, 106, 0.16);
+  border-color: rgba(108, 233, 166, 0.35);
+}

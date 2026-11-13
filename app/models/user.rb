@@ -2,6 +2,7 @@ class User < ApplicationRecord
   # Org-facing account (§3.2). Modules (brief §2): database_authenticatable, recoverable,
   # rememberable, trackable, lockable, validatable — NO registerable (no self-service sign-up).
   devise :database_authenticatable, :recoverable, :rememberable, :trackable, :lockable, :validatable
+  include Invitable
 
   # Self-referential hierarchy of unlimited depth (closure_tree). Provides parent/children/
   # ancestors/descendants/self_and_descendant_ids. parent_id nil = org_admin root.
@@ -59,9 +60,14 @@ class User < ApplicationRecord
     relation.where(id: booth&.village_id)
   end
 
-  # Blocked if the user is inactive OR their organization is deactivated (cascade, §3.1a).
+  # Blocked if the user is inactive, their organization is deactivated, or their
+  # invite has not been accepted yet.
   def active_for_authentication?
-    super && active? && organization&.active?
+    super && active? && organization&.active? && !pending_invitation?
+  end
+
+  def inactive_message
+    pending_invitation? ? :pending_invitation : super
   end
 
   private

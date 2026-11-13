@@ -88,10 +88,6 @@
             <%= f.label :phone, t("common.phone"), class: ta_label_classes %>
             <%= f.telephone_field :phone, class: ta_field_classes %>
           </div>
-          <div>
-            <%= f.label :password, t("team.initial_password"), class: ta_label_classes %>
-            <%= f.password_field :password, class: ta_field_classes, required: true, autocomplete: "new-password" %>
-          </div>
         </div>
         <button type="submit" class="<%= ta_btn_primary %> min-h-11 cursor-pointer"
                 style="background: var(--org-party-color); color: var(--org-party-contrast)"><%= t("booths.add_manager") %></button>

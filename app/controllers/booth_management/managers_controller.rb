@@ -12,7 +12,7 @@ module BoothManagement
       manager.role = role
       manager.booth = @booth
       manager.parent = current_user
-      if manager.save
+      if manager.deliver_invitation!
         redirect_to booth_path(@booth), notice: t("booths.manager_added", name: manager.name, number: @booth.number)
       else
         redirect_to booth_path(@booth), alert: manager.errors.full_messages.to_sentence
@@ -26,7 +26,7 @@ module BoothManagement
     end
 
     def manager_params
-      params.require(:user).permit(:name, :email, :phone, :password)
+      params.require(:user).permit(:name, :email, :phone)
     end
 
     def require_booth_access

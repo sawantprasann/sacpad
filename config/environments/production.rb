@@ -62,14 +62,8 @@ Rails.application.configure do
   config.action_mailer.asset_host = "https://politomatrix.com"
   config.action_controller.default_url_options = { host: "politomatrix.com", protocol: "https" }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  # Invite mail is delivered by Brevo when BREVO_SMTP_LOGIN and BREVO_SMTP_KEY
+  # are set. See config/initializers/brevo.rb.
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -81,15 +75,26 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Voter ids and names are encrypted. Production reads these from .env.
-  # Generate each once with `openssl rand -hex 16` and do not rotate them.
+  # Voter ids, names, mobiles, and social tokens are encrypted with these keys.
+  # bin/ensure-encryption-keys writes them into .env once. Rotating them makes
+  # existing rows unreadable, so a missing key must stop boot rather than fall
+  # through to empty credentials.
+  missing_encryption_keys = []
   {
     "PRIMARY_KEY" => :primary_key,
     "DETERMINISTIC_KEY" => :deterministic_key,
     "KEY_DERIVATION_SALT" => :key_derivation_salt
   }.each do |suffix, setting|
-    value = ENV["ACTIVE_RECORD_ENCRYPTION_#{suffix}"].presence
-    config.active_record.encryption[setting] = value if value
+    env_name = "ACTIVE_RECORD_ENCRYPTION_#{suffix}"
+    value = ENV[env_name].to_s.strip
+    if value.empty?
+      missing_encryption_keys << env_name
+    else
+      config.active_record.encryption[setting] = value
+    end
+  end
+  if missing_encryption_keys.any?
+    raise "Production refuses to boot without #{missing_encryption_keys.join(", ")}. Run bin/ensure-encryption-keys on the server. Do not replace keys that have already encrypted a voter row."
   end
 
   # Only the public production hosts may reach the app.
@@ -106,6 +111,6 @@ Rails.application.configure do
 
   config.after_initialize do
     Rails.application.routes.default_url_options = { host: "politomatrix.com", protocol: "https" }
-    ActionMailer::Base.default from: "Politomatrix <noreply@politomatrix.com>"
+    ActionMailer::Base.default from: ENV["MAIL_FROM"].presence || "Politomatrix <no-reply@politomatrix.com>"
   end
 end
