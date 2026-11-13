@@ -27,6 +27,8 @@ class AuthLayoutTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "aside", false
     assert_match "Forgot your password?", @response.body
-    assert_match "focus:border-brand-300", @response.body
+    assert_match "campaign-btn", @response.body
+    assert_match "focus:border-orange-400", @response.body
+    assert_no_match(/bg-brand-950/, @response.body)
   end
 end

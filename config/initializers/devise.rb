@@ -24,17 +24,13 @@ Devise.setup do |config|
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
-  config.mailer_sender = if Rails.env.production?
-    "Politomatrix <noreply@politomatrix.com>"
-  else
-    "please-change-me-at-config-initializers-devise@example.com"
-  end
+  config.mailer_sender = ENV["MAIL_FROM"].presence || (
+    Rails.env.production? ? "Politomatrix <no-reply@politomatrix.com>" : "please-change-me-at-config-initializers-devise@example.com"
+  )
 
-  # Configure the class responsible to send e-mails.
-  # config.mailer = 'Devise::Mailer'
-
-  # Configure the parent class responsible to send e-mails.
-  # config.parent_mailer = 'ActionMailer::Base'
+  # Same campaign layout as the invite mail, and always in English.
+  config.mailer = "DeviseMailer"
+  config.parent_mailer = "ApplicationMailer"
 
   # ==> ORM configuration
   # Load and configure the ORM. Supports :active_record (default) and

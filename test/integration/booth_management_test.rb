@@ -65,20 +65,22 @@ class BoothManagementTest < ActionDispatch::IntegrationTest
 
     assert_no_difference -> { User.count } do
       post booth_managers_path(@booth), params: {
-        user: { name: "Agent", email: "agent-booth@example.com", password: "short" }
+        user: { name: "", email: "agent-booth@example.com" }
       }
     end
     assert_redirected_to booth_path(@booth)
 
     assert_difference -> { User.count }, 1 do
       post booth_managers_path(@booth), params: {
-        user: { name: "Agent", email: "agent-booth@example.com", phone: "9990001111", password: "password123" }
+        user: { name: "Agent", email: "agent-booth@example.com", phone: "9990001111" }
       }
     end
     agent = User.find_by!(email: "agent-booth@example.com")
     assert_equal booth_role, agent.role
     assert_equal @booth, agent.booth
     assert_equal lead, agent.parent
+    assert agent.pending_invitation?
+    assert agent.accept_invitation!("password123", "password123")
     follow_redirect!
     assert_match "Agent", @response.body
     assert_match "9990001111", @response.body

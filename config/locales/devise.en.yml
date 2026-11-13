@@ -9,6 +9,7 @@ en:
     failure:
       already_authenticated: "You are already signed in."
       inactive: "Your account is not activated yet."
+      pending_invitation: "Accept the invite emailed to you before signing in."
       invalid: "Invalid %{authentication_keys} or password."
       locked: "Your account is locked."
       last_attempt: "You have one more attempt before your account is locked."
@@ -20,7 +21,7 @@ en:
       confirmation_instructions:
         subject: "Confirmation instructions"
       reset_password_instructions:
-        subject: "Reset password instructions"
+        subject: "Reset your PolitoMatrix password"
       unlock_instructions:
         subject: "Unlock instructions"
       email_changed:

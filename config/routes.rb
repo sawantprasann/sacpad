@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   # Org-facing scope — clean, memorable root-level path (the primary, publicly-known login).
   devise_for :users, path: ""
+  get "invite/:token", to: "invitations#edit", as: :edit_invitation
+  patch "invite/:token", to: "invitations#update", as: :invitation
 
   # Operator (platform) scope — deliberately non-obvious path, not linked from org-facing UI.
   devise_for :admins, path: "console"
@@ -75,7 +77,14 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Org-facing hierarchical user management (Story 0.9)
-  resources :users, only: %i[index new create show]
+  resources :users, only: %i[index new create show edit update] do
+    member do
+      patch :deactivate
+      patch :reactivate
+      post :resend_invitation
+      post :send_password_reset
+    end
+  end
 
   # Voter lists — taluka, then village, then that village's roll.
   namespace :voter_lists do

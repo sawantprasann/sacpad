@@ -1,0 +1,7 @@
+<%= render "campaign",
+      greeting: t("invite.email_greeting", name: @user.name),
+      intro: t("invite.email_intro_html", organization: @user.organization.name),
+      next_step: t("invite.email_next"),
+      link_label: t("invite.email_link"),
+      url: @url,
+      expiry: t("invite.email_expiry") %>

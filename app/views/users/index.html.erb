@@ -20,6 +20,10 @@
           <th class="px-5 py-3 font-medium"><%= t("common.email") %></th>
           <th class="px-5 py-3 font-medium"><%= t("common.role") %></th>
           <th class="px-5 py-3 font-medium"><%= t("common.parent") %></th>
+          <th class="px-5 py-3 font-medium"><%= t("common.status") %></th>
+          <% if policy(User).create? %>
+            <th class="px-5 py-3 font-medium"><%= t("common.actions") %></th>
+          <% end %>
         </tr>
       </thead>
       <tbody>
@@ -29,6 +33,40 @@
             <td class="px-5 py-3 text-gray-500"><%= u.email %></td>
             <td class="px-5 py-3"><%= render "ui/badge", label: u.role.name, tone: "brand" %></td>
             <td class="px-5 py-3 text-gray-500"><%= u.parent&.name || "—" %></td>
+            <td class="px-5 py-3">
+              <% if !u.active? %>
+                <%= render "ui/badge", label: t("common.inactive"), tone: "gray" %>
+              <% elsif u.pending_invitation? %>
+                <%= render "ui/badge", label: t("team.invited"), tone: "amber" %>
+              <% else %>
+                <%= render "ui/badge", label: t("team.active"), tone: "green" %>
+              <% end %>
+            </td>
+            <% if policy(User).create? %>
+              <td class="px-5 py-3">
+                <% if policy(u).edit? %>
+                  <div class="flex flex-nowrap items-center gap-1.5">
+                    <%= render "action", action: :edit, url: edit_user_path(u), label: t("common.edit") %>
+                    <% if policy(u).deactivate? %>
+                      <%= render "action", action: :deactivate, url: deactivate_user_path(u), label: t("team.deactivate"),
+                            method: :patch, confirm: t("team.deactivate_confirm", name: u.name) %>
+                    <% elsif policy(u).reactivate? %>
+                      <%= render "action", action: :reactivate, url: reactivate_user_path(u), label: t("team.reactivate"),
+                            method: :patch %>
+                    <% end %>
+                    <% if policy(u).resend_invitation? %>
+                      <%= render "action", action: :resend, url: resend_invitation_user_path(u), label: t("team.resend_invite"),
+                            method: :post %>
+                    <% elsif policy(u).send_password_reset? %>
+                      <%= render "action", action: :reset, url: send_password_reset_user_path(u), label: t("team.send_reset"),
+                            method: :post %>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <span class="text-gray-400">—</span>
+                <% end %>
+              </td>
+            <% end %>
           </tr>
         <% end %>
       </tbody>

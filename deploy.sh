@@ -27,6 +27,10 @@ bundle install
 
 set -a; source .env; set +a
 
+echo "=====> [deploy] Checking encryption keys"
+bin/ensure-encryption-keys
+set -a; source .env; set +a
+
 echo "=====> [deploy] Running migrations"
 bundle exec rails db:prepare
 

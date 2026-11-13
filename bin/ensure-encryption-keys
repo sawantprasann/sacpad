@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Write the three Active Record encryption keys into .env once.
+# Existing keys are left as they are. New keys are written only when all three
+# are missing and no encrypted row exists yet. A partial set, or rows without
+# keys, stops here so a deploy cannot rotate or invent a second key.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+ENV_FILE="${ENV_FILE:-.env}"
+KEYS=(
+  ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY
+  ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY
+  ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT
+)
+TABLES=(voters voter_versions social_pages social_pending_connections)
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Encryption keys: $ENV_FILE is missing." >&2
+  exit 1
+fi
+
+env_value() {
+  local key="$1"
+  local line
+  line="$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 || true)"
+  printf '%s' "${line#*=}" | tr -d '[:space:]'
+}
+
+missing=()
+present=()
+for key in "${KEYS[@]}"; do
+  if [ -n "$(env_value "$key")" ]; then
+    present+=("$key")
+  else
+    missing+=("$key")
+  fi
+done
+
+if [ "${#missing[@]}" -eq 0 ]; then
+  echo "Encryption keys: all three are set."
+  exit 0
+fi
+
+if [ "${#present[@]}" -gt 0 ]; then
+  echo "Encryption keys: partial configuration. Missing: ${missing[*]}" >&2
+  echo "Do not generate a replacement. Find the original key before boot." >&2
+  exit 1
+fi
+
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
+
+if [ -z "${SACPAD_DATABASE_PASSWORD:-}" ]; then
+  echo "Encryption keys: all three are missing, and SACPAD_DATABASE_PASSWORD is unset, so existing rows could not be counted." >&2
+  exit 1
+fi
+
+export PGPASSWORD="$SACPAD_DATABASE_PASSWORD"
+psql_query() {
+  psql -h "${DB_HOST:-localhost}" -U sacpad -d sacpad_production -v ON_ERROR_STOP=1 -tAc "$1"
+}
+
+encrypted_rows=0
+for table in "${TABLES[@]}"; do
+  if [ "$(psql_query "SELECT to_regclass('public.${table}') IS NOT NULL")" = "t" ]; then
+    encrypted_rows=$((encrypted_rows + $(psql_query "SELECT COUNT(*) FROM ${table}")))
+  fi
+done
+unset PGPASSWORD
+
+if [ "$encrypted_rows" -gt 0 ]; then
+  echo "Encryption keys: all three are missing, and ${encrypted_rows} encrypted rows already exist." >&2
+  echo "Generating new keys would make those rows unreadable. Restore the original keys into $ENV_FILE." >&2
+  exit 1
+fi
+
+umask 077
+cat >> "$ENV_FILE" <<KEYS
+
+# Voter names, ids, mobiles, and social tokens. Generated once. Do not rotate.
+ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=$(openssl rand -hex 16)
+ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=$(openssl rand -hex 16)
+ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=$(openssl rand -hex 16)
+KEYS
+
+echo "Encryption keys: generated all three in $ENV_FILE. Leave them in place."

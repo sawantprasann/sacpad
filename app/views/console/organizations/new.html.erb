@@ -6,10 +6,10 @@
     <%= render "fields", f: f %>
 
     <p class="mt-6 mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Initial Org Admin (required)</p>
-    <div class="grid gap-4 sm:grid-cols-3">
+    <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">They receive an email invite and choose a password before they can sign in.</p>
+    <div class="grid gap-4 sm:grid-cols-2">
       <div><label class="<%= ta_label_classes %>">Name</label><%= text_field_tag "org_admin[name]", nil, class: ta_field_classes %></div>
-      <div><label class="<%= ta_label_classes %>">Email</label><%= email_field_tag "org_admin[email]", nil, class: ta_field_classes %></div>
-      <div><label class="<%= ta_label_classes %>">Initial password</label><%= password_field_tag "org_admin[password]", nil, class: ta_field_classes %></div>
+      <div><label class="<%= ta_label_classes %>">Email</label><%= email_field_tag "org_admin[email]", nil, required: true, class: ta_field_classes %></div>
     </div>
 
     <div class="mt-6"><%= f.submit "Onboard", class: ta_btn_primary %></div>

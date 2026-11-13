@@ -209,6 +209,17 @@ SOLID_QUEUE_IN_PUMA=true
 SACPAD_ADMIN_EMAIL=${ADMIN_EMAIL}
 SACPAD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
 
+# Voter names, ids, mobiles, and social tokens. Generated once. Do not rotate.
+ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY=$(openssl rand -hex 16)
+ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY=$(openssl rand -hex 16)
+ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=$(openssl rand -hex 16)
+
+# Brevo only relays the message. MAIL_FROM is the address people see.
+# Verify that exact address as a sender in Brevo, then set all three.
+# BREVO_SMTP_LOGIN=
+# BREVO_SMTP_KEY=
+# MAIL_FROM="Politomatrix <no-reply@politomatrix.com>"
+
 # Mac posts roll JSON to POST /api/assemblies/:id/parts/:part
 SACPAD_ROLL_TOKEN=$(openssl rand -hex 24)
 ENV
@@ -235,6 +246,8 @@ su - $DEPLOY_USER <<BUNDLE
   bundle config set deployment true
   bundle config set without 'development test'
   bundle install
+  bin/ensure-encryption-keys
+  set -a; source .env; set +a
   bundle exec rails db:prepare
   bundle exec rails assets:precompile
   bundle exec rails db:seed

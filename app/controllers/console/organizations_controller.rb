@@ -29,7 +29,7 @@ module Console
     def create
       result = onboard
       if result[:ok]
-        redirect_to console_organizations_path, notice: "Organization onboarded."
+        redirect_to console_organizations_path, notice: "Organization onboarded. An invite email was sent to the Org Admin."
       else
         @organization = result[:organization]
         flash.now[:alert] = result[:error]
@@ -101,9 +101,9 @@ module Console
     # Wizard: org + constituency + (optional) party + REQUIRED initial Org Admin, in one transaction.
     def onboard
       org = Organization.new(organization_params)
-      admin = params.fetch(:org_admin, {}).permit(:name, :email, :password)
-      if admin[:email].blank? || admin[:password].blank?
-        return { ok: false, organization: org, error: "An initial Org Admin (email + password) is required." }
+      admin = params.fetch(:org_admin, {}).permit(:name, :email)
+      if admin[:email].blank?
+        return { ok: false, organization: org, error: "An initial Org Admin email is required. They receive an invite and set their own password." }
       end
 
       ActsAsTenant.without_tenant do
@@ -113,8 +113,8 @@ module Console
             org.party_memberships.create!(party_id: org.current_party_id, started_at: Time.current)
           end
           role = Role.find_by!(slug: "org_admin")
-          org.users.create!(role: role, name: admin[:name].presence || "Org Admin",
-                            email: admin[:email], password: admin[:password])
+          user = org.users.new(role: role, name: admin[:name].presence || "Org Admin", email: admin[:email])
+          raise ActiveRecord::RecordInvalid.new(user) unless user.deliver_invitation!
         end
       end
       { ok: true }

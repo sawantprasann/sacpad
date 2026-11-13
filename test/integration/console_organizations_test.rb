@@ -14,12 +14,15 @@ class ConsoleOrganizationsTest < ActionDispatch::IntegrationTest
     assert_difference [ -> { Organization.count }, -> { User.count } ], 1 do
       post console_organizations_path, params: {
         organization: { name: "Candidate A", constituency_type: "Assembly", constituency_id: 1 },
-        org_admin: { name: "Meera", email: "meera@example.com", password: "password123" }
+        org_admin: { name: "Meera", email: "meera@example.com" }
       }
     end
     org = Organization.find_by(name: "Candidate A")
     assert_equal "Assembly", org.constituency_type
-    assert_equal "org_admin", org.users.first.role.slug
+    admin = org.users.first
+    assert_equal "org_admin", admin.role.slug
+    assert admin.pending_invitation?
+    assert_enqueued_emails 1
   end
 
   test "onboarding without an initial Org Admin is rejected" do
