@@ -47,9 +47,7 @@ class WorkInlineNidhiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Nidhi by work status", response.body
     assert_select "#dashboard-work-nidhi"
-    assert_select "a[href=?]", ground_reports_work_inlines_path, text: /All work inline/ do
-      assert_select "svg"
-    end
+    assert_select "a[href=?]", ground_reports_work_inlines_path, text: "View work"
     assert_match "150,000", response.body
     assert_match "40,000", response.body
     assert_no_match(/Old well/, response.body)

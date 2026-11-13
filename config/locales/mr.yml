@@ -830,6 +830,7 @@ mr:
     nidhi_sum: "एकूण"
     view_activity: "कार्यक्रम पहा"
     view_tickets: "तिकिटे पहा"
+    view_works: "काम पहा"
     no_tickets: "अजून तिकिटे नाहीत."
     no_cadre: "अजून कार्यकर्ता कार्यक्रम नाही."
     no_access: "मैदानी अहवाल तुम्हाला उपलब्ध नाहीत."

@@ -87,14 +87,16 @@ if (window.Chart?.register) {
       const total = dataset.data.reduce((sum, value) => sum + Number(value || 0), 0)
       if (!total) return
 
+      const text = String(Math.round(total))
+      const size = text.length >= 7 ? 16 : text.length >= 6 ? 18 : text.length >= 5 ? 22 : 30
       const dark = document.body.classList.contains("dark")
       const ctx = chart.ctx
       ctx.save()
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
       ctx.fillStyle = dark ? "#f9fafb" : "#101828"
-      ctx.font = "700 30px Outfit, sans-serif"
-      ctx.fillText(String(total), arc.x, arc.y - 8)
+      ctx.font = `700 ${size}px Outfit, sans-serif`
+      ctx.fillText(text, arc.x, arc.y - 8)
       ctx.fillStyle = dark ? "#98a2b3" : "#667085"
       ctx.font = "600 11px Outfit, sans-serif"
       ctx.fillText("Total", arc.x, arc.y + 14)

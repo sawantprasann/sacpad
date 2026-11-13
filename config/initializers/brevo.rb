@@ -8,11 +8,14 @@ unless Rails.env.test?
     Rails.application.config.action_mailer.raise_delivery_errors = true
     Rails.application.config.action_mailer.smtp_settings = {
       address: "smtp-relay.brevo.com",
-      port: 587,
+      # 587 never connects from the server. Brevo accepts the same login on 2525.
+      port: 2525,
       user_name: login,
       password: key,
       authentication: :login,
-      enable_starttls_auto: true
+      enable_starttls_auto: true,
+      open_timeout: 10,
+      read_timeout: 10
     }
   elsif Rails.env.development?
     Rails.application.config.action_mailer.delivery_method = :file

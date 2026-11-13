@@ -1,10 +1,10 @@
 <%# Dashboard widget card (FR50). Jewel chrome is decorative; RAG colors stay inside module bodies. %>
 <% jewel = dashboard_jewel(local_assigns[:accent_index] || 0) %>
 <% mark = widget[:mod].presence || "admin" %>
-<article class="group relative overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 <%= jewel[:ring] %> transition hover:-translate-y-0.5 hover:shadow-theme-lg dark:bg-gray-900 dark:ring-white/10">
+<article class="group relative min-h-min min-w-0 overflow-hidden rounded-2xl bg-white shadow-theme-md ring-1 <%= jewel[:ring] %> transition hover:-translate-y-0.5 hover:shadow-theme-lg dark:bg-gray-900 dark:ring-white/10">
   <div class="h-1.5 bg-gradient-to-r <%= jewel[:bar] %>"></div>
   <div class="pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-70 <%= jewel[:wash] %>"></div>
-  <div class="relative p-5">
+  <div class="relative min-w-0 p-5">
     <div class="flex items-start justify-between gap-3">
       <div class="flex items-center gap-3">
         <%= render "ui/desk_mark", name: mark, chip_class: jewel[:chip] %>

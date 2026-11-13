@@ -75,7 +75,7 @@
   <% charts, rest = indexed.partition { |widget, _index| widget[:chart] || %w[kitchen_cabinet cadre_program].include?(widget[:mod]) } %>
   <% if charts.any? %>
     <% chart_columns = charts.size >= 3 ? "lg:grid-cols-3" : ("lg:grid-cols-2" if charts.size > 1) %>
-    <div class="grid grid-cols-1 gap-6 <%= chart_columns %>">
+    <div class="grid min-w-0 grid-cols-1 gap-6 <%= chart_columns %>">
       <% charts.each do |widget, index| %>
         <%= render "ui/dashboard_widget", widget: widget, accent_index: index %>
       <% end %>
