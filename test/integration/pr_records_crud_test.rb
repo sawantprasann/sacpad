@@ -464,6 +464,96 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
     assert_equal [ kept.id ], ActsAsTenant.with_tenant(@org) { record.entries.reload.pluck(:id) }
   end
 
+  test "show page can delete one link and keeps the others" do
+    record = record_with_links
+    entry = ActsAsTenant.with_tenant(@org) { record.entries.first }
+    removed, kept = ActsAsTenant.with_tenant(@org) { entry.links.order(:id).to_a }
+
+    get pr_record_path(record)
+    assert_response :success
+    assert_select "button[aria-label=?][data-turbo-confirm=?]",
+      I18n.t("pr.delete_link"),
+      I18n.t("pr.delete_link_confirm"),
+      count: 2
+
+    assert_difference -> { ActsAsTenant.with_tenant(@org) { entry.links.count } }, -1 do
+      delete pr_record_entry_link_path(record, entry, removed)
+    end
+    assert_redirected_to pr_record_path(record)
+    follow_redirect!
+    assert_match I18n.t("pr.link_removed"), response.body
+    assert_select "a[href='#{removed.url}']", count: 0
+    assert_select "a[href='#{kept.url}']"
+    assert_equal kept.url, ActsAsTenant.with_tenant(@org) { entry.reload.url }
+  end
+
+  test "deleting the last link clears it from the category" do
+    record = record_with_links
+    entry = ActsAsTenant.with_tenant(@org) { record.entries.first }
+    links = ActsAsTenant.with_tenant(@org) { entry.links.order(:id).to_a }
+
+    links.each do |link|
+      delete pr_record_entry_link_path(record, entry, link)
+      assert_redirected_to pr_record_path(record)
+    end
+
+    ActsAsTenant.with_tenant(@org) do
+      entry.reload
+      assert_empty entry.links
+      assert_nil entry.url
+      assert_nil entry.thumbnail_url
+    end
+    follow_redirect!
+    assert_select "a[href='#{links.first.url}']", count: 0
+    assert_select "a[href='#{links.last.url}']", count: 0
+  end
+
+  test "edit form puts a delete icon on every saved link" do
+    record = record_with_links
+    entry = ActsAsTenant.with_tenant(@org) { record.entries.first }
+
+    get edit_pr_record_path(record)
+    assert_response :success
+    ActsAsTenant.with_tenant(@org) do
+      entry.links.each do |link|
+        assert_select "button.action-icon-delete[aria-label=?][data-confirm=?][data-destroy-url=?][data-action=?]",
+          I18n.t("pr.delete_link"),
+          I18n.t("pr.delete_link_confirm"),
+          pr_record_entry_link_path(record, entry, link),
+          "pr-record-form#removeLink"
+      end
+    end
+  end
+
+  test "a read-only user cannot delete a link" do
+    record = record_with_links
+    reader = ActsAsTenant.with_tenant(@org) do
+      role = Role.create!(name: "Reader", slug: "link-reader-#{Time.current.to_i}")
+      role.role_permissions.create!(module_name: "pr", access_level: "read")
+      user = User.create!(
+        organization: @org,
+        email: "link-reader-#{Time.current.to_i}@example.com",
+        password: "password",
+        name: "Reader",
+        role: role
+      )
+      record.update!(owner: user)
+      user
+    end
+    entry = ActsAsTenant.with_tenant(@org) { record.entries.first }
+    link = ActsAsTenant.with_tenant(@org) { entry.links.order(:id).first }
+
+    sign_in reader
+    get pr_record_path(record)
+    assert_response :success
+    assert_select "button[aria-label=?]", I18n.t("pr.delete_link"), count: 0
+
+    assert_no_difference -> { ActsAsTenant.with_tenant(@org) { entry.links.count } } do
+      delete pr_record_entry_link_path(record, entry, link)
+    end
+    assert_response :not_found
+  end
+
   test "a read-only user cannot delete a category" do
     record, print_category = record_with_two_categories
     reader = ActsAsTenant.with_tenant(@org) do
@@ -490,6 +580,25 @@ class PrRecordsCrudTest < ActionDispatch::IntegrationTest
       delete pr_record_entry_path(record, removed)
     end
     assert_response :not_found
+  end
+
+  def record_with_links
+    ActsAsTenant.with_tenant(@org) do
+      @org.pr_records.create!(
+        owner: @user,
+        title: "Linked story",
+        entries_attributes: [ {
+          published_on: Date.current,
+          sentiment: :positive,
+          pr_category: @category,
+          media_platform: @platform,
+          links_attributes: [
+            { url: "https://news.example/story", thumbnail_url: "https://news.example/story.jpg" },
+            { url: "https://news.example/clip" }
+          ]
+        } ]
+      )
+    end
   end
 
   def record_with_two_categories

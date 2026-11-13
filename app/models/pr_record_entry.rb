@@ -37,10 +37,14 @@ class PrRecordEntry < ApplicationRecord
   end
 
   def sync_primary_link
-    first = links.reject(&:marked_for_destruction?).find { |link| link.url.present? }
-    return if first.blank?
-
-    self.url = first.url
-    self.thumbnail_url = first.thumbnail_url if first.thumbnail_url.present?
+    kept = links.reject(&:marked_for_destruction?)
+    first = kept.find { |link| link.url.present? }
+    if first
+      self.url = first.url
+      self.thumbnail_url = first.thumbnail_url
+    elsif links.any?(&:marked_for_destruction?)
+      self.url = nil
+      self.thumbnail_url = nil
+    end
   end
 end

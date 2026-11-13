@@ -105,6 +105,21 @@ class PrRecordsController < ApplicationController
     end
   end
 
+  def destroy_link
+    @record = policy_scope(PrRecord).find(params[:pr_record_id])
+    authorize @record, :update?
+    entry = @record.entries.find(params[:entry_id])
+    link = entry.links.find(params[:link_id])
+    link.destroy!
+    entry.association(:links).reset
+    remaining = entry.links.order(:id).first
+    entry.update!(url: remaining&.url, thumbnail_url: remaining&.thumbnail_url)
+    respond_to do |format|
+      format.html { redirect_to pr_record_path(@record), notice: t("pr.link_removed") }
+      format.json { head :no_content }
+    end
+  end
+
   private
 
   def record_params

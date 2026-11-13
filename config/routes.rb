@@ -168,6 +168,7 @@ Rails.application.routes.draw do
       post :thumbnail
     end
     delete "entries/:entry_id", action: :destroy_entry, as: :entry
+    delete "entries/:entry_id/links/:link_id", action: :destroy_link, as: :entry_link
   end
 
   # Constituency result for the signed-in organization. The dashboard shows the

@@ -83,32 +83,14 @@ module ElectionResultsHelper
     end
   end
 
-  # Vote-share donut. Stored party colors are often navy, gray, or near-white,
-  # which wash out on the white card, so each slice gets a saturated color.
-  ELECTION_PIE_COLORS = %w[
-    #FF5A1F
-    #2563EB
-    #16A34A
-    #E11D48
-    #F59E0B
-    #7C3AED
-    #0891B2
-    #DB2777
-    #65A30D
-    #4F46E5
-  ].freeze
-
-  def election_pie_color(index)
-    ELECTION_PIE_COLORS[index % ELECTION_PIE_COLORS.length]
-  end
-
+  # The donut, the share bars, and the result table use one color per party.
   def election_share_slices(election)
     seen = Hash.new(0)
-    election.candidates.each_with_index.map do |candidate, index|
+    election.candidates.map do |candidate|
       party = candidate.party.abbreviation.presence || candidate.party.name
       seen[party] += 1
       label = seen[party] > 1 ? "#{party} #{seen[party]}" : party
-      [ label, candidate.vote_percent.to_f, election_pie_color(index) ]
+      [ label, candidate.vote_percent.to_f, party_swatch(candidate.party) ]
     end
   end
 

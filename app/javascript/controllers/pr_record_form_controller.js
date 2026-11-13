@@ -9,7 +9,8 @@ export default class extends Controller {
     thumbnailFilled: String,
     chooseFirst: String,
     lastCategory: String,
-    removeFailed: String
+    removeFailed: String,
+    removeLinkFailed: String
   }
 
   connect() {
@@ -72,7 +73,7 @@ export default class extends Controller {
     const url = button.dataset.destroyUrl
     if (url) {
       button.disabled = true
-      const removed = await this.destroyEntry(url)
+      const removed = await this.destroyEntry(url, this.removeFailedValue)
       button.disabled = false
       if (!removed) return
     }
@@ -95,7 +96,7 @@ export default class extends Controller {
     ].filter((entry) => !entry.hidden)
   }
 
-  async destroyEntry(url) {
+  async destroyEntry(url, failureMessage) {
     const token = document.querySelector("meta[name='csrf-token']")?.content
     let response
     try {
@@ -107,12 +108,12 @@ export default class extends Controller {
         }
       })
     } catch {
-      await this.tell(this.removeFailedValue)
+      await this.tell(failureMessage)
       return false
     }
     if (response.ok) return true
 
-    let message = this.removeFailedValue
+    let message = failureMessage
     try {
       const data = await response.json()
       if (data.error) message = data.error
@@ -148,11 +149,25 @@ export default class extends Controller {
     entry.querySelector("[data-link-rows]").insertAdjacentHTML("beforeend", html)
   }
 
-  removeLink(event) {
+  async removeLink(event) {
     event.preventDefault()
-    const row = event.target.closest("[data-link-row]")
+    const button = event.currentTarget
+    const row = button.closest("[data-link-row]")
+    if (!row || row.hidden) return
+    const ask = window.sacpadConfirm || ((text, options = {}) => Promise.resolve(options.alert ? true : window.confirm(text)))
+    const message = button.dataset.confirm
+    if (message && !(await ask(message))) return
+
+    const url = button.dataset.destroyUrl
+    if (url) {
+      button.disabled = true
+      const removed = await this.destroyEntry(url, this.removeLinkFailedValue)
+      button.disabled = false
+      if (!removed) return
+    }
+
     const destroy = row.querySelector("[data-link-destroy]")
-    if (destroy) {
+    if (destroy && !url) {
       destroy.value = "1"
       row.hidden = true
     } else {

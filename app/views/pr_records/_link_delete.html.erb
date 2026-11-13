@@ -1,0 +1,6 @@
+<% if link.is_a?(PrRecordLink) && policy(@record).edit? %>
+  <%= icon_action_button :delete,
+        pr_record_entry_link_path(@record, entry, link),
+        label: t("pr.delete_link"),
+        confirm: t("pr.delete_link_confirm") %>
+<% end %>

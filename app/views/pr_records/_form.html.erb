@@ -8,7 +8,8 @@
      data-pr-record-form-thumbnail-filled-value="<%= t("pr.thumbnail_filled") %>"
      data-pr-record-form-choose-first-value="<%= t("pr.choose_category_first") %>"
      data-pr-record-form-last-category-value="<%= t("pr.last_category") %>"
-     data-pr-record-form-remove-failed-value="<%= t("pr.delete_category_failed") %>">
+     data-pr-record-form-remove-failed-value="<%= t("pr.delete_category_failed") %>"
+     data-pr-record-form-remove-link-failed-value="<%= t("pr.delete_link_failed") %>">
   <%= form_with model: @record, multipart: true do |f| %>
     <% if @record.errors.any? %>
       <div class="mb-6 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= @record.errors.full_messages.to_sentence %></div>
