@@ -100,7 +100,7 @@ class ConstituencyElectionResultsTest < ActionDispatch::IntegrationTest
     assert_match "Vote share", response.body
     assert_match "Margin of victory", response.body
     assert_match "Dr. Tanaji Jayawant Sawant", response.body
-    assert_match %("colors":[#{[@shiv_sena.color, @ncp.color].to_json[1..-2]}]), response.body
+    assert_match "\"colors\":#{[ @shiv_sena.color, @ncp.color ].to_json}", response.body
     assert_select "span[style*='background-color: #{@shiv_sena.color}']"
     assert_select "span[style*='background-color: #{@ncp.color}']"
     assert_no_match "Omraje Nimbalkar", response.body
