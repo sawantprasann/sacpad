@@ -28,11 +28,9 @@ Devise.setup do |config|
     Rails.env.production? ? "Politomatrix <no-reply@politomatrix.com>" : "please-change-me-at-config-initializers-devise@example.com"
   )
 
-  # Configure the class responsible to send e-mails.
-  # config.mailer = 'Devise::Mailer'
-
-  # Configure the parent class responsible to send e-mails.
-  # config.parent_mailer = 'ActionMailer::Base'
+  # Same campaign layout as the invite mail, and always in English.
+  config.mailer = "DeviseMailer"
+  config.parent_mailer = "ApplicationMailer"
 
   # ==> ORM configuration
   # Load and configure the ORM. Supports :active_record (default) and

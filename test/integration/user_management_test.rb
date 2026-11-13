@@ -116,11 +116,25 @@ class UserManagementTest < ActionDispatch::IntegrationTest
                          email: "rohan@example.com", password: "password123", parent: @admin_user)
     sign_in @admin_user
 
-    assert_emails 1 do
-      post send_password_reset_user_path(child)
+    I18n.with_locale(:mr) do
+      assert_emails 1 do
+        post send_password_reset_user_path(child)
+      end
     end
     assert_redirected_to users_path
     assert child.reload.reset_password_token.present?
+
+    message = ActionMailer::Base.deliveries.last
+    text = message.text_part.body.decoded
+    html = message.html_part.body.decoded
+    assert_equal "Reset your PolitoMatrix password", message.subject
+    assert_match "Hello Rohan,", text
+    assert_match "Reset the password for your Org A account on PolitoMatrix.", text
+    assert_match "This link expires in 6 hours.", text
+    assert_no_match "पासवर्ड", text
+    assert_match "#0b1f44", html
+    assert_match "#f59e0b", html
+    assert_match "Reset password", html
 
     post resend_invitation_user_path(child)
     assert_response :not_found

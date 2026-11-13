@@ -108,9 +108,17 @@ mr:
     email_subject: "%{organization} यांनी तुम्हाला PolitoMatrix वर निमंत्रित केले"
     email_greeting: "नमस्कार %{name},"
     email_intro: "%{organization} यांनी तुम्हाला PolitoMatrix वर निमंत्रित केले आहे."
+    email_intro_html: "<span style=\"font-weight:600; color:#101828;\">%{organization}</span> यांनी तुम्हाला PolitoMatrix वर निमंत्रित केले आहे."
     email_next: "साइन इन करण्यासाठी पासवर्ड निवडा."
     email_link: "निमंत्रण स्वीकारा"
     email_expiry: "ही लिंक ७ दिवसांत संपते."
+  password_reset:
+    email_subject: "तुमचा PolitoMatrix पासवर्ड रीसेट करा"
+    email_intro: "PolitoMatrix वरील %{organization} खात्याचा पासवर्ड रीसेट करा."
+    email_intro_html: "PolitoMatrix वरील <span style=\"font-weight:600; color:#101828;\">%{organization}</span> खात्याचा पासवर्ड रीसेट करा."
+    email_next: "साइन इन करण्यासाठी नवीन पासवर्ड निवडा. ही विनंती तुम्ही केली नसेल तर हा ईमेल दुर्लक्ष करा."
+    email_link: "पासवर्ड रीसेट करा"
+    email_expiry: "ही लिंक ६ तासांत संपते."
   dashboard:
     namaste: "नमस्ते"
     open_a_desk: "डेस्क उघडा"

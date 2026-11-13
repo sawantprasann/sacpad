@@ -60,9 +60,17 @@ en:
     email_subject: "%{organization} invited you to PolitoMatrix"
     email_greeting: "Hello %{name},"
     email_intro: "%{organization} has invited you to PolitoMatrix."
+    email_intro_html: "<span style=\"font-weight:600; color:#101828;\">%{organization}</span> has invited you to PolitoMatrix."
     email_next: "Choose a password to sign in."
     email_link: "Accept invite"
     email_expiry: "This link expires in 7 days."
+  password_reset:
+    email_subject: "Reset your PolitoMatrix password"
+    email_intro: "Reset the password for your %{organization} account on PolitoMatrix."
+    email_intro_html: "Reset the password for your <span style=\"font-weight:600; color:#101828;\">%{organization}</span> account on PolitoMatrix."
+    email_next: "Choose a new password to sign in. If you did not ask for this, ignore this email."
+    email_link: "Reset password"
+    email_expiry: "This link expires in 6 hours."
   dashboard:
     namaste: "Namaste"
     open_a_desk: "Open a desk"
