@@ -34,12 +34,13 @@ apt-get install -y \
   libpq-dev libffi-dev libyaml-dev \
   autoconf bison patch \
   libgdbm6 libgdbm-dev libgdbm-compat-dev libdb-dev uuid-dev \
-  nginx postgresql postgresql-contrib \
+  nginx postgresql postgresql-contrib redis-server \
   libvips42 libvips-tools tesseract-ocr \
   ufw
 
 systemctl enable --now postgresql
 systemctl enable --now nginx
+systemctl enable --now redis-server
 
 # =============================================================================
 echo "=====> [2/11] Add 2GB swap (prevents OOM during Ruby compile)"
@@ -66,7 +67,7 @@ usermod -aG sudo $DEPLOY_USER
 # Nginx (www-data) must connect to the Puma socket owned by deploy.
 usermod -aG $DEPLOY_USER www-data
 
-echo "$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/systemctl restart puma_$APP_NAME, /bin/systemctl start puma_$APP_NAME, /bin/systemctl stop puma_$APP_NAME, /bin/systemctl status puma_$APP_NAME" \
+echo "$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/systemctl restart puma_$APP_NAME, /bin/systemctl start puma_$APP_NAME, /bin/systemctl stop puma_$APP_NAME, /bin/systemctl status puma_$APP_NAME, /bin/systemctl restart sidekiq_$APP_NAME, /bin/systemctl start sidekiq_$APP_NAME, /bin/systemctl stop sidekiq_$APP_NAME, /bin/systemctl status sidekiq_$APP_NAME, /bin/systemctl cat sidekiq_$APP_NAME" \
   > /etc/sudoers.d/$DEPLOY_USER
 chmod 0440 /etc/sudoers.d/$DEPLOY_USER
 
@@ -203,8 +204,8 @@ RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
 DB_HOST=localhost
 SACPAD_DATABASE_PASSWORD=${DB_PASSWORD}
 
-# Solid Queue runs inside Puma on this single server.
-SOLID_QUEUE_IN_PUMA=true
+# Sidekiq runs outside Puma. Redis is local to this server.
+REDIS_URL=redis://localhost:6379/0
 
 SACPAD_ADMIN_EMAIL=${ADMIN_EMAIL}
 SACPAD_ADMIN_PASSWORD=${ADMIN_PASSWORD}
@@ -303,6 +304,34 @@ if [ "$puma_ready" -ne 1 ]; then
   echo "Puma did not stay up. See /var/log/puma_${APP_NAME}.log"
   exit 1
 fi
+
+# =============================================================================
+echo "=====> [9b/11] Create Sidekiq systemd service"
+# =============================================================================
+cat > /etc/systemd/system/sidekiq_${APP_NAME}.service <<SERVICE
+[Unit]
+Description=Sidekiq — $APP_NAME
+After=network.target postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=$DEPLOY_USER
+Group=$DEPLOY_USER
+WorkingDirectory=$APP_DIR
+EnvironmentFile=$APP_DIR/.env
+ExecStart=/home/$DEPLOY_USER/.rbenv/shims/bundle exec sidekiq -C $APP_DIR/config/sidekiq.yml
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/sidekiq_${APP_NAME}.log
+StandardError=append:/var/log/sidekiq_${APP_NAME}.log
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+systemctl daemon-reload
+systemctl enable sidekiq_${APP_NAME}
+systemctl restart sidekiq_${APP_NAME}
 
 # =============================================================================
 echo "=====> [10/11] Configure Nginx"

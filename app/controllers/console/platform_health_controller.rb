@@ -4,8 +4,9 @@ module Console
   # arrive in later epics, so their panels show placeholders until then.
   class PlatformHealthController < BaseController
     def show
-      @queue_depth  = safe { SolidQueue::Job.where(finished_at: nil).count }
-      @failed_jobs  = safe { SolidQueue::FailedExecution.count }
+      stats = sidekiq_stats
+      @queue_depth = stats&.enqueued
+      @failed_jobs = stats && (stats.retry_size + stats.dead_size)
       @org_count    = Organization.count
       @active_orgs  = Organization.active.count
       # Daily Meta sync + token headroom land with Epic 5; surfaced as pending for now.
@@ -15,10 +16,10 @@ module Console
 
     private
 
-    # Contain each probe in a savepoint so a failing query (e.g. Solid Queue tables living in a
-    # separate database that isn't present in this environment) can't poison the request transaction.
-    def safe
-      ActiveRecord::Base.transaction(requires_new: true) { yield }
+    def sidekiq_stats
+      return if Rails.env.test?
+
+      Sidekiq::Stats.new
     rescue StandardError
       nil
     end

@@ -2,7 +2,7 @@
 class ImportAssemblyVotersJob < ApplicationJob
   queue_as :default
 
-  # bin/jobs runs this many part jobs at once. Keep config/queue.yml in step.
+  # Each part is its own Sidekiq job. Concurrency is set in config/sidekiq.yml.
   PARTS_AT_A_TIME = 1
 
   def perform(assembly_id)

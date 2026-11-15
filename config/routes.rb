@@ -1,6 +1,12 @@
+require "sidekiq/web"
+require "sidekiq/cron/web"
+
 Rails.application.routes.draw do
   # Org-facing scope — clean, memorable root-level path (the primary, publicly-known login).
   devise_for :users, path: ""
+  authenticate :admin do
+    mount Sidekiq::Web => "/console/sidekiq"
+  end
   get "invite/:token", to: "invitations#edit", as: :edit_invitation
   patch "invite/:token", to: "invitations#update", as: :invitation
 
