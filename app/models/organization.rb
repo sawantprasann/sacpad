@@ -12,8 +12,13 @@ class Organization < ApplicationRecord
   has_many :pr_records, dependent: :destroy
   has_many :social_pages, class_name: "SocialMedia::SocialPage", dependent: :restrict_with_error
   has_many :bulk_posts, class_name: "SocialMedia::BulkPost", dependent: :restrict_with_error
+  has_one_attached :banner_photo
+
+  BANNER_CONTENT_TYPES = %w[image/jpeg image/png image/gif image/webp].freeze
+  BANNER_MAX_BYTES = 8.megabytes
 
   validates :name, presence: true
+  validate :acceptable_banner_photo
   validates :constituency_type, inclusion: { in: %w[Loksabha Assembly] }, allow_nil: true
 
   scope :active, -> { where(active: true) }
@@ -59,6 +64,18 @@ class Organization < ApplicationRecord
   end
 
   private
+
+  def acceptable_banner_photo
+    return unless banner_photo.attached?
+
+    blob = banner_photo.blob
+    unless blob.content_type.to_s.in?(BANNER_CONTENT_TYPES)
+      errors.add(:banner_photo, "must be a JPEG, PNG, GIF, or WebP image")
+    end
+    if blob.byte_size.to_i > BANNER_MAX_BYTES
+      errors.add(:banner_photo, "must be 8 MB or smaller")
+    end
+  end
 
   # Keep the own-candidate's name in sync with the organization name (§6.3a).
   def sync_own_politician_name

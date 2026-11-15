@@ -25,6 +25,49 @@ class ConsoleOrganizationsTest < ActionDispatch::IntegrationTest
     assert_enqueued_emails 1
   end
 
+  test "onboarding stores a banner photo and page banners show it" do
+    sign_in @admin
+    get new_console_organization_path
+    assert_response :success
+    assert_select "input[type=file][name=?]", "organization[banner_photo]"
+
+    photo = fixture_file_upload("photo.png", "image/png")
+    assert_difference -> { Organization.count }, 1 do
+      post console_organizations_path, params: {
+        organization: { name: "Banner Org", banner_photo: photo },
+        org_admin: { name: "Meera", email: "banner-admin@example.com" }
+      }
+    end
+    org = Organization.find_by!(name: "Banner Org")
+    assert org.banner_photo.attached?
+    assert_equal "image/png", org.banner_photo.content_type
+
+    user = org.users.first
+    user.update!(password: "password123", invitation_token: nil, invitation_sent_at: nil, invitation_accepted_at: Time.current)
+    sign_in user
+    get root_path
+    assert_response :success
+    assert_select "img[alt=?]", "Banner Org"
+    assert_no_match 'viewBox="0 0 120 120"', response.body
+  end
+
+  test "onboarding rejects a banner that is not an image" do
+    sign_in @admin
+    notes = Tempfile.new([ "notes", ".txt" ])
+    notes.write("not a photo")
+    notes.rewind
+    file = Rack::Test::UploadedFile.new(notes.path, "text/plain")
+    assert_no_difference -> { Organization.count } do
+      post console_organizations_path, params: {
+        organization: { name: "Bad Banner Org", banner_photo: file },
+        org_admin: { name: "Meera", email: "bad-banner@example.com" }
+      }
+    end
+    assert_response :unprocessable_entity
+  ensure
+    notes&.close!
+  end
+
   test "onboarding without an initial Org Admin is rejected" do
     sign_in @admin
     assert_no_difference -> { Organization.count } do

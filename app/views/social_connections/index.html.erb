@@ -18,12 +18,12 @@
     } do %><% end %>
 
 <% if can_connect %>
-  <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("social.stat_networks") %></h2>
-      <p class="mt-0.5 text-sm text-gray-500"><%= t("social.networks_count", live: @pages.count(&:connection_active?).positive? ? 1 : 0, total: 4) %></p>
-    </div>
-    <%= render "social_connections/connect_action" %>
+  <div class="mt-6">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("social.stat_networks") %></h2>
+    <p class="mt-0.5 text-sm text-gray-500"><%= t("social.networks_count", live: @pages.count(&:connection_active?).positive? ? 1 : 0, total: 4) %></p>
+    <% unless @facebook_ready %>
+      <p class="mt-1 max-w-md text-xs leading-5 text-gray-500"><%= t("social.not_configured") %></p>
+    <% end %>
   </div>
 
   <section class="mt-4 grid grid-cols-2 gap-4 xl:grid-cols-4">
@@ -41,16 +41,36 @@
          else
            t("social.not_connected")
          end %>
-      <article class="relative min-h-36 overflow-hidden rounded-2xl px-5 py-4 text-white shadow-sm" style="background: <%= network[:wash] %>">
+      <article class="relative flex min-h-36 flex-col overflow-hidden rounded-2xl px-5 py-4 text-white shadow-sm" style="background: <%= network[:wash] %>">
         <span class="pointer-events-none absolute rounded-full" style="width: 8.5rem; height: 8.5rem; right: -2.4rem; bottom: -2.8rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
         <span class="pointer-events-none absolute rounded-full" style="width: 6.25rem; height: 6.25rem; right: 1.4rem; top: -2.1rem; background: rgba(255,255,255,0.2);" aria-hidden="true"></span>
-        <span class="pointer-events-none absolute rounded-full" style="width: 4.25rem; height: 4.25rem; right: 3.1rem; bottom: 0.15rem; background: rgba(255,255,255,0.22);" aria-hidden="true"></span>
+        <span class="pointer-events-none absolute rounded-full" style="width: 4.25rem; height: 4.25rem; left: -1.4rem; bottom: 1.6rem; background: rgba(255,255,255,0.18);" aria-hidden="true"></span>
         <div class="relative flex items-start justify-between gap-3">
           <p class="text-sm font-medium text-white/95"><%= t("social.networks.#{network[:key]}") %></p>
           <%= render "social_connections/mark", provider: network[:key], size: "h-8 w-8 text-sm", on_color: true %>
         </div>
         <p class="relative mt-5 text-3xl font-semibold leading-none tabular-nums"><%= rows.size %></p>
-        <p class="relative mt-3 text-sm text-white/90"><%= badge %> · <%= t("social.live_count", count: live) %></p>
+        <div class="relative mt-auto flex items-center justify-between gap-3 pt-4">
+          <p class="flex min-w-0 items-center gap-1 text-xs leading-5 text-white/85">
+            <span class="min-w-0 truncate"><%= badge %></span>
+            <span class="shrink-0">· <%= t("social.live_count", count: live) %></span>
+          </p>
+          <% connect_label = t("social.connect_network", network: t("social.networks.#{network[:key]}")) %>
+          <% if network[:ready] && @facebook_ready %>
+            <%= button_to t("social.connect"), "/auth/facebook", method: :post,
+                  form: { data: { turbo: false }, class: "m-0 inline-flex shrink-0" },
+                  class: "social-connect",
+                  data: { network: network[:key] },
+                  aria: { label: connect_label } %>
+          <% else %>
+            <button type="button" disabled data-network="<%= network[:key] %>"
+                    class="social-connect"
+                    title="<%= network[:ready] ? t("social.not_configured") : t("social.coming_next") %>"
+                    aria-label="<%= connect_label %>">
+              <%= t("social.connect") %>
+            </button>
+          <% end %>
+        </div>
       </article>
     <% end %>
   </section>

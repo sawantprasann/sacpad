@@ -72,6 +72,7 @@ module Console
     def update
       previous_party_id = @organization.current_party_id
       if @organization.update(organization_params)
+        BannerPhotos::Prepare.ensure!(@organization)
         @organization.record_party_change!(previous_party_id)
         record_activity("organization.updated", record: @organization, organization: @organization)
         redirect_to console_organization_path(@organization), notice: "Organization updated."
@@ -117,6 +118,7 @@ module Console
           raise ActiveRecord::RecordInvalid.new(user) unless user.deliver_invitation!
         end
       end
+      BannerPhotos::Prepare.ensure!(org)
       { ok: true }
     rescue ActiveRecord::RecordInvalid => e
       { ok: false, organization: org, error: e.message }
@@ -179,10 +181,11 @@ module Console
     end
 
     def organization_params
-      permitted = params.require(:organization).permit(:name, :constituency_type, :constituency_id, :current_party_id)
+      permitted = params.require(:organization).permit(:name, :constituency_type, :constituency_id, :current_party_id, :banner_photo)
       permitted[:constituency_type] = nil if permitted[:constituency_type].blank?
       permitted[:constituency_id] = nil if permitted[:constituency_id].blank?
       permitted[:current_party_id] = nil if permitted[:current_party_id].blank?
+      permitted.delete(:banner_photo) if permitted[:banner_photo].blank?
       permitted
     end
   end

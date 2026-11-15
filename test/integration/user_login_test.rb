@@ -13,6 +13,17 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     assert_equal "/sign_in", new_user_session_path
   end
 
+  test "sign-in and home banners do not draw the Ashoka Chakra" do
+    get new_user_session_path
+    assert_response :success
+    assert_no_match 'viewBox="0 0 120 120"', response.body
+
+    post user_session_path, params: { user: { email: "rohan@example.com", password: "password123" } }
+    follow_redirect!
+    assert_response :success
+    assert_no_match 'viewBox="0 0 120 120"', response.body
+  end
+
   test "signing in records the timestamp and increments the login counter" do
     post user_session_path, params: { user: { email: "rohan@example.com", password: "password123" } }
     assert_response :redirect

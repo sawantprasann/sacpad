@@ -20,6 +20,23 @@ module ApplicationHelper
     color.start_with?("#") ? color : "##{color}"
   end
 
+  # Signed-in org, or the organization a console page is working on.
+  def campaign_banner_organization
+    if respond_to?(:user_signed_in?) && user_signed_in?
+      current_user.organization
+    elsif @organization.is_a?(Organization) && @organization.persisted?
+      @organization
+    end
+  end
+
+  def campaign_banner_photo
+    org = campaign_banner_organization
+    return unless org&.banner_photo&.attached?
+
+    BannerPhotos::Prepare.ensure!(org)
+    org.banner_photo if org.banner_photo.attached?
+  end
+
   # Auto-computed black/white foreground so an arbitrary party hex stays AA-legible.
   def org_accent_foreground
     hex = org_accent_color.delete("#")
