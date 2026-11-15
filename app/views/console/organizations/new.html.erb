@@ -2,7 +2,7 @@
 <%= render layout: "ui/campaign_hero", locals: { kicker: "Platform Console", title: "Onboard organization", subtitle: "Name the campaign and its first administrator." } do %><% end %>
 
 <div class="mt-6 <%= ta_card_classes %> p-6">
-  <%= form_with model: @organization, url: console_organizations_path do |f| %>
+  <%= form_with model: @organization, url: console_organizations_path, multipart: true do |f| %>
     <%= render "fields", f: f %>
 
     <p class="mt-6 mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Initial Org Admin (required)</p>

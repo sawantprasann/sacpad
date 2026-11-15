@@ -180,7 +180,7 @@ class SocialConnectionsController < ApplicationController
     current_user.pending_connections.fresh.find(params[:pending_id])
   end
 
-  # id, name, and the linked Instagram username. Never the token.
+  # id, name, photo, and the linked Instagram profile. Never the token.
   def present_pages(pending)
     pending.items.map do |page|
       ig = page["instagram_business_account"]
@@ -189,8 +189,18 @@ class SocialConnectionsController < ApplicationController
         name: page["name"],
         category: page["category"],
         username: page["username"],
-        instagram: ig && ig["id"].present? ? { id: ig["id"].to_s, username: ig["username"], name: ig["name"] } : nil
+        picture_url: https_url(page.dig("picture", "data", "url")),
+        instagram: ig && ig["id"].present? ? {
+          id: ig["id"].to_s,
+          username: ig["username"],
+          name: ig["name"],
+          picture_url: https_url(ig["profile_picture_url"])
+        } : nil
       }
     end
+  end
+
+  def https_url(value)
+    value if value.to_s.start_with?("https://")
   end
 end

@@ -1,0 +1,14 @@
+<% size = local_assigns[:size].presence || "h-16 w-16 text-lg" %>
+<% badge = local_assigns[:badge].presence || "h-6 w-6 text-[11px]" %>
+<% initial = name.to_s.strip.first&.upcase || "?" %>
+<span class="relative inline-flex shrink-0 <%= size %>">
+  <span class="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl bg-gray-100 font-semibold text-gray-500 ring-1 ring-gray-200 dark:bg-white/10 dark:text-gray-300 dark:ring-white/10">
+    <%= initial %>
+    <% if url.present? %>
+      <%= image_tag url, alt: "", class: "absolute inset-0 h-full w-full object-cover", onerror: "this.remove()" %>
+    <% end %>
+  </span>
+  <span class="absolute -right-1.5 -bottom-1.5 rounded-lg ring-2 ring-white dark:ring-gray-900">
+    <%= render "social_connections/mark", provider: provider, size: badge %>
+  </span>
+</span>

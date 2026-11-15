@@ -1183,3 +1183,44 @@ pre[class*="language-"] {
   background: rgba(18, 183, 106, 0.16);
   border-color: rgba(108, 233, 166, 0.35);
 }
+.social-connect {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: none;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  padding: 0.34rem 0.62rem 0.34rem 0.68rem;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+  backdrop-filter: blur(8px);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.social-connect::after {
+  content: "→";
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.social-connect:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: #fff;
+}
+.social-connect:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+.social-connect:disabled:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.62);
+}

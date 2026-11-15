@@ -30,9 +30,28 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match I18n.t("social.title"), response.body
     assert_match I18n.t("social.coming_next"), response.body
+    assert_select "button[data-network]", count: 4
+    assert_select "button", text: I18n.t("social.connect_facebook"), count: 0
     assert_match I18n.t("social.channels.sms"), response.body
     assert_match I18n.t("social.channels.whatsapp"), response.body
     assert_match I18n.t("social.channels.ivrs"), response.body
+  end
+
+  test "facebook and instagram cards connect through Facebook when Meta is configured" do
+    api = MetaApi.singleton_class
+    api.alias_method(:__orig_configured?, :configured?)
+    MetaApi.define_singleton_method(:configured?) { true }
+
+    sign_in @admin
+    get social_connections_path
+    assert_response :success
+    assert_select "form[action='/auth/facebook'] button[data-network=facebook]", text: I18n.t("social.connect")
+    assert_select "form[action='/auth/facebook'] button[data-network=instagram]", text: I18n.t("social.connect")
+    assert_select "button[data-network=youtube][disabled]"
+    assert_select "button[data-network=twitter][disabled]"
+    assert_select "button", text: I18n.t("social.connect_facebook"), count: 0
+  ensure
+    api&.alias_method(:configured?, :__orig_configured?) if api&.method_defined?(:__orig_configured?)
   end
 
   test "a manager sees the page table and cannot connect or disconnect" do
@@ -47,7 +66,8 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_social_connection_path
     assert_no_match I18n.t("social.networks.youtube"), response.body
     assert_match I18n.t("social.channels.sms"), response.body
-    assert_no_match I18n.t("social.connect_facebook"), response.body
+    assert_select "button[data-network]", count: 0
+    assert_select "button", text: I18n.t("social.connect_facebook"), count: 0
     get new_social_connection_path
     assert_response :success
     assert_select "[data-controller=media-preview]"
@@ -542,6 +562,52 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
       assert_equal 1, SocialMedia::SocialPage.count
       assert_equal "Youth Page renamed", SocialMedia::SocialPage.find_by!(external_id: "111").name
     end
+  end
+
+  test "the checklist shows each page photo, category, and linked instagram account" do
+    sign_in @admin
+    pending = ActsAsTenant.with_tenant(@org) do
+      @admin.pending_connections.create!(
+        provider: :facebook,
+        provider_uid: "fb-user-1",
+        items: [
+          {
+            "id" => "111",
+            "name" => "Youth Page",
+            "category" => "Political organization",
+            "username" => "youth",
+            "access_token" => "page-secret-token",
+            "picture" => { "data" => { "url" => "https://example.com/youth.jpg" } },
+            "instagram_business_account" => {
+              "id" => "ig-9",
+              "username" => "youth.ig",
+              "name" => "Youth IG",
+              "profile_picture_url" => "https://example.com/ig.jpg"
+            }
+          },
+          {
+            "id" => "222",
+            "name" => "Unsafe Photo",
+            "access_token" => "other-secret",
+            "picture" => { "data" => { "url" => "http://evil.example/pic.jpg" } }
+          }
+        ]
+      )
+    end
+
+    get choose_social_connections_path(pending_id: pending.id)
+    assert_response :success
+    assert_match "Youth Page", response.body
+    assert_match "Political organization", response.body
+    assert_match "@youth", response.body
+    assert_match "Youth IG", response.body
+    assert_match "@youth.ig", response.body
+    assert_match I18n.t("social.choose_ig_linked"), response.body
+    assert_select "img[src=?]", "https://example.com/youth.jpg"
+    assert_select "img[src=?]", "https://example.com/ig.jpg"
+    assert_select "img[src=?]", "http://evil.example/pic.jpg", count: 0
+    assert_no_match "page-secret-token", response.body
+    assert_no_match "other-secret", response.body
   end
 
   test "a different writer cannot open someone else's checklist" do

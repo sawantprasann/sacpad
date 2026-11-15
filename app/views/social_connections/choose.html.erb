@@ -1,4 +1,6 @@
 <% content_for :title, t("social.choose_title") %>
+<% ig_count = @pages.count { |page| page[:instagram] } %>
+<% check = "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 text-transparent peer-checked:border-transparent peer-checked:bg-[var(--org-party-color)] peer-checked:text-[var(--org-party-contrast)] dark:border-white/25" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("social.kicker"),
@@ -7,49 +9,124 @@
       meta: current_user.organization.name
     } do %><% end %>
 
-<%= form_with url: save_social_connections_path, method: :post, class: "mt-5", data: { controller: "filter-list" } do %>
+<%= form_with url: save_social_connections_path, method: :post, class: "mt-5", data: { controller: "filter-list", action: "change->filter-list#refresh" } do %>
   <%= hidden_field_tag :pending_id, @pending_id %>
 
-  <div class="flex flex-col gap-3 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:flex-row sm:items-center dark:bg-gray-900 dark:ring-white/10">
-    <%= text_field_tag :page_query, nil,
-          class: "h-11 flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 text-sm outline-none focus:border-[var(--org-party-color)] focus:bg-white dark:border-white/10 dark:bg-white/5",
-          placeholder: t("social.search"),
-          data: { filter_list_target: "input", action: "input->filter-list#filter" },
-          autocomplete: "off",
-          aria: { label: t("social.search") } %>
-    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-      <input type="checkbox" class="rounded border-gray-300" data-action="change->filter-list#selectAll">
+  <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
+    <article class="relative overflow-hidden rounded-2xl px-4 py-4 text-white shadow-sm" style="background: linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)">
+      <span class="pointer-events-none absolute rounded-full" style="width: 6rem; height: 6rem; right: -1.6rem; bottom: -2rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
+      <div class="relative flex items-center justify-between gap-3">
+        <p class="text-sm font-medium text-white/95"><%= t("social.choose_facebook_pages") %></p>
+        <%= render "social_connections/mark", provider: "facebook", size: "h-8 w-8 text-sm", on_color: true %>
+      </div>
+      <p class="relative mt-4 text-3xl font-semibold leading-none tabular-nums"><%= @pages.size %></p>
+    </article>
+    <article class="relative overflow-hidden rounded-2xl px-4 py-4 text-white shadow-sm" style="background: linear-gradient(135deg, #ffb199 0%, #ff6f91 100%)">
+      <span class="pointer-events-none absolute rounded-full" style="width: 6rem; height: 6rem; right: -1.6rem; bottom: -2rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
+      <div class="relative flex items-center justify-between gap-3">
+        <p class="text-sm font-medium text-white/95"><%= t("social.choose_linked_instagram") %></p>
+        <%= render "social_connections/mark", provider: "instagram", size: "h-8 w-8 text-sm", on_color: true %>
+      </div>
+      <p class="relative mt-4 text-3xl font-semibold leading-none tabular-nums"><%= ig_count %></p>
+    </article>
+    <article class="col-span-2 flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-4 shadow-sm ring-1 ring-gray-200 lg:col-span-1 dark:bg-gray-900 dark:ring-white/10">
+      <div>
+        <p class="text-sm font-medium text-gray-500"><%= t("social.choose_selection") %></p>
+        <p class="mt-1 text-3xl font-semibold leading-none tabular-nums text-gray-900 dark:text-white"
+           data-filter-list-target="count"
+           data-template="%{count}">0</p>
+      </div>
+      <span class="flex h-11 w-11 items-center justify-center rounded-2xl text-white" style="background: var(--org-party-color); color: var(--org-party-contrast)" aria-hidden="true">
+        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.2 7.2a1 1 0 01-1.4 0L3.3 9.1a1 1 0 011.4-1.4l4.1 4.1 6.5-6.5a1 1 0 011.4 0z" clip-rule="evenodd"/>
+        </svg>
+      </span>
+    </article>
+  </div>
+
+  <div class="mt-4 flex flex-col gap-3 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:flex-row sm:items-center dark:bg-gray-900 dark:ring-white/10">
+    <div class="relative min-w-0 flex-1">
+      <svg class="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-gray-400" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="8.5" cy="8.5" r="5.2"/>
+        <path d="M12.5 12.5 16.5 16.5" stroke-linecap="round"/>
+      </svg>
+      <%= text_field_tag :page_query, nil,
+            class: "h-11 w-full rounded-full border border-gray-200 bg-gray-50 pr-4 pl-11 text-sm outline-none focus:border-[var(--org-party-color)] focus:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white",
+            placeholder: t("social.search"),
+            data: { filter_list_target: "input", action: "input->filter-list#filter" },
+            autocomplete: "off",
+            aria: { label: t("social.search") } %>
+    </div>
+    <label class="inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full bg-gray-50 px-4 text-sm font-medium text-gray-700 ring-1 ring-gray-200 dark:bg-white/5 dark:text-gray-200 dark:ring-white/10">
+      <input type="checkbox" class="h-4 w-4 rounded border-gray-300" style="accent-color: var(--org-party-color)" data-filter-list-target="selectAll" data-action="change->filter-list#selectAll">
       <%= t("social.select_all") %>
     </label>
   </div>
 
-  <ul class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+  <ul class="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
     <% @pages.each do |page| %>
-      <li class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-gray-900" data-filter-list-target="item" data-name="<%= page[:name].to_s %> <%= page[:username].to_s %> <%= page.dig(:instagram, :username) %>">
-        <label class="flex cursor-pointer items-center gap-4 p-4">
-          <%= check_box_tag "page_ids[]", page[:id], false, class: "h-5 w-5 shrink-0 rounded border-gray-300" %>
-          <span class="min-w-0">
-            <span class="block truncate text-base font-semibold text-gray-900 dark:text-white"><%= page[:name] %></span>
-            <span class="mt-0.5 block truncate text-sm text-gray-500">
-              <%= page[:username].present? ? "@#{page[:username]}" : page[:category] %>
+      <% ig = page[:instagram] %>
+      <% ig_name = ig && (ig[:username].presence || ig[:name].presence || ig[:id]) %>
+      <li class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-gray-200 transition has-[.page-pick:checked]:ring-2 has-[.page-pick:checked]:ring-[var(--org-party-color)] dark:bg-gray-900 dark:ring-white/10"
+          data-filter-list-target="item"
+          data-name="<%= page[:name].to_s %> <%= page[:username].to_s %> <%= page[:category].to_s %> <%= ig&.dig(:username) %> <%= ig&.dig(:name) %>">
+        <label class="flex cursor-pointer items-center gap-4 p-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-[-2px] has-[:focus-visible]:outline-[var(--org-party-color)] has-[:checked]:bg-[color-mix(in_srgb,var(--org-party-color)_8%,transparent)]">
+          <%= check_box_tag "page_ids[]", page[:id], false, id: "page_#{page[:id]}", class: "page-pick peer sr-only" %>
+          <%= render "social_connections/avatar", name: page[:name], url: page[:picture_url], provider: "facebook" %>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-base font-semibold text-gray-900 dark:text-white"><%= page[:name].presence || t("social.unnamed") %></span>
+            <% if page[:username].present? %>
+              <span class="mt-0.5 block truncate text-sm text-gray-500">@<%= page[:username] %></span>
+            <% end %>
+            <span class="mt-2 flex flex-wrap items-center gap-1.5">
+              <span class="inline-flex items-center rounded-full bg-[#1877F2]/10 px-2 py-0.5 text-xs font-medium text-[#1877F2]"><%= t("social.networks.facebook") %></span>
+              <% if page[:category].present? %>
+                <span class="inline-flex max-w-full truncate rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-white/10 dark:text-gray-300"><%= page[:category] %></span>
+              <% end %>
             </span>
           </span>
+          <span class="<%= check %>" aria-hidden="true">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.2 7.2a1 1 0 01-1.4 0L3.3 9.1a1 1 0 011.4-1.4l4.1 4.1 6.5-6.5a1 1 0 011.4 0z" clip-rule="evenodd"/>
+            </svg>
+          </span>
         </label>
-        <% if page[:instagram] %>
-          <% ig_name = page[:instagram][:username].presence || page[:instagram][:name].presence || page[:instagram][:id] %>
-          <label class="flex cursor-pointer items-center gap-4 border-t border-gray-100 px-4 py-3 dark:border-white/10">
-            <%= check_box_tag "instagram_ids[]", page[:instagram][:id], false, class: "h-5 w-5 shrink-0 rounded border-gray-300" %>
-            <span class="min-w-0 text-sm text-gray-700 dark:text-gray-300"><%= t("social.connect_instagram", username: ig_name) %></span>
+        <% if ig %>
+          <label class="flex cursor-pointer items-center gap-3 border-t border-gray-100 bg-gradient-to-r from-[#fff1f6] to-white px-4 py-3 has-[:checked]:from-[#ffe4ee] dark:border-white/10 dark:from-white/[0.06] dark:to-transparent dark:has-[:checked]:from-white/10">
+            <%= check_box_tag "instagram_ids[]", ig[:id], false, id: "instagram_#{ig[:id]}", class: "peer sr-only" %>
+            <%= render "social_connections/avatar", name: ig[:name].presence || ig_name, url: ig[:picture_url], provider: "instagram", size: "h-11 w-11 text-sm", badge: "h-5 w-5 text-[10px]" %>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-semibold text-gray-900 dark:text-white"><%= ig[:name].presence || "@#{ig_name}" %></span>
+              <span class="mt-0.5 block truncate text-xs text-gray-500">
+                <%= ig[:username].present? ? "@#{ig[:username]} · " : "" %><%= t("social.choose_ig_linked") %>
+              </span>
+            </span>
+            <span class="<%= check %>" aria-hidden="true">
+              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-7.2 7.2a1 1 0 01-1.4 0L3.3 9.1a1 1 0 011.4-1.4l4.1 4.1 6.5-6.5a1 1 0 011.4 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
           </label>
         <% end %>
       </li>
     <% end %>
   </ul>
 
-  <div class="sticky bottom-4 mt-5 flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-3 shadow-theme-md ring-1 ring-gray-200 backdrop-blur dark:bg-gray-900/90 dark:ring-white/10">
-    <button type="submit" class="<%= ta_btn_primary %> cursor-pointer" style="background: var(--org-party-color); color: var(--org-party-contrast)">
-      <%= t("social.save") %>
-    </button>
-    <%= link_to t("common.cancel"), social_connections_path, class: "#{ta_btn_secondary} inline-flex items-center" %>
+  <p data-filter-list-target="empty" hidden class="mt-4 rounded-3xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center text-sm text-gray-500 dark:border-white/15 dark:bg-gray-900">
+    <%= t("social.choose_empty_search") %>
+  </p>
+
+  <div class="sticky bottom-4 mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/95 p-3 shadow-theme-md ring-1 ring-gray-200 backdrop-blur dark:bg-gray-900/95 dark:ring-white/10">
+    <p class="px-2 text-sm font-medium text-gray-600 dark:text-gray-300"
+       data-filter-list-target="count"
+       data-template="<%= t("social.choose_selected", count: "%{count}") %>">
+      <%= t("social.choose_selected", count: 0) %>
+    </p>
+    <div class="flex flex-wrap items-center gap-2">
+      <%= link_to t("common.cancel"), social_connections_path, class: "#{ta_btn_secondary} inline-flex items-center" %>
+      <button type="submit" disabled data-filter-list-target="save" class="<%= ta_btn_primary %> cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" style="background: var(--org-party-color); color: var(--org-party-contrast)">
+        <%= t("social.save") %>
+      </button>
+    </div>
   </div>
 <% end %>
