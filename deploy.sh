@@ -40,4 +40,11 @@ bundle exec rails assets:precompile
 echo "=====> [deploy] Restarting Puma"
 sudo systemctl restart "puma_${APP_NAME}"
 
+if sudo systemctl cat "sidekiq_${APP_NAME}" >/dev/null 2>&1; then
+  echo "=====> [deploy] Restarting Sidekiq"
+  sudo systemctl restart "sidekiq_${APP_NAME}"
+else
+  echo "=====> [deploy] sidekiq_${APP_NAME} is not installed, so jobs will not run"
+fi
+
 echo "=====> [deploy] Done"

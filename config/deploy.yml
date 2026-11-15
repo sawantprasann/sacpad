@@ -41,12 +41,8 @@ env:
   secret:
     - RAILS_MASTER_KEY
   clear:
-    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
-    # When you start using multiple servers, you should split out job processing to a dedicated machine.
-    SOLID_QUEUE_IN_PUMA: true
-
-    # Set number of processes dedicated to Solid Queue (default: 1)
-    # JOB_CONCURRENCY: 3
+    # Jobs run in a separate Sidekiq process, not inside Puma.
+    # REDIS_URL: redis://localhost:6379/0
 
     # One Puma process, 5 threads. A second process is too heavy for 2 GB RAM.
     RAILS_MAX_THREADS: 5

@@ -1,0 +1,6 @@
+cleanup_pending_connections:
+  cron: "0 * * * *"
+  class: "CleanupPendingConnectionsJob"
+  queue: default
+  active_job: true
+  description: "Delete expired social connection attempts"

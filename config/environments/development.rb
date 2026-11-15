@@ -56,10 +56,8 @@ Rails.application.configure do
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
-  # Run jobs in a separate process (bin/jobs) so a long voter sync does not block page requests.
-  config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
-  config.solid_queue.silence_polling = true
+  # Sidekiq runs outside the web server. A long voter sync does not take a Puma thread.
+  config.active_job.queue_adapter = :sidekiq
 
   # Highlight code that triggered redirect in logs.
   config.action_dispatch.verbose_redirect_logs = true
