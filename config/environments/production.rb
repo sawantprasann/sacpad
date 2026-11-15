@@ -21,7 +21,7 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
+  # Local disk until the S3 env vars are set. The initializer switches uploads to S3.
   config.active_storage.service = :local
 
   # Nginx terminates TLS for politomatrix.com. Treat proxied requests as HTTPS.

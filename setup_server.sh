@@ -220,6 +220,12 @@ ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=$(openssl rand -hex 16)
 # BREVO_SMTP_KEY=
 # MAIL_FROM="Politomatrix <no-reply@politomatrix.com>"
 
+# Private S3 bucket for uploads. Use politomatrix-storage-production on this server.
+# AWS_ACCESS_KEY_ID=
+# AWS_SECRET_ACCESS_KEY=
+# AWS_REGION=ap-southeast-2
+# AWS_S3_BUCKET=politomatrix-storage-production
+
 # Mac posts roll JSON to POST /api/assemblies/:id/parts/:part
 SACPAD_ROLL_TOKEN=$(openssl rand -hex 24)
 ENV
