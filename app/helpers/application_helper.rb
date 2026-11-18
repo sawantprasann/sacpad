@@ -20,21 +20,27 @@ module ApplicationHelper
     color.start_with?("#") ? color : "##{color}"
   end
 
-  # Signed-in org, or the organization a console page is working on.
+  # The signed-in organization's own pages. Console screens stay without a photo,
+  # even when an organization is on the page or a user session is still open.
   def campaign_banner_organization
-    if respond_to?(:user_signed_in?) && user_signed_in?
-      current_user.organization
-    elsif @organization.is_a?(Organization) && @organization.persisted?
-      @organization
-    end
+    return if console_page?
+    return unless respond_to?(:user_signed_in?) && user_signed_in?
+
+    current_user.organization
   end
 
   def campaign_banner_photo
+    return if console_page?
+
     org = campaign_banner_organization
     return unless org&.banner_photo&.attached?
 
     BannerPhotos::Prepare.ensure!(org)
     org.banner_photo if org.banner_photo.attached?
+  end
+
+  def console_page?
+    request&.path.to_s.start_with?("/console")
   end
 
   # Auto-computed black/white foreground so an arbitrary party hex stays AA-legible.

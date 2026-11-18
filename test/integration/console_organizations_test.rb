@@ -51,6 +51,64 @@ class ConsoleOrganizationsTest < ActionDispatch::IntegrationTest
     assert_no_match 'viewBox="0 0 120 120"', response.body
   end
 
+  test "console pages do not show the organization banner photo" do
+    org = ActsAsTenant.without_tenant { Organization.create!(name: "Banner Org") }
+    org.banner_photo.attach(
+      io: file_fixture("photo.png").open,
+      filename: "photo.png",
+      content_type: "image/png"
+    )
+
+    sign_in @admin
+    get console_organization_path(org)
+    assert_response :success
+    assert_select "img[alt=?]", "Banner Org", count: 0
+
+    get console_root_path
+    assert_response :success
+    assert_select "img[alt=?]", "Banner Org", count: 0
+  end
+
+  test "an admin can remove the organization banner photo" do
+    org = ActsAsTenant.without_tenant { Organization.create!(name: "Banner Org") }
+    org.banner_photo.attach(
+      io: file_fixture("photo.png").open,
+      filename: "photo.png",
+      content_type: "image/png"
+    )
+
+    sign_in @admin
+    get edit_console_organization_path(org)
+    assert_response :success
+    assert_select "button[aria-label=?]", "Remove banner photo"
+    assert_select "input[type=hidden][name=?]", "organization[remove_banner_photo]"
+
+    patch console_organization_path(org), params: {
+      organization: { name: "Banner Org", remove_banner_photo: "1" }
+    }
+
+    assert_redirected_to console_organization_path(org)
+    assert_not org.reload.banner_photo.attached?
+  end
+
+  test "a new banner upload is kept when remove is also requested" do
+    org = ActsAsTenant.without_tenant { Organization.create!(name: "Banner Org") }
+    org.banner_photo.attach(
+      io: file_fixture("photo.png").open,
+      filename: "photo.png",
+      content_type: "image/png"
+    )
+
+    sign_in @admin
+    photo = fixture_file_upload("photo.png", "image/png")
+    patch console_organization_path(org), params: {
+      organization: { name: "Banner Org", banner_photo: photo, remove_banner_photo: "1" }
+    }
+
+    assert_redirected_to console_organization_path(org)
+    assert org.reload.banner_photo.attached?
+  end
+
   test "onboarding rejects a banner that is not an image" do
     sign_in @admin
     notes = Tempfile.new([ "notes", ".txt" ])

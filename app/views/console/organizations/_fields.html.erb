@@ -27,10 +27,22 @@
 
   <div class="sm:col-span-2">
     <label class="<%= ta_label_classes %>" for="organization_banner_photo">Banner photo</label>
-    <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Shown as a square on the right of every page banner, from top to bottom. A white or checkerboard backdrop on a PNG is removed.</p>
+    <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">Shown at the same size on the right of every page banner. The whole photo stays visible, including the edges. A white or checkerboard backdrop on a PNG is removed.</p>
     <% if @organization.persisted? && @organization.banner_photo.attached? && @organization.banner_photo.blob&.persisted? %>
-      <div class="mb-3 h-24 w-24 overflow-hidden" style="background: linear-gradient(125deg, #06eff4 0%, #ea580c 48%, #f59e0b 100%);">
-        <%= image_tag @organization.banner_photo, class: "h-full w-full object-cover", style: "background: transparent;", alt: @organization.name %>
+      <div class="relative mb-3 inline-flex h-24 w-40 items-center justify-center overflow-hidden rounded-lg"
+           style="background: linear-gradient(125deg, #06eff4 0%, #ea580c 48%, #f59e0b 100%);"
+           x-data="{ removed: false }"
+           x-show="!removed">
+        <%= image_tag @organization.banner_photo, class: "max-h-full max-w-full object-contain", style: "background: transparent;", alt: @organization.name %>
+        <button type="button"
+                class="absolute top-1 right-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/80 text-white shadow-sm hover:bg-gray-900"
+                @click="removed = true"
+                aria-label="Remove banner photo">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"></path>
+          </svg>
+        </button>
+        <input type="hidden" name="organization[remove_banner_photo]" :value="removed ? '1' : '0'">
       </div>
     <% end %>
     <%= f.file_field :banner_photo, accept: "image/jpeg,image/png,image/gif,image/webp",

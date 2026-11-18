@@ -71,8 +71,14 @@ module Console
 
     def update
       previous_party_id = @organization.current_party_id
+      remove_banner = ActiveModel::Type::Boolean.new.cast(params.dig(:organization, :remove_banner_photo))
+      replacing_banner = params.dig(:organization, :banner_photo).present?
       if @organization.update(organization_params)
-        BannerPhotos::Prepare.ensure!(@organization)
+        if remove_banner && !replacing_banner
+          @organization.banner_photo.purge
+        else
+          BannerPhotos::Prepare.ensure!(@organization)
+        end
         @organization.record_party_change!(previous_party_id)
         record_activity("organization.updated", record: @organization, organization: @organization)
         redirect_to console_organization_path(@organization), notice: "Organization updated."
