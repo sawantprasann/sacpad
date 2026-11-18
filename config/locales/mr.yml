@@ -400,6 +400,7 @@ mr:
         other: "जवळजवळ %{count} वर्षे"
   common:
     copyright: "© %{year} PolitoMatrix"
+    privacy: "गोपनीयता धोरण"
     filter: "शोध"
     clear: "साफ करा"
     search: "शोधा"

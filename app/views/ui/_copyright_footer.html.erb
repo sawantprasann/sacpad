@@ -1,3 +1,6 @@
 <footer class="campaign-footer border-t border-gray-200 dark:border-gray-800">
-  <p class="px-6 py-3 text-center text-xs text-gray-500 dark:text-gray-400"><%= t("common.copyright", year: Date.current.year) %></p>
+  <p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-6 py-3 text-center text-xs text-gray-500 dark:text-gray-400">
+    <span><%= t("common.copyright", year: Date.current.year) %></span>
+    <%= link_to t("common.privacy"), privacy_path, class: "hover:text-gray-700 hover:underline dark:hover:text-gray-200" %>
+  </p>
 </footer>
