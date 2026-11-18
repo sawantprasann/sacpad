@@ -4,6 +4,13 @@ on:
   pull_request:
   push:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to test and deploy. Run this workflow from main.
+        required: true
+        default: main
+        type: string
 
 jobs:
   scan_ruby:
@@ -12,6 +19,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch || github.sha }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -30,6 +39,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch || github.sha }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -46,6 +57,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch || github.sha }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -102,6 +115,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch || github.sha }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -153,6 +168,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.inputs.branch || github.sha }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -181,16 +198,19 @@ jobs:
           if-no-files-found: ignore
 
   deploy:
-    name: Deploy to Production
+    name: Deploy ${{ github.event.inputs.branch || 'main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     needs: [scan_ruby, scan_js, lint, test, system-test]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     concurrency:
       group: production-deploy
       cancel-in-progress: false
 
     steps:
+      # This checkout is the workflow revision (run it from main). The server
+      # checks out inputs.branch itself. Piping the script avoids the copy
+      # already on the server, which matches whatever branch is currently live.
       - uses: actions/checkout@v6
 
       - name: Set up SSH
@@ -202,7 +222,17 @@ jobs:
         run: ssh-keyscan -H 143.110.248.201 >> ~/.ssh/known_hosts
 
       - name: Deploy
-        run: ssh deploy@143.110.248.201 "bash /var/www/sacpad/deploy.sh"
+        env:
+          DEPLOY_BRANCH: ${{ github.event.inputs.branch || 'main' }}
+        run: |
+          if [[ ! "$DEPLOY_BRANCH" =~ ^[A-Za-z0-9][A-Za-z0-9._+/-]*$ ]] || [[ "$DEPLOY_BRANCH" == *".."* ]]; then
+            echo "Invalid branch name: $DEPLOY_BRANCH"
+            exit 1
+          fi
+          echo "Deploying ${DEPLOY_BRANCH}"
+          # Write the script to a file first. bash -s would share stdin with
+          # git and bundle, which can swallow the rest of the script.
+          ssh deploy@143.110.248.201 "cat > /tmp/sacpad-deploy.sh && bash /tmp/sacpad-deploy.sh $(printf '%q' "$DEPLOY_BRANCH"); rc=\$?; rm -f /tmp/sacpad-deploy.sh; exit \$rc" < deploy.sh
 
       - name: Health check
         run: |

@@ -13,12 +13,21 @@ APP_NAME="sacpad"
 export PATH="/home/deploy/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
-echo "=====> [deploy] $(date '+%Y-%m-%d %H:%M:%S') Starting deploy"
+BRANCH="${1:-main}"
+
+if [[ ! "$BRANCH" =~ ^[A-Za-z0-9][A-Za-z0-9._+/-]*$ ]] || [[ "$BRANCH" == *".."* ]]; then
+  echo "=====> [deploy] Invalid branch name: ${BRANCH}" >&2
+  exit 1
+fi
+
+echo "=====> [deploy] $(date '+%Y-%m-%d %H:%M:%S') Starting deploy of ${BRANCH}"
 
 cd $APP_DIR
 
-echo "=====> [deploy] Pulling latest code"
-git pull --ff-only origin main
+echo "=====> [deploy] Fetching origin/${BRANCH}"
+git fetch origin "$BRANCH"
+git checkout -f -B "$BRANCH" "origin/${BRANCH}"
+echo "=====> [deploy] At $(git rev-parse --short HEAD) — $(git log -1 --format=%s)"
 
 echo "=====> [deploy] Installing gems"
 bundle config set deployment true
