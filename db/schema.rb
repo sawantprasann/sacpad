@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_173000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -103,6 +103,38 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_173000) do
     t.integer "last_part"
     t.string "native_name"
     t.index ["loksabha_id"], name: "index_assemblies_on_loksabha_id"
+  end
+
+  create_table "assistant_conversations", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "user_id", null: false
+    t.string "place_type"
+    t.bigint "place_id"
+    t.string "pending_tool"
+    t.jsonb "pending_arguments", default: {}, null: false
+    t.jsonb "pending_places", default: [], null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id"], name: "index_assistant_conversations_on_organization_id"
+    t.index ["place_type", "place_id"], name: "index_assistant_conversations_on_place_type_and_place_id"
+    t.index ["user_id"], name: "index_assistant_conversations_on_user_id"
+  end
+
+  create_table "assistant_messages", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "assistant_conversation_id", null: false
+    t.integer "speaker", null: false
+    t.text "body", null: false
+    t.string "tool_name"
+    t.jsonb "tool_arguments", default: {}, null: false
+    t.boolean "draft", default: false, null: false
+    t.string "link_path"
+    t.string "link_label"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assistant_conversation_id", "id"], name: "index_assistant_messages_on_assistant_conversation_id_and_id"
+    t.index ["assistant_conversation_id"], name: "index_assistant_messages_on_assistant_conversation_id"
+    t.index ["organization_id"], name: "index_assistant_messages_on_organization_id"
   end
 
   create_table "booth_checklist_items", force: :cascade do |t|
@@ -1055,6 +1087,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_173000) do
   add_foreign_key "admin_organizations", "admins"
   add_foreign_key "admin_organizations", "organizations"
   add_foreign_key "assemblies", "loksabhas"
+  add_foreign_key "assistant_conversations", "organizations"
+  add_foreign_key "assistant_conversations", "users"
+  add_foreign_key "assistant_messages", "assistant_conversations"
+  add_foreign_key "assistant_messages", "organizations"
   add_foreign_key "booth_checklist_items", "booths"
   add_foreign_key "booth_checklist_items", "organizations"
   add_foreign_key "booths", "villages"

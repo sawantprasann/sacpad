@@ -34,12 +34,21 @@
 
         <%= render "ui/top_bar" %>
 
-        <main class="flex-1 overflow-y-auto">
-          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
-            <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
-            <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
-            <%= yield %>
-          </div>
+        <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <% page = yield %>
+          <% if content_for?(:full_bleed) %>
+            <% if notice %><div class="px-4 pt-4 md:px-6"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
+            <% if alert %><div class="px-4 pt-4 md:px-6"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+            <div class="min-h-0 flex-1"><%= page %></div>
+          <% else %>
+            <div class="min-h-0 flex-1 overflow-y-auto">
+              <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+                <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
+                <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+                <%= page %>
+              </div>
+            </div>
+          <% end %>
         </main>
         <%= render "ui/copyright_footer" %>
       </div>

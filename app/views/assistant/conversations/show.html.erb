@@ -1,0 +1,116 @@
+<% content_for :full_bleed, "1" %>
+<%# Full-height chat, laid out like TailAdmin's AI text page: thread, prompt, history. %>
+<div class="flex h-full overflow-hidden bg-gray-50 dark:bg-gray-950" x-data="{ q: '' }">
+  <section class="flex min-w-0 flex-1 flex-col">
+    <header class="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 sm:px-6 dark:border-gray-800 dark:bg-gray-900">
+      <h1 class="truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= @conversation&.title || t("assistant.title") %></h1>
+      <%= link_to assistant_conversations_path(fresh: 1), class: "inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#465fff] px-3 py-2 text-xs font-medium text-white lg:hidden" do %>
+        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 4a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 0110 4z"/></svg>
+        <%= t("assistant.new_chat") %>
+      <% end %>
+    </header>
+
+    <div class="flex-1 overflow-y-auto px-4 py-8 sm:px-6">
+      <div class="mx-auto flex max-w-3xl flex-col gap-8">
+        <% if @messages.any? %>
+          <% @messages.each do |message| %>
+            <% if message.from_user? %>
+              <div class="flex justify-end">
+                <p class="max-w-xl rounded-2xl bg-gray-100 px-4 py-3 text-sm leading-6 text-gray-700 dark:bg-gray-800 dark:text-gray-200"><%= message.body %></p>
+              </div>
+            <% else %>
+              <div class="flex gap-3">
+                <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center text-[#465fff]" aria-hidden="true">
+                  <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l1.2 4.3a2 2 0 001.4 1.4L17 8.4l-4.4 1.2a2 2 0 00-1.4 1.4L10 15.3l-1.2-4.3a2 2 0 00-1.4-1.4L3 8.4l4.4-1.2a2 2 0 001.4-1.4L10 1.5z"/></svg>
+                </span>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-gray-800 dark:text-white/90"><%= t("assistant.nav") %></p>
+                  <% if message.draft? %>
+                    <p class="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300"><%= t("assistant.draft_label") %></p>
+                  <% end %>
+                  <div class="mt-2 text-sm leading-6 whitespace-pre-wrap text-gray-700 dark:text-gray-300"><%= message.body %></div>
+                  <% if message.link_path.present? %>
+                    <%= link_to message.link_label.presence || t("assistant.open_list"), message.link_path, class: "mt-3 inline-flex text-sm font-medium text-[#465fff] hover:underline" %>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+          <div id="chat-bottom"></div>
+        <% else %>
+          <div class="mx-auto max-w-lg pt-16 text-center">
+            <% if @conversations.any? %>
+              <p class="text-sm text-gray-500 dark:text-gray-400"><%= t("assistant.subtitle") %></p>
+            <% else %>
+              <p class="text-sm text-gray-500 dark:text-gray-400"><%= t("assistant.empty") %></p>
+              <ul class="mt-6 space-y-2 text-left lg:hidden">
+                <% t("assistant.examples").each do |example| %>
+                  <li>
+                    <button type="button" data-prompt="<%= example %>" @click="$refs.prompt.value = $el.dataset.prompt; $refs.prompt.focus()" class="w-full cursor-pointer rounded-2xl bg-white px-4 py-3 text-left text-sm text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-800"><%= example %></button>
+                  </li>
+                <% end %>
+              </ul>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="shrink-0 px-4 pb-4 sm:px-6">
+      <%= form_with url: assistant_conversations_path, class: "mx-auto max-w-3xl rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900" do %>
+        <% if @conversation %>
+          <%= hidden_field_tag :conversation_id, @conversation.id %>
+        <% end %>
+        <%= text_area_tag :body, nil,
+              rows: 2,
+              required: true,
+              maxlength: 2000,
+              placeholder: t("assistant.prompt"),
+              "x-ref": "prompt",
+              class: "w-full resize-none border-0 bg-transparent px-4 pt-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-0 dark:text-white/90" %>
+        <div class="flex items-center justify-end px-3 pb-3">
+          <button type="submit" aria-label="<%= t("assistant.send") %>" class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-gray-900 text-white hover:bg-gray-700 dark:bg-white dark:text-gray-900">
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a.75.75 0 01-.75-.75V6.56L6.28 9.53a.75.75 0 01-1.06-1.06l4.25-4.25a.75.75 0 011.06 0l4.25 4.25a.75.75 0 11-1.06 1.06L10.75 6.56v8.69A.75.75 0 0110 16z" clip-rule="evenodd"/></svg>
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <aside class="hidden w-80 shrink-0 flex-col border-l border-gray-200 bg-white lg:flex dark:border-gray-800 dark:bg-gray-900">
+    <div class="p-4">
+      <%= link_to assistant_conversations_path(fresh: 1), class: "flex items-center justify-center gap-2 rounded-lg bg-[#465fff] px-4 py-3 text-sm font-medium text-white hover:bg-[#3641f5]" do %>
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 4a.75.75 0 01.75.75v4.5h4.5a.75.75 0 010 1.5h-4.5v4.5a.75.75 0 01-1.5 0v-4.5h-4.5a.75.75 0 010-1.5h4.5v-4.5A.75.75 0 0110 4z"/></svg>
+        <%= t("assistant.new_chat") %>
+      <% end %>
+      <label class="mt-4 flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 dark:border-gray-700">
+        <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 013.9 9.4l3.1 3.1a.75.75 0 11-1.06 1.06l-3.1-3.1A5.5 5.5 0 119 3.5zm0 1.5a4 4 0 100 8 4 4 0 000-8z" clip-rule="evenodd"/></svg>
+        <input type="search" x-model="q" placeholder="<%= t("assistant.search") %>" class="w-full border-0 bg-transparent p-0 text-sm text-gray-700 placeholder:text-gray-400 focus:ring-0 dark:text-white/90">
+      </label>
+    </div>
+    <div class="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
+      <p class="px-2 pb-2 text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("assistant.recent") %></p>
+      <% if @conversations.any? %>
+        <ul class="space-y-1">
+          <% @conversations.each do |conversation| %>
+            <li data-title="<%= conversation.title %>" x-show="q === '' || $el.dataset.title.toLowerCase().includes(q.toLowerCase())">
+              <%= link_to conversation.title, assistant_conversation_path(conversation),
+                    class: "block truncate rounded-lg px-3 py-2 text-sm #{@conversation&.id == conversation.id ? "bg-gray-100 font-medium text-gray-800 dark:bg-white/5 dark:text-white" : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"}" %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <ul class="space-y-1">
+          <% t("assistant.examples").each do |example| %>
+            <li>
+              <button type="button" data-prompt="<%= example %>" @click="$refs.prompt.value = $el.dataset.prompt; $refs.prompt.focus()" class="w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"><%= example %></button>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+  </aside>
+</div>
+<script>
+  document.getElementById("chat-bottom")?.scrollIntoView()
+</script>

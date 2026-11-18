@@ -25,7 +25,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # =============================================================================
-echo "=====> [1/11] System update + dependencies"
+echo "=====> [1/12] System update + dependencies"
 # =============================================================================
 apt-get update -y && apt-get upgrade -y
 apt-get install -y \
@@ -43,7 +43,7 @@ systemctl enable --now nginx
 systemctl enable --now redis-server
 
 # =============================================================================
-echo "=====> [2/11] Add 2GB swap (prevents OOM during Ruby compile)"
+echo "=====> [2/12] Add 2GB swap (prevents OOM during Ruby compile)"
 # =============================================================================
 if [ ! -f /swapfile ]; then
   fallocate -l 2G /swapfile
@@ -57,7 +57,7 @@ else
 fi
 
 # =============================================================================
-echo "=====> [3/11] Create deploy user"
+echo "=====> [3/12] Create deploy user"
 # =============================================================================
 if ! id "$DEPLOY_USER" &>/dev/null; then
   adduser --disabled-password --gecos "" $DEPLOY_USER
@@ -72,7 +72,7 @@ echo "$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/systemctl restart puma_$APP_NAME, /b
 chmod 0440 /etc/sudoers.d/$DEPLOY_USER
 
 # =============================================================================
-echo "=====> [4/11] Install rbenv + Ruby $RUBY_VERSION (as deploy user)"
+echo "=====> [4/12] Install rbenv + Ruby $RUBY_VERSION (as deploy user)"
 # =============================================================================
 # Must use 'su - deploy' (not sudo -u) to avoid rbenv path issues
 su - $DEPLOY_USER <<RUBY_SETUP
@@ -97,7 +97,7 @@ su - $DEPLOY_USER <<RUBY_SETUP
 RUBY_SETUP
 
 # =============================================================================
-echo "=====> [5/11] Configure PostgreSQL"
+echo "=====> [5/12] Configure PostgreSQL"
 # =============================================================================
 if [ ! -f "$DB_PASSWORD_FILE" ]; then
   openssl rand -hex 24 > "$DB_PASSWORD_FILE"
@@ -124,7 +124,7 @@ PSQL
 echo ">>> PostgreSQL user '$APP_NAME' and production databases are ready."
 
 # =============================================================================
-echo "=====> [6/11] Set up app directory + clone repo"
+echo "=====> [6/12] Set up app directory + clone repo"
 # =============================================================================
 mkdir -p $APP_DIR
 chown -R $DEPLOY_USER:$DEPLOY_USER $APP_DIR
@@ -170,7 +170,7 @@ su - $DEPLOY_USER <<CLONE
 CLONE
 
 # =============================================================================
-echo "=====> [7/11] Create .env file"
+echo "=====> [7/12] Create .env file"
 # =============================================================================
 if [ ! -s "$APP_DIR/config/master.key" ]; then
   if [ -z "${RAILS_MASTER_KEY:-}" ]; then
@@ -229,6 +229,10 @@ ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT=$(openssl rand -hex 16)
 
 # Mac posts roll JSON to POST /api/assemblies/:id/parts/:part
 SACPAD_ROLL_TOKEN=$(openssl rand -hex 24)
+
+# Private Ollama on this machine. It has no database login. Do not open port 11434.
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen3:0.6b
 ENV
   chown $DEPLOY_USER:$DEPLOY_USER $ENV_FILE
   chmod 600 $ENV_FILE
@@ -238,7 +242,7 @@ else
 fi
 
 # =============================================================================
-echo "=====> [8/11] Bundle install + db prepare + assets + seed"
+echo "=====> [8/12] Bundle install + db prepare + assets + seed"
 # =============================================================================
 mkdir -p "$APP_DIR/tmp/pids" "$APP_DIR/tmp/storage" "$APP_DIR/storage" "$APP_DIR/log"
 chown -R $DEPLOY_USER:$DEPLOY_USER "$APP_DIR"
@@ -261,7 +265,7 @@ su - $DEPLOY_USER <<BUNDLE
 BUNDLE
 
 # =============================================================================
-echo "=====> [9/11] Create Puma systemd service"
+echo "=====> [9/12] Create Puma systemd service"
 # =============================================================================
 cat > /etc/systemd/system/puma_${APP_NAME}.service <<SERVICE
 [Unit]
@@ -306,7 +310,7 @@ if [ "$puma_ready" -ne 1 ]; then
 fi
 
 # =============================================================================
-echo "=====> [9b/11] Create Sidekiq systemd service"
+echo "=====> [9b/12] Create Sidekiq systemd service"
 # =============================================================================
 cat > /etc/systemd/system/sidekiq_${APP_NAME}.service <<SERVICE
 [Unit]
@@ -334,7 +338,7 @@ systemctl enable sidekiq_${APP_NAME}
 systemctl restart sidekiq_${APP_NAME}
 
 # =============================================================================
-echo "=====> [10/11] Configure Nginx"
+echo "=====> [10/12] Configure Nginx"
 # =============================================================================
 cat > /etc/nginx/sites-available/$APP_NAME <<NGINX
 upstream puma_${APP_NAME} {
@@ -382,11 +386,53 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 
 # =============================================================================
-echo "=====> [11/11] Configure firewall"
+echo "=====> [11/12] Configure firewall"
 # =============================================================================
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw --force enable
+
+# =============================================================================
+echo "=====> [12/12] Install Ollama (private, CPU-friendly defaults)"
+# =============================================================================
+# Same machine as Rails. Listens on localhost only, so the firewall stays closed
+# on 11434. No database credentials. Cloud models stay off.
+if ! command -v ollama >/dev/null 2>&1; then
+  curl -fsSL https://ollama.com/install.sh | sh
+fi
+
+mkdir -p /etc/systemd/system/ollama.service.d
+cat > /etc/systemd/system/ollama.service.d/override.conf <<'UNIT'
+[Service]
+Environment="OLLAMA_HOST=127.0.0.1:11434"
+Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_CONTEXT_LENGTH=2048"
+UNIT
+
+systemctl daemon-reload
+systemctl enable ollama
+systemctl restart ollama
+
+# This droplet has about 2 GB of RAM and no GPU. qwen3:8b is 5 GB and gets
+# killed on load. qwen3:0.6b is the model that fits. Move to qwen3:8b only on
+# a machine with about 16 GB of free RAM, then raise the context length.
+if ! ollama list | grep -q '^qwen3:0.6b'; then
+  ollama pull qwen3:0.6b
+fi
+
+if ! grep -q '^OLLAMA_URL=' "$ENV_FILE"; then
+  cat >> "$ENV_FILE" <<'ENV'
+
+# Private Ollama on this machine. It has no database login. Do not open port 11434.
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen3:0.6b
+ENV
+  chown $DEPLOY_USER:$DEPLOY_USER $ENV_FILE
+  chmod 600 $ENV_FILE
+fi
+
+systemctl restart puma_${APP_NAME}
 
 # =============================================================================
 echo ""
@@ -410,4 +456,6 @@ echo "      cat /home/$DEPLOY_USER/.ssh/id_ed25519"
 echo "   2. Merge to main to run tests and deploy"
 echo "   3. Point ${APP_DOMAIN} and ${WWW_DOMAIN} at ${SERVER_IP}, then run:"
 echo "      certbot --nginx -d ${APP_DOMAIN} -d ${WWW_DOMAIN}"
+echo "   4. Ask uses local Ollama (qwen3:0.6b on this 2 GB droplet). Check it with:"
+echo "      curl http://127.0.0.1:11434/api/chat -d '{\"model\":\"qwen3:0.6b\",\"stream\":false,\"messages\":[{\"role\":\"user\",\"content\":\"Reply with the word ready.\"}]}'"
 echo ""
