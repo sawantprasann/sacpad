@@ -1013,6 +1013,7 @@ en:
     search: "Search"
     recent: "Recent"
     send: "Send"
+    thinking: "Thinking..."
     empty: "Try one of these"
     examples:
       - "How many beneficiaries are in Nimgaon?"

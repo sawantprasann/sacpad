@@ -29,6 +29,19 @@ class AssistantConversationTest < ActionDispatch::IntegrationTest
     assert_match "The assistant is not connected yet", response.body
   end
 
+  test "a question returns the answer without a page reload" do
+    sign_in @user
+    post assistant_conversations_path,
+      params: { body: "How many beneficiaries are in Nimgaon?" },
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :success
+    assert_match "<turbo-stream", response.body
+    assert_match "The assistant is not connected yet", response.body
+    assert_match %(target="chat-messages"), response.body
+    assert_match %(target="assistant-thinking"), response.body
+  end
+
   test "a user with no module access does not get the page" do
     sign_in @blocked
     get assistant_conversations_path

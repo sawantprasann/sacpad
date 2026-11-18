@@ -32,13 +32,18 @@ module Assistant
         return
       end
 
-      conversation = if params[:conversation_id].present?
+      @conversation = if params[:conversation_id].present?
         user_conversations.find(params[:conversation_id])
       else
         AssistantConversation.create!(user: current_user, organization: current_user.organization)
       end
-      Assistant::Ask.new(user: current_user, conversation: conversation, question: body).call
-      redirect_to assistant_conversation_path(conversation)
+      Assistant::Ask.new(user: current_user, conversation: @conversation, question: body).call
+      @assistant_message = @conversation.messages.from_assistant.order(:id).last
+      load_history
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to assistant_conversation_path(@conversation) }
+      end
     end
 
     private

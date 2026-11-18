@@ -1,0 +1,19 @@
+<p class="px-2 pb-2 text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("assistant.recent") %></p>
+<% if @conversations.any? %>
+  <ul class="space-y-1">
+    <% @conversations.each do |conversation| %>
+      <li data-title="<%= conversation.title %>" x-show="q === '' || $el.dataset.title.toLowerCase().includes(q.toLowerCase())">
+        <%= link_to conversation.title, assistant_conversation_path(conversation),
+              class: "block truncate rounded-lg px-3 py-2 text-sm #{@conversation&.id == conversation.id ? "bg-gray-100 font-medium text-gray-800 dark:bg-white/5 dark:text-white" : "text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"}" %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <ul class="space-y-1">
+    <% t("assistant.examples").each do |example| %>
+      <li>
+        <button type="button" data-prompt="<%= example %>" @click="$refs.prompt.value = $el.dataset.prompt; $refs.prompt.focus()" class="w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5"><%= example %></button>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
