@@ -4,6 +4,8 @@ require "sidekiq/cron/web"
 Rails.application.routes.draw do
   # Org-facing scope — clean, memorable root-level path (the primary, publicly-known login).
   devise_for :users, path: ""
+  # Public. Google's OAuth consent screen links here. No sign-in.
+  get "/privacy", to: "privacy#show", as: :privacy
   authenticate :admin do
     mount Sidekiq::Web => "/console/sidekiq"
   end
