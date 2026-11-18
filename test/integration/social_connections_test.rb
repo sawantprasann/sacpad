@@ -465,6 +465,137 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "youtube and x connect when their apps are configured" do
+    youtube = YoutubeCredentials.singleton_class
+    twitter = TwitterCredentials.singleton_class
+    youtube.alias_method(:__orig_configured?, :configured?)
+    twitter.alias_method(:__orig_configured?, :configured?)
+    YoutubeCredentials.define_singleton_method(:configured?) { true }
+    TwitterCredentials.define_singleton_method(:configured?) { true }
+
+    sign_in @admin
+    get social_connections_path
+    assert_response :success
+    assert_select "form[action='/auth/youtube'] button[data-network=youtube]", text: I18n.t("social.connect")
+    assert_select "form[action='/auth/twitter'] button[data-network=twitter]", text: I18n.t("social.connect")
+  ensure
+    youtube&.alias_method(:configured?, :__orig_configured?) if youtube&.method_defined?(:__orig_configured?)
+    twitter&.alias_method(:configured?, :__orig_configured?) if twitter&.method_defined?(:__orig_configured?)
+  end
+
+  test "youtube callback lists the channel and keeps the token out of the page" do
+    sign_in @admin
+    OmniAuth.config.mock_auth[:youtube] = OmniAuth::AuthHash.new(
+      provider: "youtube",
+      uid: "google-user-1",
+      info: { name: "Campaign" },
+      credentials: { token: "yt-access-secret", refresh_token: "yt-refresh-secret", expires_at: 1.hour.from_now.to_i }
+    )
+    api = SocialConnections::YoutubeApi.singleton_class
+    api.alias_method(:__orig_channels, :channels)
+    SocialConnections::YoutubeApi.define_singleton_method(:channels) do |_token|
+      [ {
+        "id" => "UC1",
+        "snippet" => {
+          "title" => "Campaign Channel",
+          "customUrl" => "@campaign",
+          "thumbnails" => { "default" => { "url" => "https://example.com/yt.jpg" } }
+        }
+      } ]
+    end
+
+    post "/auth/youtube"
+    follow_redirect!
+    assert_response :redirect
+    follow_redirect!
+    assert_response :success
+    assert_match "Campaign Channel", response.body
+    assert_match "@campaign", response.body
+    assert_match I18n.t("social.networks.youtube"), response.body
+    assert_no_match "yt-access-secret", response.body
+    assert_no_match "yt-refresh-secret", response.body
+
+    pending = ActsAsTenant.with_tenant(@org) { SocialMedia::PendingConnection.order(:id).last }
+    raw = SocialMedia::PendingConnection.connection.select_value(
+      SocialMedia::PendingConnection.sanitize_sql_array([ "SELECT payload FROM social_pending_connections WHERE id = ?", pending.id ])
+    )
+    assert_not_includes raw, "yt-access-secret"
+    assert pending.youtube?
+  ensure
+    api&.alias_method(:channels, :__orig_channels) if api&.method_defined?(:__orig_channels)
+    OmniAuth.config.mock_auth[:youtube] = nil
+  end
+
+  test "saving a youtube channel stores the refresh token encrypted" do
+    sign_in @admin
+    pending = nil
+    ActsAsTenant.with_tenant(@org) do
+      pending = @admin.pending_connections.create!(
+        provider: :youtube,
+        provider_uid: "google-user-1",
+        items: [ {
+          "id" => "UC1",
+          "name" => "Campaign Channel",
+          "username" => "campaign",
+          "link" => "https://www.youtube.com/@campaign",
+          "access_token" => "yt-access-secret",
+          "refresh_token" => "yt-refresh-secret",
+          "expires_at" => 2.hours.from_now.iso8601,
+          "picture" => { "data" => { "url" => "https://example.com/yt.jpg" } }
+        } ]
+      )
+    end
+
+    post save_social_connections_path, params: { pending_id: pending.id, page_ids: [ "UC1" ] }
+    assert_redirected_to social_connections_path
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.find_by!(provider: :youtube, external_id: "UC1")
+      assert_equal "Campaign Channel", page.name
+      assert_equal "campaign", page.username
+      assert_equal "https://www.youtube.com/@campaign", page.url
+      assert_equal "yt-access-secret", page.access_token
+      assert_equal "yt-refresh-secret", page.refresh_token
+      assert page.expires_at.present?
+      raw = SocialMedia::SocialPage.connection.select_value(
+        SocialMedia::SocialPage.sanitize_sql_array([ "SELECT access_token FROM social_pages WHERE id = ?", page.id ])
+      )
+      assert_not_includes raw, "yt-access-secret"
+    end
+  end
+
+  test "x callback keeps the account token out of the page" do
+    sign_in @admin
+    OmniAuth.config.mock_auth[:twitter] = OmniAuth::AuthHash.new(
+      provider: "twitter",
+      uid: "tw-9",
+      info: { name: "Campaign Desk", nickname: "campaign", image: "https://example.com/x.jpg" },
+      credentials: { token: "x-access-secret", refresh_token: "x-refresh-secret", expires_at: 1.hour.from_now.to_i }
+    )
+
+    post "/auth/twitter"
+    follow_redirect!
+    assert_response :redirect
+    follow_redirect!
+    assert_response :success
+    assert_match "Campaign Desk", response.body
+    assert_match "@campaign", response.body
+    assert_no_match "x-access-secret", response.body
+
+    post save_social_connections_path, params: {
+      pending_id: ActsAsTenant.with_tenant(@org) { SocialMedia::PendingConnection.order(:id).last.id },
+      page_ids: [ "tw-9" ]
+    }
+    assert_redirected_to social_connections_path
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.find_by!(provider: :twitter, external_id: "tw-9")
+      assert_equal "https://x.com/campaign", page.url
+      assert_equal "x-access-secret", page.access_token
+      assert_equal "x-refresh-secret", page.refresh_token
+    end
+  ensure
+    OmniAuth.config.mock_auth[:twitter] = nil
+  end
+
   test "callback keeps the page token out of the html and the database column" do
     sign_in @admin
     pages = [ {

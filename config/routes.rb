@@ -159,7 +159,7 @@ Rails.application.routes.draw do
     end
   end
 
-  # Social Media. Facebook Page connect. Publishing comes after a Page is saved.
+  # Social Media. Facebook, YouTube, and X connect. Publishing comes after an account is saved.
   get "/auth/:provider/callback", to: "social_connections#create"
   get "/auth/failure", to: "social_connections#failure"
   resources :social_posts, only: %i[index edit update destroy]

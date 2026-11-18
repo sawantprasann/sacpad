@@ -86,7 +86,13 @@
   <% if @targets.empty? %>
     <div class="rounded-2xl bg-white px-6 py-14 text-center shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
       <p class="text-base font-semibold text-gray-900 dark:text-white"><%= t("social.no_posts_title") %></p>
-      <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500"><%= @page.instagram? ? t("social.instagram_connected_body") : t("social.no_posts_body") %></p>
+      <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500"><%= if @page.instagram?
+            t("social.instagram_connected_body")
+          elsif @page.youtube? || @page.twitter?
+            t("social.account_connected_body")
+          else
+            t("social.no_posts_body")
+          end %></p>
     </div>
   <% else %>
     <div class="space-y-3">

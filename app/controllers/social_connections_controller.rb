@@ -6,6 +6,8 @@ class SocialConnectionsController < ApplicationController
   def index
     @pages = policy_scope(SocialMedia::SocialPage).includes(:owner).order(:name)
     @facebook_ready = MetaApi.configured?
+    @youtube_ready = YoutubeCredentials.configured?
+    @twitter_ready = TwitterCredentials.configured?
   end
 
   def show
@@ -32,18 +34,19 @@ class SocialConnectionsController < ApplicationController
 
   def create
     auth = request.env["omniauth.auth"]
-    unless auth&.provider == "facebook"
+    connector = CONNECTORS[auth&.provider]
+    unless connector
       redirect_to social_connections_path, alert: t("social.unsupported")
       return
     end
 
-    pending = SocialConnections::ConnectFacebook.call(user: current_user, auth: auth)
+    pending = connector.call(user: current_user, auth: auth)
     if pending
       redirect_to choose_social_connections_path(pending_id: pending.id)
     else
-      redirect_to social_connections_path, alert: t("social.no_pages")
+      redirect_to social_connections_path, alert: t(empty_notice(auth.provider))
     end
-  rescue MetaApi::Graph::Error => e
+  rescue MetaApi::Graph::Error, SocialConnections::YoutubeApi::Error => e
     Rails.logger.warn("[social] connect failed: #{e.class}: #{e.message.to_s.truncate(200)}")
     redirect_to social_connections_path, alert: t("social.failed")
   end
@@ -55,17 +58,26 @@ class SocialConnectionsController < ApplicationController
   def choose
     pending = fresh_pending
     @pending_id = pending.id
+    @provider = pending.provider
     @pages = present_pages(pending)
   end
 
   def save
     pending = fresh_pending
-    saved = SocialConnections::SaveFacebookPages.call(
-      user: current_user,
-      pending: pending,
-      page_ids: params[:page_ids],
-      instagram_ids: params[:instagram_ids]
-    )
+    saved = if pending.facebook?
+      SocialConnections::SaveFacebookPages.call(
+        user: current_user,
+        pending: pending,
+        page_ids: params[:page_ids],
+        instagram_ids: params[:instagram_ids]
+      )
+    else
+      SocialConnections::SaveAccounts.call(
+        user: current_user,
+        pending: pending,
+        page_ids: params[:page_ids]
+      )
+    end
     if saved.empty?
       redirect_to choose_social_connections_path(pending_id: pending.id), alert: t("social.pick_one")
     else
@@ -176,6 +188,16 @@ class SocialConnectionsController < ApplicationController
     [ images.first(4), video ]
   end
 
+  CONNECTORS = {
+    "facebook" => SocialConnections::ConnectFacebook,
+    "youtube" => SocialConnections::ConnectYoutube,
+    "twitter" => SocialConnections::ConnectTwitter
+  }.freeze
+
+  def empty_notice(provider)
+    { "youtube" => "social.no_youtube", "twitter" => "social.no_twitter" }.fetch(provider, "social.no_pages")
+  end
+
   def fresh_pending
     current_user.pending_connections.fresh.find(params[:pending_id])
   end
@@ -186,6 +208,7 @@ class SocialConnectionsController < ApplicationController
       ig = page["instagram_business_account"]
       {
         id: page["id"].to_s,
+        provider: pending.provider,
         name: page["name"],
         category: page["category"],
         username: page["username"],

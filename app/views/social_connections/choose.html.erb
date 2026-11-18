@@ -1,26 +1,39 @@
-<% content_for :title, t("social.choose_title") %>
+<% network = @provider.to_s.presence || "facebook" %>
+<% facebook = network == "facebook" %>
+<% content_for :title, facebook ? t("social.choose_title") : t("social.choose_account_title", network: t("social.networks.#{network}")) %>
 <% ig_count = @pages.count { |page| page[:instagram] } %>
+<% washes = {
+     "facebook" => "linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)",
+     "youtube" => "linear-gradient(135deg, #ffb347 0%, #ff5a5f 100%)",
+     "twitter" => "linear-gradient(135deg, #9bb0d1 0%, #5d7294 100%)"
+   } %>
+<% pills = {
+     "facebook" => "bg-[#1877F2]/10 text-[#1877F2]",
+     "youtube" => "bg-[#FF0000]/10 text-[#CC0000]",
+     "twitter" => "bg-gray-900/10 text-gray-800 dark:bg-white/10 dark:text-white"
+   } %>
 <% check = "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-gray-300 text-transparent peer-checked:border-transparent peer-checked:bg-[var(--org-party-color)] peer-checked:text-[var(--org-party-contrast)] dark:border-white/25" %>
 
 <%= render layout: "ui/campaign_hero", locals: {
       kicker: t("social.kicker"),
-      title: t("social.choose_title"),
-      subtitle: t("social.choose_subtitle"),
+      title: facebook ? t("social.choose_title") : t("social.choose_account_title", network: t("social.networks.#{network}")),
+      subtitle: facebook ? t("social.choose_subtitle") : t("social.choose_account_subtitle"),
       meta: current_user.organization.name
     } do %><% end %>
 
 <%= form_with url: save_social_connections_path, method: :post, class: "mt-5", data: { controller: "filter-list", action: "change->filter-list#refresh" } do %>
   <%= hidden_field_tag :pending_id, @pending_id %>
 
-  <div class="grid grid-cols-2 gap-3 lg:grid-cols-3">
-    <article class="relative overflow-hidden rounded-2xl px-4 py-4 text-white shadow-sm" style="background: linear-gradient(135deg, #7ec8ff 0%, #4c8dff 100%)">
+  <div class="grid grid-cols-2 gap-3 <%= "lg:grid-cols-3" if facebook %>">
+    <article class="relative overflow-hidden rounded-2xl px-4 py-4 text-white shadow-sm" style="background: <%= washes[network] || washes["facebook"] %>">
       <span class="pointer-events-none absolute rounded-full" style="width: 6rem; height: 6rem; right: -1.6rem; bottom: -2rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
       <div class="relative flex items-center justify-between gap-3">
-        <p class="text-sm font-medium text-white/95"><%= t("social.choose_facebook_pages") %></p>
-        <%= render "social_connections/mark", provider: "facebook", size: "h-8 w-8 text-sm", on_color: true %>
+        <p class="text-sm font-medium text-white/95"><%= facebook ? t("social.choose_facebook_pages") : t("social.networks.#{network}") %></p>
+        <%= render "social_connections/mark", provider: network, size: "h-8 w-8 text-sm", on_color: true %>
       </div>
       <p class="relative mt-4 text-3xl font-semibold leading-none tabular-nums"><%= @pages.size %></p>
     </article>
+    <% if facebook %>
     <article class="relative overflow-hidden rounded-2xl px-4 py-4 text-white shadow-sm" style="background: linear-gradient(135deg, #ffb199 0%, #ff6f91 100%)">
       <span class="pointer-events-none absolute rounded-full" style="width: 6rem; height: 6rem; right: -1.6rem; bottom: -2rem; background: rgba(255,255,255,0.28);" aria-hidden="true"></span>
       <div class="relative flex items-center justify-between gap-3">
@@ -29,6 +42,7 @@
       </div>
       <p class="relative mt-4 text-3xl font-semibold leading-none tabular-nums"><%= ig_count %></p>
     </article>
+    <% end %>
     <article class="col-span-2 flex items-center justify-between gap-4 rounded-2xl bg-white px-4 py-4 shadow-sm ring-1 ring-gray-200 lg:col-span-1 dark:bg-gray-900 dark:ring-white/10">
       <div>
         <p class="text-sm font-medium text-gray-500"><%= t("social.choose_selection") %></p>
@@ -72,14 +86,15 @@
           data-name="<%= page[:name].to_s %> <%= page[:username].to_s %> <%= page[:category].to_s %> <%= ig&.dig(:username) %> <%= ig&.dig(:name) %>">
         <label class="flex cursor-pointer items-center gap-4 p-4 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-[-2px] has-[:focus-visible]:outline-[var(--org-party-color)] has-[:checked]:bg-[color-mix(in_srgb,var(--org-party-color)_8%,transparent)]">
           <%= check_box_tag "page_ids[]", page[:id], false, id: "page_#{page[:id]}", class: "page-pick peer sr-only" %>
-          <%= render "social_connections/avatar", name: page[:name], url: page[:picture_url], provider: "facebook" %>
+          <%= render "social_connections/avatar", name: page[:name], url: page[:picture_url], provider: page[:provider].presence || "facebook" %>
           <span class="min-w-0 flex-1">
             <span class="block truncate text-base font-semibold text-gray-900 dark:text-white"><%= page[:name].presence || t("social.unnamed") %></span>
             <% if page[:username].present? %>
               <span class="mt-0.5 block truncate text-sm text-gray-500">@<%= page[:username] %></span>
             <% end %>
             <span class="mt-2 flex flex-wrap items-center gap-1.5">
-              <span class="inline-flex items-center rounded-full bg-[#1877F2]/10 px-2 py-0.5 text-xs font-medium text-[#1877F2]"><%= t("social.networks.facebook") %></span>
+              <% page_network = page[:provider].presence || "facebook" %>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium <%= pills[page_network] || pills["facebook"] %>"><%= t("social.networks.#{page_network}") %></span>
               <% if page[:category].present? %>
                 <span class="inline-flex max-w-full truncate rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-white/10 dark:text-gray-300"><%= page[:category] %></span>
               <% end %>
@@ -125,7 +140,7 @@
     <div class="flex flex-wrap items-center gap-2">
       <%= link_to t("common.cancel"), social_connections_path, class: "#{ta_btn_secondary} inline-flex items-center" %>
       <button type="submit" disabled data-filter-list-target="save" class="<%= ta_btn_primary %> cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" style="background: var(--org-party-color); color: var(--org-party-contrast)">
-        <%= t("social.save") %>
+        <%= facebook ? t("social.save") : t("social.save_accounts") %>
       </button>
     </div>
   </div>
