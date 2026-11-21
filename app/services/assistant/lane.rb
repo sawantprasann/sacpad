@@ -5,14 +5,15 @@ module Assistant
     LOCK_KEY = 842_184_21
 
     def self.exclusive
-      connection = ActiveRecord::Base.connection
-      locked = connection.select_value("SELECT pg_try_advisory_lock(#{LOCK_KEY})")
-      return false if locked == false || locked == "f"
+      ActiveRecord::Base.connection_pool.with_connection do |connection|
+        locked = connection.select_value("SELECT pg_try_advisory_lock(#{LOCK_KEY})")
+        return false unless locked == true || locked == "t"
 
-      begin
-        yield
-      ensure
-        connection.select_value("SELECT pg_advisory_unlock(#{LOCK_KEY})")
+        begin
+          yield
+        ensure
+          connection.select_value("SELECT pg_advisory_unlock(#{LOCK_KEY})")
+        end
       end
     end
   end

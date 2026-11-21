@@ -13,11 +13,7 @@ module Assistant
       conversation = AssistantConversation.unscoped.find(message.assistant_conversation_id)
       ActsAsTenant.with_tenant(conversation.organization) do
         result = Lane.exclusive do
-          answered_ids = conversation.messages.from_assistant.where.not(reply_to_id: nil).select(:reply_to_id)
-          earlier = conversation.messages.from_user.where("id < ?", message.id).where.not(id: answered_ids).exists?
-          if earlier
-            :wait
-          elsif conversation.messages.from_assistant.exists?(reply_to_id: message.id)
+          if conversation.messages.from_assistant.exists?(reply_to_id: message.id)
             :skip
           else
             Ask.new(
@@ -31,7 +27,8 @@ module Assistant
           end
         end
 
-        if result == false || result == :wait
+        if result == false
+          Rails.logger.info("Assistant answer waiting for the model: message=#{user_message_id} try=#{tries}")
           self.class.set(wait: 2.seconds).perform_later(user_message_id, pending_id, locale, tries + 1) if tries < 200
           return
         end

@@ -55,6 +55,24 @@ class AssistantConversationTest < ActionDispatch::IntegrationTest
     assert_equal 2, AssistantMessage.unscoped.from_assistant.where(assistant_conversation_id: conversation.id).count
   end
 
+  test "an older question without a reply does not block the next one" do
+    sign_in @user
+    get assistant_conversations_path
+    conversation = AssistantConversation.unscoped.order(:id).last
+    ActsAsTenant.with_tenant(@org) do
+      conversation.messages.create!(organization: @org, speaker: :from_user, body: "old question that never got a reply")
+    end
+
+    assert_enqueued_jobs 1, only: Assistant::AnswerJob do
+      post assistant_conversations_path,
+        params: { body: "What is the past result?", conversation_id: conversation.id, pending_id: "pending-33333333-3333-3333-3333-333333333333" },
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    perform_enqueued_jobs
+    assert_equal 1, AssistantMessage.unscoped.from_assistant.where(assistant_conversation_id: conversation.id).count
+  end
+
   test "a user with no module access does not get the page" do
     sign_in @blocked
     get assistant_conversations_path
