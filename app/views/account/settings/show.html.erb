@@ -1,0 +1,224 @@
+<% content_for :title, t("nav.settings") %>
+<% breadcrumb t("nav.settings") %>
+<% networks = [
+     { key: "facebook", ready: true },
+     { key: "instagram", ready: true },
+     { key: "youtube", ready: false },
+     { key: "twitter", ready: false }
+   ] %>
+<% nav_link = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5" %>
+<% nav_active = "flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2.5 text-sm font-medium text-gray-900 dark:bg-white/10 dark:text-white" %>
+
+<div class="grid items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]" x-data="{ section: window.location.hash === '#social' ? 'social' : 'account', preview: '', fileName: '' }">
+  <aside class="rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="mb-3 flex items-center gap-3 px-2 py-2">
+      <img x-show="preview" x-cloak :src="preview" class="h-10 w-10 rounded-full object-cover" alt="">
+      <% if current_user.photo.attached? %>
+        <%= image_tag current_user.photo, class: "h-10 w-10 rounded-full object-cover", alt: "", "x-show": "!preview" %>
+      <% else %>
+        <span x-show="!preview" class="inline-flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white" style="background: #0b1f44"><%= current_user.name.to_s.first&.upcase %></span>
+      <% end %>
+      <div class="min-w-0">
+        <p class="truncate text-sm font-semibold text-gray-900 dark:text-white"><%= current_user.name %></p>
+        <p class="truncate text-xs text-gray-500 dark:text-gray-400"><%= current_user.role.name %></p>
+      </div>
+    </div>
+    <p class="px-3 pt-2 pb-2 text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("settings.nav_account") %></p>
+    <nav class="flex flex-col gap-1" aria-label="<%= t("nav.settings") %>">
+      <button type="button" @click="section = 'account'" :aria-current="section === 'account' ? 'page' : false"
+              class="w-full cursor-pointer text-left <%= nav_link %>" :class="section === 'account' ? '<%= nav_active %>' : '<%= nav_link %>'">
+        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="12" cy="8" r="3"/>
+          <path stroke-linecap="round" d="M6 19.5c.8-3 3-4.5 6-4.5s5.2 1.5 6 4.5"/>
+        </svg>
+        <%= t("settings.nav_account") %>
+      </button>
+      <% if @social_enabled %>
+        <button type="button" @click="section = 'social'" :aria-current="section === 'social' ? 'page' : false"
+                class="w-full cursor-pointer text-left <%= nav_link %>" :class="section === 'social' ? '<%= nav_active %>' : '<%= nav_link %>'">
+          <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h8M12 8v8"/>
+            <circle cx="12" cy="12" r="8"/>
+          </svg>
+          <%= t("settings.nav_social") %>
+        </button>
+      <% end %>
+    </nav>
+  </aside>
+
+  <div class="min-w-0 space-y-6">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white/90" x-text="section === 'social' ? '<%= j t("settings.nav_social") %>' : '<%= j t("settings.title") %>'"><%= t("settings.title") %></h1>
+
+    <div x-show="section === 'account'" class="space-y-6">
+    <section id="profile" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <h2 class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("settings.profile") %></h2>
+      <%= form_with model: current_user, url: account_settings_path, method: :patch, id: "account_profile", class: "mt-5" do |f| %>
+        <% profile_messages = %i[name email phone photo base].flat_map { |attribute| current_user.errors.full_messages_for(attribute) } %>
+        <% if profile_messages.any? %>
+          <div class="mb-4 rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= profile_messages.to_sentence %></div>
+        <% end %>
+
+        <div class="flex flex-wrap items-center gap-4">
+          <img x-show="preview" x-cloak :src="preview" class="h-14 w-14 rounded-full object-cover" alt="">
+          <% if current_user.photo.attached? && current_user.photo.blob&.persisted? %>
+            <%= image_tag current_user.photo, class: "h-14 w-14 rounded-full object-cover", alt: "", "x-show": "!preview" %>
+          <% else %>
+            <span x-show="!preview" class="inline-flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-white" style="background: #0b1f44"><%= current_user.name.to_s.first&.upcase %></span>
+          <% end %>
+          <div>
+            <label class="<%= ta_btn_secondary %> cursor-pointer">
+              <%= t("settings.upload_photo") %>
+              <%= f.file_field :photo, accept: "image/png,image/jpeg,image/webp", class: "sr-only",
+                    "x-on:change": "const file = $event.target.files[0]; if (!file) return; fileName = file.name; preview = URL.createObjectURL(file); $el.form.requestSubmit()" %>
+            </label>
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400"><%= t("settings.photo_hint") %></p>
+            <p class="mt-1 text-xs text-gray-700 dark:text-gray-300" x-show="fileName" x-cloak>
+              <span class="sr-only"><%= t("settings.photo_chosen") %></span>
+              <span x-text="fileName"></span>
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-4">
+          <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+            <%= f.label :name, t("settings.full_name"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= f.text_field :name, autocomplete: "name", required: true, class: ta_field_classes %>
+          </div>
+          <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+            <%= f.label :email, t("common.email"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= f.email_field :email, autocomplete: "email", required: true, class: ta_field_classes %>
+          </div>
+          <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+            <%= f.label :phone, t("common.phone"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+            <%= f.telephone_field :phone, autocomplete: "tel", class: ta_field_classes %>
+          </div>
+          <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="workspace_name"><%= t("settings.workspace") %></label>
+            <input id="workspace_name" type="text" value="<%= current_user.organization.name %>" disabled class="<%= ta_field_classes %> disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 dark:disabled:bg-white/5">
+          </div>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+          <%= f.submit t("common.save_changes"), class: "#{ta_btn_primary} cursor-pointer" %>
+        </div>
+      <% end %>
+    </section>
+
+    <section id="security" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+      <h2 class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("settings.security") %></h2>
+      <div class="mt-2 divide-y divide-gray-100 dark:divide-white/10">
+        <div class="py-4">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white/90"><%= t("nav.change_password") %></h3>
+          <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"><%= t("settings.change_password_hint") %></p>
+          <%= form_with model: current_user, url: account_password_path, method: :patch, id: "account_password", class: "mt-4 space-y-4" do |f| %>
+            <% password_messages = %i[current_password password password_confirmation].flat_map { |attribute| current_user.errors.full_messages_for(attribute) } %>
+            <% if password_messages.any? %>
+              <div class="rounded-lg border border-error-500/30 bg-error-50 px-4 py-2 text-sm text-error-500"><%= password_messages.to_sentence %></div>
+            <% end %>
+            <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+              <%= f.label :current_password, t("account.current_password"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= f.password_field :current_password, autocomplete: "current-password", required: true, class: ta_field_classes %>
+            </div>
+            <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+              <%= f.label :password, t("account.new_password"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= f.password_field :password, autocomplete: "new-password", required: true, class: ta_field_classes %>
+            </div>
+            <div class="grid gap-2 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-center">
+              <%= f.label :password_confirmation, t("account.confirm_password"), class: "text-sm font-medium text-gray-700 dark:text-gray-300" %>
+              <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true, class: ta_field_classes %>
+            </div>
+            <div class="flex justify-end">
+              <%= f.submit t("account.update_password"), class: "#{ta_btn_primary} cursor-pointer" %>
+            </div>
+          <% end %>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white/90"><%= t("nav.this_sign_in") %></h3>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"><%= t("settings.this_sign_in_hint") %></p>
+          </div>
+          <p class="text-sm text-gray-700 tabular-nums dark:text-gray-300"><%= current_user.current_sign_in_at ? l(current_user.current_sign_in_at, format: :stamp) : t("settings.never") %></p>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+          <div>
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white/90"><%= t("settings.previous_sign_in") %></h3>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400"><%= t("settings.previous_sign_in_hint") %></p>
+          </div>
+          <p class="text-sm text-gray-700 tabular-nums dark:text-gray-300"><%= current_user.last_sign_in_at ? l(current_user.last_sign_in_at, format: :stamp) : t("settings.never") %></p>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <% if @social_enabled %>
+      <section id="social" x-show="section === 'social'" x-cloak class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 class="text-xs font-medium tracking-wide text-gray-400 uppercase"><%= t("settings.social_title") %></h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400"><%= t("settings.social_subtitle") %></p>
+          </div>
+          <%= link_to t("settings.social_open"), social_connections_path, class: ta_text_link %>
+        </div>
+        <% unless @can_connect %>
+          <p class="mt-3 text-xs text-gray-500 dark:text-gray-400"><%= t("settings.social_read_only") %></p>
+        <% end %>
+
+        <div class="mt-2 divide-y divide-gray-100 dark:divide-white/10">
+          <% networks.each do |network| %>
+            <% rows = @pages.select { |page| page.provider == network[:key] && !page.connection_disconnected? } %>
+            <div class="py-4">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex min-w-0 items-center gap-3">
+                  <%= render "social_connections/mark", provider: network[:key], size: "h-10 w-10 text-sm" %>
+                  <div class="min-w-0">
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white/90"><%= t("social.networks.#{network[:key]}") %></h3>
+                    <p class="mt-0.5 text-xs leading-5 text-gray-500 dark:text-gray-400"><%= t("settings.networks.#{network[:key]}") %></p>
+                  </div>
+                </div>
+                <div class="shrink-0">
+                  <% if network[:ready] && @can_connect && @facebook_ready %>
+                    <%= button_to t("social.connect"), "/auth/facebook", method: :post,
+                          form: { data: { turbo: false }, class: "m-0" },
+                          class: "#{ta_btn_secondary} min-h-11 cursor-pointer",
+                          data: { network: network[:key] },
+                          aria: { label: t("social.connect_network", network: t("social.networks.#{network[:key]}")) } %>
+                  <% elsif network[:ready] && @can_connect %>
+                    <button type="button" disabled data-network="<%= network[:key] %>" title="<%= t("social.not_configured") %>"
+                            class="<%= ta_btn_secondary %> min-h-11 cursor-not-allowed opacity-60">
+                      <%= t("social.connect") %>
+                    </button>
+                  <% elsif !network[:ready] %>
+                    <button type="button" disabled data-network="<%= network[:key] %>"
+                            class="<%= ta_btn_secondary %> min-h-11 cursor-not-allowed opacity-60">
+                      <%= t("social.coming_next") %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+
+              <% if rows.any? %>
+                <ul class="mt-3 space-y-2 sm:pl-13">
+                  <% rows.each do |page| %>
+                    <li class="flex items-center justify-between gap-3 rounded-xl bg-gray-50 px-3 py-2.5 dark:bg-white/5">
+                      <div class="flex min-w-0 flex-1 items-center gap-3">
+                        <%= link_to page.name.presence || t("social.unnamed"), social_connection_path(page), class: "#{ta_text_link} min-w-0 truncate" %>
+                        <span class="shrink-0"><%= render "social_connections/status", page: page %></span>
+                      </div>
+                      <% if @can_connect %>
+                        <%= button_to t("social.disconnect"), social_connection_path(page), method: :delete,
+                              form: { class: "m-0 shrink-0", data: { turbo_confirm: t("social.disconnect_confirm") } },
+                              class: "inline-flex cursor-pointer items-center justify-center rounded-lg border border-error-200 bg-white px-3 py-1.5 text-xs font-medium text-error-600 hover:bg-error-50 dark:border-error-500/40 dark:bg-transparent dark:hover:bg-error-500/10" %>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <p class="mt-3 text-xs text-gray-500 sm:pl-13 dark:text-gray-400"><%= t("social.not_connected") %></p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</div>

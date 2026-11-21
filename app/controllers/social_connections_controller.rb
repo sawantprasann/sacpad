@@ -124,7 +124,7 @@ class SocialConnectionsController < ApplicationController
     if page.facebook?
       policy_scope(SocialMedia::SocialPage).instagram.where(parent_external_id: page.external_id).find_each(&:disconnect!)
     end
-    redirect_to social_connections_path, notice: t("social.disconnected")
+    redirect_back_or_to social_connections_path, notice: t("social.disconnected")
   end
 
   private

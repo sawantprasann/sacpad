@@ -56,7 +56,7 @@
               <%= render "ui/locale_switcher" %>
             </div>
             <div class="border-t border-amber-100 p-2 dark:border-white/10">
-              <%= link_to t("nav.change_password"), edit_account_password_path,
+              <%= link_to t("nav.settings"), account_settings_path,
                     class: "block whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-50 dark:text-amber-100 dark:hover:bg-white/5" %>
               <%= button_to destroy_user_session_path, method: :delete, form: { class: "w-full" },
                     class: "flex w-full cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5" do %>

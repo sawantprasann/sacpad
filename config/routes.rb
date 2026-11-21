@@ -197,6 +197,7 @@ Rails.application.routes.draw do
 
   # Signed-in password change. Devise's /password/edit is the emailed reset link.
   namespace :account do
+    resource :settings, only: %i[show update]
     resource :password, only: %i[edit update]
   end
 
