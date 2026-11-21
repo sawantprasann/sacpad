@@ -1,1 +1,11 @@
-<img src="https://www.gstatic.com/lamda/images/gemini_sparkle_aurora_33f86dc0c0257da337c63.svg" alt="" class="<%= local_assigns[:class_name] || "h-4 w-4" %>">
+<% spark_id = "ai-spark-#{SecureRandom.hex(4)}" %>
+<svg class="<%= local_assigns[:class_name] || "h-4 w-4" %>" viewBox="0 0 24 24" aria-hidden="true">
+  <defs>
+    <linearGradient id="<%= spark_id %>" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4C8DFF"/>
+      <stop offset="0.48" stop-color="#8A6CFF"/>
+      <stop offset="1" stop-color="#E86AA8"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#<%= spark_id %>)" d="M12 1.2C12.35 6.2 13.7 8.7 18.4 10.4 20.3 11.1 22 11.5 22.8 12 22 12.5 20.3 12.9 18.4 13.6 13.7 15.3 12.35 17.8 12 22.8 11.65 17.8 10.3 15.3 5.6 13.6 3.7 12.9 2 12.5 1.2 12 2 11.5 3.7 11.1 5.6 10.4 10.3 8.7 11.65 6.2 12 1.2Z"/>
+</svg>
