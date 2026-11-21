@@ -38,14 +38,24 @@ module Assistant
         return execute(choice.fetch(:tool), choice.fetch(:arguments), choice.fetch(:place))
       end
 
-      return Answers.not_configured unless client.configured?
+      named = Catalog.find(user, Intent.tool_name(question))
+      return Answers.not_configured if !client.configured? && speech_or_unknown?(named)
       return Answers.no_access unless Catalog.available?(user)
 
-      call = client.tool_call(messages: prompt, tools: Catalog.schemas_for(user))
-      tool = Catalog.find(user, call&.name)
+      call = model_call(named)
+      tool = named || Catalog.find(user, call&.name)
       return Answers.not_understood if tool.nil?
 
-      arguments = tool.sanitize(call.arguments)
+      arguments = tool.sanitize((call&.arguments || {}).merge(details_for(tool)))
+      mentioned = finder.mentioned(question)
+      if mentioned.status == :many
+        remember_pending(tool, arguments, mentioned.candidates)
+        return Answers.which_place(mentioned.candidates.map { |record| finder.choice_label(record) })
+      end
+      if tool.tool_name == "count_beneficiaries" && Intent.all?(question) && mentioned.status == :none
+        return execute(tool, arguments, nil)
+      end
+
       case (place = locate(tool, arguments))
       when :ask then Answers.ask_place
       when :missing then Answers.place_missing(arguments["place_name"])
@@ -55,6 +65,51 @@ module Assistant
       else
         execute(tool, arguments, place)
       end
+    end
+
+    def speech_or_unknown?(tool)
+      tool.nil? || tool.tool_name == "draft_speech"
+    end
+
+    # A named menu is answered from the database. The model is asked only when
+    # the question does not already name the place, because qwen3:0.6b follows
+    # one sentence shape and otherwise returns no tool.
+    def model_call(named)
+      mentioned = named ? finder.mentioned(question) : nil
+      mode = named.respond_to?(:place_mode) ? named.place_mode : :required if named
+      return if named && (mentioned.status != :none || Intent.all?(question) || mode != :required)
+
+      client.tool_call(messages: prompt, tools: Catalog.schemas_for(user))
+    rescue OllamaClient::Error => error
+      raise unless named
+
+      Rails.logger.warn("Assistant Ollama failed: #{error.class}: #{error.message}")
+      nil
+    end
+
+    def details_for(tool)
+      text = PlaceFinder.fold(question)
+      args = {}
+      case tool.tool_name
+      when "cadre_activities"
+        CadreProgram::CadreActivity::CATEGORY_LABELS.each do |key, label|
+          args["category"] = key if text.include?(PlaceFinder.fold(label))
+        end
+      when "list_voters"
+        ListVoters::STATUSES.each { |status| args["sentiment"] = status if text.include?(status) }
+      when "local_admin_contact"
+        args["role"] = "sarpanch" if text.include?("sarpanch") || text.include?("सरपंच")
+      when "count_beneficiaries"
+        %w[in_progress closed blocked].each { |status| args["status"] = status if text.include?(status.tr("_", " ")) }
+      end
+
+      mentioned = finder.mentioned(question)
+      if mentioned.status == :one
+        place = mentioned.place
+        args["place_name"] = place.is_a?(Booth) ? place.number.to_s : place.name
+        args["place_kind"] = place.class.name.downcase
+      end
+      args
     end
 
     def locate(tool, arguments)
@@ -163,6 +218,7 @@ module Assistant
         draft: outcome.draft || false,
         link_path: outcome.link_path,
         link_label: outcome.link_label,
+        details: outcome.details || {},
         reply_to: @user_message
       )
     end

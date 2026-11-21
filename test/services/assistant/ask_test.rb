@@ -97,6 +97,39 @@ class AssistantAskTest < ActiveSupport::TestCase
     end
   end
 
+  test "all beneficiaries are counted without a model tool call" do
+    ActsAsTenant.with_tenant(@org) do
+      KitchenCabinet::Ticket.create!(owner: @user, ticket_category: @category, person_name: "Sachin Itkar", village: "Donja", reported_at: Date.current)
+      KitchenCabinet::Ticket.create!(owner: @user, ticket_category: @category, person_name: "Asha Jadhav", village: "Nimgaon", reported_at: Date.current)
+      conversation = AssistantConversation.create!(user: @user, organization: @org)
+      client = fake("count_karyakartas", "place_name" => "SONARI", "place_kind" => "village")
+      answer = Assistant::Ask.new(
+        user: @user, conversation: conversation, question: "give me all beneficiaries", client: client
+      ).call
+      assert_includes answer.body, "There are 2 beneficiaries."
+      assert_includes answer.body, "Sachin Itkar"
+      assert_includes answer.body, "Asha Jadhav"
+      assert_not_includes answer.body, "karyakarta"
+      assert_nil client.tools
+    end
+  end
+
+  test "a beneficiary question is not answered as a karyakarta count" do
+    donja = @assembly.villages.create!(name: "Donja")
+    ActsAsTenant.with_tenant(@org) do
+      KitchenCabinet::Ticket.create!(owner: @user, ticket_category: @category, person_name: "Sachin Itkar", village: "Donja", reported_at: Date.current)
+      conversation = AssistantConversation.create!(user: @user, organization: @org)
+      answer = Assistant::Ask.new(
+        user: @user, conversation: conversation, question: "how many beneficiaries are in DONJA?",
+        client: fake("count_karyakartas", "place_name" => "DONJA", "place_kind" => "village")
+      ).call
+      assert_includes answer.body, "1 beneficiary"
+      assert_includes answer.body, "Sachin Itkar"
+      assert_not_includes answer.body, "karyakarta"
+      assert_equal donja, conversation.reload.place
+    end
+  end
+
   test "two villages with the same name ask which one" do
     @same_name.update!(name: "Nimgaon")
     ActsAsTenant.with_tenant(@org) do

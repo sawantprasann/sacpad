@@ -27,7 +27,18 @@ class AssistantConversationTest < ActionDispatch::IntegrationTest
     post assistant_conversations_path, params: { body: "What is the past result?" }
     assert_response :redirect
     follow_redirect!
-    assert_match "The assistant is not connected yet", response.body
+    assert_match "No past result is stored for this constituency.", response.body
+    assert_no_match "assistant-launcher", response.body
+
+    post assistant_conversations_path, params: { body: "How many beneficiaries are in Nimgaon?" }
+    follow_redirect!
+    assert_match "Open", response.body
+    assert_match "In progress", response.body
+    assert_match "Closed", response.body
+    assert_match "Blocked", response.body
+
+    get root_path
+    assert_match "assistant-launcher", response.body
   end
 
   test "another question can be sent while the first is still answering" do

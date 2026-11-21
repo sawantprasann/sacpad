@@ -52,7 +52,7 @@ export default class extends Controller {
     const row = document.createElement("div")
     row.className = "flex justify-end"
     const text = document.createElement("p")
-    text.className = "max-w-xl rounded-2xl bg-gray-100 px-4 py-3 text-sm leading-6 text-gray-700 dark:bg-gray-800 dark:text-gray-200"
+    text.className = "max-w-[85%] rounded-2xl rounded-br-md bg-[#465fff] px-3.5 py-2.5 text-sm leading-6 text-white"
     text.textContent = body
     row.appendChild(text)
     this.listTarget.appendChild(row)

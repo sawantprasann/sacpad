@@ -33,10 +33,23 @@ module Assistant
         body = "#{body} #{I18n.t("assistant.answers.beneficiaries.breakdown", **status_counts.symbolize_keys)}"
       end
       body = "#{body} #{I18n.t("assistant.answers.beneficiaries.named", names: names.join(", "))}" if names.any?
+      stats = status_counts.to_h.map do |key, value|
+        { "key" => key.to_s, "label" => I18n.t("assistant.stat_#{key}"), "value" => value }
+      end
       Outcome.new(
         body: body,
         link_path: link_path,
-        link_label: (I18n.t("assistant.open_list") if link_path)
+        link_label: (I18n.t("assistant.open_list") if link_path),
+        details: {
+          "headline" => I18n.t(
+            "assistant.answers.beneficiaries.#{key}",
+            count: count,
+            place: place,
+            status: I18n.t("assistant.ticket_status.#{status}", default: status)
+          ),
+          "stats" => (stats if status.nil? && status_counts),
+          "names" => names
+        }.compact
       )
     end
 

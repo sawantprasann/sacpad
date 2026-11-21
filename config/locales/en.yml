@@ -1036,6 +1036,13 @@ en:
     none: "none"
     draft_label: "Draft for your speech"
     open_list: "Open the full list"
+    open_chat: "Ask"
+    close_chat: "Close"
+    names_label: "Names"
+    stat_open: "Open"
+    stat_in_progress: "In progress"
+    stat_closed: "Closed"
+    stat_blocked: "Blocked"
     open_village: "Open the village record"
     open_result: "Open the past result"
     ticket_status:
@@ -1061,6 +1068,12 @@ en:
         voter_booth_status:
           one: "%{place} has 1 %{status} beneficiary linked to a voter in this booth. Tickets without a voter are not included."
           other: "%{place} has %{count} %{status} beneficiaries linked to a voter in this booth. Tickets without a voter are not included."
+        all:
+          one: "There is 1 beneficiary."
+          other: "There are %{count} beneficiaries."
+        all_status:
+          one: "There is 1 %{status} beneficiary."
+          other: "There are %{count} %{status} beneficiaries."
         breakdown: "Open %{open}, in progress %{in_progress}, closed %{closed}, blocked %{blocked}."
         named: "Names: %{names}."
       voters:

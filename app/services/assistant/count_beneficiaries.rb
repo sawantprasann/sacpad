@@ -38,11 +38,15 @@ module Assistant
       Answers.beneficiaries(
         count: summary[:count],
         match: summary[:match],
-        place: PlaceFinder.new(user).choice_label(place),
+        place: (PlaceFinder.new(user).choice_label(place) if place),
         names: summary[:names],
         status: summary[:status],
         status_counts: summary[:status_counts],
-        link_path: (Rails.application.routes.url_helpers.kitchen_cabinet_tickets_path(village: place.name) if place.is_a?(Village))
+        link_path: if place.is_a?(Village)
+                     Rails.application.routes.url_helpers.kitchen_cabinet_tickets_path(village: place.name)
+                   elsif place.nil?
+                     Rails.application.routes.url_helpers.kitchen_cabinet_tickets_path
+                   end
       )
     end
 
@@ -64,6 +68,8 @@ module Assistant
     def self.relation_for(user, place)
       tickets = Pundit.policy_scope(user, KitchenCabinet::Ticket)
       case place
+      when nil
+        [ tickets, "all" ]
       when Village
         [ count_by_village_text(tickets, folded_names([ place ])), "village_text" ]
       when Taluka

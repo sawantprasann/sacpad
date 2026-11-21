@@ -1,0 +1,8 @@
+<div class="fixed right-4 bottom-4 z-[60] flex flex-col items-end gap-3" data-controller="assistant-launcher" data-assistant-launcher-src-value="<%= assistant_conversations_path(panel: 1) %>">
+  <section data-assistant-launcher-target="panel" class="hidden h-[min(32rem,calc(100vh-6rem))] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900" aria-label="<%= t("assistant.title") %>">
+    <turbo-frame id="assistant-panel" data-assistant-launcher-target="frame" class="block h-full"></turbo-frame>
+  </section>
+  <button type="button" data-assistant-launcher-target="button" data-action="assistant-launcher#toggle" aria-expanded="false" aria-label="<%= t("assistant.open_chat") %>" class="inline-flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[#465fff] text-white shadow-lg shadow-[#465fff]/30 hover:bg-[#3641f5]">
+    <svg class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l1.2 4.3a2 2 0 001.4 1.4L17 8.4l-4.4 1.2a2 2 0 00-1.4 1.4L10 15.3l-1.2-4.3a2 2 0 00-1.4-1.4L3 8.4l4.4-1.2a2 2 0 001.4-1.4L10 1.5z"/></svg>
+  </button>
+</div>

@@ -1095,6 +1095,13 @@ mr:
     none: "नाही"
     draft_label: "भाषणाचा मसुदा"
     open_list: "पूर्ण यादी उघडा"
+    open_chat: "विचारा"
+    close_chat: "बंद"
+    names_label: "नावे"
+    stat_open: "खुली"
+    stat_in_progress: "प्रगतीपथावर"
+    stat_closed: "बंद"
+    stat_blocked: "अडकलेली"
     open_village: "गावची नोंद उघडा"
     open_result: "मागील निकाल उघडा"
     ticket_status:
@@ -1120,6 +1127,12 @@ mr:
         voter_booth_status:
           one: "%{place} येथे 1 %{status} लाभार्थी या बुथच्या मतदाराशी जोडलेला आहे. मतदार नसलेली तिकिटे या संख्येत नाहीत."
           other: "%{place} येथे %{count} %{status} लाभार्थी या बुथच्या मतदाराशी जोडलेले आहेत. मतदार नसलेली तिकिटे या संख्येत नाहीत."
+        all:
+          one: "एकूण 1 लाभार्थी आहे."
+          other: "एकूण %{count} लाभार्थी आहेत."
+        all_status:
+          one: "एकूण 1 %{status} लाभार्थी आहे."
+          other: "एकूण %{count} %{status} लाभार्थी आहेत."
         breakdown: "खुली %{open}, प्रगतीपथावर %{in_progress}, बंद %{closed}, अडकलेली %{blocked}."
         named: "नावे: %{names}."
       voters:

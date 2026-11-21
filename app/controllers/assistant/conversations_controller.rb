@@ -6,7 +6,7 @@ module Assistant
     def index
       if params[:fresh].present?
         conversation = AssistantConversation.create!(user: current_user, organization: current_user.organization)
-        redirect_to assistant_conversation_path(conversation)
+        redirect_to assistant_conversation_path(conversation, panel_params)
         return
       end
 
@@ -14,13 +14,14 @@ module Assistant
       @conversation = @conversations.first ||
         AssistantConversation.create!(user: current_user, organization: current_user.organization)
       @messages = @conversation.messages.order(:id)
-      render :show
+      render params[:panel].present? ? :panel : :show
     end
 
     def show
       load_history
       @conversation = user_conversations.find(params[:id])
       @messages = @conversation.messages.order(:id)
+      render :panel if params[:panel].present?
     end
 
     def create
@@ -73,6 +74,10 @@ module Assistant
     def pending_id
       value = params[:pending_id].to_s
       value.match?(/\Apending-[0-9a-f-]{8,}\z/i) ? value : "pending-#{SecureRandom.uuid}"
+    end
+
+    def panel_params
+      params[:panel].present? ? { panel: 1 } : {}
     end
 
     def return_path

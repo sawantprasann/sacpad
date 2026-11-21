@@ -54,6 +54,9 @@
         <%= render "ui/copyright_footer" %>
       </div>
     </div>
+    <% if user_signed_in? && !controller_path.start_with?("assistant/") && Assistant::Catalog.available?(current_user) %>
+      <%= render "ui/assistant_launcher" %>
+    <% end %>
     <%= render "ui/confirm_dialog" %>
   </body>
 </html>

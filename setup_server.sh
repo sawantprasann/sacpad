@@ -359,6 +359,20 @@ server {
     add_header Cache-Control public;
   }
 
+  # Action Cable. Without the upgrade headers the chat answer is saved
+  # but the open page does not see it until a reload.
+  location /cable {
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header Host \$http_host;
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
+    proxy_pass http://puma_${APP_NAME};
+  }
+
   location / {
     try_files \$uri/index.html \$uri @puma;
   }
@@ -409,6 +423,7 @@ Environment="OLLAMA_HOST=127.0.0.1:11434"
 Environment="OLLAMA_NUM_PARALLEL=1"
 Environment="OLLAMA_MAX_LOADED_MODELS=1"
 Environment="OLLAMA_CONTEXT_LENGTH=2048"
+Environment="OLLAMA_KEEP_ALIVE=-1"
 UNIT
 
 systemctl daemon-reload
