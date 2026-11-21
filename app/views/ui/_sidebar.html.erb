@@ -155,7 +155,17 @@
         </ul>
 
         <% if user_signed_in? %>
-          <h3 class="campaign-nav-label mt-6 mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.help") %></h3>
+          <% on_settings = controller_path.in?(%w[account/settings account/passwords]) %>
+          <h3 class="campaign-nav-label mt-6 mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.settings") %></h3>
+          <ul class="mb-6 flex flex-col gap-1">
+            <li>
+              <%= link_to account_settings_path, class: "menu-item group #{on_settings ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("settings") %>
+                <span class="menu-item-text"><%= t("nav.settings") %></span>
+              <% end %>
+            </li>
+          </ul>
+          <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.help") %></h3>
           <ul class="flex flex-col gap-1">
             <li>
               <%= link_to support_tickets_path,

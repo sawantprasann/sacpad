@@ -37,7 +37,8 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_match "Rohan", @response.body
     assert_match "Sign-ins", @response.body
-    assert_select "a[href='#{edit_account_password_path}']", text: "Change password"
+    assert_select "a[href='#{account_settings_path}']", text: "Settings"
+    assert_select "a[href='#{edit_account_password_path}']", count: 0
   end
 
   test "a signed-in user can replace their password" do
@@ -52,7 +53,7 @@ class UserLoginTest < ActionDispatch::IntegrationTest
     patch account_password_path, params: {
       user: { current_password: "password123", password: "newpassword", password_confirmation: "newpassword" }
     }
-    assert_redirected_to root_path
+    assert_redirected_to account_settings_path
     assert @user.reload.valid_password?("newpassword")
     follow_redirect!
     assert_match "Password updated.", response.body
