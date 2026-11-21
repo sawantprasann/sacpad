@@ -1,0 +1,9 @@
+<%= turbo_stream.update "chat-title" do %><%= @conversation.title %><% end %>
+<%= turbo_stream.update "chat-history" do %>
+  <%= render "history" %>
+<% end %>
+<% if params[:conversation_id].blank? %>
+  <%= turbo_stream.append "chat-form" do %>
+    <%= hidden_field_tag :conversation_id, @conversation.id %>
+  <% end %>
+<% end %>

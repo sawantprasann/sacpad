@@ -204,6 +204,11 @@ Rails.application.routes.draw do
   # the sign-in page keeps the choice.
   resource :locale, only: :update
 
+  # Questions over this organization's own records. Ollama only picks the lookup.
+  namespace :assistant do
+    resources :conversations, only: %i[index create show]
+  end
+
   # Defines the root path route ("/")
   root "home#index"
 end

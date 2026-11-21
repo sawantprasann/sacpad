@@ -8,6 +8,7 @@
     <meta name="application-name" content="PolitoMatrix">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= action_cable_meta_tag %>
     <%= yield :head %>
     <link rel="icon" href="/favicon.ico?v=2" sizes="48x48">
     <link rel="icon" href="/icon.svg?v=2" type="image/svg+xml">
@@ -34,16 +35,28 @@
 
         <%= render "ui/top_bar" %>
 
-        <main class="flex-1 overflow-y-auto">
-          <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
-            <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
-            <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
-            <%= yield %>
-          </div>
+        <main class="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <% page = yield %>
+          <% if content_for?(:full_bleed) %>
+            <% if notice %><div class="px-4 pt-4 md:px-6"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
+            <% if alert %><div class="px-4 pt-4 md:px-6"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+            <div class="min-h-0 flex-1"><%= page %></div>
+          <% else %>
+            <div class="min-h-0 flex-1 overflow-y-auto">
+              <div class="mx-auto max-w-(--breakpoint-2xl) p-4 md:p-6">
+                <% if notice %><div class="mb-4"><%= render "ui/alert", tone: "success", message: notice %></div><% end %>
+                <% if alert %><div class="mb-4"><%= render "ui/alert", tone: "error", message: alert %></div><% end %>
+                <%= page %>
+              </div>
+            </div>
+          <% end %>
         </main>
         <%= render "ui/copyright_footer" %>
       </div>
     </div>
+    <% if user_signed_in? && !controller_path.start_with?("assistant/") && Assistant::Catalog.available?(current_user) %>
+      <%= render "ui/assistant_launcher" %>
+    <% end %>
     <%= render "ui/confirm_dialog" %>
   </body>
 </html>

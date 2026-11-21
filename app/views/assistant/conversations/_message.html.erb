@@ -1,0 +1,46 @@
+<% if message.from_user? %>
+  <div id="<%= dom_id(message) %>" class="flex justify-end">
+    <p class="max-w-[85%] rounded-2xl rounded-br-md bg-[#465fff] px-3.5 py-2.5 text-sm leading-6 text-white"><%= message.body %></p>
+  </div>
+<% else %>
+  <% details = message.details.to_h %>
+  <div id="<%= dom_id(message) %>" class="flex items-end gap-2">
+    <span class="mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center" aria-hidden="true">
+      <%= render "ui/ai_spark", class_name: "h-5 w-5" %>
+    </span>
+    <div class="min-w-0 max-w-[85%] rounded-2xl rounded-bl-md border border-gray-200 bg-white px-3.5 py-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <% if message.draft? %>
+        <p class="mb-1 text-[11px] font-medium tracking-wide text-amber-700 uppercase dark:text-amber-300"><%= t("assistant.draft_label") %></p>
+      <% end %>
+      <% if details["headline"].present? %>
+        <p class="text-sm leading-6 text-gray-800 dark:text-white/90"><%= details["headline"] %></p>
+        <% if details["stats"].present? %>
+          <dl class="mt-3 grid grid-cols-4 gap-1.5">
+            <% details["stats"].each do |stat| %>
+              <div class="rounded-xl bg-gray-50 px-1.5 py-2 text-center dark:bg-white/5">
+                <dt class="text-[10px] leading-4 text-gray-500 dark:text-gray-400"><%= stat["label"] %></dt>
+                <dd class="text-sm font-semibold text-gray-900 dark:text-white"><%= stat["value"] %></dd>
+              </div>
+            <% end %>
+          </dl>
+        <% end %>
+        <% if details["names"].present? %>
+          <p class="mt-3 text-[11px] font-medium tracking-wide text-gray-400 uppercase"><%= t("assistant.names_label") %></p>
+          <ul class="mt-1.5 flex flex-wrap gap-1.5">
+            <% details["names"].each do |name| %>
+              <li class="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700 dark:bg-white/10 dark:text-gray-200"><%= name %></li>
+            <% end %>
+          </ul>
+        <% end %>
+      <% else %>
+        <div class="text-sm leading-6 whitespace-pre-wrap text-gray-800 dark:text-white/90"><%= message.body %></div>
+      <% end %>
+      <% if message.link_path.present? %>
+        <%= link_to message.link_path, class: "mt-3 inline-flex items-center gap-1 rounded-lg bg-[#465fff]/10 px-2.5 py-1.5 text-xs font-medium text-[#465fff] hover:bg-[#465fff]/15" do %>
+          <%= message.link_label.presence || t("assistant.open_list") %>
+          <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 010-1.06L12.44 6.5H7.75a.75.75 0 010-1.5h6.5a.75.75 0 01.75.75v6.5a.75.75 0 01-1.5 0V7.56l-7.22 7.22a.75.75 0 01-1.06 0z" clip-rule="evenodd"/></svg>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
