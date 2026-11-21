@@ -29,12 +29,20 @@ export default class extends Controller {
       },
       body: data
     }).then(async (response) => {
-      const html = await response.text()
-      if (html.includes("<turbo-stream")) {
-        window.Turbo.renderStreamMessage(html)
-        window.Alpine?.initTree?.(document.getElementById("chat-history"))
-      } else {
+      if (!response.ok) {
         this.showFailure(pendingId)
+        return
+      }
+      const html = await response.text()
+      if (!html.includes("<turbo-stream")) return
+
+      try {
+        window.Turbo.renderStreamMessage(html)
+        const history = document.getElementById("chat-history")
+        if (history) window.Alpine?.initTree?.(history)
+      } catch (_) {
+        // The reply is still delivered to this bubble. A sidebar refresh
+        // must not turn a saved answer into the failure sentence.
       }
     }).catch(() => {
       this.showFailure(pendingId)

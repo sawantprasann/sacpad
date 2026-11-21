@@ -1,7 +1,7 @@
 <template data-assistant-chat-target="thinking">
   <div id="assistant-thinking" class="flex items-end gap-2" data-failed="<%= t("assistant.unavailable") %>">
-    <span class="mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#465fff] text-white shadow-sm" aria-hidden="true">
-      <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l1.2 4.3a2 2 0 001.4 1.4L17 8.4l-4.4 1.2a2 2 0 00-1.4 1.4L10 15.3l-1.2-4.3a2 2 0 00-1.4-1.4L3 8.4l4.4-1.2a2 2 0 001.4-1.4L10 1.5z"/></svg>
+    <span class="mb-1 inline-flex h-7 w-7 shrink-0 items-center justify-center" aria-hidden="true">
+      <%= render "ui/ai_spark", class_name: "h-5 w-5" %>
     </span>
     <div class="rounded-2xl rounded-bl-md border border-gray-200 bg-white px-3.5 py-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
       <p class="flex items-center gap-1 text-sm text-gray-400" data-thinking-label>
