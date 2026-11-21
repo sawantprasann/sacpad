@@ -1092,6 +1092,130 @@ mr:
     connected_on: "जोडले"
     open_page: "पेज उघडा"
     granted_by: "परवानगी दिली"
+  assistant:
+    nav: "विचारा"
+    title: "तुमच्या माहितीबद्दल विचारा"
+    subtitle: "उत्तरे या संघटनेच्या नोंदींमधून येतात."
+    placeholder: "गाव, तालुका किंवा बुथबद्दल विचारा"
+    prompt: "काहीही विचारा..."
+    new_chat: "नवीन गप्पा"
+    search: "शोधा"
+    recent: "अलीकडील"
+    send: "पाठवा"
+    thinking: "विचार करत आहे..."
+    empty: "या प्रश्नांपैकी एक विचारून पहा"
+    examples:
+      - "निमगावात किती लाभार्थी आहेत?"
+      - "निमगावातील नाराज मतदारांची यादी द्या"
+      - "किती नेतृत्व भेटी आहेत?"
+      - "मागील निकाल काय आहे?"
+      - "कोणती सोशल पेज जोडली आहेत?"
+      - "या तालुक्यात किती मतदार आहेत?"
+      - "बुथ 12 ची यादी सांगा"
+    blank: "प्रश्न लिहा."
+    too_long: "हा प्रश्न खूप मोठा आहे."
+    not_configured: "सहाय्यक अजून जोडलेला नाही. सर्व्हरवर OLLAMA_URL सेट करा."
+    not_understood: "मी मागील निकाल, लाभार्थी, कार्यकर्ता कार्यक्रम, मैदानी अहवाल, प्रसिद्धी, मतदार यादी, तालुका, बुथ आणि सोशल मीडिया याबद्दल उत्तर देऊ शकतो."
+    no_access: "तुमच्या भूमिकेत हा सहाय्यक वापरता येत नाही."
+    ask_place: "कोणते गाव, तालुका किंवा बुथ?"
+    place_missing: "%{name} या नावाचे ठिकाण या मतदारसंघात नाही."
+    which_place: "कोणते ठिकाण अभिप्रेत आहे? यापैकी एकाचे नाव लिहा: %{names}"
+    unavailable: "आत्ता उत्तर देता आले नाही."
+    village_only: "ही नोंद गावानुसार ठेवली आहे. गावाचे नाव सांगा."
+    none: "नाही"
+    draft_label: "भाषणाचा मसुदा"
+    open_list: "पूर्ण यादी उघडा"
+    open_chat: "विचारा"
+    close_chat: "बंद"
+    names_label: "नावे"
+    stat_open: "खुली"
+    stat_in_progress: "प्रगतीपथावर"
+    stat_closed: "बंद"
+    stat_blocked: "अडकलेली"
+    open_village: "गावची नोंद उघडा"
+    open_result: "मागील निकाल उघडा"
+    ticket_status:
+      open: "खुली"
+      in_progress: "प्रगतीपथावर"
+      closed: "बंद"
+      blocked: "अडकलेली"
+    sentiment:
+      pleased: "खुश"
+      transit: "तटस्थ"
+      displeased: "नाराज"
+    answers:
+      beneficiaries:
+        village_text:
+          one: "%{place} येथे 1 लाभार्थी आहे. तिकिटावरील गावाच्या नावावरून जुळवले."
+          other: "%{place} येथे %{count} लाभार्थी आहेत. तिकिटावरील गावाच्या नावावरून जुळवले."
+        village_text_status:
+          one: "%{place} येथे 1 %{status} लाभार्थी आहे. तिकिटावरील गावाच्या नावावरून जुळवले."
+          other: "%{place} येथे %{count} %{status} लाभार्थी आहेत. तिकिटावरील गावाच्या नावावरून जुळवले."
+        voter_booth:
+          one: "%{place} येथे 1 लाभार्थी या बुथच्या मतदाराशी जोडलेला आहे. मतदार नसलेली तिकिटे या संख्येत नाहीत."
+          other: "%{place} येथे %{count} लाभार्थी या बुथच्या मतदाराशी जोडलेले आहेत. मतदार नसलेली तिकिटे या संख्येत नाहीत."
+        voter_booth_status:
+          one: "%{place} येथे 1 %{status} लाभार्थी या बुथच्या मतदाराशी जोडलेला आहे. मतदार नसलेली तिकिटे या संख्येत नाहीत."
+          other: "%{place} येथे %{count} %{status} लाभार्थी या बुथच्या मतदाराशी जोडलेले आहेत. मतदार नसलेली तिकिटे या संख्येत नाहीत."
+        all:
+          one: "एकूण 1 लाभार्थी आहे."
+          other: "एकूण %{count} लाभार्थी आहेत."
+        all_status:
+          one: "एकूण 1 %{status} लाभार्थी आहे."
+          other: "एकूण %{count} %{status} लाभार्थी आहेत."
+        breakdown: "खुली %{open}, प्रगतीपथावर %{in_progress}, बंद %{closed}, अडकलेली %{blocked}."
+        named: "नावे: %{names}."
+      voters:
+        zero: "%{place} येथे %{sentiment} मतदार नाहीत."
+        some: "%{place} येथे %{count} %{sentiment} मतदार आहेत. %{names}"
+        more: "%{place} येथे %{count} %{sentiment} मतदार आहेत. %{shown} दाखवले: %{names}"
+        all:
+          zero: "%{place} येथे मतदार यादीत कोणी नाही."
+          some: "%{place} येथे %{count} मतदार आहेत. %{names}"
+          more: "%{place} येथे %{count} मतदार आहेत. %{shown} दाखवले: %{names}"
+      past_result:
+        none: "या मतदारसंघाचा मागील निकाल साठवलेला नाही."
+        margin: "मार्जिन %{votes} मते (%{percent}%)."
+        winner: "विजेता: %{name}, %{party}, %{votes} मते."
+      cadre:
+        total: "%{count} कार्यकर्ता कार्यक्रम."
+        none: "जुळणारा कार्यक्रम नाही."
+      ground:
+        issues: "%{place} येथे %{count} मैदानी मुद्दे आहेत."
+        worship: "पूजास्थाने: %{names}."
+        position: "%{name}, %{title}, %{party}."
+        no_position: "सध्याचे राजकीय पद नोंदलेले नाही."
+        karyakartas: "%{count} स्थानिक कार्यकर्ते: %{names}."
+        contacts: "प्रशासकीय संपर्क: %{names}."
+        poll: "मतदान पूर्वाभ्यासातील संभाव्य विजेता: %{names}."
+      pr:
+        total: "%{count} प्रसिद्धी नोंदी."
+        none: "जुळणारी प्रसिद्धी नोंद नाही."
+      taluka:
+        total: "%{count} तालुके."
+        villages: "%{place} येथे %{count} गावे आहेत."
+        one_village: "%{village} तालुका %{taluka} मध्ये आहे आणि तेथे %{count} मतदार आहेत."
+        unassigned: "%{count} गावांचा तालुका नाही."
+        village_word: "गावे"
+        voter_word: "मतदार"
+      booth:
+        total: "%{place} साठी %{count} बुथ."
+        row: "बुथ %{booth} · %{name}: %{voters} मतदार, %{voted} मतदान केले, यादी %{done}/%{items}, व्यवस्थापक %{managers}."
+        more: "आणखी बुथ बुथ पानावर आहेत."
+      social:
+        pages: "%{count} जोडलेली पेज."
+        posts: "%{count} पोस्ट."
+      contacts:
+        total: "%{place} येथे %{count} प्रशासकीय संपर्क आहेत."
+        none: "जुळणारा संपर्क नाही."
+      karyakartas:
+        zero: "%{place} येथे स्थानिक कार्यकर्ते नाहीत."
+        some: "%{place} येथे %{count} स्थानिक कार्यकर्ते आहेत: %{names}"
+      sarpanch:
+        none: "%{place} च्या नोंदीत सरपंच नाही."
+        one: "%{place} चे सरपंच %{name}, क्रमांक %{phone}."
+        one_without_phone: "%{place} चे सरपंच %{name}. क्रमांक नोंदीत नाही."
+        many: "%{place} येथे एकापेक्षा जास्त सरपंच संपर्क आहेत: %{list}"
   activerecord:
     errors:
       messages:

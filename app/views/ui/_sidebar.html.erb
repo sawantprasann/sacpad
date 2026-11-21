@@ -43,6 +43,15 @@
 
         <h3 class="campaign-nav-label mb-4 text-xs leading-5 font-semibold uppercase tracking-[0.16em]"><%= t("nav.modules") %></h3>
         <ul class="flex flex-col gap-1">
+          <% if user_signed_in? && Assistant::Catalog.available?(current_user) %>
+            <li>
+              <%= link_to assistant_conversations_path,
+                    class: "menu-item group #{params[:controller] == "assistant/conversations" ? "menu-item-active" : "menu-item-inactive"}" do %>
+                <%= menu_desk_icon("assistant") %>
+                <span class="menu-item-text"><%= t("assistant.nav") %></span>
+              <% end %>
+            </li>
+          <% end %>
           <% if user_signed_in? && election_result_nav? %>
             <li>
               <%= link_to election_result_path,

@@ -1033,6 +1033,130 @@ en:
     connected_on: "Connected"
     open_page: "Open page"
     granted_by: "Granted by"
+  assistant:
+    nav: "Ask"
+    title: "Ask about your data"
+    subtitle: "Answers come from this organization's records."
+    placeholder: "Ask about a village, taluka, or booth"
+    prompt: "Ask AI anything..."
+    new_chat: "New chat"
+    search: "Search"
+    recent: "Recent"
+    send: "Send"
+    thinking: "Thinking..."
+    empty: "Try one of these"
+    examples:
+      - "How many beneficiaries are in Nimgaon?"
+      - "List displeased voters in Nimgaon"
+      - "How many leadership meets do we have?"
+      - "What is the past result?"
+      - "Which social pages are connected?"
+      - "How many voters are in this taluka?"
+      - "Booth checklist for booth 12"
+    blank: "Type a question."
+    too_long: "That question is too long."
+    not_configured: "The assistant is not connected yet. Set OLLAMA_URL on the server."
+    not_understood: "I can answer past results, beneficiaries, cadre program, ground reports, PR records, voter lists, talukas, booths, and social media."
+    no_access: "Your role does not include a module this assistant can read."
+    ask_place: "Which village, taluka, or booth?"
+    place_missing: "No place named %{name} is in this constituency."
+    which_place: "Which place do you mean? Reply with one of these: %{names}"
+    unavailable: "I could not answer that just now."
+    village_only: "That record is kept per village. Name the village."
+    none: "none"
+    draft_label: "Draft for your speech"
+    open_list: "Open the full list"
+    open_chat: "Ask"
+    close_chat: "Close"
+    names_label: "Names"
+    stat_open: "Open"
+    stat_in_progress: "In progress"
+    stat_closed: "Closed"
+    stat_blocked: "Blocked"
+    open_village: "Open the village record"
+    open_result: "Open the past result"
+    ticket_status:
+      open: "open"
+      in_progress: "in progress"
+      closed: "closed"
+      blocked: "blocked"
+    sentiment:
+      pleased: "pleased"
+      transit: "transit"
+      displeased: "displeased"
+    answers:
+      beneficiaries:
+        village_text:
+          one: "%{place} has 1 beneficiary, matched by the village name on the ticket."
+          other: "%{place} has %{count} beneficiaries, matched by the village name on the ticket."
+        village_text_status:
+          one: "%{place} has 1 %{status} beneficiary, matched by the village name on the ticket."
+          other: "%{place} has %{count} %{status} beneficiaries, matched by the village name on the ticket."
+        voter_booth:
+          one: "%{place} has 1 beneficiary linked to a voter in this booth. Tickets without a voter are not included."
+          other: "%{place} has %{count} beneficiaries linked to a voter in this booth. Tickets without a voter are not included."
+        voter_booth_status:
+          one: "%{place} has 1 %{status} beneficiary linked to a voter in this booth. Tickets without a voter are not included."
+          other: "%{place} has %{count} %{status} beneficiaries linked to a voter in this booth. Tickets without a voter are not included."
+        all:
+          one: "There is 1 beneficiary."
+          other: "There are %{count} beneficiaries."
+        all_status:
+          one: "There is 1 %{status} beneficiary."
+          other: "There are %{count} %{status} beneficiaries."
+        breakdown: "Open %{open}, in progress %{in_progress}, closed %{closed}, blocked %{blocked}."
+        named: "Names: %{names}."
+      voters:
+        zero: "%{place} has no %{sentiment} voters."
+        some: "%{place} has %{count} %{sentiment} voters. %{names}"
+        more: "%{place} has %{count} %{sentiment} voters. Showing %{shown}: %{names}"
+        all:
+          zero: "%{place} has no voters on the roll."
+          some: "%{place} has %{count} voters. %{names}"
+          more: "%{place} has %{count} voters. Showing %{shown}: %{names}"
+      past_result:
+        none: "No past result is stored for this constituency."
+        margin: "Margin %{votes} votes (%{percent}%)."
+        winner: "Winner: %{name}, %{party}, %{votes} votes."
+      cadre:
+        total: "%{count} cadre activities."
+        none: "No cadre activities match."
+      ground:
+        issues: "%{place} has %{count} ground-report issues."
+        worship: "Worship places: %{names}."
+        position: "%{name}, %{title}, %{party}."
+        no_position: "No current political position is recorded."
+        karyakartas: "%{count} local karyakartas: %{names}."
+        contacts: "Administrative contacts: %{names}."
+        poll: "Mock poll likely winner: %{names}."
+      pr:
+        total: "%{count} PR records."
+        none: "No PR records match."
+      taluka:
+        total: "%{count} talukas."
+        villages: "%{place} has %{count} villages."
+        one_village: "%{village} is in %{taluka} and has %{count} voters."
+        unassigned: "%{count} villages have no taluka."
+        village_word: "villages"
+        voter_word: "voters"
+      booth:
+        total: "%{count} booths for %{place}."
+        row: "Booth %{booth} · %{name}: %{voters} voters, %{voted} voted, checklist %{done}/%{items}, manager %{managers}."
+        more: "More booths are on the booth page."
+      social:
+        pages: "%{count} connected pages."
+        posts: "%{count} posts."
+      contacts:
+        total: "%{place} has %{count} administrative contacts."
+        none: "No contacts match."
+      karyakartas:
+        zero: "%{place} has no local karyakartas."
+        some: "%{place} has %{count} local karyakartas: %{names}"
+      sarpanch:
+        none: "%{place} has no sarpanch on the village record."
+        one: "The sarpanch of %{place} is %{name}, %{phone}."
+        one_without_phone: "The sarpanch of %{place} is %{name}. No phone is on the record."
+        many: "%{place} has more than one sarpanch contact: %{list}"
   activerecord:
     errors:
       messages:

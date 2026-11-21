@@ -1,0 +1,14 @@
+<%= turbo_frame_tag "assistant-panel" do %>
+  <div class="flex h-full min-h-0 flex-col bg-gray-50 dark:bg-gray-950">
+    <header class="flex h-12 shrink-0 items-center gap-2 border-b border-gray-200 bg-white px-3 dark:border-gray-800 dark:bg-gray-900">
+      <p id="chat-title" class="min-w-0 flex-1 truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= @conversation&.title || t("assistant.title") %></p>
+      <%= link_to assistant_conversations_path(fresh: 1, panel: 1), class: "shrink-0 text-xs font-medium text-[#465fff] hover:underline", data: { turbo_frame: "assistant-panel" } do %>
+        <%= t("assistant.new_chat") %>
+      <% end %>
+      <button type="button" data-action="assistant-launcher#close" aria-label="<%= t("assistant.close_chat") %>" class="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/10">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>
+      </button>
+    </header>
+    <%= render "thread", compact: true %>
+  </div>
+<% end %>
