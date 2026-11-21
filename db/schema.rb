@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_19_010000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -132,9 +132,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
     t.string "link_label"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "reply_to_id"
     t.index ["assistant_conversation_id", "id"], name: "index_assistant_messages_on_assistant_conversation_id_and_id"
     t.index ["assistant_conversation_id"], name: "index_assistant_messages_on_assistant_conversation_id"
     t.index ["organization_id"], name: "index_assistant_messages_on_organization_id"
+    t.index ["reply_to_id"], name: "index_assistant_messages_on_reply_to_id"
   end
 
   create_table "booth_checklist_items", force: :cascade do |t|
@@ -1090,6 +1092,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_120000) do
   add_foreign_key "assistant_conversations", "organizations"
   add_foreign_key "assistant_conversations", "users"
   add_foreign_key "assistant_messages", "assistant_conversations"
+  add_foreign_key "assistant_messages", "assistant_messages", column: "reply_to_id"
   add_foreign_key "assistant_messages", "organizations"
   add_foreign_key "booth_checklist_items", "booths"
   add_foreign_key "booth_checklist_items", "organizations"

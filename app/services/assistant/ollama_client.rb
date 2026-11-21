@@ -13,7 +13,8 @@ module Assistant
     def configured? = @url.present?
 
     def tool_call(messages:, tools:)
-      body = post(model: @model, stream: false, messages: messages, tools: tools, read_timeout: 30)
+      # Twelve tool schemas take about half a minute to read on this 2 GB CPU.
+      body = post(model: @model, stream: false, messages: messages, tools: tools, read_timeout: 90, options: { num_ctx: 2048 })
       self.class.parse_tool_call(body)
     end
 
@@ -53,7 +54,7 @@ module Assistant
       # content and tool_calls.
       request.body = payload.merge(think: false).to_json
       response = http.request(request)
-      raise Error, "Ollama returned #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+      raise Error, "Ollama returned #{response.code}: #{response.body.to_s.truncate(200)}" unless response.is_a?(Net::HTTPSuccess)
 
       JSON.parse(response.body)
     rescue Net::OpenTimeout, Net::ReadTimeout

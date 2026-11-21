@@ -8,19 +8,24 @@ module Assistant
       "Booth" => Booth
     }.freeze
 
-    def initialize(user:, conversation:, question:, client: OllamaClient.new)
+    def initialize(user:, conversation:, question:, client: OllamaClient.new, save_question: true, user_message: nil)
       @user = user
       @conversation = conversation
       @question = question.to_s.strip
       @client = client
       @finder = PlaceFinder.new(user)
+      @save_question = save_question
+      @user_message = user_message
     end
 
     def call
-      conversation.messages.create!(organization: user.organization, speaker: :from_user, body: question)
+      if @save_question
+        @user_message = conversation.messages.create!(organization: user.organization, speaker: :from_user, body: question)
+      end
       outcome = build_outcome
       save_answer(outcome)
-    rescue OllamaClient::Error
+    rescue OllamaClient::Error => error
+      Rails.logger.warn("Assistant Ollama failed: #{error.class}: #{error.message}")
       save_answer(Answers.unavailable)
     end
 
@@ -142,7 +147,7 @@ module Assistant
       [
         {
           role: "system",
-          content: "Choose one tool for this campaign question. Each tool matches one menu: past result, beneficiaries, cadre program, ground reports, PR records, voter lists, taluka, booth management, or social media. The user may write in English or Marathi. #{hint} Do not invent counts, names, or phone numbers."
+          content: "Pick one tool. The user may write in English or Marathi. #{hint} Do not invent counts, names, or phone numbers."
         },
         { role: "user", content: question }
       ]
@@ -157,7 +162,8 @@ module Assistant
         tool_arguments: outcome.arguments || {},
         draft: outcome.draft || false,
         link_path: outcome.link_path,
-        link_label: outcome.link_label
+        link_label: outcome.link_label,
+        reply_to: @user_message
       )
     end
   end

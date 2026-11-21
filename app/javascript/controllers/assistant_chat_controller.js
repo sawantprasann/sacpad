@@ -8,16 +8,18 @@ export default class extends Controller {
   submit(event) {
     event.preventDefault()
     const body = this.inputTarget.value.trim()
-    if (!body || this.sending) return
+    if (!body) return
 
-    this.sending = true
+    const pendingId = `pending-${crypto.randomUUID()}`
     this.appendUser(body)
     this.inputTarget.value = ""
-    this.showThinking()
+    this.showThinking(pendingId)
     this.scroll()
+    this.inputTarget.focus()
 
     const data = new FormData(this.formTarget)
     data.set("body", body)
+    data.set("pending_id", pendingId)
 
     fetch(this.formTarget.action, {
       method: "POST",
@@ -32,14 +34,10 @@ export default class extends Controller {
         window.Turbo.renderStreamMessage(html)
         window.Alpine?.initTree?.(document.getElementById("chat-history"))
       } else {
-        this.showFailure()
+        this.showFailure(pendingId)
       }
     }).catch(() => {
-      this.showFailure()
-    }).finally(() => {
-      this.sending = false
-      this.scroll()
-      this.inputTarget.focus()
+      this.showFailure(pendingId)
     })
   }
 
@@ -60,16 +58,17 @@ export default class extends Controller {
     this.listTarget.appendChild(row)
   }
 
-  showThinking() {
-    this.listTarget.appendChild(this.thinkingTarget.content.cloneNode(true))
+  showThinking(pendingId) {
+    const node = this.thinkingTarget.content.cloneNode(true)
+    node.querySelector("#assistant-thinking").id = pendingId
+    this.listTarget.appendChild(node)
   }
 
-  showFailure() {
-    const thinking = document.getElementById("assistant-thinking")
+  showFailure(pendingId) {
+    const thinking = document.getElementById(pendingId)
     const label = thinking?.querySelector("[data-thinking-label]")
     if (!label) return
     label.textContent = thinking.dataset.failed
-    thinking.removeAttribute("id")
   }
 
   scroll() {

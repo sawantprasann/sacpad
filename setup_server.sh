@@ -372,6 +372,7 @@ server {
     proxy_set_header  X-Forwarded-Proto \$scheme;
     proxy_set_header  Host \$http_host;
     proxy_redirect    off;
+    proxy_read_timeout 120s;
     proxy_pass        http://puma_${APP_NAME};
   }
 

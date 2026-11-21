@@ -4,14 +4,16 @@ module Assistant
     before_action :require_assistant_access
 
     def index
-      load_history
-      if params[:fresh]
-        @conversation = nil
-        @messages = AssistantMessage.none
-      else
-        @conversation = @conversations.first
-        @messages = @conversation ? @conversation.messages.order(:id) : AssistantMessage.none
+      if params[:fresh].present?
+        conversation = AssistantConversation.create!(user: current_user, organization: current_user.organization)
+        redirect_to assistant_conversation_path(conversation)
+        return
       end
+
+      load_history
+      @conversation = @conversations.first ||
+        AssistantConversation.create!(user: current_user, organization: current_user.organization)
+      @messages = @conversation.messages.order(:id)
       render :show
     end
 
@@ -37,12 +39,21 @@ module Assistant
       else
         AssistantConversation.create!(user: current_user, organization: current_user.organization)
       end
-      Assistant::Ask.new(user: current_user, conversation: @conversation, question: body).call
-      @assistant_message = @conversation.messages.from_assistant.order(:id).last
-      load_history
+
       respond_to do |format|
-        format.turbo_stream
-        format.html { redirect_to assistant_conversation_path(@conversation) }
+        format.turbo_stream do
+          @user_message = @conversation.messages.create!(
+            organization: current_user.organization,
+            speaker: :from_user,
+            body: body
+          )
+          Assistant::AnswerJob.perform_later(@user_message.id, pending_id, I18n.locale.to_s)
+          load_history
+        end
+        format.html do
+          Assistant::Ask.new(user: current_user, conversation: @conversation, question: body).call
+          redirect_to assistant_conversation_path(@conversation)
+        end
       end
     end
 
@@ -57,6 +68,11 @@ module Assistant
 
     def user_conversations
       AssistantConversation.where(user_id: current_user.id).order(id: :desc)
+    end
+
+    def pending_id
+      value = params[:pending_id].to_s
+      value.match?(/\Apending-[0-9a-f-]{8,}\z/i) ? value : "pending-#{SecureRandom.uuid}"
     end
 
     def return_path

@@ -2,6 +2,7 @@ require "test_helper"
 
 class AssistantConversationTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   setup do
     @org = ActsAsTenant.without_tenant { Organization.create!(name: "Chat Org") }
@@ -29,17 +30,29 @@ class AssistantConversationTest < ActionDispatch::IntegrationTest
     assert_match "The assistant is not connected yet", response.body
   end
 
-  test "a question returns the answer without a page reload" do
+  test "another question can be sent while the first is still answering" do
     sign_in @user
-    post assistant_conversations_path,
-      params: { body: "How many beneficiaries are in Nimgaon?" },
-      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    get assistant_conversations_path
+    assert_match "turbo-cable-stream-source", response.body
+
+    conversation = AssistantConversation.unscoped.order(:id).last
+    assert_enqueued_jobs 2, only: Assistant::AnswerJob do
+      post assistant_conversations_path,
+        params: { body: "How many beneficiaries are in Nimgaon?", conversation_id: conversation.id, pending_id: "pending-11111111-1111-1111-1111-111111111111" },
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      post assistant_conversations_path,
+        params: { body: "What is the past result?", conversation_id: conversation.id, pending_id: "pending-22222222-2222-2222-2222-222222222222" },
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
 
     assert_response :success
     assert_match "<turbo-stream", response.body
-    assert_match "The assistant is not connected yet", response.body
-    assert_match %(target="chat-messages"), response.body
-    assert_match %(target="assistant-thinking"), response.body
+    assert_no_match "The assistant is not connected yet", response.body
+
+    perform_enqueued_jobs
+    travel 3.seconds
+    perform_enqueued_jobs
+    assert_equal 2, AssistantMessage.unscoped.from_assistant.where(assistant_conversation_id: conversation.id).count
   end
 
   test "a user with no module access does not get the page" do

@@ -1,6 +1,7 @@
 <% content_for :full_bleed, "1" %>
 <%# Full-height chat. The question is drawn immediately; the answer is streamed in. %>
 <div class="flex h-full overflow-hidden bg-gray-50 dark:bg-gray-950" x-data="{ q: '' }" data-controller="assistant-chat">
+  <%= turbo_stream_from @conversation %>
   <section class="flex min-w-0 flex-1 flex-col">
     <header class="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-gray-200 bg-white px-4 sm:px-6 dark:border-gray-800 dark:bg-gray-900">
       <h1 id="chat-title" class="truncate text-sm font-medium text-gray-800 dark:text-white/90"><%= @conversation&.title || t("assistant.title") %></h1>

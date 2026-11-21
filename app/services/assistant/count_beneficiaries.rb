@@ -27,7 +27,7 @@ module Assistant
       {
         type: "object",
         properties: {
-          place_name: { type: "string", description: "Village, taluka, or booth name as the user wrote it. Leave empty to reuse the current place." },
+          place_name: { type: "string", description: "Village, taluka, or booth, as written." },
           place_kind: { type: "string", enum: %w[village taluka booth] }
         }
       }
