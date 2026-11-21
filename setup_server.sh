@@ -11,7 +11,7 @@ set -euo pipefail
 APP_NAME="sacpad"
 DEPLOY_USER="deploy"
 APP_DIR="/var/www/$APP_NAME"
-RUBY_VERSION="3.4.6"
+RUBY_VERSION="3.4.13"
 REPO_URL="git@github.com:sawantprasann/sacpad.git"
 SERVER_IP="143.110.248.201"
 APP_DOMAIN="politomatrix.com"
