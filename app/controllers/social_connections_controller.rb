@@ -181,23 +181,36 @@ class SocialConnectionsController < ApplicationController
   end
 
   # id, name, photo, and the linked Instagram profile. Never the token.
+  # Pages and Instagram accounts already connected in this org start ticked.
   def present_pages(pending)
+    connected = connected_external_ids
     pending.items.map do |page|
       ig = page["instagram_business_account"]
+      ig_id = ig && ig["id"].present? ? ig["id"].to_s : nil
       {
         id: page["id"].to_s,
         name: page["name"],
         category: page["category"],
         username: page["username"],
         picture_url: https_url(page.dig("picture", "data", "url")),
-        instagram: ig && ig["id"].present? ? {
-          id: ig["id"].to_s,
+        connected: connected[:facebook].include?(page["id"].to_s),
+        instagram: ig_id ? {
+          id: ig_id,
           username: ig["username"],
           name: ig["name"],
-          picture_url: https_url(ig["profile_picture_url"])
+          picture_url: https_url(ig["profile_picture_url"]),
+          connected: connected[:instagram].include?(ig_id)
         } : nil
       }
     end
+  end
+
+  def connected_external_ids
+    scope = policy_scope(SocialMedia::SocialPage).where.not(status: :disconnected)
+    {
+      facebook: scope.facebook.pluck(:external_id).to_set,
+      instagram: scope.instagram.pluck(:external_id).to_set
+    }
   end
 
   def https_url(value)

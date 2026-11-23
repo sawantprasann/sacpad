@@ -90,7 +90,7 @@ module Console
     def deactivate
       @organization.deactivate!
       record_activity("organization.deactivated", record: @organization, organization: @organization)
-      redirect_to console_organization_path(@organization), notice: "Organization deactivated — all its users are now locked out."
+      redirect_to console_organization_path(@organization), notice: "Organization deactivated — all its users are locked out and its social accounts are disconnected."
     end
 
     def reactivate

@@ -29,6 +29,7 @@ module SocialMedia
     end
 
     def disconnect!
+      SocialConnections::ReleaseFacebookGrant.call(self)
       update!(status: :disconnected, access_token: nil, refresh_token: nil)
     end
 

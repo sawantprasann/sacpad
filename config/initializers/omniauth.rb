@@ -16,6 +16,7 @@ if app_id.present? && app_secret.present?
     provider :facebook, app_id, app_secret,
       scope: %w[pages_show_list pages_manage_posts pages_read_engagement pages_read_user_content instagram_basic instagram_content_publish instagram_manage_contents].join(","),
       info_fields: "name",
-      secure_image_url: true
+      secure_image_url: true,
+      auth_type: "rerequest"
   end
 end

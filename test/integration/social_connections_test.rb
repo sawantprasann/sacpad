@@ -606,8 +606,43 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_select "img[src=?]", "https://example.com/youth.jpg"
     assert_select "img[src=?]", "https://example.com/ig.jpg"
     assert_select "img[src=?]", "http://evil.example/pic.jpg", count: 0
+    assert_select "input[name='page_ids[]'][checked]", count: 0
+    assert_select "input[name='instagram_ids[]'][checked]", count: 0
     assert_no_match "page-secret-token", response.body
     assert_no_match "other-secret", response.body
+  end
+
+  test "already connected pages and instagram accounts start selected" do
+    sign_in @admin
+    ActsAsTenant.with_tenant(@org) do
+      SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      SocialMedia::SocialPage.create!(owner: @admin, provider: :instagram, external_id: "ig-9", name: "youth.ig", parent_external_id: "111", access_token: "page-secret-token", status: :needs_reauth)
+      SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "333", name: "Left Page", access_token: nil, status: :disconnected)
+    end
+    pending = ActsAsTenant.with_tenant(@org) do
+      @admin.pending_connections.create!(
+        provider: :facebook,
+        provider_uid: "fb-user-1",
+        items: [
+          {
+            "id" => "111",
+            "name" => "Youth Page",
+            "access_token" => "page-secret-token",
+            "instagram_business_account" => { "id" => "ig-9", "username" => "youth.ig" }
+          },
+          { "id" => "222", "name" => "New Page", "access_token" => "other-secret" },
+          { "id" => "333", "name" => "Left Page", "access_token" => "left-secret" }
+        ]
+      )
+    end
+
+    get choose_social_connections_path(pending_id: pending.id)
+    assert_response :success
+    assert_select "input[name='page_ids[]'][value='111'][checked]"
+    assert_select "input[name='instagram_ids[]'][value='ig-9'][checked]"
+    assert_select "input[name='page_ids[]'][value='222'][checked]", count: 0
+    assert_select "input[name='page_ids[]'][value='333'][checked]", count: 0
+    assert_match I18n.t("social.choose_selected", count: 2), response.body
   end
 
   test "a different writer cannot open someone else's checklist" do
@@ -664,6 +699,71 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
       assert_nil instagram.access_token
       assert_equal "Youth Page", page.name
     end
+  end
+
+  test "disconnecting a facebook page tells Facebook to forget that login's pages" do
+    page = nil
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(
+        owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page",
+        provider_uid: "fb-user-9", access_token: "page-secret-token", status: :active
+      )
+    end
+    calls = []
+    api = MetaApi.singleton_class
+    graph = MetaApi::Graph.singleton_class
+    api.alias_method(:__orig_configured?, :configured?)
+    graph.alias_method(:__orig_delete, :delete)
+    MetaApi.define_singleton_method(:configured?) { true }
+    MetaApi::Graph.define_singleton_method(:delete) do |path, params = {}|
+      calls << [ path, params[:access_token] ]
+      { "success" => true }
+    end
+
+    sign_in @admin
+    delete social_connection_path(page)
+
+    assert_redirected_to social_connections_path
+    assert_includes calls.map(&:first), "/fb-user-9/permissions/pages_show_list"
+    assert_includes calls.map(&:first), "/fb-user-9/permissions/pages_manage_posts"
+    app_token = "#{MetaCredentials.app_id}|#{MetaCredentials.app_secret}"
+    assert calls.all? { |_, token| token == app_token }
+    assert calls.none? { |_, token| token == "page-secret-token" }
+    ActsAsTenant.with_tenant(@org) do
+      assert page.reload.connection_disconnected?
+      assert_nil page.access_token
+    end
+  ensure
+    api&.alias_method(:configured?, :__orig_configured?) if api&.method_defined?(:__orig_configured?)
+    graph&.alias_method(:delete, :__orig_delete) if graph&.method_defined?(:__orig_delete)
+  end
+
+  test "disconnect still finishes when Facebook cannot forget the page" do
+    page = nil
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(
+        owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page",
+        provider_uid: "fb-user-9", access_token: "page-secret-token", status: :active
+      )
+    end
+    api = MetaApi.singleton_class
+    graph = MetaApi::Graph.singleton_class
+    api.alias_method(:__orig_configured?, :configured?)
+    graph.alias_method(:__orig_delete, :delete)
+    MetaApi.define_singleton_method(:configured?) { true }
+    MetaApi::Graph.define_singleton_method(:delete) { |_path, _params = {}| raise MetaApi::Graph::Error, "rejected" }
+
+    sign_in @admin
+    delete social_connection_path(page)
+
+    assert_redirected_to social_connections_path
+    ActsAsTenant.with_tenant(@org) do
+      assert page.reload.connection_disconnected?
+      assert_nil page.access_token
+    end
+  ensure
+    api&.alias_method(:configured?, :__orig_configured?) if api&.method_defined?(:__orig_configured?)
+    graph&.alias_method(:delete, :__orig_delete) if graph&.method_defined?(:__orig_delete)
   end
 
   test "another organization cannot see the page" do
