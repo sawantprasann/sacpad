@@ -28,6 +28,14 @@ module SocialMedia
       video if video.attached?
     end
 
+    def synced_from_network?
+      targets.any? && targets.all?(&:synced_from_network?)
+    end
+
+    def composed_here?
+      !synced_from_network?
+    end
+
     private
 
     def body_or_media_present

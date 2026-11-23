@@ -1,0 +1,19 @@
+<% content_for :title, t("nav.social_channels") %>
+<% can_connect = policy(SocialMedia::SocialPage).connect? %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("social.kicker"),
+      title: t("nav.social_channels"),
+      subtitle: t("social.subtitle"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<div class="mt-6">
+  <h2 class="text-lg font-semibold text-gray-900 dark:text-white/90"><%= t("social.stat_networks") %></h2>
+  <p class="mt-0.5 text-sm text-gray-500"><%= t("social.networks_count", live: @pages.count(&:connection_active?).positive? ? 1 : 0, total: 4) %></p>
+  <% if can_connect && !@facebook_ready %>
+    <p class="mt-1 max-w-md text-xs leading-5 text-gray-500"><%= t("social.not_configured") %></p>
+  <% end %>
+</div>
+
+<%= render "social_connections/network_cards", spacing: "mt-4" %>

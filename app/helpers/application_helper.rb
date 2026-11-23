@@ -93,6 +93,16 @@ module ApplicationHelper
     key.to_s if CadreProgram::CadreActivity.categories.key?(key.to_s)
   end
 
+  # Which Social Media submenu row is open. Nil off that section of the app.
+  def social_nav_key
+    return "outreach" if controller_path == "outreach/campaigns"
+    return "posts" if controller_path == "social_posts" || (controller_path == "social_connections" && action_name == "new")
+    return "channels" if controller_path == "social_connections" && action_name.in?(%w[channels choose])
+    return "pages" if controller_path == "social_connections"
+
+    nil
+  end
+
   def ta_page_title
     "text-xl font-semibold tracking-tight text-gray-900 dark:text-white/90"
   end

@@ -61,11 +61,13 @@ module SocialConnections
 
       if target
         target.bulk_post.update!(body: text) if text.present? && target.bulk_post.body != text
-        target.update!(
+        state = target.provider_state.merge("picture_url" => picture)
+      state["source"] = "facebook" if state["source"].blank?
+      target.update!(
           permalink: post["permalink_url"].presence,
           published_at: published_at || target.published_at,
           status: :published,
-          provider_state: target.provider_state.merge("picture_url" => picture, "source" => "facebook")
+          provider_state: state
         )
       else
         bulk = SocialMedia::BulkPost.new(

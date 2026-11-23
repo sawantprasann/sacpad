@@ -1,0 +1,41 @@
+<% content_for :title, t("outreach.send_bulk") %>
+
+<%= render layout: "ui/campaign_hero", locals: {
+      kicker: t("nav.social_outreach"),
+      title: t("outreach.send_bulk"),
+      subtitle: t("outreach.sms_help"),
+      meta: current_user.organization.name
+    } do %><% end %>
+
+<div class="mt-4 flex justify-end">
+  <%= link_to t("common.back_to_list"), outreach_campaigns_path, class: "#{ta_btn_secondary} min-h-11" %>
+</div>
+
+<section class="mt-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10 sm:p-6">
+  <% unless @sms_ready %>
+    <p class="mb-5 text-sm leading-6 text-amber-800"><%= t("outreach.not_configured") %></p>
+  <% end %>
+
+  <%= form_with model: @campaign, url: outreach_campaigns_path do |f| %>
+    <%= f.label :body, t("outreach.message"), class: ta_label_classes %>
+    <%= f.text_area :body, rows: 4, class: ta_area_classes, placeholder: t("outreach.message_placeholder") %>
+
+    <div class="mt-5" data-controller="file-picker">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <%= f.label :source_file, t("outreach.csv"), class: ta_label_classes %>
+        <%= link_to t("outreach.sample"), sample_outreach_campaigns_path, class: "#{ta_btn_secondary} min-h-9 px-3 py-1.5 text-xs" %>
+      </div>
+      <label class="mt-1 flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-4 dark:border-gray-700 dark:bg-white/5">
+        <span class="inline-flex min-h-10 items-center rounded-lg bg-white px-3 text-sm font-medium text-gray-800 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:text-white dark:ring-white/10"><%= t("outreach.choose_file") %></span>
+        <span class="min-w-0 truncate text-sm text-gray-500" data-file-picker-target="name" data-empty="<%= t("outreach.csv_empty") %>"><%= t("outreach.csv_empty") %></span>
+        <%= f.file_field :source_file, accept: "text/csv,.csv", class: "sr-only",
+              data: { action: "change->file-picker#show" } %>
+      </label>
+      <p class="mt-2 text-xs leading-5 text-gray-500"><%= t("outreach.csv_help") %></p>
+    </div>
+
+    <div class="mt-5">
+      <%= f.submit t("outreach.send"), class: "#{ta_btn_primary} cursor-pointer", style: "background: #2563eb; color: #fff" %>
+    </div>
+  <% end %>
+</section>

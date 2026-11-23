@@ -62,6 +62,8 @@ module BreadcrumbHelper
       "support_tickets" => [ t("nav.support"), support_tickets_path ],
       "pr_records" => [ t("nav.pr_records"), pr_records_path ],
       "social_connections" => [ t("nav.social_media"), social_connections_path ],
+      "social_posts" => [ t("nav.social_posts"), social_posts_path ],
+      "outreach/campaigns" => [ t("nav.social_outreach"), outreach_campaigns_path ],
       "data_deletions" => [ t("social.deletion_title"), nil ],
       "voter_lists/talukas" => [ t("nav.talukas"), voter_lists_talukas_path ],
       "voter_lists/villages" => [ t("nav.talukas"), voter_lists_talukas_path ],

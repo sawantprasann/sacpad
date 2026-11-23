@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_21_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_22_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -490,6 +490,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_120000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_outdoor_ad_types_on_slug", unique: true
+  end
+
+  create_table "outreach_campaigns", force: :cascade do |t|
+    t.bigint "organization_id", null: false
+    t.bigint "owner_id", null: false
+    t.integer "channel", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.text "body", null: false
+    t.string "webhook_token", null: false
+    t.string "last_error"
+    t.integer "total_count", default: 0, null: false
+    t.integer "sent_count", default: 0, null: false
+    t.integer "delivered_count", default: 0, null: false
+    t.integer "failed_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "created_at"], name: "index_outreach_campaigns_on_organization_id_and_created_at"
+    t.index ["organization_id"], name: "index_outreach_campaigns_on_organization_id"
+    t.index ["owner_id"], name: "index_outreach_campaigns_on_owner_id"
+    t.index ["webhook_token"], name: "index_outreach_campaigns_on_webhook_token", unique: true
+  end
+
+  create_table "outreach_recipients", force: :cascade do |t|
+    t.bigint "outreach_campaign_id", null: false
+    t.bigint "organization_id", null: false
+    t.string "phone", null: false
+    t.integer "status", default: 0, null: false
+    t.string "provider_message_id"
+    t.string "error_message"
+    t.datetime "sent_at"
+    t.datetime "delivered_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["organization_id", "status"], name: "index_outreach_recipients_on_organization_id_and_status"
+    t.index ["organization_id"], name: "index_outreach_recipients_on_organization_id"
+    t.index ["outreach_campaign_id", "phone"], name: "index_outreach_recipients_on_outreach_campaign_id_and_phone", unique: true
+    t.index ["outreach_campaign_id"], name: "index_outreach_recipients_on_outreach_campaign_id"
   end
 
   create_table "parties", force: :cascade do |t|
@@ -1137,6 +1174,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_21_120000) do
   add_foreign_key "mock_poll_responses", "politicians"
   add_foreign_key "mock_poll_responses", "users", column: "created_by_id"
   add_foreign_key "mock_poll_responses", "villages"
+  add_foreign_key "outreach_campaigns", "organizations"
+  add_foreign_key "outreach_campaigns", "users", column: "owner_id"
+  add_foreign_key "outreach_recipients", "organizations"
+  add_foreign_key "outreach_recipients", "outreach_campaigns"
   add_foreign_key "party_memberships", "organizations"
   add_foreign_key "party_memberships", "parties"
   add_foreign_key "police_stations", "states"
