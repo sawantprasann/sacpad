@@ -7,7 +7,7 @@
 # Ignore bundler config.
 /.bundle
 
-# Ignore all environment files.
+# Ignore all environment files, including examples.
 /.env*
 
 # Ignore all default key files.
@@ -46,6 +46,14 @@
 # Ignore development files
 /.devcontainer
 
-# Ignore Docker-related files
+# Ignore tests, coverage, and host deploy scripts. They do not belong in the image.
+/test
+/coverage
+/deploy.sh
+/setup_server.sh
+
+# Ignore Docker-related files. The Redis entrypoint is mounted by Compose, not baked in.
 /.dockerignore
 /Dockerfile*
+/docker-compose*.yml
+/docker

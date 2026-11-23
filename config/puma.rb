@@ -30,13 +30,16 @@ threads threads_count, threads_count
 
 app_dir = File.expand_path("..", __dir__)
 
-# Production sits behind Nginx on a Unix socket. Other environments keep the TCP port.
-if ENV["RAILS_ENV"] == "production"
+# The VM deploy is fronted by host Nginx on a Unix socket.
+# Docker sets PUMA_BIND=tcp. Puma then listens on localhost only, and Thruster
+# is the process that accepts traffic from the load balancer.
+if ENV["RAILS_ENV"] == "production" && ENV["PUMA_BIND"] != "tcp"
   bind "unix://#{app_dir}/tmp/puma.sock"
   pidfile "#{app_dir}/tmp/pids/server.pid"
   state_path "#{app_dir}/tmp/pids/server.state"
+elsif ENV["PUMA_BIND"] == "tcp"
+  bind "tcp://127.0.0.1:#{ENV.fetch("PORT", 3000)}"
 else
-  # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
   port ENV.fetch("PORT", 3000)
 end
 

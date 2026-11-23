@@ -1,8 +1,59 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+# Production refuses to boot with a missing secret or an unverified remote database.
+# The VM deploy does not use this entrypoint.
+if [ "${RAILS_ENV}" = "production" ]; then
+  missing=()
+  [ -n "${DB_HOST:-}" ] || missing+=("DB_HOST")
+  [ -n "${DB_USERNAME:-}" ] || missing+=("DB_USERNAME")
+  [ -n "${DB_PASSWORD:-${SACPAD_DATABASE_PASSWORD:-}}" ] || missing+=("DB_PASSWORD")
+  [ -n "${ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY:-}" ] || missing+=("ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY")
+  [ -n "${ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY:-}" ] || missing+=("ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY")
+  [ -n "${ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT:-}" ] || missing+=("ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT")
+  [ -n "${SECRET_KEY_BASE:-${RAILS_MASTER_KEY:-}}" ] || missing+=("RAILS_MASTER_KEY or SECRET_KEY_BASE")
+  [ -n "${REDIS_URL:-}" ] || missing+=("REDIS_URL")
+
+  if [ "${#missing[@]}" -gt 0 ]; then
+    echo "Refusing to boot. Missing: ${missing[*]}" >&2
+    exit 1
+  fi
+
+  db_password="${DB_PASSWORD:-${SACPAD_DATABASE_PASSWORD}}"
+  if [ "${#db_password}" -lt 12 ]; then
+    echo "Refusing to boot. DB_PASSWORD must be at least 12 characters." >&2
+    exit 1
+  fi
+
+  case "${DB_HOST}" in
+    localhost|127.0.0.1) ;;
+    *)
+      case "${DB_SSLMODE:-prefer}" in
+        verify-full|verify-ca) ;;
+        *)
+          echo "Refusing to boot. Set DB_SSLMODE=verify-full so RDS certificates are verified." >&2
+          exit 1
+          ;;
+      esac
+      if [ ! -r "${DB_SSLROOTCERT:-}" ]; then
+        echo "Refusing to boot. RDS CA bundle is not readable at DB_SSLROOTCERT." >&2
+        exit 1
+      fi
+      ;;
+  esac
+
+  case "${REDIS_URL}" in
+    redis://:*@*|rediss://:*@*|redis://*:*@*|rediss://*:*@*) ;;
+    *)
+      echo "Refusing to boot. REDIS_URL must include a password (rediss:// for ElastiCache TLS)." >&2
+      exit 1
+      ;;
+  esac
+fi
+
+# Migrate from the web process only, before Puma accepts traffic.
+# Sidekiq starts after the web health check, so it does not race migrations.
+if [ "${1:-}" = "./bin/thrust" ] || { [ "${@: -2:1}" = "./bin/rails" ] && [ "${@: -1}" = "server" ]; }; then
   ./bin/rails db:prepare
 fi
 
-exec "${@}"
+exec "$@"
