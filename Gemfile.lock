@@ -214,7 +214,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     jmespath (1.6.2)
-    json (3.0.2)
+    json (3.1.0)
     jwt (3.3.0)
       base64
     kamal (2.12.0)
@@ -310,7 +310,7 @@ GEM
       omniauth (~> 2.0)
     orm_adapter (0.5.0)
     ostruct (0.6.3)
-    pagy (43.7.0)
+    pagy (43.8.5)
       json
       uri
       yaml
@@ -522,7 +522,7 @@ GEM
       unicode-emoji (~> 4.3)
     unicode-emoji (4.3.0)
     uniform_notifier (1.18.0)
-    uri (1.1.1)
+    uri (1.1.2)
     useragent (0.16.11)
     version_gem (1.1.17)
     warden (1.2.9)
@@ -576,7 +576,7 @@ DEPENDENCIES
   kamal
   omniauth-facebook (~> 10.0)
   omniauth-rails_csrf_protection (~> 1.0)
-  pagy (~> 43.7)
+  pagy (~> 43.8)
   paper_trail (~> 17.0)
   pdf-reader (~> 2.14)
   pg (~> 1.1)
