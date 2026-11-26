@@ -24,11 +24,12 @@ development:
   primary: &primary_development
     <<: *default
     database: <%= ENV.fetch("DB_NAME", "sacpad_development") %>
-    # Set only inside Docker. On the Mac, Rails keeps using the local socket.
-    <% if ENV["DB_HOST"].present? %>
-    host: <%= ENV["DB_HOST"] %>
+    # Inside Docker there is no Mac socket. Use the host Postgres over TCP.
+    # On the Mac itself, leave host unset so Rails keeps the local socket.
+    <% if File.exist?("/.dockerenv") %>
+    host: <%= ENV["DB_HOST"].to_s.empty? ? "host.docker.internal" : ENV["DB_HOST"] %>
     port: <%= ENV.fetch("DB_PORT", 5432) %>
-    username: <%= ENV["DB_USERNAME"] %>
+    username: <%= ENV["DB_USERNAME"].to_s.empty? ? "prasannsawant" : ENV["DB_USERNAME"] %>
     password: <%= ENV["DB_PASSWORD"] %>
     sslmode: <%= ENV.fetch("DB_SSLMODE", "disable") %>
     <% end %>
