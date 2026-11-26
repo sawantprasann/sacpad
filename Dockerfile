@@ -76,6 +76,48 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/ && \
     ./bin/rails assets:precompile && \
     rm -rf tmp/cache vendor/bundle
 
+# Local development. Postgres runs on the host, not in RDS.
+FROM base AS development
+
+USER root
+
+ENV RAILS_ENV="development" \
+    BUNDLE_DEPLOYMENT="" \
+    BUNDLE_WITHOUT="" \
+    PUMA_BIND="" \
+    DB_SSLMODE="disable" \
+    RAILS_LOG_LEVEL="debug"
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      libpq-dev \
+      libyaml-dev \
+      pkg-config && \
+    rm -rf /var/lib/apt/lists/* && \
+    gem install bundler -v 2.7.2 --no-document && \
+    groupadd --system --gid 1000 rails && \
+    useradd --system --uid 1000 --gid 1000 --create-home --shell /usr/sbin/nologin rails
+
+COPY Gemfile Gemfile.lock ./
+
+RUN --mount=type=cache,target=/usr/local/bundle/cache,sharing=locked \
+    bundle install && \
+    rm -rf ~/.bundle "${BUNDLE_PATH}"/ruby/*/cache
+
+COPY . .
+RUN mkdir -p tmp log storage && \
+    chmod 755 bin/docker-entrypoint bin/rails && \
+    chown -R rails:rails /rails /usr/local/bundle
+
+USER 1000:1000
+
+EXPOSE 3000
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+CMD ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+
 FROM base AS runtime
 
 RUN groupadd --system --gid 1000 rails && \

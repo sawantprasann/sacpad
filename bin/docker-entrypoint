@@ -24,9 +24,9 @@ if [ "${RAILS_ENV}" = "production" ]; then
     exit 1
   fi
 
+  # verify-full is required for RDS. A local Postgres server has no RDS certificate.
   case "${DB_HOST}" in
-    localhost|127.0.0.1) ;;
-    *)
+    *.rds.amazonaws.com|*.rds.*.amazonaws.com)
       case "${DB_SSLMODE:-prefer}" in
         verify-full|verify-ca) ;;
         *)
@@ -52,7 +52,7 @@ fi
 
 # Migrate from the web process only, before Puma accepts traffic.
 # Sidekiq starts after the web health check, so it does not race migrations.
-if [ "${1:-}" = "./bin/thrust" ] || { [ "${@: -2:1}" = "./bin/rails" ] && [ "${@: -1}" = "server" ]; }; then
+if [ "${1:-}" = "./bin/thrust" ] || [[ " $* " == *" ./bin/rails "* && " $* " == *" server "* ]]; then
   ./bin/rails db:prepare
 fi
 
