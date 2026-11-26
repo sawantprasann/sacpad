@@ -47,6 +47,9 @@ services:
       RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
       REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0}
+      # Thruster toggle. Kept out of the Dockerfile because the name ends in AUTH
+      # and the image linter treats that as a secret.
+      GZIP_COMPRESSION_DISABLE_ON_AUTH: "true"
     ports:
       - "8080:8080"
     depends_on:

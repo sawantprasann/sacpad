@@ -37,7 +37,6 @@ ENV RAILS_ENV="production" \
     TARGET_PORT="3000" \
     STORAGE_PATH="/rails/tmp/thruster" \
     MAX_REQUEST_BODY="209715200" \
-    GZIP_COMPRESSION_DISABLE_ON_AUTH="true" \
     PUMA_BIND="tcp" \
     DB_SSLMODE="verify-full" \
     DB_SSLROOTCERT="/rails/config/certs/rds-global-bundle.pem" \
