@@ -23,16 +23,13 @@ default: &default
 development:
   primary: &primary_development
     <<: *default
-    database: <%= ENV.fetch("DB_NAME", "sacpad_development") %>
-    # Inside Docker, Compose sets DB_HOST=postgres. On the Mac itself, leave
-    # host unset so Rails keeps the local socket.
-    <% if File.exist?("/.dockerenv") %>
+    # Compose service name. A blank host makes libpq use a Unix socket.
     host: <%= ENV["DB_HOST"].to_s.empty? ? "postgres" : ENV["DB_HOST"] %>
-    port: <%= ENV.fetch("DB_PORT", 5432) %>
-    username: <%= ENV["DB_USERNAME"] %>
+    port: <%= ENV["DB_PORT"].to_s.empty? ? 5432 : ENV["DB_PORT"] %>
+    database: <%= ENV["DB_NAME"].to_s.empty? ? "sacpad_development" : ENV["DB_NAME"] %>
+    username: <%= ENV["DB_USERNAME"].to_s.empty? ? "postgres" : ENV["DB_USERNAME"] %>
     password: <%= ENV["DB_PASSWORD"] %>
-    sslmode: <%= ENV.fetch("DB_SSLMODE", "disable") %>
-    <% end %>
+    sslmode: <%= ENV["DB_SSLMODE"].to_s.empty? ? "disable" : ENV["DB_SSLMODE"] %>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.

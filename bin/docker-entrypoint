@@ -52,12 +52,30 @@ fi
 
 # Local Docker development uses the Postgres service in docker-compose.yml.
 # That image creates DB_USERNAME on first start of the postgres_data volume.
+# PGHOST and DATABASE_URL are set here because a database.yml without a host
+# makes Rails open a Unix socket, and the old log line hid an empty DB_HOST.
 if [ "${RAILS_ENV}" = "development" ] && [ -f /.dockerenv ]; then
   if [ -z "${DB_USERNAME:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
     echo "Refusing to boot. Set DB_USERNAME and DB_PASSWORD in .env." >&2
     exit 1
   fi
-  echo "Database: host=${DB_HOST:-postgres} port=${DB_PORT:-5432} name=${DB_NAME:-sacpad_development} user=${DB_USERNAME}" >&2
+
+  export DB_HOST="${DB_HOST:-postgres}"
+  export DB_PORT="${DB_PORT:-5432}"
+  export DB_NAME="${DB_NAME:-sacpad_development}"
+  export DB_SSLMODE="${DB_SSLMODE:-disable}"
+  export PGHOST="$DB_HOST"
+  export PGPORT="$DB_PORT"
+  export PGUSER="$DB_USERNAME"
+  export PGPASSWORD="$DB_PASSWORD"
+  export PGDATABASE="$DB_NAME"
+  export PGSSLMODE="$DB_SSLMODE"
+  DATABASE_URL="$(
+    ruby -ruri -e 'u=URI.encode_www_form_component(ENV.fetch("DB_USERNAME")); p=URI.encode_www_form_component(ENV.fetch("DB_PASSWORD")); print %(postgres://#{u}:#{p}@#{ENV.fetch("DB_HOST")}:#{ENV.fetch("DB_PORT")}/#{ENV.fetch("DB_NAME")}?sslmode=#{ENV.fetch("DB_SSLMODE")})'
+  )"
+  export DATABASE_URL
+
+  echo "Database: host=${DB_HOST} port=${DB_PORT} name=${DB_NAME} user=${DB_USERNAME}" >&2
 fi
 
 # Migrate from the web process only, before Puma accepts traffic.
