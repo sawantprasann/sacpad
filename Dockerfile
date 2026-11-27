@@ -76,7 +76,7 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/ && \
     ./bin/rails assets:precompile && \
     rm -rf tmp/cache vendor/bundle
 
-# Local development. Postgres runs on the host, not in RDS.
+# Local development. Postgres is the Compose service, not RDS.
 FROM base AS development
 
 USER root
@@ -104,6 +104,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 COPY Gemfile Gemfile.lock ./
 
 RUN --mount=type=cache,target=/usr/local/bundle/cache,sharing=locked \
+    echo "Installing gems. This step often prints nothing else for several minutes." && \
     bundle install && \
     rm -rf ~/.bundle "${BUNDLE_PATH}"/ruby/*/cache
 

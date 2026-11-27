@@ -1,16 +1,14 @@
 # Local development. Postgres and Redis run in this Compose project.
 # Production uses RDS and is docker-compose.prod.yml.
 #
-#   docker compose up --build -d
+# First build prints almost nothing until gems finish compiling. Use:
+#   docker compose build --progress=plain
+#   docker compose up
 #
 # App: http://localhost:3000
 
 x-app: &app
   image: sacpad:development
-  build:
-    context: .
-    dockerfile: Dockerfile
-    target: development
   env_file:
     - .env
   restart: unless-stopped
@@ -30,6 +28,10 @@ x-app: &app
 services:
   web:
     <<: *app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
     command: ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
     environment:
       RAILS_ENV: development
