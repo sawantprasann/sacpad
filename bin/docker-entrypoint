@@ -50,6 +50,16 @@ if [ "${RAILS_ENV}" = "production" ]; then
   esac
 fi
 
+# Local Docker development uses the Postgres service in docker-compose.yml.
+# That image creates DB_USERNAME on first start of the postgres_data volume.
+if [ "${RAILS_ENV}" = "development" ] && [ -f /.dockerenv ]; then
+  if [ -z "${DB_USERNAME:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
+    echo "Refusing to boot. Set DB_USERNAME and DB_PASSWORD in .env." >&2
+    exit 1
+  fi
+  echo "Database: host=${DB_HOST:-postgres} port=${DB_PORT:-5432} name=${DB_NAME:-sacpad_development} user=${DB_USERNAME}" >&2
+fi
+
 # Migrate from the web process only, before Puma accepts traffic.
 # Sidekiq starts after the web health check, so it does not race migrations.
 if [ "${1:-}" = "./bin/thrust" ] || [[ " $* " == *" ./bin/rails "* && " $* " == *" server "* ]]; then

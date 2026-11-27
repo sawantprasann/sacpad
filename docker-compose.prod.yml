@@ -1,14 +1,10 @@
-# Production on AWS. Postgres is RDS. Use:
-#   docker compose -f docker-compose.prod.yml up --build -d
+# Production on EC2. The image is pulled from ECR. Postgres is RDS.
+# GitHub Actions sets SACPAD_IMAGE. Secrets stay in /opt/sacpad/.env on the instance.
 #
 # Publish 8080 only to the load balancer security group. TLS ends at the ALB.
 
 x-app: &app
-  image: sacpad:local
-  build:
-    context: .
-    dockerfile: Dockerfile
-    target: runtime
+  image: ${SACPAD_IMAGE:?Set SACPAD_IMAGE to the ECR image}
   env_file:
     - .env
   restart: unless-stopped
