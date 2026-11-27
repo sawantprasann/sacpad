@@ -23,7 +23,13 @@ default: &default
 development:
   primary: &primary_development
     <<: *default
-    database: sacpad_development
+    # Compose service name. A blank host makes libpq use a Unix socket.
+    host: <%= ENV["DB_HOST"].to_s.empty? ? "postgres" : ENV["DB_HOST"] %>
+    port: <%= ENV["DB_PORT"].to_s.empty? ? 5432 : ENV["DB_PORT"] %>
+    database: <%= ENV["DB_NAME"].to_s.empty? ? "sacpad_development" : ENV["DB_NAME"] %>
+    username: <%= ENV["DB_USERNAME"].to_s.empty? ? "postgres" : ENV["DB_USERNAME"] %>
+    password: <%= ENV["DB_PASSWORD"] %>
+    sslmode: <%= ENV["DB_SSLMODE"].to_s.empty? ? "disable" : ENV["DB_SSLMODE"] %>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
@@ -89,14 +95,22 @@ production:
   primary: &primary_production
     <<: *default
     host: <%= ENV.fetch("DB_HOST", "localhost") %>
-    database: sacpad_production
-    username: sacpad
-    password: <%= ENV["SACPAD_DATABASE_PASSWORD"] %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    database: <%= ENV.fetch("DB_NAME", "sacpad_production") %>
+    username: <%= ENV.fetch("DB_USERNAME", "sacpad") %>
+    password: <%= ENV["DB_PASSWORD"].presence || ENV["SACPAD_DATABASE_PASSWORD"] %>
+    # prefer keeps the current VM deploy working. The Docker image sets
+    # verify-full and the RDS CA bundle so the remote certificate is checked.
+    sslmode: <%= ENV.fetch("DB_SSLMODE", "prefer") %>
+    <% if ENV["DB_SSLROOTCERT"].present? %>
+    sslrootcert: <%= ENV["DB_SSLROOTCERT"] %>
+    <% end %>
+    connect_timeout: <%= ENV.fetch("DB_CONNECT_TIMEOUT", 5) %>
   cache:
     <<: *primary_production
-    database: sacpad_production_cache
+    database: <%= ENV.fetch("CACHE_DB_NAME", "sacpad_production_cache") %>
     migrations_paths: db/cache_migrate
   cable:
     <<: *primary_production
-    database: sacpad_production_cable
+    database: <%= ENV.fetch("CABLE_DB_NAME", "sacpad_production_cable") %>
     migrations_paths: db/cable_migrate

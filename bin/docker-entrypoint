@@ -1,8 +1,87 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+# Production refuses to boot with a missing secret or an unverified remote database.
+# The VM deploy does not use this entrypoint.
+if [ "${RAILS_ENV}" = "production" ]; then
+  missing=()
+  [ -n "${DB_HOST:-}" ] || missing+=("DB_HOST")
+  [ -n "${DB_USERNAME:-}" ] || missing+=("DB_USERNAME")
+  [ -n "${DB_PASSWORD:-${SACPAD_DATABASE_PASSWORD:-}}" ] || missing+=("DB_PASSWORD")
+  [ -n "${ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY:-}" ] || missing+=("ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY")
+  [ -n "${ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY:-}" ] || missing+=("ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY")
+  [ -n "${ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT:-}" ] || missing+=("ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT")
+  [ -n "${SECRET_KEY_BASE:-${RAILS_MASTER_KEY:-}}" ] || missing+=("RAILS_MASTER_KEY or SECRET_KEY_BASE")
+  [ -n "${REDIS_URL:-}" ] || missing+=("REDIS_URL")
+
+  if [ "${#missing[@]}" -gt 0 ]; then
+    echo "Refusing to boot. Missing: ${missing[*]}" >&2
+    exit 1
+  fi
+
+  db_password="${DB_PASSWORD:-${SACPAD_DATABASE_PASSWORD}}"
+  if [ "${#db_password}" -lt 12 ]; then
+    echo "Refusing to boot. DB_PASSWORD must be at least 12 characters." >&2
+    exit 1
+  fi
+
+  # verify-full is required for RDS. A local Postgres server has no RDS certificate.
+  case "${DB_HOST}" in
+    *.rds.amazonaws.com|*.rds.*.amazonaws.com)
+      case "${DB_SSLMODE:-prefer}" in
+        verify-full|verify-ca) ;;
+        *)
+          echo "Refusing to boot. Set DB_SSLMODE=verify-full so RDS certificates are verified." >&2
+          exit 1
+          ;;
+      esac
+      if [ ! -r "${DB_SSLROOTCERT:-}" ]; then
+        echo "Refusing to boot. RDS CA bundle is not readable at DB_SSLROOTCERT." >&2
+        exit 1
+      fi
+      ;;
+  esac
+
+  case "${REDIS_URL}" in
+    redis://:*@*|rediss://:*@*|redis://*:*@*|rediss://*:*@*) ;;
+    *)
+      echo "Refusing to boot. REDIS_URL must include a password (rediss:// for ElastiCache TLS)." >&2
+      exit 1
+      ;;
+  esac
+fi
+
+# Local Docker development uses the Postgres service in docker-compose.yml.
+# That image creates DB_USERNAME on first start of the postgres_data volume.
+# PGHOST and DATABASE_URL are set here because a database.yml without a host
+# makes Rails open a Unix socket, and the old log line hid an empty DB_HOST.
+if [ "${RAILS_ENV}" = "development" ] && [ -f /.dockerenv ]; then
+  if [ -z "${DB_USERNAME:-}" ] || [ -z "${DB_PASSWORD:-}" ]; then
+    echo "Refusing to boot. Set DB_USERNAME and DB_PASSWORD in .env." >&2
+    exit 1
+  fi
+
+  export DB_HOST="${DB_HOST:-postgres}"
+  export DB_PORT="${DB_PORT:-5432}"
+  export DB_NAME="${DB_NAME:-sacpad_development}"
+  export DB_SSLMODE="${DB_SSLMODE:-disable}"
+  export PGHOST="$DB_HOST"
+  export PGPORT="$DB_PORT"
+  export PGUSER="$DB_USERNAME"
+  export PGPASSWORD="$DB_PASSWORD"
+  export PGDATABASE="$DB_NAME"
+  export PGSSLMODE="$DB_SSLMODE"
+  DATABASE_URL="$(
+    ruby -ruri -e 'u=URI.encode_www_form_component(ENV.fetch("DB_USERNAME")); p=URI.encode_www_form_component(ENV.fetch("DB_PASSWORD")); print %(postgres://#{u}:#{p}@#{ENV.fetch("DB_HOST")}:#{ENV.fetch("DB_PORT")}/#{ENV.fetch("DB_NAME")}?sslmode=#{ENV.fetch("DB_SSLMODE")})'
+  )"
+  export DATABASE_URL
+
+  echo "Database: host=${DB_HOST} port=${DB_PORT} name=${DB_NAME} user=${DB_USERNAME}" >&2
+fi
+
+# Migrate from the web process only, before Puma accepts traffic.
+# Sidekiq starts after the web health check, so it does not race migrations.
+if [ "${1:-}" = "./bin/thrust" ] || [[ " $* " == *" ./bin/rails "* && " $* " == *" server "* ]]; then
   ./bin/rails db:prepare
 fi
 
-exec "${@}"
+exec "$@"

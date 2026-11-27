@@ -1,0 +1,167 @@
+# Local development. Postgres and Redis run in this Compose project.
+# Production uses RDS and is docker-compose.prod.yml.
+#
+# First build prints almost nothing until gems finish compiling. Use:
+#   docker compose build --progress=plain
+#   docker compose up
+#
+# App: http://localhost:3000
+
+x-app: &app
+  image: sacpad:development
+  env_file:
+    - .env
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 30s
+  volumes:
+    - .:/rails
+  logging:
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "5"
+  networks:
+    - app
+    - data
+
+services:
+  web:
+    <<: *app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    command: ["./bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+    environment:
+      RAILS_ENV: development
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SSLMODE: disable
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGUSER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      PGPASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      PGDATABASE: ${DB_NAME:-sacpad_development}
+      PGSSLMODE: disable
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  css:
+    <<: *app
+    command: ["./bin/rails", "tailwindcss:watch[always]"]
+    environment:
+      RAILS_ENV: development
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SSLMODE: disable
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGUSER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      PGPASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      PGDATABASE: ${DB_NAME:-sacpad_development}
+      PGSSLMODE: disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    <<: *app
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+    environment:
+      RAILS_ENV: development
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_SSLMODE: disable
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGUSER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      PGPASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      PGDATABASE: ${DB_NAME:-sacpad_development}
+      PGSSLMODE: disable
+      RAILS_MAX_THREADS: ${SIDEKIQ_CONCURRENCY:-5}
+      SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-5}
+      REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    init: true
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: ${DB_NAME:-sacpad_development}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - data
+
+  redis-init:
+    image: redis:7.4-alpine
+    user: "0:0"
+    network_mode: none
+    command: ["chown", "redis:redis", "/data"]
+    volumes:
+      - redis_data:/data
+    restart: "no"
+
+  redis:
+    image: redis:7.4-alpine
+    user: "redis:redis"
+    restart: unless-stopped
+    init: true
+    depends_on:
+      redis-init:
+        condition: service_completed_successfully
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command: ["sh", "/usr/local/bin/redis-entrypoint.sh"]
+    volumes:
+      - redis_data:/data
+      - ./docker/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - data
+
+networks:
+  app:
+  data:
+    internal: true
+
+volumes:
+  postgres_data:
+  redis_data:

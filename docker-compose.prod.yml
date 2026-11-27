@@ -1,0 +1,136 @@
+# Production on EC2. The image is pulled from ECR. Postgres is RDS.
+# GitHub Actions sets SACPAD_IMAGE. Secrets stay in /opt/sacpad/.env on the instance.
+#
+# Publish 8080 only to the load balancer security group. TLS ends at the ALB.
+
+x-app: &app
+  image: ${SACPAD_IMAGE:?Set SACPAD_IMAGE to the ECR image}
+  env_file:
+    - .env
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 30s
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,uid=1000,gid=1000,mode=1770,size=128m
+    - /rails/tmp:rw,nosuid,nodev,uid=1000,gid=1000,mode=0750,size=256m
+    - /rails/log:rw,nosuid,nodev,uid=1000,gid=1000,mode=0750,size=64m
+    - /rails/storage:rw,nosuid,nodev,uid=1000,gid=1000,mode=0750,size=256m
+    - /home/rails:rw,nosuid,nodev,uid=1000,gid=1000,mode=0700,size=32m
+  logging:
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "5"
+  networks:
+    - app
+    - data
+
+services:
+  web:
+    <<: *app
+    command: ["./bin/thrust", "./bin/rails", "server"]
+    environment:
+      RAILS_ENV: production
+      RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+      REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0}
+      GZIP_COMPRESSION_DISABLE_ON_AUTH: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/up"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  worker:
+    <<: *app
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+    environment:
+      RAILS_ENV: production
+      RAILS_MAX_THREADS: ${SIDEKIQ_CONCURRENCY:-5}
+      SIDEKIQ_CONCURRENCY: ${SIDEKIQ_CONCURRENCY:-5}
+      REDIS_URL: ${REDIS_URL:-redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0}
+    depends_on:
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+
+  redis-init:
+    image: redis:7.4-alpine
+    user: "0:0"
+    network_mode: none
+    command: ["chown", "redis:redis", "/data"]
+    volumes:
+      - redis_data:/data
+    restart: "no"
+    read_only: true
+
+  redis:
+    image: redis:7.4-alpine
+    user: "redis:redis"
+    restart: unless-stopped
+    init: true
+    depends_on:
+      redis-init:
+        condition: service_completed_successfully
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command: ["sh", "/usr/local/bin/redis-entrypoint.sh"]
+    volumes:
+      - redis_data:/data
+      - ./docker/redis-entrypoint.sh:/usr/local/bin/redis-entrypoint.sh:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=32m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+networks:
+  app:
+  data:
+    internal: true
+
+volumes:
+  redis_data:
