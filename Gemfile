@@ -60,7 +60,7 @@ gem "roo", "~> 3.0"             # Excel import (Ground Reports, Voter roll)
 gem "pdf-reader", "~> 2.14"     # electoral-roll PDF pages for voter sync
 gem "faraday", "~> 2.15"        # HTTP client for Meta/WhatsApp/IVRS adapters
 gem "omniauth-facebook", "~> 10.0" # Facebook Login for connecting Pages
-gem "omniauth-rails_csrf_protection", "~> 1.0"
+gem "omniauth-rails_csrf_protection", "~> 2.0"
 gem "aws-sdk-s3", "~> 1.233", require: false # Active Storage S3 backend (all file types)
 
 group :development, :test do
