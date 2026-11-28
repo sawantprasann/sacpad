@@ -13,9 +13,18 @@
     } do %><% end %>
 
 <section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10">
-  <div class="flex items-center justify-between gap-3 px-5 py-4">
+  <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
     <h2 class="text-base font-semibold text-gray-900 dark:text-white/90"><%= t("social.posts_count", count: @pagy.count) %></h2>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
+      <% [
+           [ nil, t("social.origin_all") ],
+           [ "ours", t("social.origin_ours") ],
+           [ "synced", t("social.origin_synced") ]
+         ].each do |key, label| %>
+        <% current = params[:origin].presence == key %>
+        <%= link_to label, social_posts_path(origin: key),
+              class: "inline-flex min-h-9 items-center rounded-full px-3 text-xs font-medium #{current ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900" : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300"}" %>
+      <% end %>
       <%= link_to t("social.connected"), social_connections_path, class: "#{ta_btn_secondary} min-h-11" %>
       <% if can_publish %>
         <%= link_to new_social_connection_path,
@@ -56,6 +65,11 @@
               <td class="<%= td %> max-w-md">
                 <p class="font-medium text-gray-900 dark:text-white" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"><%= post.body.presence || post.title.presence || t("social.unnamed") %></p>
                 <p class="mt-1 text-xs text-gray-500"><%= l_stamp(when_at || post.created_at) %></p>
+                <p class="mt-1">
+                  <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset <%= post.synced_from_network? ? "bg-gray-100 text-gray-600 ring-gray-200" : "bg-sky-50 text-sky-700 ring-sky-200" %>" data-origin="<%= post.synced_from_network? ? "synced" : "ours" %>">
+                    <%= t(post.synced_from_network? ? "social.origin_synced" : "social.origin_ours") %>
+                  </span>
+                </p>
                 <% opens = post.targets.select { |target| target.status_published? && target.permalink.to_s.start_with?("https://") && target.social_page.provider.in?(%w[facebook instagram]) } %>
                 <% unless opens.empty? %>
                   <div class="mt-2 flex flex-wrap items-center gap-1.5">

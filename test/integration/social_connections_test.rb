@@ -26,15 +26,19 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
 
   test "an org admin sees the network section" do
     sign_in @admin
-    get social_connections_path
+    get social_channels_path
     assert_response :success
-    assert_match I18n.t("social.title"), response.body
     assert_match I18n.t("social.coming_next"), response.body
     assert_select "button[data-network]", count: 4
     assert_select "button", text: I18n.t("social.connect_facebook"), count: 0
-    assert_match I18n.t("social.channels.sms"), response.body
-    assert_match I18n.t("social.channels.whatsapp"), response.body
-    assert_match I18n.t("social.channels.ivrs"), response.body
+
+    get social_connections_path
+    assert_response :success
+    assert_match I18n.t("social.title"), response.body
+    assert_select "a[href=?]", social_channels_path
+    assert_select "a[href=?]", social_posts_path
+    assert_select "a[href=?]", outreach_campaigns_path
+    assert_select "button[data-network]", count: 4
   end
 
   test "facebook and instagram cards connect through Facebook when Meta is configured" do
@@ -43,7 +47,7 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     MetaApi.define_singleton_method(:configured?) { true }
 
     sign_in @admin
-    get social_connections_path
+    get social_channels_path
     assert_response :success
     assert_select "form[action='/auth/facebook'] button[data-network=facebook]", text: I18n.t("social.connect")
     assert_select "form[action='/auth/facebook'] button[data-network=instagram]", text: I18n.t("social.connect")
@@ -64,10 +68,16 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "Youth Page", response.body
     assert_select "a[href=?]", new_social_connection_path
-    assert_no_match I18n.t("social.networks.youtube"), response.body
-    assert_match I18n.t("social.channels.sms"), response.body
+    assert_match I18n.t("social.networks.youtube"), response.body
     assert_select "button[data-network]", count: 0
     assert_select "button", text: I18n.t("social.connect_facebook"), count: 0
+    get social_channels_path
+    assert_select "button[data-network]", count: 0
+    get outreach_campaigns_path
+    assert_response :success
+    assert_match I18n.t("social.channels.sms"), response.body
+    assert_match I18n.t("social.channels.whatsapp"), response.body
+    assert_match I18n.t("social.channels.ivrs"), response.body
     get new_social_connection_path
     assert_response :success
     assert_select "[data-controller=media-preview]"
@@ -209,6 +219,29 @@ class SocialConnectionsTest < ActionDispatch::IntegrationTest
     get social_posts_path
     assert_response :success
     assert_operator response.body.index("Fresh booth note"), :<, response.body.index("Old booth note")
+  end
+
+  test "a synced post is marked apart from one sent from here" do
+    ActsAsTenant.with_tenant(@org) do
+      page = SocialMedia::SocialPage.create!(owner: @admin, provider: :facebook, external_id: "111", name: "Youth Page", access_token: "page-secret-token", status: :active)
+      ours = SocialMedia::BulkPost.create!(owner: @admin, body: "Written here", status: :completed)
+      ours.targets.create!(social_page: page, status: :published, external_post_id: "111_1", idempotency_key: "publish:1:1", provider_state: { "source" => "sacpad" }, published_at: Time.current)
+      synced = SocialMedia::BulkPost.create!(owner: @admin, body: "Already on Facebook", status: :completed)
+      synced.targets.create!(social_page: page, status: :published, external_post_id: "111_2", idempotency_key: "facebook:111:111_2", provider_state: { "source" => "facebook" }, published_at: 1.hour.ago)
+    end
+
+    sign_in @manager
+    get social_posts_path
+    assert_select "[data-origin=ours]", text: I18n.t("social.origin_ours")
+    assert_select "[data-origin=synced]", text: I18n.t("social.origin_synced")
+
+    get social_posts_path(origin: "synced")
+    assert_match "Already on Facebook", response.body
+    assert_no_match "Written here", response.body
+
+    get social_posts_path(origin: "ours")
+    assert_match "Written here", response.body
+    assert_no_match "Already on Facebook", response.body
   end
 
   test "editing or deleting one post updates every page it was sent to" do

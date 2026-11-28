@@ -165,6 +165,7 @@ Rails.application.routes.draw do
   get "/auth/:provider/callback", to: "social_connections#create"
   get "/auth/failure", to: "social_connections#failure"
   resources :social_posts, only: %i[index edit update destroy]
+  get "social/channels", to: "social_connections#channels", as: :social_channels
   resources :social_connections, only: %i[index new show destroy] do
     member do
       post :sync
@@ -178,6 +179,18 @@ Rails.application.routes.draw do
   post "/meta/deauthorize", to: "meta_webhooks#deauthorize"
   post "/meta/data_deletion", to: "meta_webhooks#data_deletion"
   get "/data_deletion/:code", to: "data_deletions#show", as: :data_deletion_status
+
+  namespace :outreach do
+    resources :campaigns, only: %i[index new create show] do
+      collection do
+        get :sample
+      end
+      member do
+        post :send_messages
+      end
+    end
+  end
+  post "outreach/delivery/:token", to: "outreach/campaigns#deliver", as: :outreach_delivery
 
   # PR Records (Epic 4). Story 4.2 captures media coverage; Story 4.3 adds category-specific details.
   resources :pr_records, only: %i[index new create show edit update] do

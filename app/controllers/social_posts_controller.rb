@@ -9,7 +9,12 @@ class SocialPostsController < ApplicationController
     relation = SocialMedia::BulkPost.kept
       .where(id: SocialMedia::BulkPostTarget.select(:bulk_post_id))
       .includes(targets: :social_page)
-      .order(Arel.sql(<<~SQL.squish))
+    relation = case params[:origin]
+    when "ours" then relation.where.not(id: SocialMedia::BulkPostTarget.synced_from_network.select(:bulk_post_id))
+    when "synced" then relation.where(id: SocialMedia::BulkPostTarget.synced_from_network.select(:bulk_post_id))
+    else relation
+    end
+    relation = relation.order(Arel.sql(<<~SQL.squish))
         (
           SELECT MAX(COALESCE(bulk_post_targets.published_at, bulk_post_targets.created_at))
           FROM bulk_post_targets

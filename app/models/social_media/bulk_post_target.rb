@@ -21,6 +21,17 @@ module SocialMedia
       post_metrics.order(fetched_at: :desc).first
     end
 
+    def synced_from_network?
+      return false if idempotency_key.to_s.start_with?("publish:")
+      return false if provider_state.to_h["source"] == "sacpad"
+
+      idempotency_key.to_s.start_with?("facebook:") || provider_state.to_h["source"] == "facebook"
+    end
+
+    scope :synced_from_network, -> {
+      where("idempotency_key LIKE 'facebook:%' OR (provider_state ->> 'source' = ? AND idempotency_key NOT LIKE 'publish:%')", "facebook")
+    }
+
     private
 
     def set_idempotency_key

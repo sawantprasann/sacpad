@@ -31,11 +31,16 @@
   <% end %>
 
   <div class="min-w-0 flex-1">
-    <header class="flex items-center justify-between gap-3">
+    <header class="flex flex-wrap items-center justify-between gap-2">
       <p class="text-xs text-gray-500"><%= l_stamp(target.published_at || target.created_at) %></p>
-      <% unless target.status_published? %>
-        <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset <%= tone %>"><%= t("social.target_status.#{target.status}") %></span>
-      <% end %>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset <%= target.synced_from_network? ? "bg-gray-100 text-gray-600 ring-gray-200" : "bg-sky-50 text-sky-700 ring-sky-200" %>" data-origin="<%= target.synced_from_network? ? "synced" : "ours" %>">
+          <%= t(target.synced_from_network? ? "social.origin_synced" : "social.origin_ours") %>
+        </span>
+        <% unless target.status_published? %>
+          <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset <%= tone %>"><%= t("social.target_status.#{target.status}") %></span>
+        <% end %>
+      </div>
     </header>
 
     <% if post.title.present? %>

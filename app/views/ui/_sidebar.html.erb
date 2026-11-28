@@ -153,12 +153,32 @@
           <% end %>
 
           <% if user_signed_in? && current_user.role.can_access?("social_media") %>
-            <li>
-              <%= link_to social_connections_path,
-                    class: "menu-item group #{params[:controller] == "social_connections" ? "menu-item-active" : "menu-item-inactive"}" do %>
+            <% social_section = social_nav_key %>
+            <li x-data="{ open: <%= social_section.present? %> }">
+              <button type="button" @click="open = !open"
+                class="menu-item group w-full <%= social_section ? "menu-item-active" : "menu-item-inactive" %>"
+                :class="open ? 'menu-item-active' : 'menu-item-inactive'">
                 <%= menu_desk_icon("social_media") %>
                 <span class="menu-item-text"><%= t("nav.social_media") %></span>
-              <% end %>
+                <svg class="ml-auto h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
+                     viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+              <ul x-show="open" x-cloak class="mt-1 ml-5 flex flex-col gap-1 border-l border-gray-100 pl-3 dark:border-gray-800">
+                <% [
+                     [ "pages", t("nav.social_pages"), social_connections_path ],
+                     [ "channels", t("nav.social_channels"), social_channels_path ],
+                     [ "posts", t("nav.social_posts"), social_posts_path ],
+                     [ "outreach", t("nav.social_outreach"), outreach_campaigns_path ]
+                   ].each do |key, label, path| %>
+                  <li>
+                    <%= link_to label, path,
+                          class: "menu-dropdown-item #{social_section == key ? "menu-dropdown-item-active" : "menu-dropdown-item-inactive"}",
+                          aria: (social_section == key ? { current: "page" } : {}) %>
+                  </li>
+                <% end %>
+              </ul>
             </li>
           <% end %>
         </ul>

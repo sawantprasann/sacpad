@@ -8,6 +8,11 @@ class SocialConnectionsController < ApplicationController
     @facebook_ready = MetaApi.configured?
   end
 
+  def channels
+    @pages = policy_scope(SocialMedia::SocialPage).includes(:owner).order(:name)
+    @facebook_ready = MetaApi.configured?
+  end
+
   def show
     @page = policy_scope(SocialMedia::SocialPage).includes(:owner, :karyakarta_user, :politician).find(params[:id])
     authorize @page
