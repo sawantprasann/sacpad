@@ -258,6 +258,46 @@ class ConsoleOrganizationsTest < ActionDispatch::IntegrationTest
     assert ActivityLog.exists?(action: "organization.reactivated", organization_id: org.id)
   end
 
+  test "deactivating an organization disconnects its social accounts" do
+    org = ActsAsTenant.without_tenant { Organization.create!(name: "Org A") }
+    role = Role.find_by!(slug: "org_admin")
+    owner = User.create!(organization: org, role: role, name: "Meera",
+                         email: "meera-social@example.com", password: "password123")
+    facebook = instagram = youtube = already = nil
+    ActsAsTenant.with_tenant(org) do
+      facebook = SocialMedia::SocialPage.create!(
+        owner: owner, provider: :facebook, external_id: "111", name: "Youth Page",
+        provider_uid: "fb-user-9", access_token: "page-secret-token", status: :active
+      )
+      instagram = SocialMedia::SocialPage.create!(
+        owner: owner, provider: :instagram, external_id: "ig-9", name: "youth.ig",
+        parent_external_id: "111", access_token: "page-secret-token", status: :needs_reauth
+      )
+      youtube = SocialMedia::SocialPage.create!(
+        owner: owner, provider: :youtube, external_id: "yt-1", name: "Youth Channel",
+        access_token: "yt-token", status: :active
+      )
+      already = SocialMedia::SocialPage.create!(
+        owner: owner, provider: :twitter, external_id: "x-1", name: "Youth X", status: :disconnected
+      )
+    end
+
+    sign_in @admin
+    patch deactivate_console_organization_path(org)
+
+    assert_redirected_to console_organization_path(org)
+    assert_not org.reload.active?
+    ActsAsTenant.with_tenant(org) do
+      assert facebook.reload.connection_disconnected?
+      assert_nil facebook.access_token
+      assert instagram.reload.connection_disconnected?
+      assert_nil instagram.access_token
+      assert youtube.reload.connection_disconnected?
+      assert_nil youtube.access_token
+      assert already.reload.connection_disconnected?
+    end
+  end
+
   test "organizations can be filtered by party, name, and status" do
     party = Party.create!(name: "Sample Party", color: "#112233")
     match = ActsAsTenant.without_tenant { Organization.create!(name: "Indapur Office", current_party: party, active: true) }

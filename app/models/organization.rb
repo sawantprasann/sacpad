@@ -47,8 +47,13 @@ class Organization < ApplicationRecord
   end
 
   # Deactivation cascade (§3.1a): one toggle cuts off every user under the org (enforced in
-  # User#active_for_authentication? and in Pundit scopes).
-  def deactivate! = update!(active: false)
+  # User#active_for_authentication? and in Pundit scopes) and disconnects its social accounts.
+  def deactivate!
+    update!(active: false)
+    ActsAsTenant.with_tenant(self) do
+      SocialMedia::SocialPage.where.not(status: :disconnected).find_each(&:disconnect!)
+    end
+  end
   def reactivate! = update!(active: true)
 
   # Close the open party_memberships row and open a new one when affiliation changes (§3.1b).
